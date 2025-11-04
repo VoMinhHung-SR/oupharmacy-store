@@ -1,0 +1,15 @@
+# Config files
+tailwind.config.js
+postcss.config.js
+next.config.js
+
+# Config directory
+config/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+
