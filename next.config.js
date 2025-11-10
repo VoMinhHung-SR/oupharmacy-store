@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // App Router is enabled by default in Next.js 13+
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+  },
 }
 
 module.exports = nextConfig
