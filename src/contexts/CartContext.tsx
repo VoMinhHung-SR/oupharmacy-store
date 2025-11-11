@@ -2,9 +2,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 export interface CartItem {
-  id: string
+  id: string // medicine_unit_id as string for compatibility
+  medicine_unit_id: number
   name: string
   price: number
+  image_url?: string
+  packaging?: string
   qty: number
 }
 
@@ -26,7 +29,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
-      if (raw) setItems(JSON.parse(raw))
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        // Migrate old cart items to new format if needed
+        const migrated = parsed.map((item: any) => ({
+          ...item,
+          medicine_unit_id: item.medicine_unit_id || parseInt(item.id) || 0,
+          id: item.medicine_unit_id?.toString() || item.id,
+        }))
+        setItems(migrated)
+      }
     } catch {}
   }, [])
 
@@ -38,9 +50,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const add = (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
     setItems((prev) => {
-      const exist = prev.find((i) => i.id === item.id)
-      if (exist) return prev.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i))
-      return [...prev, { ...item, qty }]
+      const exist = prev.find((i) => i.medicine_unit_id === item.medicine_unit_id)
+      if (exist) {
+        return prev.map((i) =>
+          i.medicine_unit_id === item.medicine_unit_id ? { ...i, qty: i.qty + qty } : i
+        )
+      }
+      return [...prev, { ...item, qty, id: item.medicine_unit_id.toString() }]
     })
   }
 
