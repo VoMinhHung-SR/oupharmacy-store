@@ -22,6 +22,13 @@ axiosInstance.interceptors.request.use(
     // if (token) {
     //   config.headers.Authorization = `Bearer ${token}`
     // }
+    
+    // Add Accept-Language header from URL
+    if (typeof window !== 'undefined') {
+      const locale = window.location.pathname.split('/')[1] || 'vi'
+      config.headers['Accept-Language'] = locale
+    }
+    
     return config
   },
   (error) => {
