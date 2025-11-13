@@ -1,42 +1,26 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { setRequestLocale } from 'next-intl/server'
 
-export default function Home() {
+export default async function Home({
+  params: { locale }
+}: {
+  params: { locale: string }
+}) {
+  setRequestLocale(locale)
+  const t = await getTranslations('common')
+  
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary-600">OUPharmacy</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Trang chủ
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Giới thiệu
-              </Link>
-              <Link href="/contact" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Liên hệ
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Hệ thống quản lý nhà thuốc
+              {t('home')}
               <span className="text-primary-600"> OUPharmacy</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Giải pháp toàn diện cho việc quản lý nhà thuốc, đặt lịch khám bệnh và 
-              quản lý thuốc một cách hiệu quả và chuyên nghiệp.
+              Hệ thống quản lý nhà thuốc hiện đại và hiệu quả
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors">
@@ -101,34 +85,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4">OUPharmacy System</h3>
-            <p className="text-gray-400 mb-6">
-              Giải pháp quản lý nhà thuốc hiện đại và hiệu quả
-            </p>
-            <div className="flex justify-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Facebook
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Twitter
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                LinkedIn
-              </a>
-            </div>
-            <div className="mt-8 pt-8 border-t border-gray-800">
-              <p className="text-gray-400">
-                © 2024 OUPharmacy System. Tất cả quyền được bảo lưu.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }
+
