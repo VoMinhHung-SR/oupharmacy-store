@@ -3,12 +3,12 @@ import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import '../globals.css'
-import Header from '../../components/Header'
-import Footer from '../../components/Footer'
-import Container from '../../components/Container'
-import { CartProvider } from '../../contexts/CartContext'
+import Header from '@/layouts/Header'
+import NavigationBar from '@/layouts/NavigationBar'
+import Footer from '@/layouts/Footer'
+import { CartProvider } from '@/contexts/CartContext'
 import { Providers } from '../providers'
-import { locales } from '../../i18n/config'
+import { locales } from '@/i18n/config'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,10 +37,9 @@ export default async function LocaleLayout({
           <Providers>
             <CartProvider>
               <Header />
-              <main className="min-h-[60vh] py-6">
-                <Container>
-                  {children}
-                </Container>
+              <NavigationBar />
+              <main>
+                {children}
               </main>
               <Footer />
             </CartProvider>
