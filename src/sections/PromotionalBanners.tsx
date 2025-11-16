@@ -11,7 +11,7 @@ export const PromotionalBanners: React.FC = () => {
   const createLink = (href: string) => `/${locale}${href}`
 
   return (
-    <section className="py-12 bg-primary-50">
+    <section className="py-12 bg-gray-50">
       <Container>
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left banner */}

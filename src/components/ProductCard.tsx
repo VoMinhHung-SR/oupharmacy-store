@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
@@ -82,15 +84,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, locale = 'vi'
           )}
         </div>
 
-        <div 
-          className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors text-center cursor-pointer"
+        <button
+          type="button"
+          className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
           onClick={(e) => {
             e.preventDefault()
             window.location.href = productLink
           }}
         >
           Chọn mua
-        </div>
+        </button>
       </div>
     </Link>
   )

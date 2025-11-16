@@ -27,7 +27,7 @@ export const FavoriteBrands: React.FC = () => {
   const createLink = (href: string) => `/${locale}${href}`
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-12 bg-white">
       <Container>
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-primary-600 rounded flex items-center justify-center">

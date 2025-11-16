@@ -89,12 +89,12 @@ export const Header: React.FC = () => {
 
           {/* Popular search terms */}
           <div className="mt-3 flex items-center gap-4 text-sm text-gray-600 flex-wrap">
-            <span className="font-medium">Tìm kiếm phổ biến:</span>
+            <span className="font-medium text-gray-700">Tìm kiếm phổ biến:</span>
             {['Omega 3', 'Canxi', 'Dung dịch vệ sinh', 'Sữa rửa mặt', 'Thuốc nhỏ mắt', 'Kẽm', 'Men vi sinh', 'Kem chống nắng'].map((term) => (
               <Link 
                 key={term}
                 href={createLink(`/search?q=${encodeURIComponent(term)}`)}
-                className="hover:text-primary-600"
+                className="hover:text-primary-600 transition-colors"
               >
                 {term}
               </Link>

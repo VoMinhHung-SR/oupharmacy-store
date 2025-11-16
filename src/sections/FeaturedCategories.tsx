@@ -32,7 +32,7 @@ export const FeaturedCategories: React.FC = () => {
   const createLink = (href: string) => `/${locale}${href}`
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-12 bg-primary-50">
       <Container>
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-primary-600 rounded flex items-center justify-center">
@@ -44,17 +44,17 @@ export const FeaturedCategories: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((category) => (
+          {categories.slice(0, 6).map((category) => (
             <Link
               key={category.href}
               href={createLink(category.href)}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-primary-500 transition-all group"
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-primary-500 hover:bg-primary-50 transition-all group"
             >
               <div className="text-4xl mb-3 text-center">{category.icon}</div>
-              <div className="text-sm font-medium text-gray-900 mb-1 group-hover:text-primary-700 text-center line-clamp-2">
+              <div className="text-sm font-medium text-gray-900 mb-1 group-hover:text-primary-700 text-center line-clamp-2 min-h-[2.5rem]">
                 {category.name}
               </div>
-              <div className="text-xs text-gray-500 text-center">
+              <div className="text-xs text-gray-600 text-center">
                 {category.count} sản phẩm
               </div>
             </Link>

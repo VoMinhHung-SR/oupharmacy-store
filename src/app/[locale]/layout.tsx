@@ -15,6 +15,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'OUPharmacy System',
   description: 'Hệ thống quản lý nhà thuốc OUPharmacy',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export function generateStaticParams() {
