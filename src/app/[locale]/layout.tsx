@@ -41,7 +41,7 @@ export default async function LocaleLayout({
             <CartProvider>
               <Header />
               <NavigationBar />
-              <main>
+              <main className="bg-white">
                 {children}
               </main>
               <Footer />

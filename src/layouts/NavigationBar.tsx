@@ -56,14 +56,14 @@ export const NavigationBar: React.FC = () => {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+    <nav className="bg-white border-b border-gray-200 shadow-sm">
       <Container>
         <div className="flex items-center gap-0">
           {/* Left scroll button */}
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="flex-shrink-0 bg-white/20 hover:bg-white/30 p-2.5 rounded-l-lg transition-colors h-full flex items-center"
+              className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-l-lg transition-colors h-full flex items-center"
               aria-label="Scroll left"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +81,7 @@ export const NavigationBar: React.FC = () => {
               <Link
                 key={category.href}
                 href={createLink(category.href)}
-                className="flex items-center gap-1 py-3 px-2 hover:bg-white/20 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1 py-3 px-2 hover:bg-primary-50 hover:text-primary-700 text-gray-700 transition-colors whitespace-nowrap"
               >
                 <span className="text-sm font-medium">{category.name}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +95,7 @@ export const NavigationBar: React.FC = () => {
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="flex-shrink-0 bg-white/20 hover:bg-white/30 p-2.5 rounded-r-lg transition-colors h-full flex items-center"
+              className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-r-lg transition-colors h-full flex items-center"
               aria-label="Scroll right"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

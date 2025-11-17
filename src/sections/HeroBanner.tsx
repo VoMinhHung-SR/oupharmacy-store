@@ -24,7 +24,7 @@ export const HeroBanner: React.FC = () => {
               Chăm sóc sức khỏe toàn diện cho bạn và gia đình
             </p>
             <div className="flex gap-4">
-              <Button variant="secondary" size="lg" className="bg-white text-primary-700 hover:bg-gray-100">
+              <Button variant="secondary" size="lg" className="bg-white text-blue-700 hover:bg-blue-700 hover:text-white transition-colors">
                 Mua ngay
               </Button>
             </div>
