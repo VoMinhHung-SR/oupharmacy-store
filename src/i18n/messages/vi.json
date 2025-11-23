@@ -1,0 +1,72 @@
+{
+  "common": {
+    "home": "Trang chủ",
+    "products": "Sản phẩm",
+    "categories": "Danh mục",
+    "brands": "Thương hiệu",
+    "deals": "Khuyến mãi",
+    "cart": "Giỏ hàng",
+    "account": "Tài khoản",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm sản phẩm...",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "about": "Về chúng tôi",
+    "contact": "Liên hệ",
+    "loading": "Đang tải...",
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "submit": "Gửi",
+    "close": "Đóng"
+  },
+  "product": {
+    "title": "Sản phẩm",
+    "addToCart": "Thêm vào giỏ",
+    "outOfStock": "Hết hàng",
+    "inStock": "Còn hàng",
+    "price": "Giá",
+    "description": "Mô tả",
+    "specifications": "Thông số kỹ thuật",
+    "reviews": "Đánh giá",
+    "relatedProducts": "Sản phẩm liên quan"
+  },
+  "cart": {
+    "title": "Giỏ hàng",
+    "empty": "Giỏ hàng trống",
+    "subtotal": "Tạm tính",
+    "total": "Tổng cộng",
+    "checkout": "Thanh toán",
+    "remove": "Xóa",
+    "quantity": "Số lượng",
+    "update": "Cập nhật"
+  },
+  "order": {
+    "title": "Đơn hàng",
+    "orderNumber": "Mã đơn hàng",
+    "status": "Trạng thái",
+    "pending": "Chờ xử lý",
+    "confirmed": "Đã xác nhận",
+    "shipping": "Đang giao hàng",
+    "delivered": "Đã giao",
+    "cancelled": "Đã hủy",
+    "date": "Ngày đặt",
+    "total": "Tổng tiền"
+  },
+  "checkout": {
+    "title": "Thanh toán",
+    "shippingInfo": "Thông tin giao hàng",
+    "paymentMethod": "Phương thức thanh toán",
+    "shippingMethod": "Phương thức vận chuyển",
+    "orderSummary": "Tóm tắt đơn hàng"
+  }
+}
+

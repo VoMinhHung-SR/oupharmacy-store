@@ -1,17 +1,98 @@
+'use client'
+
 import Link from 'next/link'
+import Image from 'next/image'
 import React from 'react'
 
 interface ProductCardProps {
-  product: { id: string; name: string; price: number }
+  product: {
+    id: string
+    name: string
+    price: number
+    originalPrice?: number
+    discount?: number
+    image_url?: string
+    packaging?: string
+    medicine_unit_id?: number
+  }
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const productLink = `/products/${product.medicine_unit_id || product.id}`
+  const discount = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0)
+
   return (
-    <Link href={`/products/${product.id}`} className="group rounded-lg border p-4 hover:shadow">
-      <div className="aspect-square w-full rounded bg-gray-100" />
-      <div className="mt-3 space-y-1">
-        <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700">{product.name}</div>
-        <div className="text-primary-700">{product.price.toLocaleString('vi-VN')}₫</div>
+    <Link
+      href={productLink}
+      className="group relative rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
+    >
+      {/* Discount badge */}
+      {discount > 0 && (
+        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+          -{discount}%
+        </div>
+      )}
+
+      {/* Product image */}
+      <div className="aspect-square w-full overflow-hidden rounded bg-gray-100 mb-3">
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            width={300}
+            height={300}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-gray-400">
+            <svg
+              className="h-12 w-12"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Product info */}
+      <div className="space-y-2">
+        <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700 min-h-[2.5rem]">
+          {product.name}
+        </div>
+        
+        {product.packaging && (
+          <div className="text-xs text-gray-500">{product.packaging}</div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <div className="text-primary-700 font-bold text-lg">
+            {product.price.toLocaleString('vi-VN')}₫
+          </div>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <div className="text-gray-400 text-sm line-through">
+              {product.originalPrice.toLocaleString('vi-VN')}₫
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+          onClick={(e) => {
+            e.preventDefault()
+            window.location.href = productLink
+          }}
+        >
+          Chọn mua
+        </button>
       </div>
     </Link>
   )
