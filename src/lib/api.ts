@@ -23,11 +23,16 @@ axiosInstance.interceptors.request.use(
     //   config.headers.Authorization = `Bearer ${token}`
     // }
     
+    // I18N DISABLED - Tạm thời tắt Accept-Language header
+    // Để bật lại: uncomment code bên dưới
     // Add Accept-Language header from URL
-    if (typeof window !== 'undefined') {
-      const locale = window.location.pathname.split('/')[1] || 'vi'
-      config.headers['Accept-Language'] = locale
-    }
+    // if (typeof window !== 'undefined') {
+    //   const locale = window.location.pathname.split('/')[1] || 'vi'
+    //   config.headers['Accept-Language'] = locale
+    // }
+    
+    // Tạm thời: luôn set locale là 'vi'
+    config.headers['Accept-Language'] = 'vi'
     
     return config
   },
