@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useLocale } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
 
@@ -23,8 +22,6 @@ const brands: Brand[] = [
 ]
 
 export const FavoriteBrands: React.FC = () => {
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
 
   return (
     <section className="py-12 bg-white">
@@ -42,7 +39,7 @@ export const FavoriteBrands: React.FC = () => {
           {brands.map((brand) => (
             <Link
               key={brand.id}
-              href={createLink(brand.href)}
+              href={brand.href}
               className="flex-shrink-0 bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-primary-500 transition-all w-48"
             >
               <div className="aspect-square w-full bg-gray-100 rounded mb-4 flex items-center justify-center">

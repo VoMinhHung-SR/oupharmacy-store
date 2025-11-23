@@ -1,14 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
 import Button from '@/components/Button'
 
 export const HeroBanner: React.FC = () => {
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
 
   return (
     <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-12">
@@ -24,7 +21,7 @@ export const HeroBanner: React.FC = () => {
               Chăm sóc sức khỏe toàn diện cho bạn và gia đình
             </p>
             <div className="flex gap-4">
-              <Button variant="secondary" size="lg" className="bg-white text-blue-700 hover:bg-blue-700 hover:text-white transition-colors">
+              <Button variant="secondary" size="lg" className="bg-white text-primary-600 hover:bg-primary-50 hover:text-primary-700 transition-colors font-bold shadow-lg">
                 Mua ngay
               </Button>
             </div>
@@ -35,8 +32,8 @@ export const HeroBanner: React.FC = () => {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
               <div className="text-2xl font-bold mb-2">Dược Mỹ Phẩm</div>
               <div className="text-3xl font-bold text-yellow-300 mb-4">Giảm đến 35%</div>
-              <Link href={createLink('/categories/duoc-my-pham')}>
-                <Button variant="secondary" size="md" className="bg-white text-primary-700 hover:bg-gray-100">
+              <Link href="/categories/duoc-my-pham">
+                <Button variant="secondary" size="md" className="bg-white text-primary-600 hover:bg-primary-50 hover:text-primary-700 transition-colors font-semibold shadow-md">
                   Mua ngay
                 </Button>
               </Link>
@@ -44,8 +41,8 @@ export const HeroBanner: React.FC = () => {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
               <div className="text-2xl font-bold mb-2">TPCN Hàng Nhật Âu Mỹ</div>
               <div className="text-3xl font-bold text-yellow-300 mb-4">Giảm đến 30%</div>
-              <Link href={createLink('/categories/thuc-pham-chuc-nang')}>
-                <Button variant="secondary" size="md" className="bg-white text-primary-700 hover:bg-gray-100">
+              <Link href="/categories/thuc-pham-chuc-nang">
+                <Button variant="secondary" size="md" className="bg-white text-primary-600 hover:bg-primary-50 hover:text-primary-700 transition-colors font-semibold shadow-md">
                   Mua ngay
                 </Button>
               </Link>

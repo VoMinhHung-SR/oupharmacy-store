@@ -1,18 +1,10 @@
-import { getTranslations } from 'next-intl/server'
-import { setRequestLocale } from 'next-intl/server'
 import HeroBanner from '@/sections/HeroBanner'
 import FeaturedCategories from '@/sections/FeaturedCategories'
 import FavoriteBrands from '@/sections/FavoriteBrands'
 import BestsellingProducts from '@/sections/BestsellingProducts'
 import PromotionalBanners from '@/sections/PromotionalBanners'
 
-export default async function Home({
-  params: { locale }
-}: {
-  params: { locale: string }
-}) {
-  setRequestLocale(locale)
-  const t = await getTranslations('common')
+export default async function Home() {
   
   return (
     <main className="min-h-screen bg-white">
@@ -45,7 +37,7 @@ export default async function Home({
             ].map((link) => (
               <a
                 key={link.href}
-                href={`/${locale}${link.href}`}
+                href={link.href}
                 className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-lg hover:border-primary-500 transition-all"
               >
                 <div className="text-4xl mb-2">{link.icon}</div>

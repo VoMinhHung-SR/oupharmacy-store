@@ -15,11 +15,10 @@ interface ProductCardProps {
     packaging?: string
     medicine_unit_id?: number
   }
-  locale?: string
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, locale = 'vi' }) => {
-  const productLink = `/${locale}/products/${product.medicine_unit_id || product.id}`
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const productLink = `/products/${product.medicine_unit_id || product.id}`
   const discount = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0)
 
   return (

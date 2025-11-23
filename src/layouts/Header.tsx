@@ -1,15 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import React from 'react'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
 import Container from '@/components/Container'
 
 export const Header: React.FC = () => {
   const t = useTranslations('common')
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
 
   return (
     <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg">
@@ -32,7 +29,7 @@ export const Header: React.FC = () => {
         <Container>
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
-            <Link href={createLink('/')} className="flex-shrink-0 hover:opacity-90 transition-opacity">
+            <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
               <div className="flex flex-col">
                 <span className="text-2xl font-bold text-white">NHÀ THUỐC</span>
                 <span className="text-xl font-semibold text-primary-100">OUPHARMACY</span>
@@ -40,7 +37,7 @@ export const Header: React.FC = () => {
             </Link>
 
             {/* Search bar */}
-            <form action={createLink('/search')} className="flex-1 max-w-2xl">
+            <form action="/search" className="flex-1 max-w-2xl">
               <div className="relative">
                 <input
                   name="q"
@@ -71,19 +68,18 @@ export const Header: React.FC = () => {
             {/* Right actions */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link 
-                href={createLink('/login')} 
+                href="/login" 
                 className="px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
               >
                 {t('login')}
               </Link>
               <Link 
-                href={createLink('/cart')} 
+                href="/cart" 
                 className="relative px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
               >
                 {t('cart')}
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
               </Link>
-              <LanguageSwitcher />
             </div>
           </div>
 
@@ -93,7 +89,7 @@ export const Header: React.FC = () => {
             {['Omega 3', 'Canxi', 'Dung dịch vệ sinh', 'Sữa rửa mặt', 'Thuốc nhỏ mắt', 'Kẽm', 'Men vi sinh', 'Kem chống nắng'].map((term) => (
               <Link 
                 key={term}
-                href={createLink(`/search?q=${encodeURIComponent(term)}`)}
+                href={`/search?q=${encodeURIComponent(term)}`}
                 className="hover:text-white transition-colors text-white/80"
               >
                 {term}

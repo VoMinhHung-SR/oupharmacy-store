@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
 
@@ -28,8 +27,6 @@ const categories: Category[] = [
 ]
 
 export const FeaturedCategories: React.FC = () => {
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
 
   return (
     <section className="py-12 bg-primary-50">
@@ -47,7 +44,7 @@ export const FeaturedCategories: React.FC = () => {
           {categories.slice(0, 6).map((category) => (
             <Link
               key={category.href}
-              href={createLink(category.href)}
+              href={category.href}
               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-primary-500 hover:bg-primary-50 transition-all group"
             >
               <div className="text-4xl mb-3 text-center">{category.icon}</div>

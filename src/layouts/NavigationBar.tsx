@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
 import React, { useRef, useState, useEffect } from 'react'
 import Container from '@/components/Container'
 
@@ -17,8 +16,6 @@ const categories = [
 ]
 
 export const NavigationBar: React.FC = () => {
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -80,7 +77,7 @@ export const NavigationBar: React.FC = () => {
             {categories.map((category) => (
               <Link
                 key={category.href}
-                href={createLink(category.href)}
+                href={category.href}
                 className="flex items-center gap-1 py-3 px-2 hover:bg-primary-50 hover:text-primary-700 text-gray-700 transition-colors whitespace-nowrap"
               >
                 <span className="text-sm font-medium">{category.name}</span>

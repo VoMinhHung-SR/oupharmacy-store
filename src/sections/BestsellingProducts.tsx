@@ -3,7 +3,6 @@
 import React from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/ProductCard'
-import { useLocale } from 'next-intl'
 
 interface Product {
   id: string
@@ -65,8 +64,6 @@ const mockProducts: Product[] = [
 ]
 
 export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ products = mockProducts }) => {
-  const locale = useLocale()
-
   return (
     <section className="py-12 bg-white">
       <Container>
@@ -79,7 +76,7 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ produc
         <div className="bg-primary-50 p-6 rounded-lg">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} locale={locale} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </div>

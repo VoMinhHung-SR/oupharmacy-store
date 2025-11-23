@@ -1,14 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
 import Button from '@/components/Button'
 
 export const PromotionalBanners: React.FC = () => {
-  const locale = useLocale()
-  const createLink = (href: string) => `/${locale}${href}`
 
   return (
     <section className="py-12 bg-gray-50">
@@ -35,7 +32,7 @@ export const PromotionalBanners: React.FC = () => {
             <div className="bg-gray-100 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
               <div className="text-gray-400 text-sm">Hình ảnh sản phẩm</div>
             </div>
-            <Link href={createLink('/articles/thuoc')}>
+            <Link href="/articles/thuoc">
               <Button variant="primary" size="md" className="w-full bg-red-600 hover:bg-red-700">
                 ĐỌC NGAY
               </Button>
@@ -50,7 +47,7 @@ export const PromotionalBanners: React.FC = () => {
             <div className="bg-gray-100 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
               <div className="text-gray-400 text-sm">Hình ảnh sản phẩm</div>
             </div>
-            <Link href={createLink('/categories/thuoc-nho-mat')}>
+            <Link href="/categories/thuoc-nho-mat">
               <Button variant="primary" size="md" className="w-full bg-pink-500 hover:bg-pink-600">
                 MUA NGAY
               </Button>

@@ -35,9 +35,15 @@ export const Button: React.FC<ButtonProps> = ({
   
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : ''
   
+  // If className contains bg- or text-, it should override variant classes
+  const hasCustomStyles = className && (className.includes('bg-') || className.includes('text-'))
+  const finalClasses = hasCustomStyles
+    ? `${baseClasses} ${sizeClasses[size]} ${disabledClasses} ${className}`
+    : `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`
+  
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`}
+      className={finalClasses}
       onClick={onClick}
       disabled={disabled}
     >
