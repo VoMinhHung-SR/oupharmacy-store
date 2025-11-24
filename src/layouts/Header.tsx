@@ -4,9 +4,12 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
+import { useAuth } from '@/contexts/AuthContext'
+import AvatarBadge from '@/components/AvatarBadge'
 
 export const Header: React.FC = () => {
   const t = useTranslations('common')
+  const { isAuthenticated } = useAuth()
 
   return (
     <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg">
@@ -67,14 +70,18 @@ export const Header: React.FC = () => {
 
             {/* Right actions */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <Link 
-                href="/login" 
-                className="px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
-              >
-                {t('login')}
-              </Link>
-              <Link 
-                href="/cart" 
+              {isAuthenticated ? (
+                <AvatarBadge />
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  {t('login')}
+                </Link>
+              )}
+              <Link
+                href="/cart"
                 className="relative px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
               >
                 {t('cart')}
@@ -87,7 +94,7 @@ export const Header: React.FC = () => {
           <div className="mt-3 flex items-center gap-3 text-sm text-white/90 flex-wrap">
             <span className="font-medium text-white">Tìm kiếm phổ biến:</span>
             {['Omega 3', 'Canxi', 'Dung dịch vệ sinh', 'Sữa rửa mặt', 'Thuốc nhỏ mắt', 'Kẽm', 'Men vi sinh', 'Kem chống nắng'].map((term) => (
-              <Link 
+              <Link
                 key={term}
                 href={`/search?q=${encodeURIComponent(term)}`}
                 className="hover:text-white transition-colors text-white/80"

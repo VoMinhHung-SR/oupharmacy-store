@@ -7,6 +7,7 @@ import Header from '@/layouts/Header'
 import NavigationBar from '@/layouts/NavigationBar'
 import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -32,14 +33,16 @@ export default async function RootLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <CartProvider>
-              <Header />
-              <NavigationBar />
-              <main className="bg-white">
-                {children}
-              </main>
-              <Footer />
-            </CartProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Header />
+                <NavigationBar />
+                <main className="bg-white">
+                  {children}
+                </main>
+                <Footer />
+              </CartProvider>
+            </AuthProvider>
           </Providers>
         </NextIntlClientProvider>
       </body>

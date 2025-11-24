@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
+import { STORAGE_KEY } from './constant'
 
 export interface ApiResponse<T> {
   data?: T
@@ -18,10 +19,13 @@ const axiosInstance: AxiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    // Add Authorization header từ localStorage
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem(STORAGE_KEY.TOKEN)
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
     
     // I18N DISABLED - Tạm thời tắt Accept-Language header
     // Để bật lại: uncomment code bên dưới
