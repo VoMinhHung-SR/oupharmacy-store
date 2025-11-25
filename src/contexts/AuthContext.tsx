@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { login as loginApi, register as registerApi, getCurrentUser, type User } from '@/lib/services/auth'
 import { STORAGE_KEY } from '@/lib/constant'
 import { setEncodedItem, getEncodedItem, removeEncodedItem } from '@/lib/utils/storage'
+import { toastSuccess } from '@/lib/utils/toast'
 
 interface AuthContextValue {
   user: User | null
@@ -35,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (storedUser) {
             setUser(storedUser)
           } else {
-            // Nếu không có user trong storage, fetch từ API
             const result = await getCurrentUser(storedToken)
             if (result.data) {
               setUser(result.data)
@@ -75,6 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     setToken(access_token)
     localStorage.setItem(STORAGE_KEY.TOKEN, access_token)
+    if (typeof document !== 'undefined') {
+      document.cookie = `token=${access_token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
+    }
     if (refresh_token) {
       localStorage.setItem(STORAGE_KEY.REFRESH_TOKEN, refresh_token)
     }
@@ -83,6 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (userResult.data) {
       setUser(userResult.data)
       setEncodedItem(STORAGE_KEY.USER, userResult.data)
+
+      toastSuccess('Đăng nhập thành công')
     } else {
       throw new Error(userResult.error || 'Không thể lấy thông tin user')
     }
@@ -104,6 +109,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(STORAGE_KEY.TOKEN)
     localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN)
     removeEncodedItem(STORAGE_KEY.USER)
+    if (typeof document !== 'undefined') {
+      document.cookie = 'token=; path=/; max-age=0'
+    }
   }
 
   const refreshUser = async () => {
@@ -142,4 +150,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
-
