@@ -75,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     setToken(access_token)
     localStorage.setItem(STORAGE_KEY.TOKEN, access_token)
+    
     if (typeof document !== 'undefined') {
       document.cookie = `token=${access_token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
     }
