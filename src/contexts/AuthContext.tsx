@@ -1,6 +1,6 @@
 'use client'
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { login as loginApi, register as registerApi, getCurrentUser, type User } from '@/lib/services/auth'
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import { login as loginApi, register as registerApi, getCurrentUser, firebaseSocialLogin, type User } from '@/lib/services/auth'
 import { STORAGE_KEY } from '@/lib/constant'
 import { setEncodedItem, getEncodedItem, removeEncodedItem } from '@/lib/utils/storage'
 import { toastSuccess } from '@/lib/utils/toast'
@@ -11,6 +11,7 @@ interface AuthContextValue {
   token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
+  loginWithGoogle: () => Promise<void>
   logout: () => void
   register: (name: string, email: string, password: string) => Promise<void>
   refreshUser: () => Promise<void>
@@ -64,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadAuth()
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const result = await loginApi(email, password)
     
     if (result.error || !result.data) {
@@ -92,9 +93,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       throw new Error(userResult.error || 'Không thể lấy thông tin user')
     }
-  }
+  }, [])
 
-  const register = async (name: string, email: string, password: string) => {
+  const loginWithGoogle = useCallback(async () => {
+    // Dynamic import để tránh lỗi SSR
+    const { signInWithPopup } = await import('firebase/auth')
+    const { auth, googleProvider } = await import('@/lib/config/firebase')
+
+    const result = await signInWithPopup(auth, googleProvider)
+    const idToken = await result.user.getIdToken()
+
+    const response = await firebaseSocialLogin(idToken, 'google')
+
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Đăng nhập với Google thất bại')
+    }
+
+    const { access_token, refresh_token, user } = response.data
+
+    setToken(access_token)
+    localStorage.setItem(STORAGE_KEY.TOKEN, access_token)
+
+    if (typeof document !== 'undefined') {
+      document.cookie = `token=${access_token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
+    }
+    if (refresh_token) {
+      localStorage.setItem(STORAGE_KEY.REFRESH_TOKEN, refresh_token)
+    }
+
+    setUser(user)
+    setEncodedItem(STORAGE_KEY.USER, user)
+
+    toastSuccess('Đăng nhập với Google thành công')
+  }, [])
+
+  const register = useCallback(async (name: string, email: string, password: string) => {
     const result = await registerApi({ name, email, password })
     
     if (result.error || !result.data) {
@@ -102,9 +135,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     await login(email, password)
-  }
+  }, [login])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null)
     setUser(null)
     localStorage.removeItem(STORAGE_KEY.TOKEN)
@@ -113,9 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof document !== 'undefined') {
       document.cookie = 'token=; path=/; max-age=0'
     }
-  }
+  }, [])
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     if (!token) return
 
     const result = await getCurrentUser(token)
@@ -125,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       logout()
     }
-  }
+  }, [token, logout])
 
   const isAuthenticated = useMemo(() => !!token && !!user, [token, user])
 
@@ -136,11 +169,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       token,
       loading,
       login,
+      loginWithGoogle,
       logout,
       register,
       refreshUser,
     }),
-    [user, isAuthenticated, token, loading]
+    [user, isAuthenticated, token, loading, login, loginWithGoogle, logout, register, refreshUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

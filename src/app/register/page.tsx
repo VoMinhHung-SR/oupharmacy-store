@@ -63,7 +63,7 @@ export default function RegisterPage() {
             type="text"
             {...register('name')}
             placeholder="Nhập họ tên của bạn"
-            className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
               errors.name
                 ? 'border-red-300 focus:ring-red-500'
                 : 'border-gray-300'
@@ -84,7 +84,7 @@ export default function RegisterPage() {
             type="email"
             {...register('email')}
             placeholder="Nhập email của bạn"
-            className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
               errors.email
                 ? 'border-red-300 focus:ring-red-500'
                 : 'border-gray-300'
@@ -105,7 +105,7 @@ export default function RegisterPage() {
             type="password"
             {...register('password')}
             placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)"
-            className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
               errors.password
                 ? 'border-red-300 focus:ring-red-500'
                 : 'border-gray-300'
@@ -126,7 +126,7 @@ export default function RegisterPage() {
             type="password"
             {...register('confirmPassword')}
             placeholder="Nhập lại mật khẩu"
-            className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
               errors.confirmPassword
                 ? 'border-red-300 focus:ring-red-500'
                 : 'border-gray-300'

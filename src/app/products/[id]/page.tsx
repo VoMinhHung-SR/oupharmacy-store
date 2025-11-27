@@ -179,7 +179,7 @@ export default function ProductDetailPage({ params }: Props) {
                       const val = parseInt(e.target.value) || 1
                       setQuantity(Math.max(1, Math.min(product.in_stock, val)))
                     }}
-                    className="h-8 w-16 rounded border text-center"
+                    className="h-8 w-16 rounded border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <button
                     onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}

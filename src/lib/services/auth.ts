@@ -64,7 +64,6 @@ export async function login(
         grant_type: 'password',
       }
     )
-    console.log(response.data)
     return { data: response.data }
   } catch (error: any) {
     const errorMessage =
@@ -116,6 +115,36 @@ export async function getCurrentUser(
         error.message ||
         'Không thể lấy thông tin user',
     }
+  }
+}
+
+export interface FirebaseSocialLoginResponse {
+  access_token: string
+  refresh_token?: string
+  user: User
+}
+
+export async function firebaseSocialLogin(
+  idToken: string,
+  provider: 'google' | 'facebook' = 'google'
+): Promise<{ data?: FirebaseSocialLoginResponse; error?: string }> {
+  try {
+    const response = await axios.post<FirebaseSocialLoginResponse>(
+      `${MAIN_API_URL}/auth/firebase/`,
+      {
+        id_token: idToken,
+        provider: provider,
+      }
+    )
+
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.response?.data?.message ||
+      error.message ||
+      'Đăng nhập với tài khoản mạng xã hội thất bại'
+    return { error: errorMessage }
   }
 }
 
