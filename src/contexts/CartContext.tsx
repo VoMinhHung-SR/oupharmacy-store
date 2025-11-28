@@ -1,5 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { toastSuccess } from '@/lib/utils/toast'
 
 export interface CartItem {
   id: string // medicine_unit_id as string for compatibility
@@ -49,18 +50,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items])
 
   const add = (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
+    const isUpdate = items.some((i) => i.medicine_unit_id === item.medicine_unit_id)
+
     setItems((prev) => {
       const exist = prev.find((i) => i.medicine_unit_id === item.medicine_unit_id)
-      if (exist) {
-        return prev.map((i) =>
-          i.medicine_unit_id === item.medicine_unit_id ? { ...i, qty: i.qty + qty } : i
-        )
-      }
-      return [...prev, { ...item, qty, id: item.medicine_unit_id.toString() }]
+      return exist
+        ? prev.map((i) => (i.medicine_unit_id === item.medicine_unit_id ? { ...i, qty: i.qty + qty } : i))
+        : [...prev, { ...item, qty, id: item.medicine_unit_id.toString() }]
     })
+
+    toastSuccess(isUpdate ? `Đã cập nhật số lượng ${item.name} trong giỏ hàng` : `Đã thêm ${item.name} vào giỏ hàng`)
   }
 
-  const remove = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id))
+  const remove = (id: string) => {
+    const item = items.find((i) => i.id === id)
+    setItems((prev) => prev.filter((i) => i.id !== id))
+    if (item) {
+      toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
+    }
+  }
   const clear = () => setItems([])
   const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items])
 
@@ -73,5 +81,3 @@ export function useCart() {
   if (!ctx) throw new Error('useCart must be used within CartProvider')
   return ctx
 }
-
-
