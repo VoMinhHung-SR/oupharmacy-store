@@ -33,6 +33,38 @@ export interface RegisterData {
   password: string
 }
 
+export async function register(
+  data: RegisterData | FormData
+): Promise<{ data?: User; error?: string }> {
+  try {
+    const isFormData = data instanceof FormData
+    const config = isFormData
+      ? {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      : {}
+
+    const response = await axios.post<User>(
+      `${MAIN_API_URL}/users/`,
+      data,
+      config
+    )
+
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.response?.data?.email?.[0] ||
+      error.response?.data?.phone_number?.[0] ||
+      error.response?.data?.message ||
+      error.message ||
+      'Đăng ký thất bại'
+    return { error: errorMessage }
+  }
+}
+
 export async function getOAuth2Info(): Promise<{ data?: OAuth2Info; error?: string }> {
   try {
     const response = await axios.get<OAuth2Info>(`${MAIN_API_URL}/oauth2-info/`)
@@ -75,27 +107,6 @@ export async function login(
   }
 }
 
-export async function register(
-  data: RegisterData
-): Promise<{ data?: User; error?: string }> {
-  try {
-    const response = await axios.post<User>(`${MAIN_API_URL}/users/`, {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    })
-
-    return { data: response.data }
-  } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.detail ||
-      error.response?.data?.email?.[0] ||
-      error.response?.data?.message ||
-      error.message ||
-      'Đăng ký thất bại'
-    return { error: errorMessage }
-  }
-}
 
 export async function getCurrentUser(
   token: string
