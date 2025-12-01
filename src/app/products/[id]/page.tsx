@@ -1,11 +1,12 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
 import { useProduct } from '@/lib/hooks/useProducts'
 import { useCart } from '@/contexts/CartContext'
+import { toastWarning } from '@/lib/utils/toast'
 
 interface Props {
   params: { id: string }
@@ -14,40 +15,70 @@ interface Props {
 export default function ProductDetailPage({ params }: Props) {
   const { id } = params
   const router = useRouter()
-  const { add } = useCart()
+  const { add, items } = useCart()
   const { data: product, isLoading: loading, error } = useProduct(id)
   const [quantity, setQuantity] = useState(1)
+  const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
+
+  // Helper function để tạo cart item object
+  const getCartItem = () => ({
+    id: product!.id.toString(),
+    medicine_unit_id: product!.id,
+    name: product!.medicine.name,
+    price: product!.price,
+    image_url: product!.image_url,
+    packaging: product!.packaging,
+  })
+
+  // Helper function để validate stock
+  const validateStock = () => {
+    if (!product) return false
+    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const currentQtyInCart = existingItem?.qty ?? 0
+    const totalQty = currentQtyInCart + quantity
+
+    if (product.in_stock === 0) {
+      toastWarning('Sản phẩm đã hết hàng')
+      return false
+    }
+
+    if (totalQty > product.in_stock) {
+      toastWarning(
+        `Số lượng vượt quá tồn kho. Hiện có ${product.in_stock} sản phẩm trong kho. Bạn đã có ${currentQtyInCart} sản phẩm trong giỏ hàng.`
+      )
+      return false
+    }
+
+    return { currentQtyInCart, totalQty }
+  }
 
   const handleAddToCart = () => {
     if (!product) return
-    add(
-      {
-        id: product.id.toString(),
-        medicine_unit_id: product.id,
-        name: product.medicine.name,
-        price: product.price,
-        image_url: product.image_url,
-        packaging: product.packaging,
-      },
-      quantity
-    )
-    // Show success message or toast here
+    const validation = validateStock()
+    if (!validation) return
+    add(getCartItem(), quantity)
   }
+
+  // Watch for cart update after "Buy Now" action
+  useEffect(() => {
+    if (pendingBuyNowRef.current) {
+      const { productId, expectedQty } = pendingBuyNowRef.current
+      const itemInCart = items.find((i) => i.medicine_unit_id === productId)
+      
+      if (itemInCart && itemInCart.qty >= expectedQty) {
+        pendingBuyNowRef.current = null
+        router.push('/checkout')
+      }
+    }
+  }, [items, router])
 
   const handleBuyNow = () => {
     if (!product) return
-    add(
-      {
-        id: product.id.toString(),
-        medicine_unit_id: product.id,
-        name: product.medicine.name,
-        price: product.price,
-        image_url: product.image_url,
-        packaging: product.packaging,
-      },
-      quantity
-    )
-    router.push('/checkout')
+    const validation = validateStock()
+    if (!validation) return
+
+    pendingBuyNowRef.current = { productId: product.id, expectedQty: validation.totalQty }
+    add(getCartItem(), quantity)
   }
 
   if (loading) {
@@ -179,7 +210,7 @@ export default function ProductDetailPage({ params }: Props) {
                       const val = parseInt(e.target.value) || 1
                       setQuantity(Math.max(1, Math.min(product.in_stock, val)))
                     }}
-                    className="h-8 w-16 rounded border text-center"
+                    className="h-8 w-16 rounded border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <button
                     onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}
