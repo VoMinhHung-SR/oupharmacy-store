@@ -1,4 +1,4 @@
-import { Card } from '@/components/Card'
+import { Card } from '@/components/cards/Card'
 import { Button } from '@/components/Button'
 
 export default function About() {

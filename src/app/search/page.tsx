@@ -1,4 +1,4 @@
-import { ProductCard } from '@/components/ProductCard'
+import { ProductCard } from '@/components/cards/ProductCard'
 import React from 'react'
 
 interface Props {
