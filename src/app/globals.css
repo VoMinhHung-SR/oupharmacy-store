@@ -30,6 +30,15 @@ body {
   html {
     font-family: system-ui, sans-serif;
   }
+  
+  main {
+    border: none !important;
+    border-bottom: none !important;
+  }
+  
+  footer {
+    border-top: 1px solid #e5e7eb !important;
+  }
 }
 
 @layer utilities {

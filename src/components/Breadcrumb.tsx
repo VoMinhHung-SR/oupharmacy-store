@@ -20,7 +20,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className = '' })
           if (item.href && !isLast) {
             return (
               <li key={index} className="flex items-center gap-2">
-                <Link href={item.href} className="hover:text-primary-700">{item.label}</Link>
+                <Link href={item.href} className="text-primary-500 hover:text-primary-700">{item.label}</Link>
                 <span>／</span>
               </li>
             )

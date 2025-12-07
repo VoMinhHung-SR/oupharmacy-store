@@ -1,12 +1,14 @@
 "use client"
-import React, { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
+import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
-import Breadcrumb from '@/components/Breadcrumb'
+import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
+import { Container } from '@/components/Container'
 import { useProduct } from '@/lib/hooks/useProducts'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
+import { ProductImageGallery } from '@/components/products/ProductImageGallery'
+import Link from 'next/link'
 
 interface Props {
   params: { id: string }
@@ -83,40 +85,47 @@ export default function ProductDetailPage({ params }: Props) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Breadcrumb
-          items={[
-            { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/products' },
-            { label: 'Đang tải...' },
-          ]}
-        />
-        <div className="grid gap-8 md:grid-cols-2">
-          <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
-          <div className="space-y-4">
-            <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
-            <div className="h-6 w-1/4 animate-pulse rounded bg-gray-200" />
-            <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+      <Container className="pb-6" >
+          <div className="py-4">
+            <Breadcrumb
+              items={[
+                { label: 'Trang chủ', href: '/' },
+                { label: 'Sản phẩm', href: '/products' },
+                { label: 'Đang tải...' },
+              ]}
+            />
+          </div>
+         <div className="bg-white rounded-lg p-6 space-y-6">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
+            <div className="space-y-4">
+              <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
+              <div className="h-6 w-1/4 animate-pulse rounded bg-gray-200" />
+              <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+            </div>
           </div>
         </div>
-      </div>
+      </Container>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <Container className="pb-6">
         <Breadcrumb
-          items={[
-            { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/products' },
-            { label: 'Lỗi' },
-          ]}
-        />
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error.message || 'Không tìm thấy sản phẩm'}
+            items={[
+              { label: 'Trang chủ', href: '/' },
+              { label: 'Sản phẩm', href: '/products' },
+              { label: 'Lỗi' },
+            ]}
+            className="py-4"
+          />
+         <div className="bg-white rounded-lg p-6 space-y-6">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+            {error.message || 'Không tìm thấy sản phẩm'}
+          </div>
         </div>
-      </div>
+      </Container>
     )
   }
 
@@ -124,82 +133,137 @@ export default function ProductDetailPage({ params }: Props) {
     return null
   }
 
-  return (
-    <div className="space-y-6">
-      <Breadcrumb
-        items={[
-          { label: 'Trang chủ', href: '/' },
-          { label: 'Sản phẩm', href: '/products' },
-          { label: product.medicine.name },
-        ]}
-      />
+  // Build breadcrumb items
+  const breadcrumbItems: CrumbItem[] = [
+    { label: 'Trang chủ', href: '/' },
+  ]
+  
+  if (product.category) {
+    breadcrumbItems.push({
+      label: product.category.name,
+      href: `/categories/${product.category.name.toLowerCase().replace(/\s+/g, '-')}`,
+    })
+  }
+  
+  breadcrumbItems.push({ label: product.medicine.name })
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <div className="aspect-square w-full overflow-hidden rounded-lg border bg-gray-100">
-            {product.image_url ? (
-              <Image
-                src={product.image_url}
-                alt={product.medicine.name}
-                width={600}
-                height={600}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-gray-400">
-                <svg className="h-24 w-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
+  return (
+    <Container className="pb-6">
+      <Breadcrumb items={breadcrumbItems} className="mb-4" />
+      <div className="bg-white rounded-lg p-6 space-y-6">
+
+        <div className="grid gap-8 md:grid-cols-2">
+          {/* Left: Product Images */}
+          <div>
+            <ProductImageGallery
+              mainImage={product.image_url}
+              productName={product.medicine.name}
+            />
+          </div>
+
+          {/* Right: Product Details */}
+          <div className="space-y-6">
+            {/* Brand */}
+            {product.brand && (
+              <div className="text-sm text-gray-600">
+                Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
               </div>
             )}
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <h1 className="text-2xl font-semibold">{product.medicine.name}</h1>
-            {product.packaging && (
-              <div className="mt-1 text-sm text-gray-600">Quy cách: {product.packaging}</div>
-            )}
-            {product.brand && (
-              <div className="mt-1 text-sm text-gray-600">Thương hiệu: {product.brand.name}</div>
-            )}
-            {product.category && (
-              <div className="mt-1 text-sm text-gray-600">Danh mục: {product.category.name}</div>
-            )}
-          </div>
-          <div className="text-3xl font-bold text-primary-700">
-            {product.price.toLocaleString('vi-VN')}₫
-          </div>
-          {product.medicine.effect && (
+
+            {/* Product Name */}
             <div>
-              <h3 className="font-semibold">Công dụng:</h3>
-              <p className="text-sm text-gray-600">{product.medicine.effect}</p>
+              <h1 className="text-2xl font-semibold text-gray-900 leading-tight">
+                {product.medicine.name}
+                {/* {product.packaging && ` (${product.packaging})`} */}
+              </h1>
             </div>
-          )}
-          {product.medicine.contraindications && (
+
+            {/* Product ID & Rating (Placeholder) */}
+            {/* TODO: Add rating and comments */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>{product.id.toString().padStart(8, '0')}</span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <span className="text-yellow-500">★</span>
+                <span>5</span>
+              </span>
+              <span>•</span>
+              <span>1 đánh giá</span>
+              <span>•</span>
+              <span>9 bình luận</span>
+            </div>
+
+            {/* Price */}
             <div>
-              <h3 className="font-semibold">Chống chỉ định:</h3>
-              <p className="text-sm text-gray-600">{product.medicine.contraindications}</p>
+              <div className="text-3xl font-bold text-primary-700">
+                {product.price.toLocaleString('vi-VN')}₫
+              </div>
+              {/* <div className="text-sm text-gray-500">/ Hộp</div> */}
             </div>
-          )}
-          <div>
-            <div className="mb-2 text-sm font-medium">
-              Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
+
+            {/* Unit Selection (if multiple units available) */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Chọn đơn vị tính
+              </label>
+              <div className="flex gap-2">
+                <button className="rounded-full border-2 border-primary-600 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700">
+                  Hộp
+                </button>
+              </div>
             </div>
+
+            {/* Product Information */}
+            <div className="space-y-3 border-t border-gray-200 pt-4">
+              <div className="text-sm">
+                <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
+                <span className="text-gray-600">{product.medicine.name}</span>
+              </div>
+
+              {product.category && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Danh mục:</span>{' '}
+                  <Link href={`/categories/${product.category.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <span className="text-primary-500 hover:text-primary-700">{product.category.name}</span>
+                  </Link>
+                </div>
+              )}
+
+              {product.packaging && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Quy cách:</span>{' '}
+                  <span className="text-gray-600">{product.packaging}</span>
+                </div>
+              )}
+
+              {product.medicine.effect && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Thành phần:</span>{' '}
+                  <span className="text-gray-600">{product.medicine.effect}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Stock Status */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="text-sm font-medium text-gray-700">
+                Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
             {product.in_stock > 0 && (
-              <div className="mb-4 flex items-center gap-3">
-                <label className="text-sm font-medium">Số lượng:</label>
-                <div className="flex items-center gap-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Chọn số lượng
+                </label>
+                <div className="flex items-center gap-3">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="h-8 w-8 rounded border hover:bg-gray-100"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={quantity <= 1}
                   >
-                    -
+                    <span className="text-lg text-gray-900">−</span>
                   </button>
                   <input
                     type="number"
@@ -210,30 +274,51 @@ export default function ProductDetailPage({ params }: Props) {
                       const val = parseInt(e.target.value) || 1
                       setQuantity(Math.max(1, Math.min(product.in_stock, val)))
                     }}
-                    className="h-8 w-16 rounded border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="h-10 w-20 rounded-lg border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <button
                     onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}
-                    className="h-8 w-8 rounded border hover:bg-gray-100"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={quantity >= product.in_stock}
                   >
-                    +
+                    <span className="text-lg text-gray-900">+</span>
                   </button>
                 </div>
               </div>
             )}
-          </div>
-          <div className="flex gap-3 pt-2">
-            <Button onClick={handleAddToCart} disabled={product.in_stock === 0}>
-              Thêm vào giỏ
-            </Button>
-            <Button variant="outline" onClick={handleBuyNow} disabled={product.in_stock === 0}>
-              Mua ngay
-            </Button>
+
+            {/* Action Buttons */}
+            {/* TODO: Add quantity selector */}
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={handleAddToCart}
+                disabled={product.in_stock === 0}
+                className="flex-1"
+                size="lg"
+              >
+                Thêm vào giỏ
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleBuyNow}
+                disabled={product.in_stock === 0}
+                className="flex-1"
+                size="lg"
+              >
+                Mua ngay
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            {product.medicine.contraindications && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <h3 className="mb-2 text-sm font-semibold text-amber-900">Chống chỉ định:</h3>
+                <p className="text-sm text-amber-800">{product.medicine.contraindications}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }
-
-

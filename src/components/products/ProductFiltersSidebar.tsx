@@ -67,7 +67,7 @@ export const ProductFiltersSidebar: React.FC<ProductFiltersSidebarProps> = ({
   }
 
   return (
-    <div className="space-y-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+    <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
 
       {/* Đối tượng sử dụng */}
