@@ -44,17 +44,17 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                 <h3 className="text-lg font-medium text-gray-900 group-hover:text-primary-700 mb-2">
                   {product.medicine.name}
                 </h3>
-                {product.packaging && (
-                  <p className="text-sm text-gray-500 mb-2">{product.packaging}</p>
+                {product.package_size && (
+                  <p className="text-sm text-gray-500 mb-2">{product.package_size}</p>
                 )}
-                {product.medicine.effect && (
-                  <p className="text-sm text-gray-600 line-clamp-2">{product.medicine.effect}</p>
+                {product.medicine.usage && (
+                  <p className="text-sm text-gray-600 line-clamp-2">{product.medicine.usage}</p>
                 )}
               </div>
 
               <div className="flex items-center justify-between mt-4">
                 <div className="text-primary-700 font-bold text-xl">
-                  {product.price.toLocaleString('vi-VN')}₫
+                  {product.price_value.toLocaleString('vi-VN')}₫
                 </div>
                 <button
                   type="button"

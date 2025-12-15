@@ -7,7 +7,7 @@ import { useCategories } from '@/lib/hooks/useCategories'
 import { useBrands } from '@/lib/hooks/useBrands'
 import { Container } from '@/components/Container'
 import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/components/products'
-import { PAGINATION, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
+import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
 
@@ -39,9 +39,9 @@ export default function ProductsPage() {
     const sorted = [...productList]
     switch (sortOption) {
       case 'price-low':
-        return sorted.sort((a, b) => a.price - b.price)
+        return sorted.sort((a, b) => a.price_value - b.price_value)
       case 'price-high':
-        return sorted.sort((a, b) => b.price - a.price)
+        return sorted.sort((a, b) => b.price_value - a.price_value)
       case 'bestselling':
       default:
         // Default sorting (bestselling could be based on in_stock or created_date)
@@ -55,10 +55,10 @@ export default function ProductsPage() {
     
     if (sort === 'price-low') {
       newFilters.price_sort = 'asc'
-      newFilters.ordering = 'price'
+      newFilters.ordering = 'price_value'
     } else if (sort === 'price-high') {
       newFilters.price_sort = 'desc'
-      newFilters.ordering = '-price'
+      newFilters.ordering = '-price_value'
     } else {
       delete newFilters.price_sort
       delete newFilters.ordering
@@ -196,9 +196,10 @@ export default function ProductsPage() {
                   product={{
                     id: product.id.toString(),
                     name: product.medicine.name,
-                    price: product.price,
+                    price_display: product.price_display || PRICE_CONSULT,
+                    price: product.price_value,
                     image_url: product.image_url,
-                    packaging: product.packaging,
+                    packaging: product.package_size,
                     medicine_unit_id: product.id,
                   }}
                 />

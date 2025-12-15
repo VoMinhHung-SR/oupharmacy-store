@@ -7,7 +7,7 @@ import { useCategories } from '@/lib/hooks/useCategories'
 import { useBrands } from '@/lib/hooks/useBrands'
 import { Container } from '@/components/Container'
 import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/components/products'
-import { PAGINATION, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
+import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
 
@@ -31,12 +31,14 @@ export default function CategoryListingPage({ params }: Props) {
   const { data: categories } = useCategories()
   const { data: brands } = useBrands()
   
-  // Find category by slug (assuming slug matches category name or we need to map it)
+  // Find category by slug (using path_slug or slug field)
   const category = useMemo(() => {
     if (!categories) return null
-    // Try to find by name (lowercase match) or by slug
+    // Try to find by path_slug first (full path), then by slug, then by name
     return categories.find(
-      (cat) => cat.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
+      (cat) => cat.path_slug?.toLowerCase() === slug.toLowerCase() ||
+               cat.slug?.toLowerCase() === slug.toLowerCase() ||
+               cat.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
                cat.name.toLowerCase() === slug.toLowerCase()
     )
   }, [categories, slug])
@@ -62,9 +64,9 @@ export default function CategoryListingPage({ params }: Props) {
     const sorted = [...productList]
     switch (sortOption) {
       case 'price-low':
-        return sorted.sort((a, b) => a.price - b.price)
+        return sorted.sort((a, b) => a.price_value - b.price_value)
       case 'price-high':
-        return sorted.sort((a, b) => b.price - a.price)
+        return sorted.sort((a, b) => b.price_value - a.price_value)
       case 'bestselling':
       default:
         return sorted.sort((a, b) => b.in_stock - a.in_stock)
@@ -77,10 +79,10 @@ export default function CategoryListingPage({ params }: Props) {
     
     if (sort === 'price-low') {
       newFilters.price_sort = 'asc'
-      newFilters.ordering = 'price'
+      newFilters.ordering = 'price_value'
     } else if (sort === 'price-high') {
       newFilters.price_sort = 'desc'
-      newFilters.ordering = '-price'
+      newFilters.ordering = '-price_value'
     } else {
       delete newFilters.price_sort
       delete newFilters.ordering
@@ -224,9 +226,10 @@ export default function CategoryListingPage({ params }: Props) {
                   product={{
                     id: product.id.toString(),
                     name: product.medicine.name,
-                    price: product.price,
+                    price_display: product.price_display || PRICE_CONSULT,
+                    price: product.price_value,
                     image_url: product.image_url,
-                    packaging: product.packaging,
+                    packaging: product.package_size,
                     medicine_unit_id: product.id,
                   }}
                 />

@@ -2,26 +2,57 @@ import { apiGet } from '../api'
 
 export interface Product {
   id: number
-  price: number
+  price_value: number 
+  price_display?: string  
   in_stock: number
   image?: string
   image_url?: string
-  packaging?: string
+  images?: string[]  
+  images_urls?: string[]  
+  package_size?: string  
+  prices?: any[]  
+  price_obj?: any  
   medicine: {
     id: number
     name: string
-    effect?: string
-    contraindications?: string
+    mid?: string
+    slug?: string
+    web_name?: string
+    description?: string
+    ingredients?: string
+    usage?: string
+    dosage?: string
+    adverse_effect?: string
+    careful?: string
+    preservation?: string
+    brand_id?: number
   }
   category?: {
     id: number
     name: string
+    slug?: string
+    path?: string
+    path_slug?: string
+    category_array?: Array<{ name: string; slug: string }>
   } | null
-  brand_id?: number
+  category_info?: {
+    category: Array<{ name: string; slug: string }>
+    categoryPath: string
+    categorySlug: string
+  }
   brand?: {
     id: number
     name: string
   } | null
+  registration_number?: string
+  origin?: string
+  manufacturer?: string
+  shelf_life?: string
+  specifications?: any
+  link?: string
+  product_ranking?: number
+  display_code?: number
+  is_published?: boolean
   active: boolean
   created_date: string
   updated_date: string

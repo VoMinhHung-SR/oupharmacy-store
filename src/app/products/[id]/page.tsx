@@ -9,6 +9,7 @@ import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
 import { ProductImageGallery } from '@/components/products/ProductImageGallery'
 import Link from 'next/link'
+import { PRICE_CONSULT } from '@/lib/constant'
 
 interface Props {
   params: { id: string }
@@ -27,9 +28,9 @@ export default function ProductDetailPage({ params }: Props) {
     id: product!.id.toString(),
     medicine_unit_id: product!.id,
     name: product!.medicine.name,
-    price: product!.price,
+    price: product!.price_value,
     image_url: product!.image_url,
-    packaging: product!.packaging,
+    packaging: product!.package_size,
   })
 
   // Helper function để validate stock
@@ -139,13 +140,16 @@ export default function ProductDetailPage({ params }: Props) {
   ]
   
   if (product.category) {
+    const categorySlug = product.category.path_slug || product.category.slug || product.category.name.toLowerCase().replace(/\s+/g, '-')
     breadcrumbItems.push({
       label: product.category.name,
-      href: `/categories/${product.category.name.toLowerCase().replace(/\s+/g, '-')}`,
+      href: `/categories/${categorySlug}`,
     })
   }
   
   breadcrumbItems.push({ label: product.medicine.name })
+
+  const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT
 
   return (
     <Container className="pb-6">
@@ -193,25 +197,35 @@ export default function ProductDetailPage({ params }: Props) {
               <span>9 bình luận</span>
             </div>
 
-            {/* Price */}
-            <div>
-              <div className="text-3xl font-bold text-primary-700">
-                {product.price.toLocaleString('vi-VN')}₫
+            {/* Price or Consult Notice */}
+            {isConsultPrice ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+                </p>
               </div>
-              {/* <div className="text-sm text-gray-500">/ Hộp</div> */}
-            </div>
+            ) : (
+              <>
+                <div>
+                  <div className="text-3xl font-bold text-primary-700">
+                    {product.price_value.toLocaleString('vi-VN')}₫
+                  </div>
+                  {/* <div className="text-sm text-gray-500">/ Hộp</div> */}
+                </div>
 
-            {/* Unit Selection (if multiple units available) */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Chọn đơn vị tính
-              </label>
-              <div className="flex gap-2">
-                <button className="rounded-full border-2 border-primary-600 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700">
-                  Hộp
-                </button>
-              </div>
-            </div>
+                {/* Unit Selection (if multiple units available) */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Chọn đơn vị tính
+                  </label>
+                  <div className="flex gap-2">
+                    <button className="rounded-full border-2 border-primary-600 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700">
+                      Hộp
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Product Information */}
             <div className="space-y-3 border-t border-gray-200 pt-4">
@@ -223,23 +237,23 @@ export default function ProductDetailPage({ params }: Props) {
               {product.category && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Danh mục:</span>{' '}
-                  <Link href={`/categories/${product.category.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link href={`/categories/${product.category.path_slug || product.category.slug || product.category.name.toLowerCase().replace(/\s+/g, '-')}`}>
                     <span className="text-primary-500 hover:text-primary-700">{product.category.name}</span>
                   </Link>
                 </div>
               )}
 
-              {product.packaging && (
+              {product.package_size && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
-                  <span className="text-gray-600">{product.packaging}</span>
+                  <span className="text-gray-600">{product.package_size}</span>
                 </div>
               )}
 
-              {product.medicine.effect && (
+              {product.medicine.ingredients && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Thành phần:</span>{' '}
-                  <span className="text-gray-600">{product.medicine.effect}</span>
+                  <span className="text-gray-600">{product.medicine.ingredients}</span>
                 </div>
               )}
             </div>
@@ -251,8 +265,8 @@ export default function ProductDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            {product.in_stock > 0 && (
+            {/* Quantity Selector - Only show if not consult price */}
+            {!isConsultPrice && product.in_stock > 0 && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   Chọn số lượng
@@ -288,32 +302,56 @@ export default function ProductDetailPage({ params }: Props) {
             )}
 
             {/* Action Buttons */}
-            {/* TODO: Add quantity selector */}
-            <div className="flex gap-3 pt-2">
-              <Button
-                onClick={handleAddToCart}
-                disabled={product.in_stock === 0}
-                className="flex-1"
-                size="lg"
-              >
-                Thêm vào giỏ
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleBuyNow}
-                disabled={product.in_stock === 0}
-                className="flex-1"
-                size="lg"
-              >
-                Mua ngay
-              </Button>
-            </div>
+            {isConsultPrice ? (
+              <div className="flex flex-col gap-3 pt-2">
+                <Button
+                  onClick={() => {
+                    // TODO: Navigate to consultation page or open consultation modal
+                    // For now, could scroll to a consultation section or open a modal
+                  }}
+                  className="w-full"
+                  size="lg"
+                >
+                  Tư vấn ngay
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // TODO: Navigate to pharmacy finder
+                  }}
+                  className="w-full"
+                  size="lg"
+                >
+                  Tìm nhà thuốc
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={product.in_stock === 0}
+                  className="flex-1"
+                  size="lg"
+                >
+                  Thêm vào giỏ
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleBuyNow}
+                  disabled={product.in_stock === 0}
+                  className="flex-1"
+                  size="lg"
+                >
+                  Mua ngay
+                </Button>
+              </div>
+            )}
 
             {/* Additional Info */}
-            {product.medicine.contraindications && (
+            {product.medicine.adverse_effect && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <h3 className="mb-2 text-sm font-semibold text-amber-900">Chống chỉ định:</h3>
-                <p className="text-sm text-amber-800">{product.medicine.contraindications}</p>
+                <p className="text-sm text-amber-800">{product.medicine.adverse_effect}</p>
               </div>
             )}
           </div>
