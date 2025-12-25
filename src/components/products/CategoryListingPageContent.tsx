@@ -1,10 +1,7 @@
-"use client"
+'use client'
 import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { useProducts } from '@/lib/hooks/useProducts'
-import { ProductFilters } from '@/lib/services/products'
-import { useCategories } from '@/lib/hooks/useCategories'
-import { useBrands } from '@/lib/hooks/useBrands'
+import { ProductFilters, Product } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/components/products'
 import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
@@ -14,54 +11,51 @@ import { Pagination } from '@/components/Pagination'
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 type ViewMode = 'grid' | 'list'
 
-interface Props {
-  params: { slug: string }
+interface CategoryListingPageContentProps {
+  categorySlug: string
+  products: Product[]
+  totalCount: number
+  loading: boolean
+  error: Error | null
+  categoryName?: string | null
+  categories?: any[]
+  brands?: any[]
+  filters: ProductFilters
+  onFiltersChange: (filters: ProductFilters) => void
 }
 
-export default function CategoryListingPage({ params }: Props) {
-  const { slug } = params
-  const [filters, setFilters] = useState<ProductFilters>({ 
-    page: PAGINATION.DEFAULT_PAGE, 
-    page_size: PAGINATION.DEFAULT_PAGE_SIZE 
-  })
+export function CategoryListingPageContent({
+  categorySlug,
+  products,
+  totalCount,
+  loading,
+  error,
+  categoryName,
+  categories,
+  brands,
+  filters,
+  onFiltersChange,
+}: CategoryListingPageContentProps) {
   const [sortOption, setSortOption] = useState<SortOption>(PRODUCT_LISTING.DEFAULT_SORT)
   const [viewMode, setViewMode] = useState<ViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
-  
-  const { data: categories } = useCategories()
-  const { data: brands } = useBrands()
-  
-  // Find category by slug (using path_slug or slug field)
-  const category = useMemo(() => {
-    if (!categories) return null
-    // Try to find by path_slug first (full path), then by slug, then by name
-    return categories.find(
-      (cat) => cat.path_slug?.toLowerCase() === slug.toLowerCase() ||
-               cat.slug?.toLowerCase() === slug.toLowerCase() ||
-               cat.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
-               cat.name.toLowerCase() === slug.toLowerCase()
-    )
-  }, [categories, slug])
 
-  // Update filters with category when found
+  // Prepare filters (loại bỏ category vì đã có trong slug)
+  const { category: _, ...filtersWithoutCategory } = filters
   const categoryFilters = useMemo(() => {
-    if (category) {
-      return { ...filters, category: category.id }
-    }
-    return filters
-  }, [filters, category])
-
-  const { data, isLoading, error } = useProducts(categoryFilters)
-  const products = data?.results || []
-  const loading = isLoading
-  const totalPages = data ? Math.ceil(data.count / (filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE)) : 1
+    return filtersWithoutCategory
+  }, [filtersWithoutCategory])
 
   // Apply sorting
   const sortedProducts = useMemo(() => {
-    const productList = data?.results || []
-    if (!productList.length) return productList
-
-    const sorted = [...productList]
+    if (!products.length) return products
+    
+    if (categoryFilters.ordering) {
+      return products
+    }
+    
+    // Fallback: sort trên client chỉ khi không có server-side sorting
+    const sorted = [...products]
     switch (sortOption) {
       case 'price-low':
         return sorted.sort((a, b) => a.price_value - b.price_value)
@@ -71,11 +65,11 @@ export default function CategoryListingPage({ params }: Props) {
       default:
         return sorted.sort((a, b) => b.in_stock - a.in_stock)
     }
-  }, [data?.results, sortOption])
+  }, [products, sortOption, categoryFilters.ordering])
 
   const handleSortChange = (sort: SortOption) => {
     setSortOption(sort)
-    const newFilters: ProductFilters = { ...categoryFilters }
+    const newFilters: Omit<ProductFilters, 'category'> = { ...categoryFilters }
     
     if (sort === 'price-low') {
       newFilters.price_sort = 'asc'
@@ -88,15 +82,18 @@ export default function CategoryListingPage({ params }: Props) {
       delete newFilters.ordering
     }
     
-    setFilters(newFilters)
+    onFiltersChange(newFilters as ProductFilters)
   }
 
   const handleFiltersChange = (newFilters: ProductFilters) => {
-    // Preserve category filter
-    const updatedFilters = category 
-      ? { ...newFilters, category: category.id, page: PAGINATION.DEFAULT_PAGE, page_size: filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE }
-      : { ...newFilters, page: PAGINATION.DEFAULT_PAGE, page_size: filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE }
-    setFilters(updatedFilters)
+    // Loại bỏ category từ filters vì đã có trong slug
+    const { category: _, ...filtersWithoutCategory } = newFilters
+    const updatedFilters: ProductFilters = { 
+      ...filtersWithoutCategory, 
+      page: PAGINATION.DEFAULT_PAGE, 
+      page_size: filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE 
+    } as ProductFilters
+    onFiltersChange(updatedFilters)
   }
 
   if (loading) {
@@ -126,8 +123,17 @@ export default function CategoryListingPage({ params }: Props) {
   if (error) {
     return (
       <Container className="py-8">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          Lỗi khi tải sản phẩm: {error.message || 'Đã xảy ra lỗi'}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
+          <p className="text-amber-800 font-medium mb-2">Không thể tải danh sách sản phẩm</p>
+          <p className="text-sm text-amber-700 mb-4">
+            {error.message || 'Đã xảy ra lỗi khi kết nối với server. Vui lòng thử lại sau.'}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm"
+          >
+            Tải lại trang
+          </button>
         </div>
       </Container>
     )
@@ -194,7 +200,7 @@ export default function CategoryListingPage({ params }: Props) {
 
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900">
-              {category ? category.name : `Danh mục: ${slug}`}
+              {categoryName || `Danh mục: ${categorySlug}`}
             </h1>
           </div>
 
@@ -203,7 +209,7 @@ export default function CategoryListingPage({ params }: Props) {
             viewMode={viewMode}
             onSortChange={handleSortChange}
             onViewModeChange={setViewMode}
-            productCount={data?.count}
+            productCount={totalCount}
           />
 
           {/* Notice */}
@@ -215,25 +221,49 @@ export default function CategoryListingPage({ params }: Props) {
 
           {/* Products */}
           {sortedProducts.length === 0 ? (
-            <div className="rounded-lg border p-8 text-center text-gray-600">
-              Không tìm thấy sản phẩm nào trong danh mục này
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-gray-600 mb-2">Không tìm thấy sản phẩm nào trong danh mục này</p>
+              <p className="text-sm text-gray-500">Vui lòng thử lại sau hoặc chọn danh mục khác</p>
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {sortedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    id: product.id.toString(),
-                    name: product.medicine.name,
-                    price_display: product.price_display || PRICE_CONSULT,
-                    price: product.price_value,
-                    image_url: product.image_url,
-                    packaging: product.package_size,
-                    medicine_unit_id: product.id,
-                  }}
-                />
-              ))}
+              {sortedProducts.map((product) => {
+                // Sử dụng categorySlug từ URL (props) thay vì extract từ product
+                // Vì đang ở trong category page, categorySlug đã đúng từ URL
+                const productCategorySlug = categorySlug
+                
+                // Medicine slug từ product.medicine.slug
+                // Nếu không có, có thể dùng medicine name để tạo slug hoặc fallback về ID
+                const productMedicineSlug = product.medicine?.slug || 
+                  (product.medicine?.name 
+                    ? product.medicine.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                    : undefined)
+                
+                // Product name: ưu tiên medicine.name, fallback về web_name hoặc tên mặc định
+                const productName = product.medicine?.name || 
+                  product.medicine?.web_name || 
+                  'Sản phẩm'
+                
+                // Price display: check với PRICE_CONSULT constant
+                const priceDisplay = product.price_display || PRICE_CONSULT
+                
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      id: product.id.toString(),
+                      name: productName,
+                      price_display: priceDisplay,
+                      price: product.price_value || 0,
+                      image_url: product.image_url || undefined,
+                      packaging: product.package_size || undefined,
+                      medicine_unit_id: product.id,
+                      category_slug: productCategorySlug,
+                      medicine_slug: productMedicineSlug,
+                    }}
+                  />
+                )
+              })}
             </div>
           ) : (
             <ProductListView products={sortedProducts} />
@@ -242,8 +272,8 @@ export default function CategoryListingPage({ params }: Props) {
           {/* Pagination */}
           <Pagination
             currentPage={categoryFilters.page || PAGINATION.DEFAULT_PAGE}
-            totalPages={totalPages}
-            onPageChange={(page) => setFilters({ ...categoryFilters, page })}
+            totalPages={Math.ceil(totalCount / (filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE))}
+            onPageChange={(page) => onFiltersChange({ ...categoryFilters, page } as ProductFilters)}
             buttonClassName="text-gray-600"
           />
         </main>
@@ -251,5 +281,4 @@ export default function CategoryListingPage({ params }: Props) {
     </Container>
   )
 }
-
 

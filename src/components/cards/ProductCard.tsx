@@ -17,11 +17,39 @@ interface ProductCardProps {
     image_url?: string
     packaging?: string
     medicine_unit_id?: number
+    category_slug?: string
+    medicine_slug?: string
   }
 }
 
+// Helper function để tạo product link
+const getProductLink = (product: ProductCardProps['product']): string | null => {
+  // Nếu có đủ category_slug và medicine_slug, sử dụng format mới
+  if (product.category_slug && product.medicine_slug) {
+    return `/${product.category_slug}/${product.medicine_slug}`
+  }
+  // Fallback: sử dụng ID nếu không có slug (cho backward compatibility)
+  if (product.medicine_unit_id || product.id) {
+    return `/products/${product.medicine_unit_id || product.id}`
+  }
+  // Nếu không có gì, trả về null
+  return null
+}
+
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const productLink = `/products/${product.medicine_unit_id || product.id}`
+  const productLink = getProductLink(product)
+  
+  // Nếu không có link, hiển thị thông báo thay vì crash
+  if (!productLink) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="text-sm text-gray-600">
+          <p className="font-medium mb-1">Sản phẩm tạm thời không khả dụng</p>
+          <p className="text-xs text-gray-500">Thông tin sản phẩm đang được cập nhật</p>
+        </div>
+      </div>
+    )
+  }
   const discount = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0)
   const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price) === PRICE_CONSULT
 

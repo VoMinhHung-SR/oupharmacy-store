@@ -10,11 +10,31 @@ interface ProductListViewProps {
   products: Product[]
 }
 
+// Helper function để tạo product link từ Product data
+const getProductLink = (product: Product): string | null => {
+  // Nếu có đủ category và medicine slug, sử dụng format mới
+  if (product.category && product.medicine.slug) {
+    const categorySlug = product.category.path_slug || product.category.slug || product.category.name.toLowerCase().replace(/\s+/g, '-')
+    return `/${categorySlug}/${product.medicine.slug}`
+  }
+  // Fallback: sử dụng ID nếu không có slug
+  if (product.id) {
+    return `/products/${product.id}`
+  }
+  return null
+}
+
 export const ProductListView: React.FC<ProductListViewProps> = ({ products }) => {
   return (
     <div className="space-y-4">
       {products.map((product) => {
-        const productLink = `/products/${product.id}`
+        const productLink = getProductLink(product)
+        
+        // Nếu không có link, bỏ qua product này
+        if (!productLink) {
+          return null
+        }
+        
         return (
           <Link
             key={product.id}
