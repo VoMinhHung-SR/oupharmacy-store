@@ -5,21 +5,19 @@ import Image from 'next/image'
 import React from 'react'
 import { Product } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
+import { PRICE_CONSULT } from '@/lib/constant'
 
 interface ProductListViewProps {
   products: Product[]
 }
 
-// Helper function để tạo product link từ Product data
 const getProductLink = (product: Product): string | null => {
-  // Nếu có đủ category và medicine slug, sử dụng format mới
   if (product.category && product.medicine.slug) {
-    const categorySlug = product.category.path_slug || product.category.slug || product.category.name.toLowerCase().replace(/\s+/g, '-')
-    return `/${categorySlug}/${product.medicine.slug}`
-  }
-  // Fallback: sử dụng ID nếu không có slug
-  if (product.id) {
-    return `/products/${product.id}`
+    const categoryArray = product.category_info?.category
+    const categorySlug = categoryArray && categoryArray.length > 0 
+      ? categoryArray.map(cat => cat.slug).join('/')
+      : product.category_info?.categorySlug
+    return categorySlug ? `/${categorySlug}/${product.medicine.slug}` : null
   }
   return null
 }
@@ -30,10 +28,11 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
       {products.map((product) => {
         const productLink = getProductLink(product)
         
-        // Nếu không có link, bỏ qua product này
         if (!productLink) {
           return null
         }
+        
+        const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT || product.price_value === 0
         
         return (
           <Link
@@ -43,19 +42,22 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
           >
             {/* Product image */}
             <div className="w-32 h-32 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-              {product.image_url ? (
-                <Image
-                  src={product.image_url}
-                  alt={product.medicine.name}
-                  width={128}
-                  height={128}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-gray-400">
-                  <ImagePlaceholderIcon className="h-12 w-12" />
-                </div>
-              )}
+              {(() => {
+                const imageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null)
+                return imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt={product.medicine.name}
+                    width={128}
+                    height={128}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-gray-400">
+                    <ImagePlaceholderIcon className="h-12 w-12" />
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Product info */}
@@ -72,21 +74,53 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                 )}
               </div>
 
-              <div className="flex items-center justify-between mt-4">
-                <div className="text-primary-700 font-bold text-xl">
-                  {product.price_value.toLocaleString('vi-VN')}₫
+              {isConsultPrice ? (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-xs text-amber-800">
+                      <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+                    </p>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      type="button"
+                      className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        window.location.href = productLink
+                      }}
+                    >
+                      Tư vấn ngay
+                    </button>
+                    <button
+                      type="button" 
+                      className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        // TODO: Navigate to pharmacy finder
+                      }}
+                    >
+                      Tìm nhà thuốc
+                    </button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    window.location.href = productLink
-                  }}
-                >
-                  Chọn mua
-                </button>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-primary-700 font-bold text-xl">
+                    {product.price_value.toLocaleString('vi-VN')}₫
+                  </div>
+                  <button
+                    type="button"
+                    className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      window.location.href = productLink
+                    }}
+                  >
+                    Chọn mua
+                  </button>
+                </div>
+              )}
             </div>
           </Link>
         )

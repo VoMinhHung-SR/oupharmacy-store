@@ -190,20 +190,24 @@ export default function ProductsPage() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {sortedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    id: product.id.toString(),
-                    name: product.medicine.name,
-                    price_display: product.price_display || PRICE_CONSULT,
-                    price: product.price_value,
-                    image_url: product.image_url,
-                    packaging: product.package_size,
-                    medicine_unit_id: product.id,
-                  }}
-                />
-              ))}
+              {sortedProducts.map((product) => {
+                const productImageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined)
+                
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      id: product.id.toString(),
+                      name: product.medicine.name,
+                      price_display: product.price_display || PRICE_CONSULT,
+                      price: product.price_value,
+                      image_url: productImageUrl,
+                      packaging: product.package_size,
+                      medicine_unit_id: product.id,
+                    }}
+                  />
+                )
+              })}
             </div>
           ) : (
             <ProductListView products={sortedProducts} />

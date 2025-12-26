@@ -22,17 +22,10 @@ interface ProductCardProps {
   }
 }
 
-// Helper function để tạo product link
 const getProductLink = (product: ProductCardProps['product']): string | null => {
-  // Nếu có đủ category_slug và medicine_slug, sử dụng format mới
   if (product.category_slug && product.medicine_slug) {
     return `/${product.category_slug}/${product.medicine_slug}`
   }
-  // Fallback: sử dụng ID nếu không có slug (cho backward compatibility)
-  if (product.medicine_unit_id || product.id) {
-    return `/products/${product.medicine_unit_id || product.id}`
-  }
-  // Nếu không có gì, trả về null
   return null
 }
 
@@ -124,7 +117,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <div className="text-primary-700 font-bold text-base">
                 {product.price.toLocaleString('vi-VN')}₫
               </div>
-              <span className="text-xs text-gray-500">/ Hộp</span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <div className="text-gray-400 text-sm line-through ml-auto">
                   {product.originalPrice.toLocaleString('vi-VN')}₫

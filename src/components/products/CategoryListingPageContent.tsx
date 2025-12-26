@@ -7,6 +7,7 @@ import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/co
 import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
+import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 type ViewMode = 'grid' | 'list'
@@ -140,7 +141,16 @@ export function CategoryListingPageContent({
   }
 
   return (
-    <Container className="py-8">
+    <Container className="py-4">
+      <div className="mb-4">
+        <Breadcrumb 
+          items={[
+            { label: 'Trang chủ', href: '/' },
+            { label: categoryName || `Danh mục: ${categorySlug}` }
+          ]}
+        />
+      </div>
+      
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Filters - Desktop */}
         <aside className="hidden lg:flex flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
@@ -198,12 +208,6 @@ export function CategoryListingPageContent({
             </button>
           </div>
 
-          <div className="mb-4">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {categoryName || `Danh mục: ${categorySlug}`}
-            </h1>
-          </div>
-
           <ProductSortAndView
             sortOption={sortOption}
             viewMode={viewMode}
@@ -228,24 +232,23 @@ export function CategoryListingPageContent({
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {sortedProducts.map((product) => {
-                // Sử dụng categorySlug từ URL (props) thay vì extract từ product
-                // Vì đang ở trong category page, categorySlug đã đúng từ URL
-                const productCategorySlug = categorySlug
+                const categoryArray = product.category_info?.category
+                const productCategorySlug = categoryArray && categoryArray.length > 0 
+                  ? categoryArray.map(cat => cat.slug).join('/')
+                  : product.category_info?.categorySlug || categorySlug
                 
-                // Medicine slug từ product.medicine.slug
-                // Nếu không có, có thể dùng medicine name để tạo slug hoặc fallback về ID
                 const productMedicineSlug = product.medicine?.slug || 
                   (product.medicine?.name 
                     ? product.medicine.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
                     : undefined)
                 
-                // Product name: ưu tiên medicine.name, fallback về web_name hoặc tên mặc định
                 const productName = product.medicine?.name || 
                   product.medicine?.web_name || 
                   'Sản phẩm'
                 
-                // Price display: check với PRICE_CONSULT constant
                 const priceDisplay = product.price_display || PRICE_CONSULT
+              
+                const productImageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined)
                 
                 return (
                   <ProductCard
@@ -255,7 +258,7 @@ export function CategoryListingPageContent({
                       name: productName,
                       price_display: priceDisplay,
                       price: product.price_value || 0,
-                      image_url: product.image_url || undefined,
+                      image_url: productImageUrl,
                       packaging: product.package_size || undefined,
                       medicine_unit_id: product.id,
                       category_slug: productCategorySlug,
