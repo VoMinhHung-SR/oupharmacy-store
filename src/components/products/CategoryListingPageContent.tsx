@@ -97,6 +97,60 @@ export function CategoryListingPageContent({
     onFiltersChange(updatedFilters)
   }
 
+  // Build breadcrumbs từ categorySlug (URL) - domain hiện tại
+  // Tìm category name từ product data nếu category path match với categorySlug
+  const breadcrumbItems = useMemo(() => {
+    const items: Array<{ label: string; href?: string }> = [
+      { label: 'Trang chủ', href: '/' }
+    ]
+    
+    // Parse categorySlug từ URL thành các phần
+    const slugParts = categorySlug.split('/')
+    let accumulatedPath = ''
+    
+    // Tìm category names từ product data - chỉ match đúng với path từ URL
+    const findCategoryName = (targetSlug: string, targetPath: string, targetIndex: number): string | null => {
+      // Tìm trong products để lấy category name
+      for (const product of products) {
+        if (product.category_info?.category) {
+          const categoryArray = product.category_info.category
+          
+          // Chỉ xét các category có index <= targetIndex (đảm bảo match đúng level)
+          if (categoryArray.length > targetIndex) {
+            let productPath = ''
+            
+            for (let i = 0; i <= targetIndex && i < categoryArray.length; i++) {
+              productPath += i === 0 ? categoryArray[i].slug : `/${categoryArray[i].slug}`
+            }
+            
+            // Chỉ match nếu path chính xác bằng targetPath
+            if (productPath === targetPath) {
+              return categoryArray[targetIndex].name
+            }
+          }
+        }
+      }
+      return null
+    }
+    
+    slugParts.forEach((slugPart, index) => {
+      accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
+      const isLast = index === slugParts.length - 1
+      
+      // Tìm category name từ product data - chỉ match đúng với path từ URL
+      const categoryName = findCategoryName(slugPart, accumulatedPath, index)
+      const label = categoryName || slugPart.replace(/-/g, ' ')
+      
+      if (!isLast) {
+        items.push({ label, href: `/${accumulatedPath}` })
+      } else {
+        items.push({ label })
+      }
+    })
+    
+    return items
+  }, [products, categorySlug])
+
   if (loading) {
     return (
       <Container className="py-8">
@@ -143,12 +197,7 @@ export function CategoryListingPageContent({
   return (
     <Container className="py-4">
       <div className="mb-4">
-        <Breadcrumb 
-          items={[
-            { label: 'Trang chủ', href: '/' },
-            { label: categoryName || `Danh mục: ${categorySlug}` }
-          ]}
-        />
+        <Breadcrumb items={breadcrumbItems} />
       </div>
       
       <div className="flex flex-col lg:flex-row gap-6">
@@ -201,7 +250,7 @@ export function CategoryListingPageContent({
           <div className="lg:hidden mb-4">
             <button
               onClick={() => setShowMobileFilters(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <FilterIcon />
               <span>Bộ lọc</span>
@@ -232,10 +281,12 @@ export function CategoryListingPageContent({
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {sortedProducts.map((product) => {
-                const categoryArray = product.category_info?.category
-                const productCategorySlug = categoryArray && categoryArray.length > 0 
-                  ? categoryArray.map(cat => cat.slug).join('/')
-                  : product.category_info?.categorySlug || categorySlug
+                // Sử dụng category slug từ product data (category_info.categorySlug hoặc build từ category array)
+                // Điều này đảm bảo product link sử dụng đúng category path của sản phẩm
+                const productCategorySlug = product.category_info?.categorySlug ||
+                  (product.category_info?.category && product.category_info.category.length > 0
+                    ? product.category_info.category.map(cat => cat.slug).join('/')
+                    : categorySlug)
                 
                 const productMedicineSlug = product.medicine?.slug || 
                   (product.medicine?.name 

@@ -39,16 +39,23 @@ export default function CategoryListingPage({ params }: Props) {
   )
   
   // Category name lấy từ product đầu tiên trong response (nếu có)
-  // Không cần query categories list nữa vì đã có trong product.category
+  // Ưu tiên lấy từ category_info.category array (item cuối cùng là category hiện tại)
   const categoryName = useMemo(() => {
-    // Lấy từ product đầu tiên nếu có
     if (data?.results && data.results.length > 0) {
       const firstProduct = data.results[0]
+      
+      // Ưu tiên lấy từ category_info.category array (item cuối cùng)
+      if (firstProduct.category_info?.category && firstProduct.category_info.category.length > 0) {
+        const lastCategory = firstProduct.category_info.category[firstProduct.category_info.category.length - 1]
+        return lastCategory.name
+      }
+      
+      // Fallback: lấy từ category.name
       if (firstProduct.category?.name) {
         return firstProduct.category.name
       }
     }
-    // Fallback: extract từ slug
+    // Fallback: extract từ slug (lấy phần cuối cùng)
     return categorySlug.split('/').pop()?.replace(/-/g, ' ') || null
   }, [data?.results, categorySlug])
 

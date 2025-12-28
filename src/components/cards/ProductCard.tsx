@@ -59,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       )}
 
       {/* Product image */}
-      <div className="aspect-square w-full overflow-hidden rounded bg-gray-100 mb-3">
+      <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100 mb-3">
         {product.image_url ? (
           <Image
             src={product.image_url}

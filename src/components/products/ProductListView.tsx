@@ -12,11 +12,12 @@ interface ProductListViewProps {
 }
 
 const getProductLink = (product: Product): string | null => {
-  if (product.category && product.medicine.slug) {
-    const categoryArray = product.category_info?.category
-    const categorySlug = categoryArray && categoryArray.length > 0 
-      ? categoryArray.map(cat => cat.slug).join('/')
-      : product.category_info?.categorySlug
+  if (product.medicine?.slug) {
+    // Ưu tiên sử dụng categorySlug từ category_info, sau đó build từ category array
+    const categorySlug = product.category_info?.categorySlug ||
+      (product.category_info?.category && product.category_info.category.length > 0
+        ? product.category_info.category.map(cat => cat.slug).join('/')
+        : null)
     return categorySlug ? `/${categorySlug}/${product.medicine.slug}` : null
   }
   return null
@@ -41,7 +42,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
             className="group flex gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
           >
             {/* Product image */}
-            <div className="w-32 h-32 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+            <div className="w-32 h-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {(() => {
                 const imageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null)
                 return imageUrl ? (
