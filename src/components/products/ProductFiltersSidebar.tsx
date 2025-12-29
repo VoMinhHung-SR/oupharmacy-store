@@ -67,7 +67,7 @@ export const ProductFiltersSidebar: React.FC<ProductFiltersSidebarProps> = ({
   }
 
   return (
-    <div className="space-y-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+    <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
 
       {/* Đối tượng sử dụng */}
@@ -91,7 +91,7 @@ export const ProductFiltersSidebar: React.FC<ProductFiltersSidebarProps> = ({
                 placeholder="Tìm theo tên"
                 value={targetAudienceSearch}
                 onChange={(e) => setTargetAudienceSearch(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               <div className="absolute right-3 top-2.5 text-gray-400">
                 <SearchIcon />

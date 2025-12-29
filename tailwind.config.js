@@ -12,6 +12,16 @@ module.exports = {
   theme: {
     extend: {
       colors: colors,
+      borderRadius: {
+        'DEFAULT': '12px',
+        'sm': '6px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
+        '3xl': '24px',
+        'full': '9999px',
+      },
     },
   },
   plugins: [],

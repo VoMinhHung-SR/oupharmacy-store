@@ -86,3 +86,5 @@ export const PRODUCT_FILTERS = {
     { value: 'price-high', label: 'Giá cao' },
   ] as const,
 } as const
+
+export const PRICE_CONSULT = 'CONSULT' as const

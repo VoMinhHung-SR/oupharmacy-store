@@ -42,7 +42,7 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
               <button
                 key={option.value}
                 onClick={() => onSortChange(option.value)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                   sortOption === option.value
                     ? 'bg-white text-primary-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -58,7 +58,7 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
         <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <button
             onClick={() => onViewModeChange('grid')}
-            className={`p-2 rounded-md transition-colors ${
+            className={`p-2 rounded-lg transition-colors ${
               viewMode === 'grid'
                 ? 'bg-white text-primary-700 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -69,7 +69,7 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
           </button>
           <button
             onClick={() => onViewModeChange('list')}
-            className={`p-2 rounded-md transition-colors ${
+            className={`p-2 rounded-lg transition-colors ${
               viewMode === 'list'
                 ? 'bg-white text-primary-700 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'

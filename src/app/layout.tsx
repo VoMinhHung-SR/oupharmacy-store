@@ -42,7 +42,7 @@ export default async function RootLayout({
                 <CheckoutProvider>
                   <Header />
                   <NavigationBar />
-                  <main className="bg-white">
+                  <main className="bg-[#ededed] border-0">
                     {children}
                   </main>
                   <Footer />

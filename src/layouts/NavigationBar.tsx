@@ -5,14 +5,14 @@ import React, { useRef, useState, useEffect } from 'react'
 import Container from '@/components/Container'
 
 const categories = [
-  { name: 'Thực phẩm chức năng', href: '/categories/thuc-pham-chuc-nang' },
-  { name: 'Dược mỹ phẩm', href: '/categories/duoc-my-pham' },
-  { name: 'Thuốc', href: '/categories/thuoc' },
-  { name: 'Chăm sóc cá nhân', href: '/categories/cham-soc-ca-nhan' },
-  { name: 'Thiết bị y tế', href: '/categories/thiet-bi-y-te' },
-  { name: 'Tiêm chủng', href: '/categories/tiem-chung' },
-  { name: 'Bệnh & Góc sức khỏe', href: '/categories/benh-goc-suc-khoe' },
-  { name: 'Hệ thống nhà thuốc', href: '/categories/he-thong-nha-thuoc' },
+  { name: 'Thực phẩm chức năng', href: '/thuc-pham-chuc-nang' },
+  { name: 'Dược mỹ phẩm', href: '/duoc-my-pham' },
+  { name: 'Thuốc', href: '/thuoc' },
+  { name: 'Chăm sóc cá nhân', href: '/cham-soc-ca-nhan' },
+  { name: 'Thiết bị y tế', href: '/thiet-bi-y-te' },
+  { name: 'Tiêm chủng', href: '/tiem-chung' },
+  { name: 'Bệnh & Góc sức khỏe', href: '/benh-goc-suc-khoe' },
+  { name: 'Hệ thống nhà thuốc', href: '/he-thong-nha-thuoc' },
 ]
 
 export const NavigationBar: React.FC = () => {
