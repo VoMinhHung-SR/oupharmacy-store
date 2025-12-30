@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet } from '@/lib/api'
 import { Product, ProductListResponse } from '@/lib/services/products'
 import { ProductDetailPageContent } from '@/components/products'
@@ -51,6 +51,7 @@ export default function NestedPathPage({ params }: Props) {
   })
   
   const { data: brands } = useBrands()
+  const queryClient = useQueryClient()
   
   // Gọi API với full path, backend sẽ tự động detect category listing hay product detail
   const { data: apiResponse, isLoading, error } = useQuery({
@@ -87,7 +88,26 @@ export default function NestedPathPage({ params }: Props) {
   // - Không có 'results' → Product (product detail)
   const isProductList = apiResponse && 'results' in apiResponse
   const productList = isProductList ? (apiResponse as ProductListResponse) : null
-  const product = !isProductList ? (apiResponse as Product | undefined) : undefined
+  const product = !isProductList && apiResponse ? (apiResponse as Product) : undefined
+  
+  // Xác định loại skeleton dựa trên cached data hoặc heuristic
+  const shouldRenderProductDetailSkeleton = useMemo(() => {
+    if (!isLoading || apiResponse) return false
+    
+    // Check cached data để xác định loại skeleton
+    const cachedData = queryClient.getQueryData<Product | ProductListResponse>(['nested-path', fullPath, filters])
+    if (cachedData) {
+      return !('results' in cachedData)
+    }
+    
+    // Heuristic: Nếu có nhiều hơn 3 segments, có khả năng cao là product detail
+    if (parts.length > 3) {
+      return true
+    }
+    
+    // Mặc định: render category listing skeleton
+    return false
+  }, [isLoading, apiResponse, fullPath, filters, queryClient, parts.length])
   
   // Parse để lấy category path và medicine slug (cho product detail)
   const parsedCategoryPath = isValidPath ? parts.slice(0, -1).join('/') : undefined
@@ -110,6 +130,38 @@ export default function NestedPathPage({ params }: Props) {
   
   if (!isValidPath) {
     return null
+  }
+  
+  // Khi loading và chưa có data, render skeleton dựa trên cached data hoặc heuristic
+  if (isLoading && !apiResponse) {
+    if (shouldRenderProductDetailSkeleton) {
+      // Render product detail skeleton
+      return (
+        <ProductDetailPageContent
+          product={undefined}
+          categorySlug={parsedCategoryPath!}
+          medicineSlug={parsedMedicineSlug!}
+          loading={true}
+          error={null}
+        />
+      )
+    } else {
+      // Render category listing skeleton
+      return (
+        <CategoryListingPageContent
+          categorySlug={fullPath}
+          products={[]}
+          totalCount={0}
+          loading={true}
+          error={null}
+          categoryName={null}
+          categories={undefined}
+          brands={brands}
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
+      )
+    }
   }
   
   // Render category listing nếu là ProductListResponse
@@ -141,6 +193,3 @@ export default function NestedPathPage({ params }: Props) {
     />
   )
 }
-
-
-

@@ -7,6 +7,34 @@ import { Product } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 
+export const ProductListViewSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex gap-4 rounded-lg border border-gray-200 bg-white p-4">
+          {/* Product image skeleton */}
+          <div className="w-32 h-32 flex-shrink-0 animate-pulse rounded-lg bg-gray-200" />
+          
+          {/* Product info skeleton */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="h-6 w-3/4 animate-pulse rounded bg-gray-200" />
+              <div className="h-4 w-1/4 animate-pulse rounded bg-gray-200" />
+              <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+            </div>
+            
+            <div className="flex items-center justify-between mt-4">
+              <div className="h-7 w-32 animate-pulse rounded bg-gray-200" />
+              <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-200" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 interface ProductListViewProps {
   products: Product[]
 }

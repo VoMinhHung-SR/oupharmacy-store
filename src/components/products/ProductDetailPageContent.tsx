@@ -31,6 +31,10 @@ export function ProductDetailPageContent({
   const [quantity, setQuantity] = useState(1)
   const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
 
+  const productImageUrl = product 
+    ? (product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null))
+    : null
+
   // Helper function để tạo cart item object
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
@@ -39,7 +43,7 @@ export function ProductDetailPageContent({
       medicine_unit_id: product.id,
       name: product.medicine.name,
       price: product.price_value,
-      image_url: product.image_url,
+      image_url: productImageUrl || product.image_url,
       packaging: product.package_size,
     }
   }
@@ -108,11 +112,64 @@ export function ProductDetailPageContent({
         />
         <div className="bg-white rounded-lg p-6 space-y-6">
           <div className="grid gap-8 md:grid-cols-2">
-            <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
+            {/* Left: Image Gallery Skeleton */}
             <div className="space-y-4">
-              <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
-              <div className="h-6 w-1/4 animate-pulse rounded bg-gray-200" />
-              <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+              <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-20 w-20 animate-pulse rounded-lg bg-gray-200" />
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Product Details Skeleton */}
+            <div className="space-y-6">
+              {/* Brand */}
+              <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+
+              {/* Product Name */}
+              <div className="space-y-2">
+                <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
+                <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200" />
+              </div>
+
+              {/* Product ID & Rating */}
+              <div className="h-4 w-48 animate-pulse rounded bg-gray-200" />
+
+              {/* Price */}
+              <div className="h-10 w-40 animate-pulse rounded bg-gray-200" />
+
+              {/* Unit Selection */}
+              <div className="space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                <div className="h-10 w-24 animate-pulse rounded-full bg-gray-200" />
+              </div>
+
+              {/* Product Information */}
+              <div className="space-y-3 border-t border-gray-200 pt-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                ))}
+              </div>
+
+              {/* Stock Status */}
+              <div className="h-16 w-full animate-pulse rounded-lg bg-gray-200" />
+
+              {/* Quantity Selector */}
+              <div className="space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-gray-200" />
+                  <div className="h-10 w-20 animate-pulse rounded-lg bg-gray-200" />
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-gray-200" />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
+                <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
+              </div>
             </div>
           </div>
         </div>
@@ -212,7 +269,7 @@ export function ProductDetailPageContent({
           {/* Left: Product Images */}
           <div>
             <ProductImageGallery
-              mainImage={product.image_url}
+              mainImage={productImageUrl ?? undefined}
               productName={product.medicine.name}
             />
           </div>
