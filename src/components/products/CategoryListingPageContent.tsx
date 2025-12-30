@@ -153,23 +153,55 @@ export function CategoryListingPageContent({
 
   if (loading) {
     return (
-      <Container className="py-8">
-        <div className="flex gap-6">
+      <Container className="py-4">
+        {/* Breadcrumb skeleton */}
+        <div className="mb-4">
+          <div className="h-6 w-64 animate-pulse rounded bg-gray-200" />
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 ">
           {/* Sidebar skeleton */}
-          <div className="hidden lg:block w-64 space-y-4">
-            <div className="h-8 bg-gray-200 rounded animate-pulse" />
-            <div className="h-64 bg-gray-200 rounded animate-pulse" />
+          <div className="hidden lg:block flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+            <div className="sticky w-full space-y-4 rounded-lg border border-gray-200 bg-white p-4" style={{ top: `${SIDEBAR.STICKY_TOP}px` }}>
+              <div className="h-8 bg-gray-200 rounded animate-pulse" />
+              <div className="h-64 bg-gray-200 rounded animate-pulse" />
+            </div>
           </div>
           
           {/* Main content skeleton */}
-          <div className="flex-1 space-y-6">
-            <div className="h-8 bg-gray-200 rounded animate-pulse" />
+          <main className="flex-1 min-w-0 space-y-6">
+            {/* Mobile Filter Button skeleton */}
+            <div className="lg:hidden">
+              <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-200" />
+            </div>
+
+            {/* Sort and View skeleton */}
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-32 animate-pulse rounded bg-gray-200" />
+              <div className="flex gap-2">
+                <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-200" />
+                <div className="h-10 w-10 animate-pulse rounded-lg bg-gray-200" />
+                <div className="h-10 w-10 animate-pulse rounded-lg bg-gray-200" />
+              </div>
+            </div>
+
+            {/* Notice skeleton */}
+            <div className="h-16 w-full animate-pulse rounded-lg bg-gray-200" />
+
+            {/* Products skeleton - Grid view (default) */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-64 animate-pulse rounded-lg bg-gray-200" />
+                <div key={i} className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+                  <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+                    <div className="h-6 w-20 animate-pulse rounded bg-gray-200" />
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
+          </main>
         </div>
       </Container>
     )

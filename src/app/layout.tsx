@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import './globals.css'
 import Header from '@/layouts/Header'
-import NavigationBar from '@/layouts/NavigationBar'
+import NavigationBarWrapper from '@/layouts/NavigationBarWrapper'
 import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -41,7 +41,7 @@ export default async function RootLayout({
               <CartProvider>
                 <CheckoutProvider>
                   <Header />
-                  <NavigationBar />
+                  <NavigationBarWrapper />
                   <main className="bg-[#ededed] border-0">
                     {children}
                   </main>

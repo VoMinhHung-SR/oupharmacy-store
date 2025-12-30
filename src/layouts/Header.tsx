@@ -13,7 +13,7 @@ export const Header: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const { items } = useCart()
   return (
-    <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg">
+    <header className="sticky top-0 left-0 right-0 z-30 w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg">
       {/* Top bar */}
       <div className="bg-primary-800/50 text-white text-sm py-2 border-b border-white/10">
         <Container>
