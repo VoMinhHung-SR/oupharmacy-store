@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, getProduct, ProductFilters, Product, ProductListResponse } from '../services/products'
+import { getProducts, getProduct, getProductsByCategorySlug, getProductByCategoryAndMedicineSlug, ProductFilters, Product, ProductListResponse } from '../services/products'
 
 export function useProducts(filters?: ProductFilters) {
   return useQuery<ProductListResponse | undefined, Error>({
@@ -31,6 +31,56 @@ export function useProduct(id: number | string | undefined) {
       return response.data
     },
     enabled: !!productId && !isNaN(productId),
+  })
+}
+
+/**
+ * Hook để lấy danh sách sản phẩm theo category slug từ URL path
+ * @param categorySlug - Category slug (ví dụ: 'thuc-pham-chuc-nang')
+ * @param filters - Optional filters (min_price, max_price, in_stock, page, page_size, etc.)
+ */
+export function useProductsByCategorySlug(
+  categorySlug: string | undefined,
+  filters?: Omit<ProductFilters, 'category'>
+) {
+  return useQuery<ProductListResponse | undefined, Error>({
+    queryKey: ['products-by-category-slug', categorySlug, filters],
+    queryFn: async () => {
+      if (!categorySlug) {
+        throw new Error('Category slug is required')
+      }
+      const response = await getProductsByCategorySlug(categorySlug, filters)
+      if (response.error) {
+        throw new Error(response.error)
+      }
+      return response.data
+    },
+    enabled: !!categorySlug,
+  })
+}
+
+/**
+ * Hook để lấy chi tiết sản phẩm theo category slug và medicine slug
+ * @param categorySlug - Category slug (ví dụ: 'thuc-pham-chuc-nang')
+ * @param medicineSlug - Medicine slug (ví dụ: 'vitamin-c-1000mg')
+ */
+export function useProductByCategoryAndMedicineSlug(
+  categorySlug: string | undefined,
+  medicineSlug: string | undefined
+) {
+  return useQuery<Product | undefined, Error>({
+    queryKey: ['product-by-category-medicine-slug', categorySlug, medicineSlug],
+    queryFn: async () => {
+      if (!categorySlug || !medicineSlug) {
+        throw new Error('Category slug and medicine slug are required')
+      }
+      const response = await getProductByCategoryAndMedicineSlug(categorySlug, medicineSlug)
+      if (response.error) {
+        throw new Error(response.error)
+      }
+      return response.data
+    },
+    enabled: !!categorySlug && !!medicineSlug,
   })
 }
 

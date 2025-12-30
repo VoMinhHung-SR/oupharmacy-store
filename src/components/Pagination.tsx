@@ -1,24 +1,58 @@
-import Link from 'next/link'
 import React from 'react'
 
 interface PaginationProps {
-  page: number
+  currentPage: number
   totalPages: number
-  basePath: string
+  onPageChange: (page: number) => void
+  className?: string
+  buttonClassName?: string
 }
 
-export const Pagination: React.FC<PaginationProps> = ({ page, totalPages, basePath }) => {
-  const prev = Math.max(1, page - 1)
-  const next = Math.min(totalPages, page + 1)
+export const Pagination: React.FC<PaginationProps> = ({ 
+  currentPage, 
+  totalPages, 
+  onPageChange,
+  className = '',
+  buttonClassName = ''
+}) => {
+  if (totalPages <= 1) return null
+
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1)
+    }
+  }
+
+  const isPrevDisabled = currentPage <= 1
+  const isNextDisabled = currentPage >= totalPages
+
   return (
-    <div className="flex items-center justify-center gap-2 text-sm">
-      <Link className="rounded border px-3 py-1 hover:bg-gray-50" href={`${basePath}?page=${prev}`}>Trước</Link>
-      <span className="text-gray-600">Trang {page}/{totalPages}</span>
-      <Link className="rounded border px-3 py-1 hover:bg-gray-50" href={`${basePath}?page=${next}`}>Sau</Link>
+    <div className={`mt-8 flex items-center justify-center gap-2 text-sm ${className}`}>
+      <button
+        onClick={handlePrev}
+        disabled={isPrevDisabled}
+        className={`rounded border px-3 py-1 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-primary-600 ${buttonClassName}`}
+      >
+        Trước
+      </button>
+      <span className="text-gray-600">
+        Trang {currentPage}/{totalPages}
+      </span>
+      <button
+        onClick={handleNext}
+        disabled={isNextDisabled}
+        className={`rounded border px-3 py-1 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-primary-600 ${buttonClassName}`}
+      >
+        Sau
+      </button>
     </div>
   )
 }
 
 export default Pagination
-
-

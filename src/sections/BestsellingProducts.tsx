@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Container from '@/components/Container'
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/cards/ProductCard'
 
 interface Product {
   id: string
