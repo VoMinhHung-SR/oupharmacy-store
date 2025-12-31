@@ -82,7 +82,7 @@ export const Header: React.FC = () => {
                 </Link>
               )}
               <Link
-                href="/cart"
+                href="/gio-hang"
                 className="relative px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
               >
                 {t('cart')}

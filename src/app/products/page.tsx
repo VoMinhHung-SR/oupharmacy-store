@@ -191,7 +191,7 @@ export default function ProductsPage() {
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {sortedProducts.map((product) => {
-                const productImageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined)
+                const productImageUrl = product.image_url || product.images?.[0]
                 
                 return (
                   <ProductCard
@@ -204,6 +204,7 @@ export default function ProductsPage() {
                       image_url: productImageUrl,
                       packaging: product.package_size,
                       medicine_unit_id: product.id,
+                      in_stock: product.in_stock,
                     }}
                   />
                 )
