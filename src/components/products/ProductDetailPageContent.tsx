@@ -32,11 +32,11 @@ export function ProductDetailPageContent({
   const [quantity, setQuantity] = useState(1)
   const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
 
+  const productImages = product?.images || []
   const productImageUrl = product 
-    ? (product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null))
+    ? (product.image_url || (productImages.length > 0 ? productImages[0] : null))
     : null
 
-  // Helper function để tạo cart item object
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
     return {
@@ -49,7 +49,6 @@ export function ProductDetailPageContent({
     }
   }
 
-  // Helper function để validate stock
   const validateStock = () => {
     if (!product) return false
     const existingItem = items.find((i) => i.medicine_unit_id === product.id)
@@ -78,7 +77,6 @@ export function ProductDetailPageContent({
     add(getCartItem(), quantity)
   }
 
-  // Watch for cart update after "Buy Now" action
   useEffect(() => {
     if (pendingBuyNowRef.current) {
       const { productId, expectedQty } = pendingBuyNowRef.current
@@ -113,7 +111,6 @@ export function ProductDetailPageContent({
         />
         <div className="bg-white rounded-lg p-6 space-y-6">
           <div className="grid gap-8 md:grid-cols-2">
-            {/* Left: Image Gallery Skeleton */}
             <div className="space-y-4">
               <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
               <div className="flex gap-2">
@@ -123,40 +120,31 @@ export function ProductDetailPageContent({
               </div>
             </div>
 
-            {/* Right: Product Details Skeleton */}
             <div className="space-y-6">
-              {/* Brand */}
               <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
 
-              {/* Product Name */}
               <div className="space-y-2">
                 <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
                 <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200" />
               </div>
 
-              {/* Product ID & Rating */}
               <div className="h-4 w-48 animate-pulse rounded bg-gray-200" />
 
-              {/* Price */}
               <div className="h-10 w-40 animate-pulse rounded bg-gray-200" />
 
-              {/* Unit Selection */}
               <div className="space-y-2">
                 <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
                 <div className="h-10 w-24 animate-pulse rounded-full bg-gray-200" />
               </div>
 
-              {/* Product Information */}
               <div className="space-y-3 border-t border-gray-200 pt-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="h-4 w-full animate-pulse rounded bg-gray-200" />
                 ))}
               </div>
 
-              {/* Stock Status */}
               <div className="h-16 w-full animate-pulse rounded-lg bg-gray-200" />
 
-              {/* Quantity Selector */}
               <div className="space-y-2">
                 <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
                 <div className="flex items-center gap-3">
@@ -166,7 +154,6 @@ export function ProductDetailPageContent({
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
                 <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
                 <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
@@ -267,31 +254,27 @@ export function ProductDetailPageContent({
       <Breadcrumb items={breadcrumbItems} className="py-4" />
       <div className="bg-white rounded-lg p-6 space-y-6">
         <div className="grid gap-8 md:grid-cols-2">
-          {/* Left: Product Images */}
           <div>
             <ProductImageGallery
               mainImage={productImageUrl ?? undefined}
+              images={productImages}
               productName={product.medicine.name}
             />
           </div>
 
-          {/* Right: Product Details */}
           <div className="space-y-6">
-            {/* Brand */}
             {product.brand && (
               <div className="text-sm text-gray-600">
                 Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
               </div>
             )}
 
-            {/* Product Name */}
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 leading-tight">
                 {product.medicine.name}
               </h1>
             </div>
 
-            {/* Product ID & Rating (Placeholder) */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>{product.id.toString().padStart(8, '0')}</span>
               <span>•</span>
@@ -305,7 +288,6 @@ export function ProductDetailPageContent({
               <span>9 bình luận</span>
             </div>
 
-            {/* Price or Consult Notice */}
             {isConsultPrice ? (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm text-amber-800">
@@ -320,7 +302,6 @@ export function ProductDetailPageContent({
                   </div>
                 </div>
 
-                {/* Unit Selection */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
                     Chọn đơn vị tính
@@ -334,7 +315,6 @@ export function ProductDetailPageContent({
               </>
             )}
 
-            {/* Product Information / Specifications */}
             <div className="space-y-3 border-t border-gray-200 pt-4">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
@@ -398,14 +378,12 @@ export function ProductDetailPageContent({
               )}
             </div>
 
-            {/* Stock Status */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div className="text-sm font-medium text-gray-700">
                 Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
               </div>
             </div>
 
-            {/* Quantity Selector - Only show if not consult price */}
             {!isConsultPrice && product.in_stock > 0 && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -441,13 +419,10 @@ export function ProductDetailPageContent({
               </div>
             )}
 
-            {/* Action Buttons */}
             {isConsultPrice ? (
               <div className="flex flex-col gap-3 pt-2">
                 <Button
-                  onClick={() => {
-                    // TODO: Navigate to consultation page or open consultation modal
-                  }}
+                  onClick={() => {}}
                   className="w-full"
                   size="lg"
                 >
@@ -455,9 +430,7 @@ export function ProductDetailPageContent({
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    // TODO: Navigate to pharmacy finder
-                  }}
+                  onClick={() => {}}
                   className="w-full"
                   size="lg"
                 >
@@ -486,7 +459,6 @@ export function ProductDetailPageContent({
               </div>
             )}
 
-            {/* Service Guarantees */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-2">
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Đổi trả trong 30 ngày kể từ ngày mua hàng</span>
@@ -501,7 +473,6 @@ export function ProductDetailPageContent({
           </div>
         </div>
 
-        {/* Product Description Section */}
       </div>
       <div className="mt-6">
         <ProductDescriptionSection product={product} />
