@@ -5,6 +5,7 @@ import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/products/ProductImageGallery'
+import { ProductDescriptionSection } from '@/components/products/ProductDescriptionSection'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
@@ -333,7 +334,7 @@ export function ProductDetailPageContent({
               </>
             )}
 
-            {/* Product Information */}
+            {/* Product Information / Specifications */}
             <div className="space-y-3 border-t border-gray-200 pt-4">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
@@ -349,6 +350,18 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
+              {product.registration_number && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Số đăng ký:</span>{' '}
+                  <span className="text-gray-600">{product.registration_number}</span>
+                  {product.link && (
+                    <Link href={product.link} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700 underline">
+                      Xem giấy công bố sản phẩm
+                    </Link>
+                  )}
+                </div>
+              )}
+
               {product.package_size && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
@@ -356,10 +369,31 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
+              {product.manufacturer && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Nhà sản xuất:</span>{' '}
+                  <span className="text-gray-600">{product.manufacturer}</span>
+                </div>
+              )}
+
+              {product.origin && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Nước sản xuất:</span>{' '}
+                  <span className="text-gray-600">{product.origin}</span>
+                </div>
+              )}
+
               {product.medicine.ingredients && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Thành phần:</span>{' '}
                   <span className="text-gray-600">{product.medicine.ingredients}</span>
+                </div>
+              )}
+
+              {product.shelf_life && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Hạn sử dụng:</span>{' '}
+                  <span className="text-gray-600">{product.shelf_life}</span>
                 </div>
               )}
             </div>
@@ -452,15 +486,25 @@ export function ProductDetailPageContent({
               </div>
             )}
 
-            {/* Additional Info */}
-            {product.medicine.adverse_effect && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <h3 className="mb-2 text-sm font-semibold text-amber-900">Chống chỉ định:</h3>
-                <p className="text-sm text-amber-800">{product.medicine.adverse_effect}</p>
+            {/* Service Guarantees */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-2">
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Đổi trả trong 30 ngày kể từ ngày mua hàng</span>
               </div>
-            )}
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Miễn phí 100% đổi thuốc</span>
+              </div>
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Miễn phí vận chuyển theo chính sách giao hàng</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Product Description Section */}
+      </div>
+      <div className="mt-6">
+        <ProductDescriptionSection product={product} />
       </div>
     </Container>
   )
