@@ -1,9 +1,87 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import Image from 'next/image'
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 import { ImagePlaceholderIcon } from '@/components/icons'
+
+interface ImageZoomModalProps {
+  image: string
+  productName: string
+  isOpen: boolean
+  onClose: () => void
+  onPrev: () => void
+  onNext: () => void
+  hasPrev: boolean
+  hasNext: boolean
+}
+
+const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
+  image,
+  productName,
+  isOpen,
+  onClose,
+  onPrev,
+  onNext,
+  hasPrev,
+  hasNext,
+}) => {
+  if (!isOpen) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
+        aria-label="Close zoom"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {hasPrev && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onPrev()
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors z-10"
+          aria-label="Previous image"
+        >
+          <ChevronLeftIcon className="w-6 h-6" />
+        </button>
+      )}
+
+      {hasNext && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onNext()
+          }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors z-10"
+          aria-label="Next image"
+        >
+          <ChevronRightIcon className="w-6 h-6" />
+        </button>
+      )}
+
+      <div onClick={(e) => e.stopPropagation()} className="relative max-w-7xl max-h-full">
+        <Image
+          src={image}
+          alt={productName}
+          width={1200}
+          height={1200}
+          className="max-h-[90vh] w-auto object-contain"
+          priority
+        />
+      </div>
+    </div>
+  )
+}
 
 interface ProductImageGalleryProps {
   mainImage?: string
@@ -16,7 +94,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   images = [],
   productName,
 }) => {
-  const allImages = React.useMemo(() => {
+  const allImages = useMemo(() => {
     const imageSet = new Set<string>()
     const result: string[] = []
     
@@ -36,6 +114,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   }, [mainImage, images])
   
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [isZoomOpen, setIsZoomOpen] = useState(false)
   const thumbnailRef = useRef<HTMLDivElement>(null)
   const currentImage = allImages[selectedIndex] || allImages[0]
 
@@ -81,17 +160,32 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
     )
   }
 
+  const handleImageClick = () => {
+    if (currentImage) {
+      setIsZoomOpen(true)
+    }
+  }
+
+  const handleZoomPrev = () => {
+    setSelectedIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1))
+  }
+
+  const handleZoomNext = () => {
+    setSelectedIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0))
+  }
+
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-100 group">
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-100 group cursor-zoom-in">
         {currentImage ? (
           <Image
             src={currentImage}
             alt={productName}
             width={600}
             height={600}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain transition-transform group-hover:scale-105"
             priority
+            onClick={handleImageClick}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
@@ -173,6 +267,17 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
       <p className="text-xs text-gray-500 text-center">
         Mẫu mã sản phẩm có thể thay đổi theo lô hàng
       </p>
+
+      <ImageZoomModal
+        image={currentImage}
+        productName={productName}
+        isOpen={isZoomOpen}
+        onClose={() => setIsZoomOpen(false)}
+        onPrev={handleZoomPrev}
+        onNext={handleZoomNext}
+        hasPrev={allImages.length > 1}
+        hasNext={allImages.length > 1}
+      />
     </div>
   )
 }

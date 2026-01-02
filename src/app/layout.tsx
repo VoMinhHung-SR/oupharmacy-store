@@ -9,6 +9,7 @@ import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { CheckoutProvider } from '@/contexts/CheckoutContext'
+import { WishlistProvider } from '@/contexts/WishlistContext'
 import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -39,14 +40,16 @@ export default async function RootLayout({
           <Providers>
             <AuthProvider>
               <CartProvider>
-                <CheckoutProvider>
-                  <Header />
-                  <NavigationBarWrapper />
-                  <main className="bg-[#ededed] border-0">
-                    {children}
-                  </main>
-                  <Footer />
-                </CheckoutProvider>
+                <WishlistProvider>
+                  <CheckoutProvider>
+                    <Header />
+                    <NavigationBarWrapper />
+                    <main className="bg-[#ededed] border-0">
+                      {children}
+                    </main>
+                    <Footer />
+                  </CheckoutProvider>
+                </WishlistProvider>
               </CartProvider>
             </AuthProvider>
           </Providers>

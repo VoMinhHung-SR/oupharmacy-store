@@ -4,5 +4,8 @@ export { ProductListView, ProductListViewSkeleton } from './ProductListView'
 export { ProductImageGallery } from './ProductImageGallery'
 export { ProductDetailPageContent } from './ProductDetailPageContent'
 export { ProductDescriptionSection } from './ProductDescriptionSection'
+export { ShareButton } from './ShareButton'
+export { RelatedProducts } from './RelatedProducts'
+export { RecentlyViewed, saveToRecentlyViewed } from './RecentlyViewed'
 export { CategoryListingPageContent } from './CategoryListingPageContent'
 
