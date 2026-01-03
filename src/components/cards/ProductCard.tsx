@@ -53,6 +53,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault()
     e.stopPropagation()
 
+    if (isConsultPrice) {
+      return
+    }
+
     if (!product.medicine_unit_id) return
 
     const inStock = product.in_stock ?? 0

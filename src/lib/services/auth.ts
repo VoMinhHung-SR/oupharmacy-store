@@ -159,3 +159,82 @@ export async function firebaseSocialLogin(
   }
 }
 
+export interface UpdateProfileData {
+  first_name?: string
+  last_name?: string
+  name?: string
+  email?: string
+  phone_number?: string
+}
+
+export async function updateProfile(
+  userId: number,
+  data: UpdateProfileData | FormData,
+  token: string
+): Promise<{ data?: User; error?: string }> {
+  try {
+    const isFormData = data instanceof FormData
+    const config = isFormData
+      ? {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      : {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+
+    const response = await axios.patch<User>(
+      `${MAIN_API_URL}/users/${userId}/`,
+      data,
+      config
+    )
+
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.response?.data?.email?.[0] ||
+      error.response?.data?.phone_number?.[0] ||
+      error.response?.data?.message ||
+      error.message ||
+      'Cập nhật thông tin thất bại'
+    return { error: errorMessage }
+  }
+}
+
+export interface ChangePasswordData {
+  current_password: string
+  new_password: string
+}
+
+export async function changePassword(
+  data: ChangePasswordData,
+  token: string
+): Promise<{ data?: { message: string }; error?: string }> {
+  try {
+    const response = await axios.post<{ message: string }>(
+      `${MAIN_API_URL}/users/change-password/`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.response?.data?.current_password?.[0] ||
+      error.response?.data?.new_password?.[0] ||
+      error.response?.data?.message ||
+      error.message ||
+      'Đổi mật khẩu thất bại'
+    return { error: errorMessage }
+  }
+}

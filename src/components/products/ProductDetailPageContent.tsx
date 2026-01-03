@@ -268,6 +268,7 @@ export function ProductDetailPageContent({
       medicine_unit_id: product.id,
       name: product.medicine.name,
       price: product.price_value,
+      price_display: product.price_display,
       image_url: productImageUrl || product.image_url,
       packaging: product.package_size,
       category_slug: categorySlug,
@@ -295,35 +296,35 @@ export function ProductDetailPageContent({
           <div className="space-y-6">
             {product.brand && (
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
-                </div>
+              <div className="text-sm text-gray-600">
+                Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
+              </div>
                 <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={handleWishlistToggle}
+                <button
+                  onClick={handleWishlistToggle}
                     className={`p-1.5 rounded-lg border transition-colors ${
-                      isInWishlist(product.id)
-                        ? 'border-red-300 bg-red-50 text-red-600'
-                        : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
-                    aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                  >
-                    <svg
+                    isInWishlist(product.id)
+                      ? 'border-red-300 bg-red-50 text-red-600'
+                      : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                  <svg
                       className="w-4 h-4"
-                      fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                      />
-                    </svg>
-                  </button>
-                  <ShareButton productName={product.medicine.name} productUrl={productUrl} />
-                </div>
+                    fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+                <ShareButton productName={product.medicine.name} productUrl={productUrl} />
+              </div>
               </div>
             )}
 

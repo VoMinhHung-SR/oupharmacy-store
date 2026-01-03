@@ -30,7 +30,7 @@ export default async function Home() {
             {[
               { icon: '💊', title: 'Cần mua thuốc', href: '/products' },
               { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/consultation' },
-              { icon: '📄', title: 'Đơn của tôi', href: '/account/orders' },
+              { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
               { icon: '📍', title: 'Tìm nhà thuốc', href: '/pharmacies' },
               { icon: '💉', title: 'Tiêm Vắc xin', href: '/vaccination' },
               { icon: '🔍', title: 'Tra thuốc chính hãng', href: '/verify' },

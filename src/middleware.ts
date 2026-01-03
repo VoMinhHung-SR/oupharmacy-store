@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   }
   
   // Protected routes - authentication
-  const protectedPaths = ['/checkout', '/account']
+  const protectedPaths = ['/checkout', '/tai-khoan']
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   
   if (isProtectedPath) {
@@ -32,7 +32,7 @@ export const config = {
   matcher: [
     '/(vi|en)/:path*',
     '/checkout/:path*', // Protected checkout routes
-    '/account/:path*',  // Protected account routes
+    '/tai-khoan/:path*',  // Protected account routes
   ]
 }
 

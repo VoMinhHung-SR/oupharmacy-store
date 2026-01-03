@@ -2,12 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { toastSuccess, toastWarning } from '@/lib/utils/toast'
+import { useAuth } from '@/contexts/AuthContext'
 
 export interface WishlistItem {
   id: string
   medicine_unit_id: number
   name: string
   price: number
+  price_display?: string
   image_url?: string
   packaging?: string
   category_slug?: string
@@ -29,9 +31,15 @@ const WishlistContext = createContext<WishlistContextValue | undefined>(undefine
 const STORAGE_KEY = 'oupharmacy_wishlist'
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth()
   const [items, setItems] = useState<WishlistItem[]>([])
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setItems([])
+      return
+    }
+
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
       if (raw) {
@@ -39,15 +47,22 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setItems(parsed)
       }
     } catch {}
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
+    if (!isAuthenticated) return
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     } catch {}
-  }, [items])
+  }, [items, isAuthenticated])
 
   const add = (item: WishlistItem) => {
+    if (!isAuthenticated) {
+      toastWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích')
+      return
+    }
+
     const exists = items.some((i) => i.medicine_unit_id === item.medicine_unit_id)
     if (exists) {
       toastWarning('Sản phẩm đã có trong danh sách yêu thích')
@@ -59,6 +74,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const remove = (id: string) => {
+    if (!isAuthenticated) {
+      toastWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích')
+      return
+    }
+
     const item = items.find((i) => i.id === id)
     setItems((prev) => prev.filter((i) => i.id !== id))
     if (item) {
@@ -67,10 +87,16 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const isInWishlist = (id: string | number): boolean => {
+    if (!isAuthenticated) return false
     return items.some((item) => item.medicine_unit_id === Number(id) || item.id === String(id))
   }
 
   const toggle = (item: WishlistItem) => {
+    if (!isAuthenticated) {
+      toastWarning('Vui lòng đăng nhập để sử dụng tính năng yêu thích')
+      return
+    }
+
     if (isInWishlist(item.medicine_unit_id)) {
       const existingItem = items.find((i) => i.medicine_unit_id === item.medicine_unit_id)
       if (existingItem) {
@@ -81,7 +107,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }
 
-  const clear = () => setItems([])
+  const clear = () => {
+    if (!isAuthenticated) return
+    setItems([])
+  }
 
   const count = useMemo(() => items.length, [items])
 

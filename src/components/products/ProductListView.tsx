@@ -64,6 +64,11 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
     e.preventDefault()
     e.stopPropagation()
 
+    const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT || product.price_value === 0
+    if (isConsultPrice) {
+      return
+    }
+
     const inStock = product.in_stock ?? 0
     const existingItem = items.find((i) => i.medicine_unit_id === product.id)
     const currentQtyInCart = existingItem?.qty ?? 0
