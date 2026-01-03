@@ -10,6 +10,8 @@ import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { CheckoutProvider } from '@/contexts/CheckoutContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
+import { LoginModalProvider } from '@/contexts/LoginModalContext'
+import { LoginModal } from '@/components/modals/LoginModal'
 import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -39,6 +41,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <AuthProvider>
+              <LoginModalProvider>
               <CartProvider>
                 <WishlistProvider>
                   <CheckoutProvider>
@@ -48,9 +51,11 @@ export default async function RootLayout({
                       {children}
                     </main>
                     <Footer />
+                      <LoginModal />
                   </CheckoutProvider>
                 </WishlistProvider>
               </CartProvider>
+              </LoginModalProvider>
             </AuthProvider>
           </Providers>
         </NextIntlClientProvider>

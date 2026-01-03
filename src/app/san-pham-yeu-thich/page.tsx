@@ -10,21 +10,22 @@ import Link from 'next/link'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { Button } from '@/components/Button'
 import { toastSuccess } from '@/lib/utils/toast'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { PRICE_CONSULT } from '@/lib/constant'
 
 export default function WishlistPage() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const { items, remove, clear } = useWishlist()
   const { add: addToCart } = useCart()
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!loading && !isAuthenticated && !isOpen) {
+      openModal('/san-pham-yeu-thich')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, loading, openModal, isOpen])
 
   // Filter out consult products from selectable items
   const selectableItems = useMemo(() => {

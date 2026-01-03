@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess } from '@/lib/utils/toast'
 import { ArrowLeftIcon } from '@/components/icons'
 
@@ -19,8 +19,8 @@ interface PrivacySettings {
 }
 
 export default function PrivacyPage() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const [settings, setSettings] = useState<PrivacySettings>({
     profileVisibility: 'private',
     showEmail: false,
@@ -32,10 +32,11 @@ export default function PrivacyPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!authLoading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/quyen-rieng-tu')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authLoading, openModal, isOpen])
 
   useEffect(() => {
     const saved = localStorage.getItem('privacy_settings')

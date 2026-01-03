@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess } from '@/lib/utils/toast'
 import { ArrowLeftIcon } from '@/components/icons'
 
@@ -27,8 +27,8 @@ interface NotificationPreferences {
 }
 
 export default function NotificationsPage() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     email: {
       orders: true,
@@ -49,10 +49,11 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!authLoading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/thong-bao')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authLoading, openModal, isOpen])
 
   useEffect(() => {
     const saved = localStorage.getItem('notification_preferences')

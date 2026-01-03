@@ -20,4 +20,5 @@ export { OrderIcon } from './OrderIcon'
 export { EyeIcon } from './EyeIcon'
 export { EyeOffIcon } from './EyeOffIcon'
 export { XIcon } from './XIcon'
+export { GoogleIcon } from './GoogleIcon'
 

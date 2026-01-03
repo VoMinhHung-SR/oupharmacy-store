@@ -4,18 +4,29 @@ import Link from 'next/link'
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { UserIcon, LocationIcon, CreditCardIcon, BellIcon, SettingsIcon, LockIcon, KeyIcon, OrderIcon } from '@/components/icons'
 
 export default function AccountPage() {
-  const { user, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { user, isAuthenticated, loading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
 
   React.useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!loading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, loading, openModal, isOpen])
+
+  if (loading) {
+    return (
+      <Container className="py-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        </div>
+      </Container>
+    )
+  }
 
   if (!isAuthenticated) {
     return null

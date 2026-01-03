@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { ArrowLeftIcon, LocationIcon, XIcon } from '@/components/icons'
 
@@ -21,18 +21,19 @@ interface Address {
 }
 
 export default function AddressesPage() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!authLoading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/dia-chi')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authLoading, openModal, isOpen])
 
   useEffect(() => {
     // TODO: Load addresses from API

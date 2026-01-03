@@ -28,7 +28,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { icon: '💊', title: 'Cần mua thuốc', href: '/products' },
+              { icon: '💊', title: 'Cần mua thuốc', href: '/search' },
               { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/consultation' },
               { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
               { icon: '📍', title: 'Tìm nhà thuốc', href: '/pharmacies' },

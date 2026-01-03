@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { REGEX_EMAIL, REGEX_PHONE_NUMBER } from '@/lib/constant'
 import { updateProfile } from '@/lib/services/auth'
@@ -44,7 +44,7 @@ interface Address {
 
 export default function ProfilePage() {
   const { user, refreshUser, isAuthenticated, token } = useAuth()
-  const router = useRouter()
+  const { openModal, isOpen } = useLoginModal()
   const [loading, setLoading] = useState(false)
   const [addresses, setAddresses] = useState<Address[]>([])
   const [addressLoading, setAddressLoading] = useState(false)
@@ -52,10 +52,11 @@ export default function ProfilePage() {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/ho-so')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, openModal, isOpen])
 
   const {
     register,

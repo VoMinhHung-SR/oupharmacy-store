@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useOrder } from '@/lib/hooks/useOrders'
 import { Container } from '@/components/Container'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import Image from 'next/image'
 import { ImagePlaceholderIcon, ArrowLeftIcon } from '@/components/icons'
 
@@ -22,16 +22,17 @@ const statusMap: Record<string, { label: string; color: string }> = {
 }
 
 export default function OrderDetailPage({ params }: Props) {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const orderId = parseInt(params.id)
   const { data: order, isLoading, error } = useOrder(orderId)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!loading && !isAuthenticated && !isOpen) {
+      openModal(`/tai-khoan/don-hang/${params.id}`)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, loading, openModal, isOpen, params.id])
 
   if (!isAuthenticated) {
     return null

@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 import Container from '@/components/Container'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
 import { useCart } from '@/contexts/CartContext'
 
 export const Header: React.FC = () => {
   const t = useTranslations('common')
   const { isAuthenticated } = useAuth()
+  const { openModal } = useLoginModal()
   const { items } = useCart()
   return (
     <header className="sticky top-0 left-0 right-0 z-30 w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg">
@@ -74,12 +76,12 @@ export const Header: React.FC = () => {
               {isAuthenticated ? (
                 <AvatarBadge />
               ) : (
-                <Link
-                  href="/login"
+                <button
+                  onClick={() => openModal()}
                   className="px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
                 >
                   {t('login')}
-                </Link>
+                </button>
               )}
               <Link
                 href="/gio-hang"

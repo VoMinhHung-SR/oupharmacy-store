@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { ArrowLeftIcon, CreditCardIcon } from '@/components/icons'
 
@@ -20,16 +20,17 @@ interface PaymentMethod {
 }
 
 export default function PaymentMethodsPage() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const [methods, setMethods] = useState<PaymentMethod[]>([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!authLoading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/phuong-thuc-thanh-toan')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authLoading, openModal, isOpen])
 
   useEffect(() => {
     // TODO: Load payment methods from API

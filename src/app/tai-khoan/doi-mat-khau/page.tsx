@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { changePassword } from '@/lib/services/auth'
 import { ArrowLeftIcon, EyeIcon, EyeOffIcon } from '@/components/icons'
@@ -30,18 +30,19 @@ const changePasswordSchema = Yup.object().shape({
 type ChangePasswordFormData = Yup.InferType<typeof changePasswordSchema>
 
 export default function ChangePasswordPage() {
-  const { isAuthenticated, token } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, token, loading: authLoading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
   const [loading, setLoading] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Only open modal if not loading, not authenticated, and modal is not already open
+    if (!authLoading && !isAuthenticated && !isOpen) {
+      openModal('/tai-khoan/doi-mat-khau')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authLoading, openModal, isOpen])
 
   const {
     register,
