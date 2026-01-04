@@ -102,7 +102,8 @@ export function useRegister() {
 
       setOpenBackdrop(false)
       toastSuccess('Đăng ký thành công! Bạn có thể cập nhật địa chỉ sau trong phần tài khoản.')
-      router.push('/login')
+      // User is already logged in after registration, redirect to home
+      router.push('/')
     } catch (err: any) {
       setOpenBackdrop(false)
       const errorMsg = err.message || 'Đăng ký thất bại. Vui lòng thử lại.'

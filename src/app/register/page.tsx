@@ -7,10 +7,12 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { toastError } from '@/lib/utils/toast'
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth'
 import { useRegister } from '@/lib/hooks/useRegister'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 import UserInfoForm from '@/components/register/UserInfoForm'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { openModal } = useLoginModal()
   const [loading, setLoading] = useState(false)
 
   const {
@@ -159,9 +161,12 @@ export default function RegisterPage() {
       <div className="text-center space-y-2">
         <div className="text-sm text-gray-600">
           Đã có tài khoản?{' '}
-          <Link href="/login" className="text-primary-700 hover:text-primary-800 hover:underline font-medium">
+          <button
+            onClick={() => openModal()}
+            className="text-primary-700 hover:text-primary-800 hover:underline font-medium"
+          >
             Đăng nhập
-          </Link>
+          </button>
         </div>
       </div>
     </div>

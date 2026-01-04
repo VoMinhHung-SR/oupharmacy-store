@@ -429,13 +429,13 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                   }}
                   onMouseLeave={handleCategoryMouseLeave}
                 >
-                  <Link
-                    href={category.href}
+              <Link
+                href={category.href}
                     className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-all whitespace-nowrap ${
                       isHovered ? 'text-primary-700 border-primary-700' : ''
                     }`}
-                  >
-                    <span className="text-sm font-medium">{category.name}</span>
+              >
+                <span className="text-sm font-medium">{category.name}</span>
                     {hasChildren && (
                       <svg 
                         className={`w-4 h-4 transition-transform ${isHovered ? 'rotate-180' : ''}`}
@@ -443,10 +443,10 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
                     )}
-                  </Link>
+              </Link>
                 </div>
               )
             })}

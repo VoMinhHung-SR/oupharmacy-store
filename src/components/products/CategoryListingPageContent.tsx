@@ -163,8 +163,8 @@ export function CategoryListingPageContent({
           {/* Sidebar skeleton */}
           <div className="hidden lg:block flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
             <div className="sticky w-full space-y-4 rounded-lg border border-gray-200 bg-white p-4" style={{ top: `${SIDEBAR.STICKY_TOP}px` }}>
-              <div className="h-8 bg-gray-200 rounded animate-pulse" />
-              <div className="h-64 bg-gray-200 rounded animate-pulse" />
+            <div className="h-8 bg-gray-200 rounded animate-pulse" />
+            <div className="h-64 bg-gray-200 rounded animate-pulse" />
             </div>
           </div>
           
@@ -330,8 +330,7 @@ export function CategoryListingPageContent({
                   'Sản phẩm'
                 
                 const priceDisplay = product.price_display || PRICE_CONSULT
-              
-                const productImageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined)
+                const productImageUrl = product.image_url || product.images?.[0]
                 
                 return (
                   <ProductCard
@@ -342,10 +341,11 @@ export function CategoryListingPageContent({
                       price_display: priceDisplay,
                       price: product.price_value || 0,
                       image_url: productImageUrl,
-                      packaging: product.package_size || undefined,
+                      packaging: product.package_size,
                       medicine_unit_id: product.id,
                       category_slug: productCategorySlug,
                       medicine_slug: productMedicineSlug,
+                      in_stock: product.in_stock,
                     }}
                   />
                 )

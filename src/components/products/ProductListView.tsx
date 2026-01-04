@@ -6,6 +6,8 @@ import React from 'react'
 import { Product } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
+import { useCart } from '@/contexts/CartContext'
+import { toastWarning } from '@/lib/utils/toast'
 
 export const ProductListViewSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
   return (
@@ -51,7 +53,57 @@ const getProductLink = (product: Product): string | null => {
   return null
 }
 
+const getProductImageUrl = (product: Product): string | undefined => {
+  return product.image_url || (product.images?.[0])
+}
+
 export const ProductListView: React.FC<ProductListViewProps> = ({ products }) => {
+  const { add, items } = useCart()
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT || product.price_value === 0
+    if (isConsultPrice) {
+      return
+    }
+
+    const inStock = product.in_stock ?? 0
+    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const currentQtyInCart = existingItem?.qty ?? 0
+    const totalQty = currentQtyInCart + 1
+
+    if (inStock === 0) {
+      toastWarning('Sản phẩm đã hết hàng')
+      return
+    }
+
+    if (totalQty > inStock) {
+      toastWarning(
+        `Số lượng vượt quá tồn kho. Hiện có ${inStock} sản phẩm trong kho. Bạn đã có ${currentQtyInCart} sản phẩm trong giỏ hàng.`
+      )
+      return
+    }
+
+    add(
+      {
+        id: product.id.toString(),
+        medicine_unit_id: product.id,
+        name: product.medicine.name,
+        price: product.price_value,
+        image_url: getProductImageUrl(product),
+        packaging: product.package_size,
+      },
+      1
+    )
+  }
+
+  const handleNavigate = (e: React.MouseEvent, productLink: string) => {
+    e.preventDefault()
+    window.location.href = productLink
+  }
+
   return (
     <div className="space-y-4">
       {products.map((product) => {
@@ -72,7 +124,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
             {/* Product image */}
             <div className="w-32 h-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {(() => {
-                const imageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null)
+                const imageUrl = getProductImageUrl(product)
                 return imageUrl ? (
                   <Image
                     src={imageUrl}
@@ -114,10 +166,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                     <button
                       type="button"
                       className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        window.location.href = productLink
-                      }}
+                      onClick={(e) => handleNavigate(e, productLink)}
                     >
                       Tư vấn ngay
                     </button>
@@ -134,20 +183,26 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between mt-4 gap-4">
                   <div className="text-primary-700 font-bold text-xl">
                     {product.price_value.toLocaleString('vi-VN')}₫
                   </div>
-                  <button
-                    type="button"
-                    className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      window.location.href = productLink
-                    }}
-                  >
-                    Chọn mua
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                      onClick={(e) => handleAddToCart(e, product)}
+                    >
+                      Thêm vào giỏ
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                      onClick={(e) => handleNavigate(e, productLink)}
+                    >
+                      Chi tiết
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { ProductCard } from '@/components/cards/ProductCard'
 import React from 'react'
+import { PRICE_CONSULT } from '@/lib/constant'
 
 interface Props {
   searchParams: { q?: string }
@@ -8,7 +9,14 @@ interface Props {
 export default function SearchPage({ searchParams }: Props) {
   const q = (searchParams.q || '').trim()
   const results = q
-    ? Array.from({ length: 6 }).map((_, i) => ({ id: `s-${i}`, name: `${q} – kết quả ${i + 1}`, price: 100000 + i * 10000 }))
+    ? Array.from({ length: 6 }).map((_, i) => ({ 
+        id: `s-${i}`, 
+        name: `${q} – kết quả ${i + 1}`, 
+        price: 100000 + i * 10000,
+        price_display: String(100000 + i * 10000),
+        medicine_unit_id: i + 1,
+        in_stock: 10,
+      }))
     : []
 
   return (

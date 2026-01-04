@@ -67,7 +67,7 @@ export default function CheckoutInformationPage() {
   // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0) {
-      router.push('/cart')
+      router.push('/gio-hang')
     }
   }, [items.length, router])
 
@@ -80,7 +80,7 @@ export default function CheckoutInformationPage() {
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },
-          { label: 'Giỏ hàng', href: '/cart' },
+          { label: 'Giỏ hàng', href: '/gio-hang' },
           { label: 'Thông tin khách hàng' },
         ]}
       />
@@ -167,7 +167,7 @@ export default function CheckoutInformationPage() {
 
           <div className="flex justify-between items-center pt-4 border-t">
             <Link
-              href="/cart"
+              href="/gio-hang"
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               Quay lại
