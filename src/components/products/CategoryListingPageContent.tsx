@@ -3,7 +3,11 @@ import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { ProductFilters, Product } from '@/lib/services/products'
 import { Container } from '@/components/Container'
-import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/components/products'
+import { ProductSortAndView, ProductListView } from '@/components/products'
+import { DynamicFiltersSidebar } from './DynamicFiltersSidebar'
+import { SubcategoriesHorizontalList } from './SubcategoriesHorizontalList'
+import { ActiveFilters } from './ActiveFilters'
+import { Subcategory, FilterGroup } from '@/lib/services/products'
 import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
@@ -19,8 +23,9 @@ interface CategoryListingPageContentProps {
   loading: boolean
   error: Error | null
   categoryName?: string | null
-  categories?: any[]
-  brands?: any[]
+  subcategories?: Subcategory[]
+  dynamicFilters?: FilterGroup[]
+  filtersLoading?: boolean
   filters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
 }
@@ -32,8 +37,9 @@ export function CategoryListingPageContent({
   loading,
   error,
   categoryName,
-  categories,
-  brands,
+  subcategories = [],
+  dynamicFilters,
+  filtersLoading = false,
   filters,
   onFiltersChange,
 }: CategoryListingPageContentProps) {
@@ -42,29 +48,30 @@ export function CategoryListingPageContent({
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   // Prepare filters (loại bỏ category vì đã có trong slug)
-  const { category: _, ...filtersWithoutCategory } = filters
   const categoryFilters = useMemo(() => {
-    return filtersWithoutCategory
-  }, [filtersWithoutCategory])
+    const { category: _, ...rest } = filters
+    return rest
+  }, [filters])
 
-  // Apply sorting
+  // Apply sorting - only client-side if server doesn't provide ordering
   const sortedProducts = useMemo(() => {
     if (!products.length) return products
     
+    // If server provides ordering, use products as-is
     if (categoryFilters.ordering) {
       return products
     }
     
-    // Fallback: sort trên client chỉ khi không có server-side sorting
+    // Client-side fallback sorting
     const sorted = [...products]
     switch (sortOption) {
       case 'price-low':
-        return sorted.sort((a, b) => a.price_value - b.price_value)
+        return sorted.sort((a, b) => (a.price_value || 0) - (b.price_value || 0))
       case 'price-high':
-        return sorted.sort((a, b) => b.price_value - a.price_value)
+        return sorted.sort((a, b) => (b.price_value || 0) - (a.price_value || 0))
       case 'bestselling':
       default:
-        return sorted.sort((a, b) => b.in_stock - a.in_stock)
+        return sorted.sort((a, b) => (b.in_stock || 0) - (a.in_stock || 0))
     }
   }, [products, sortOption, categoryFilters.ordering])
 
@@ -97,59 +104,75 @@ export function CategoryListingPageContent({
     onFiltersChange(updatedFilters)
   }
 
-  // Build breadcrumbs từ categorySlug (URL) - domain hiện tại
-  // Tìm category name từ product data nếu category path match với categorySlug
+  // Build breadcrumbs from categorySlug and product data
   const breadcrumbItems = useMemo(() => {
     const items: Array<{ label: string; href?: string }> = [
       { label: 'Trang chủ', href: '/' }
     ]
     
-    // Parse categorySlug từ URL thành các phần
-    const slugParts = categorySlug.split('/')
-    let accumulatedPath = ''
-    
-    // Tìm category names từ product data - chỉ match đúng với path từ URL
-    const findCategoryName = (targetSlug: string, targetPath: string, targetIndex: number): string | null => {
-      // Tìm trong products để lấy category name
-      for (const product of products) {
-        if (product.category_info?.category) {
-          const categoryArray = product.category_info.category
-          
-          // Chỉ xét các category có index <= targetIndex (đảm bảo match đúng level)
-          if (categoryArray.length > targetIndex) {
-            let productPath = ''
+    // Use categoryName if available, otherwise build from slug
+    if (categoryName) {
+      const slugParts = categorySlug.split('/')
+      let accumulatedPath = ''
+      
+      slugParts.forEach((slugPart, index) => {
+        accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
+        const isLast = index === slugParts.length - 1
+        
+        // Use categoryName for last item, formatted slug for others
+        const label = isLast 
+          ? categoryName 
+          : slugPart.replace(/-/g, ' ')
+        
+        if (!isLast) {
+          items.push({ label, href: `/${accumulatedPath}` })
+        } else {
+          items.push({ label })
+        }
+      })
+    } else {
+      // Fallback: build from slug and product data
+      const slugParts = categorySlug.split('/')
+      let accumulatedPath = ''
+      
+      // Find category names from product data
+      const findCategoryName = (targetPath: string, targetIndex: number): string | null => {
+        for (const product of products) {
+          if (product.category_info?.category) {
+            const categoryArray = product.category_info.category
             
-            for (let i = 0; i <= targetIndex && i < categoryArray.length; i++) {
-              productPath += i === 0 ? categoryArray[i].slug : `/${categoryArray[i].slug}`
-            }
-            
-            // Chỉ match nếu path chính xác bằng targetPath
-            if (productPath === targetPath) {
-              return categoryArray[targetIndex].name
+            if (categoryArray.length > targetIndex) {
+              let productPath = ''
+              
+              for (let i = 0; i <= targetIndex && i < categoryArray.length; i++) {
+                productPath += i === 0 ? categoryArray[i].slug : `/${categoryArray[i].slug}`
+              }
+              
+              if (productPath === targetPath) {
+                return categoryArray[targetIndex].name
+              }
             }
           }
         }
+        return null
       }
-      return null
+      
+      slugParts.forEach((slugPart, index) => {
+        accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
+        const isLast = index === slugParts.length - 1
+        const categoryName = findCategoryName(accumulatedPath, index)
+        const label = categoryName || slugPart.replace(/-/g, ' ')
+        
+        if (!isLast) {
+          items.push({ label, href: `/${accumulatedPath}` })
+        } else {
+          items.push({ label })
+        }
+      })
     }
     
-    slugParts.forEach((slugPart, index) => {
-      accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
-      const isLast = index === slugParts.length - 1
-      
-      // Tìm category name từ product data - chỉ match đúng với path từ URL
-      const categoryName = findCategoryName(slugPart, accumulatedPath, index)
-      const label = categoryName || slugPart.replace(/-/g, ' ')
-      
-      if (!isLast) {
-        items.push({ label, href: `/${accumulatedPath}` })
-      } else {
-        items.push({ label })
-      }
-    })
-    
     return items
-  }, [products, categorySlug])
+  }, [categorySlug, categoryName, products])
 
   if (loading) {
     return (
@@ -231,17 +254,39 @@ export function CategoryListingPageContent({
       <div className="mb-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
+
+      {/* Category Name */}
+      {categoryName && (
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          {categoryName}
+        </h1>
+      )}
+
+      {/* Subcategories Horizontal List */}
+      {subcategories && subcategories.length > 0 && (
+        <SubcategoriesHorizontalList
+          subcategories={subcategories}
+          currentCategorySlug={categorySlug}
+        />
+      )}
       
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Filters - Desktop */}
+        {/* Always show filter sidebar (except when overLimit, which is handled in page.tsx) */}
         <aside className="hidden lg:flex flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
           <div className="sticky w-full" style={{ top: `${SIDEBAR.STICKY_TOP}px` }}>
-            <ProductFiltersSidebar
-              filters={categoryFilters}
-              onFiltersChange={handleFiltersChange}
-              categories={categories}
-              brands={brands}
-            />
+            {filtersLoading || dynamicFilters === undefined ? (
+              <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+                <p className="text-sm text-gray-500">Đang tải bộ lọc...</p>
+              </div>
+            ) : (
+              <DynamicFiltersSidebar
+                filters={dynamicFilters || []}
+                activeFilters={categoryFilters}
+                onFiltersChange={handleFiltersChange}
+              />
+            )}
           </div>
         </aside>
 
@@ -266,19 +311,25 @@ export function CategoryListingPageContent({
                   <CloseIcon />
                 </button>
               </div>
-              <ProductFiltersSidebar
-                filters={categoryFilters}
-                onFiltersChange={handleFiltersChange}
-                categories={categories}
-                brands={brands}
-              />
+              {filtersLoading || dynamicFilters === undefined ? (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+                  <p className="text-sm text-gray-500">Đang tải bộ lọc...</p>
+                </div>
+              ) : (
+                <DynamicFiltersSidebar
+                  filters={dynamicFilters || []}
+                  activeFilters={categoryFilters}
+                  onFiltersChange={handleFiltersChange}
+                />
+              )}
             </aside>
           </>
         )}
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          {/* Mobile Filter Button */}
+          {/* Mobile Filter Button - Always show (except when overLimit, which is handled in page.tsx) */}
           <div className="lg:hidden mb-4">
             <button
               onClick={() => setShowMobileFilters(true)}
@@ -296,6 +347,20 @@ export function CategoryListingPageContent({
             onViewModeChange={setViewMode}
             productCount={totalCount}
           />
+
+          {/* Active Filters */}
+          {dynamicFilters && dynamicFilters.length > 0 && (
+            <ActiveFilters
+              activeFilters={categoryFilters}
+              filterGroups={dynamicFilters}
+              onRemoveFilter={(filterKey) => {
+                const newFilters = { ...filters }
+                delete newFilters[filterKey as keyof ProductFilters]
+                onFiltersChange(newFilters)
+              }}
+              onClearAll={() => handleFiltersChange({})}
+            />
+          )}
 
           {/* Notice */}
           <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -367,4 +432,3 @@ export function CategoryListingPageContent({
     </Container>
   )
 }
-

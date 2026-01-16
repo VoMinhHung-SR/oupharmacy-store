@@ -3,10 +3,10 @@ import React, { useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet } from '@/lib/api'
-import { Product, ProductListResponse } from '@/lib/services/products'
+import { Product, ProductListResponse, CategoryProductsResponse } from '@/lib/services/products'
 import { ProductDetailPageContent } from '@/components/products'
 import { CategoryListingPageContent } from '@/components/products'
-import { useBrands } from '@/lib/hooks/useBrands'
+import { useDynamicFilters } from '@/lib/hooks/useDynamicFilters'
 import { ProductFilters } from '@/lib/services/products'
 import { PAGINATION } from '@/lib/constant'
 
@@ -38,22 +38,18 @@ interface Props {
 export default function NestedPathPage({ params }: Props) {
   const pathname = usePathname()
   
-  // Lấy full path từ URL (bỏ dấu / đầu tiên)
   const fullPath = pathname.startsWith('/') ? pathname.slice(1) : pathname
   
   const parts = fullPath.split('/')
   
-  // Route này xử lý paths có 2+ segments
   const isValidPath = parts.length >= 2
   const [filters, setFilters] = useState<ProductFilters>({ 
     page: PAGINATION.DEFAULT_PAGE, 
     page_size: PAGINATION.DEFAULT_PAGE_SIZE 
   })
   
-  const { data: brands } = useBrands()
   const queryClient = useQueryClient()
   
-  // Gọi API với full path, backend sẽ tự động detect category listing hay product detail
   const { data: apiResponse, isLoading, error } = useQuery({
     queryKey: ['nested-path', fullPath, filters],
     queryFn: async () => {
@@ -73,7 +69,6 @@ export default function NestedPathPage({ params }: Props) {
       const queryString = params.toString()
       const path = `/${fullPath}${queryString ? `?${queryString}` : ''}`
       
-      // Gọi API - backend tự động detect và trả về Product hoặc ProductListResponse
       const response = await apiGet<Product | ProductListResponse>(path)
       if (response.error) {
         throw new Error(response.error)
@@ -84,37 +79,63 @@ export default function NestedPathPage({ params }: Props) {
   })
   
   // Kiểm tra response type từ API:
-  // - Có 'results' array → ProductListResponse (category listing)
+  // - Có 'results' array → ProductListResponse hoặc CategoryProductsResponse (category listing)
   // - Không có 'results' → Product (product detail)
   const isProductList = apiResponse && 'results' in apiResponse
-  const productList = isProductList ? (apiResponse as ProductListResponse) : null
+  const productList = isProductList ? (apiResponse as ProductListResponse | CategoryProductsResponse) : null
   const product = !isProductList && apiResponse ? (apiResponse as Product) : undefined
   
-  // Xác định loại skeleton dựa trên cached data hoặc heuristic
+  const isCategoryProductsResponse = (list: ProductListResponse | CategoryProductsResponse | null): list is CategoryProductsResponse => {
+    return list !== null && 'categoryName' in list
+  }
+  
   const shouldRenderProductDetailSkeleton = useMemo(() => {
     if (!isLoading || apiResponse) return false
     
-    // Check cached data để xác định loại skeleton
     const cachedData = queryClient.getQueryData<Product | ProductListResponse>(['nested-path', fullPath, filters])
     if (cachedData) {
       return !('results' in cachedData)
     }
     
-    // Heuristic: Nếu có nhiều hơn 3 segments, có khả năng cao là product detail
     if (parts.length > 3) {
       return true
     }
     
-    // Mặc định: render category listing skeleton
     return false
   }, [isLoading, apiResponse, fullPath, filters, queryClient, parts.length])
   
-  // Parse để lấy category path và medicine slug (cho product detail)
+  // Fetch dynamic filters chỉ khi là category listing (không phải product detail)
+  // Logic: đối với tất cả /domain../{categorySlug}/ đều trả về filter
+  // except: /{categorySlug}/productDetail là không có bộ lọc
+  // Fetch khi: đã xác định là category listing HOẶC đang loading (trừ khi heuristic cho thấy là product detail)
+  const shouldFetchFilters = isProductList === true || (isLoading && !shouldRenderProductDetailSkeleton)
+  const { 
+    data: filtersData,
+    isLoading: filtersLoading 
+  } = useDynamicFilters(
+    shouldFetchFilters ? fullPath : undefined,
+    { 
+      include_variants: true, 
+      include_counts: true
+    },
+    shouldFetchFilters // Chỉ fetch khi là category listing
+  )
+  
   const parsedCategoryPath = isValidPath ? parts.slice(0, -1).join('/') : undefined
   const parsedMedicineSlug = isValidPath ? parts[parts.length - 1] : undefined
   
-  // Category name cho listing page
   const categoryName = useMemo(() => {
+    // Priority 1: From productList API response (check if it's CategoryProductsResponse)
+    if (isCategoryProductsResponse(productList) && productList.categoryName) {
+      return productList.categoryName
+    }
+    
+    // Priority 2: From filters API response
+    if (filtersData?.categoryName) {
+      return filtersData.categoryName
+    }
+    
+    // Priority 3: From product data
     if (productList?.results && productList.results.length > 0) {
       const firstProduct = productList.results[0]
       if (firstProduct.category_info?.category && firstProduct.category_info.category.length > 0) {
@@ -125,8 +146,18 @@ export default function NestedPathPage({ params }: Props) {
         return firstProduct.category.name
       }
     }
+    
+    // Priority 4: Fallback to slug formatting
     return fullPath.split('/').pop()?.replace(/-/g, ' ') || null
-  }, [productList?.results, fullPath])
+  }, [productList, filtersData?.categoryName, fullPath])
+  
+  // Subcategories from API response (prioritize productList)
+  const subcategories = useMemo(() => {
+    if (isCategoryProductsResponse(productList) && Array.isArray(productList.subcategories)) {
+      return productList.subcategories
+    }
+    return Array.isArray(filtersData?.subcategories) ? filtersData.subcategories : []
+  }, [productList, filtersData?.subcategories])
   
   if (!isValidPath) {
     return null
@@ -155,8 +186,9 @@ export default function NestedPathPage({ params }: Props) {
           loading={true}
           error={null}
           categoryName={null}
-          categories={undefined}
-          brands={brands}
+          subcategories={[]}
+          dynamicFilters={filtersData?.filters}
+          filtersLoading={filtersLoading}
           filters={filters}
           onFiltersChange={setFilters}
         />
@@ -171,11 +203,12 @@ export default function NestedPathPage({ params }: Props) {
         categorySlug={fullPath}
         products={productList.results || []}
         totalCount={productList.count || 0}
-        loading={isLoading}
+        loading={isLoading || filtersLoading}
         error={error as Error | null}
         categoryName={categoryName}
-        categories={undefined}
-        brands={brands}
+        subcategories={subcategories}
+        dynamicFilters={filtersData?.filters}
+        filtersLoading={filtersLoading}
         filters={filters}
         onFiltersChange={setFilters}
       />
