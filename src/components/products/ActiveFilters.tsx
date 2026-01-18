@@ -44,7 +44,7 @@ export function ActiveFilters({
     ),
     [activeFilters]
   )
-
+  
   if (activeFilterEntries.length === 0) {
     return null
   }

@@ -47,6 +47,33 @@ export function CategoryListingPageContent({
   const [viewMode, setViewMode] = useState<ViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
+  // Extract the last category name from the full path (remove " > Parent" prefix)
+  // Or get it directly from first product's category info
+  const lastCategoryName = useMemo(() => {
+    // Priority 1: Get from first product's category info, matching categorySlug level
+    if (products.length > 0 && products[0].category_info?.category) {
+      const categoryArray = products[0].category_info.category
+      const slugParts = categorySlug.split('/')
+      
+      // Get the category at the correct level (matching slug depth)
+      const targetLevel = slugParts.length - 1
+      if (categoryArray.length > targetLevel) {
+        const lastCategory = categoryArray[targetLevel]
+        if (lastCategory?.name) {
+          return lastCategory.name
+        }
+      }
+    }
+    
+    // Priority 2: Extract from categoryName if it has " > " separator
+    if (categoryName) {
+      const parts = categoryName.split(' > ')
+      return parts[parts.length - 1]
+    }
+    
+    return null
+  }, [products, categoryName, categorySlug])
+
   // Prepare filters (loại bỏ category vì đã có trong slug)
   const categoryFilters = useMemo(() => {
     const { category: _, ...rest } = filters
@@ -104,64 +131,47 @@ export function CategoryListingPageContent({
     onFiltersChange(updatedFilters)
   }
 
-  // Build breadcrumbs from categorySlug and product data
+  // Build breadcrumbs from category_array in product data
   const breadcrumbItems = useMemo(() => {
     const items: Array<{ label: string; href?: string }> = [
       { label: 'Trang chủ', href: '/' }
     ]
     
-    // Use categoryName if available, otherwise build from slug
-    if (categoryName) {
+    // Get category_array from first product (all products have same category path)
+    let categoryArray: Array<{ name: string; slug: string }> = []
+    
+    if (products.length > 0 && products[0].category_info?.category) {
+      categoryArray = products[0].category_info.category
+    }
+    
+    // If we have category_array from API, use it but only the levels that match categorySlug
+    if (categoryArray.length > 0) {
+      // Build the path from categorySlug to determine how many levels we should display
       const slugParts = categorySlug.split('/')
-      let accumulatedPath = ''
       
-      slugParts.forEach((slugPart, index) => {
-        accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
-        const isLast = index === slugParts.length - 1
-        
-        // Use categoryName for last item, formatted slug for others
-        const label = isLast 
-          ? categoryName 
-          : slugPart.replace(/-/g, ' ')
+      // Only include category items up to the number of slug parts
+      const relevantCategories = categoryArray.slice(0, slugParts.length)
+      
+      let accumulatedPath = ''
+      relevantCategories.forEach((cat, index) => {
+        accumulatedPath += index === 0 ? cat.slug : `/${cat.slug}`
+        const isLast = index === relevantCategories.length - 1
         
         if (!isLast) {
-          items.push({ label, href: `/${accumulatedPath}` })
+          items.push({ label: cat.name, href: `/${accumulatedPath}` })
         } else {
-          items.push({ label })
+          items.push({ label: cat.name })
         }
       })
     } else {
-      // Fallback: build from slug and product data
+      // Fallback: build from slug parts if no category_array available
       const slugParts = categorySlug.split('/')
       let accumulatedPath = ''
-      
-      // Find category names from product data
-      const findCategoryName = (targetPath: string, targetIndex: number): string | null => {
-        for (const product of products) {
-          if (product.category_info?.category) {
-            const categoryArray = product.category_info.category
-            
-            if (categoryArray.length > targetIndex) {
-              let productPath = ''
-              
-              for (let i = 0; i <= targetIndex && i < categoryArray.length; i++) {
-                productPath += i === 0 ? categoryArray[i].slug : `/${categoryArray[i].slug}`
-              }
-              
-              if (productPath === targetPath) {
-                return categoryArray[targetIndex].name
-              }
-            }
-          }
-        }
-        return null
-      }
       
       slugParts.forEach((slugPart, index) => {
         accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
         const isLast = index === slugParts.length - 1
-        const categoryName = findCategoryName(accumulatedPath, index)
-        const label = categoryName || slugPart.replace(/-/g, ' ')
+        const label = slugPart.replace(/-/g, ' ')
         
         if (!isLast) {
           items.push({ label, href: `/${accumulatedPath}` })
@@ -172,7 +182,7 @@ export function CategoryListingPageContent({
     }
     
     return items
-  }, [categorySlug, categoryName, products])
+  }, [categorySlug, products])
 
   if (loading) {
     return (
@@ -256,9 +266,9 @@ export function CategoryListingPageContent({
       </div>
 
       {/* Category Name */}
-      {categoryName && (
+      {lastCategoryName && (
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          {categoryName}
+          {lastCategoryName}
         </h1>
       )}
 

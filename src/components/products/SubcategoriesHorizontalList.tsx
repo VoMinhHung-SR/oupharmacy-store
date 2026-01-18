@@ -63,7 +63,7 @@ export function SubcategoriesHorizontalList({
   }
 
   const buttonBase =
-  'h-10 w-10 rounded-full flex items-center justify-center transition'
+  'h-10 w-10 rounded-full flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
 
   const buttonActive =
   'bg-white shadow-md hover:shadow-lg hover:bg-gray-50 text-gray-700'
@@ -71,76 +71,83 @@ export function SubcategoriesHorizontalList({
   const buttonDisabled =
   'bg-gray-100 text-gray-300 cursor-not-allowed'
 
-return (
-  <div className="mb-6 flex items-stretch">
-    {/* LEFT BUTTON */}
-    <div className="w-12 flex items-center justify-center">
-      <button
-        onClick={() => scroll('left')}
-        disabled={!canScrollLeft}
-        aria-label="Scroll left"
-        className={`
-          ${buttonBase}
-          ${canScrollLeft ? buttonActive : buttonDisabled}
-        `}
-      >
-        <ChevronLeftIcon className="w-5 h-5" />
-      </button>
-    </div>
-
-    {/* SCROLL CONTENT */}
-    <div
-      ref={scrollContainerRef}
-      className="
-        flex flex-1 items-center gap-2
-        overflow-x-auto overflow-y-hidden
-        scrollbar-hide scroll-smooth
-      "
-    >
-      {subcategories.map((subcat) => (
-        <Link
-          key={subcat.slug}
-          href={`/${subcat.slug}`}
-          className="flex items-center gap-2 px-3 py-3 bg-white
-            border border-gray-200
-            rounded-lg
-            whitespace-nowrap
-            flex-shrink-0
-            hover:border-primary-500
-            hover:bg-primary-50
-            transition
-          "
+  return (
+    <div className="mb-6 flex items-stretch">
+      {/* LEFT BUTTON */}
+      <div className="w-12 flex items-center justify-center">
+        <button
+          onClick={() => scroll('left')}
+          disabled={!canScrollLeft}
+          aria-label="Scroll left through subcategories"
+          title="Cuộn trái"
+          className={`
+            ${buttonBase}
+            ${canScrollLeft ? buttonActive : buttonDisabled}
+          `}
         >
-          <div className="w-4 h-4 flex items-center justify-center">
-            {/* CategoryIcon */}
-            <CategoryIcon 
-              categorySlug={subcat.slug}
-              className="w-5 h-5 text-gray-600"
-            />
-          </div>
+          <ChevronLeftIcon className="w-5 h-5" />
+        </button>
+      </div>
 
-          <span className="text-xs font-medium text-gray-700">
-            {getSubcategoryName(subcat.name)}
-          </span>
-        </Link>
-      ))}
-    </div>
-
-    {/* RIGHT BUTTON */}
-    <div className="w-12 flex items-center justify-center">
-      <button
-        onClick={() => scroll('right')}
-        disabled={!canScrollRight}
-        aria-label="Scroll right"
-        className={`
-          ${buttonBase}
-          ${canScrollRight ? buttonActive : buttonDisabled}
-        `}
+      {/* SCROLL CONTENT */}
+      <div
+        ref={scrollContainerRef}
+        className="
+          flex flex-1 items-center gap-2
+          overflow-x-auto overflow-y-hidden
+          scrollbar-hide scroll-smooth
+        "
+        role="region"
+        aria-label="Subcategories list"
       >
-        <ChevronRightIcon className="w-5 h-5" />
-      </button>
+        {subcategories.map((subcat) => (
+          <Link
+            key={subcat.slug}
+            href={`/${subcat.slug}`}
+            className="flex items-center gap-2 px-3 py-3 bg-white
+              border border-gray-200
+              rounded-lg
+              whitespace-nowrap
+              flex-shrink-0
+              hover:border-primary-500
+              hover:bg-primary-50
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+              transition
+            "
+            title={`View ${getSubcategoryName(subcat.name)} category`}
+          >
+            <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+              {/* CategoryIcon */}
+              <CategoryIcon 
+                categorySlug={subcat.slug}
+                className="w-5 h-5 text-gray-600 hover:text-primary-600 transition-colors"
+                aria-hidden="true"
+              />
+            </div>
+
+            <span className="text-xs font-medium text-gray-700 truncate">
+              {getSubcategoryName(subcat.name)}
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      {/* RIGHT BUTTON */}
+      <div className="w-12 flex items-center justify-center">
+        <button
+          onClick={() => scroll('right')}
+          disabled={!canScrollRight}
+          aria-label="Scroll right through subcategories"
+          title="Cuộn phải"
+          className={`
+            ${buttonBase}
+            ${canScrollRight ? buttonActive : buttonDisabled}
+          `}
+        >
+          <ChevronRightIcon className="w-5 h-5" />
+        </button>
+      </div>
     </div>
-  </div>
-)
+  )
 
 }
