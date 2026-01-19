@@ -13,6 +13,7 @@ interface Product {
   image_url?: string
   packaging?: string
   medicine_unit_id?: number
+  in_stock?: number
 }
 
 interface BestsellingProductsProps {
@@ -26,6 +27,7 @@ const mockProducts: Product[] = [
     price: 6675000,
     originalPrice: 8900000,
     packaging: 'Hộp 60 Viên',
+    in_stock: 10,
   },
   {
     id: '2',
@@ -33,6 +35,7 @@ const mockProducts: Product[] = [
     price: 1040000,
     originalPrice: 1300000,
     packaging: 'Hộp 60 Viên',
+    in_stock: 15,
   },
   {
     id: '3',
@@ -40,6 +43,7 @@ const mockProducts: Product[] = [
     price: 119200,
     originalPrice: 149000,
     packaging: 'Hộp 60 Viên',
+    in_stock: 20,
   },
   {
     id: '4',
@@ -47,6 +51,7 @@ const mockProducts: Product[] = [
     price: 388800,
     originalPrice: 486000,
     packaging: 'Hộp 60 viên',
+    in_stock: 12,
   },
   {
     id: '5',
@@ -54,12 +59,14 @@ const mockProducts: Product[] = [
     price: 246750,
     originalPrice: 329000,
     packaging: 'Hộp 6 Hũ',
+    in_stock: 8,
   },
   {
     id: '6',
     name: 'Chai xịt Aloclair Plus Spray giảm đau nhanh bệnh tay chân miệng',
     price: 229000,
     packaging: 'Hộp x 15ml',
+    in_stock: 25,
   },
 ]
 

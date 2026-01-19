@@ -4,9 +4,11 @@ import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 
 export const AvatarBadge: React.FC = () => {
   const { user, logout } = useAuth()
+  const { count: wishlistCount } = useWishlist()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -101,26 +103,53 @@ export const AvatarBadge: React.FC = () => {
           </div>
           <div className="py-1">
             <Link
-              href="/account/orders"
+              href="/tai-khoan"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Tài khoản của tôi
+            </Link>
+            <Link
+              href="/tai-khoan/ho-so"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Hồ sơ cá nhân
+            </Link>
+            <Link
+              href="/san-pham-yeu-thich"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors relative"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <span className="flex items-center justify-between">
+                <span>Sản phẩm yêu thích</span>
+                {wishlistCount > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {wishlistCount}
+                  </span>
+                )}
+              </span>
+            </Link>
+            <Link
+              href="/tai-khoan/don-hang"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
               Đơn hàng của tôi
             </Link>
             <Link
-              href="/account/profile"
+              href="/tai-khoan/cai-dat"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
-              Thông tin tài khoản
+              Cài đặt tài khoản
             </Link>
-            {/* TODO: user's setting */}
             <Link
-              href="/account/settings"
+              href="/tai-khoan/doi-mat-khau"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
-              Cài đặt
+              Đổi mật khẩu
             </Link>
           </div>
           <div className="border-t border-gray-200 py-1">

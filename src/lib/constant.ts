@@ -88,3 +88,4 @@ export const PRODUCT_FILTERS = {
 } as const
 
 export const PRICE_CONSULT = 'CONSULT' as const
+export const EMAIL_SUPPORT = 'oupharmacymanagement@gmail.com' as const

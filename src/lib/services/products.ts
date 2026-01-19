@@ -65,6 +65,61 @@ export interface ProductListResponse {
   results: Product[]
 }
 
+export interface Subcategory {
+  slug: string
+  name: string
+  productCount: number
+  level: number
+}
+
+export interface CategoryProductsResponse extends ProductListResponse {
+  categorySlug: string
+  categoryName: string
+  productCount: number
+  hasSubcategories: boolean
+  subcategories: Subcategory[]
+  overLimit: boolean
+  // Pagination fields from ProductListResponse
+  count: number
+  next?: string
+  previous?: string
+  results: Product[]
+}
+
+export interface FilterOption {
+  id: string
+  label: string
+  count?: number
+  value: string | number
+}
+
+export interface FilterGroup {
+  id: string
+  label: string
+  type: 'single' | 'multiple' | 'range'
+  options: FilterOption[]
+  showMore?: boolean
+  maxVisible?: number
+}
+
+export interface DynamicFiltersResponse {
+  categorySlug: string
+  categoryName: string
+  productCount: number
+  hasSubcategories: boolean
+  subcategories: Subcategory[]
+  overLimit: boolean
+  variants?: {
+    brands?: string[]
+    priceRanges?: Array<{ min: number; max?: number; label: string }>
+    targetAudiences?: string[]
+    flavors?: string[]
+    countries?: string[]
+    [key: string]: any
+  }
+  filters?: FilterGroup[]
+}
+
 export interface ProductFilters {
   kw?: string
   category?: number
@@ -79,7 +134,10 @@ export interface ProductFilters {
   page_size?: number
 }
 
-export async function getProducts(filters?: ProductFilters) {
+/**
+ * Build URLSearchParams from filters object
+ */
+function buildSearchParams(filters?: ProductFilters): URLSearchParams {
   const params = new URLSearchParams()
   
   if (filters) {
@@ -90,6 +148,11 @@ export async function getProducts(filters?: ProductFilters) {
     })
   }
   
+  return params
+}
+
+export async function getProducts(filters?: ProductFilters) {
+  const params = buildSearchParams(filters)
   const queryString = params.toString()
   const path = `/products/${queryString ? `?${queryString}` : ''}`
   
@@ -111,21 +174,12 @@ export async function getProduct(id: number) {
 export async function getProductsByCategorySlug(
   categorySlug: string,
   filters?: Omit<ProductFilters, 'category'>
-): Promise<ApiResponse<ProductListResponse>> {
-  const params = new URLSearchParams()
-  
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value))
-      }
-    })
-  }
-  
+): Promise<ApiResponse<CategoryProductsResponse>> {
+  const params = buildSearchParams(filters)
   const queryString = params.toString()
   const path = `/${categorySlug}${queryString ? `?${queryString}` : ''}`
   
-  return apiGet<ProductListResponse>(path)
+  return apiGet<CategoryProductsResponse>(path)
 }
 
 /**

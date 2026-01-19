@@ -16,6 +16,7 @@ interface CartContextValue {
   items: CartItem[]
   add: (item: Omit<CartItem, 'qty'>, qty?: number) => void
   remove: (id: string) => void
+  updateQuantity: (id: string, qty: number) => void
   clear: () => void
   total: number
 }
@@ -69,10 +70,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
     }
   }
+
+  const updateQuantity = (id: string, qty: number) => {
+    if (qty < 1) return
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, qty } : i))
+    )
+  }
+
   const clear = () => setItems([])
   const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items])
 
-  const value = useMemo(() => ({ items, add, remove, clear, total }), [items, total])
+  const value = useMemo(() => ({ items, add, remove, updateQuantity, clear, total }), [items, total])
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 

@@ -3,7 +3,11 @@ import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { ProductFilters, Product } from '@/lib/services/products'
 import { Container } from '@/components/Container'
-import { ProductFiltersSidebar, ProductSortAndView, ProductListView } from '@/components/products'
+import { ProductSortAndView, ProductListView } from '@/components/products'
+import { DynamicFiltersSidebar } from './DynamicFiltersSidebar'
+import { SubcategoriesHorizontalList } from './SubcategoriesHorizontalList'
+import { ActiveFilters } from './ActiveFilters'
+import { Subcategory, FilterGroup } from '@/lib/services/products'
 import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
@@ -19,8 +23,9 @@ interface CategoryListingPageContentProps {
   loading: boolean
   error: Error | null
   categoryName?: string | null
-  categories?: any[]
-  brands?: any[]
+  subcategories?: Subcategory[]
+  dynamicFilters?: FilterGroup[]
+  filtersLoading?: boolean
   filters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
 }
@@ -32,8 +37,9 @@ export function CategoryListingPageContent({
   loading,
   error,
   categoryName,
-  categories,
-  brands,
+  subcategories = [],
+  dynamicFilters,
+  filtersLoading = false,
   filters,
   onFiltersChange,
 }: CategoryListingPageContentProps) {
@@ -41,30 +47,58 @@ export function CategoryListingPageContent({
   const [viewMode, setViewMode] = useState<ViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
-  // Prepare filters (loại bỏ category vì đã có trong slug)
-  const { category: _, ...filtersWithoutCategory } = filters
-  const categoryFilters = useMemo(() => {
-    return filtersWithoutCategory
-  }, [filtersWithoutCategory])
+  // Extract the last category name from the full path (remove " > Parent" prefix)
+  // Or get it directly from first product's category info
+  const lastCategoryName = useMemo(() => {
+    // Priority 1: Get from first product's category info, matching categorySlug level
+    if (products.length > 0 && products[0].category_info?.category) {
+      const categoryArray = products[0].category_info.category
+      const slugParts = categorySlug.split('/')
+      
+      // Get the category at the correct level (matching slug depth)
+      const targetLevel = slugParts.length - 1
+      if (categoryArray.length > targetLevel) {
+        const lastCategory = categoryArray[targetLevel]
+        if (lastCategory?.name) {
+          return lastCategory.name
+        }
+      }
+    }
+    
+    // Priority 2: Extract from categoryName if it has " > " separator
+    if (categoryName) {
+      const parts = categoryName.split(' > ')
+      return parts[parts.length - 1]
+    }
+    
+    return null
+  }, [products, categoryName, categorySlug])
 
-  // Apply sorting
+  // Prepare filters (loại bỏ category vì đã có trong slug)
+  const categoryFilters = useMemo(() => {
+    const { category: _, ...rest } = filters
+    return rest
+  }, [filters])
+
+  // Apply sorting - only client-side if server doesn't provide ordering
   const sortedProducts = useMemo(() => {
     if (!products.length) return products
     
+    // If server provides ordering, use products as-is
     if (categoryFilters.ordering) {
       return products
     }
     
-    // Fallback: sort trên client chỉ khi không có server-side sorting
+    // Client-side fallback sorting
     const sorted = [...products]
     switch (sortOption) {
       case 'price-low':
-        return sorted.sort((a, b) => a.price_value - b.price_value)
+        return sorted.sort((a, b) => (a.price_value || 0) - (b.price_value || 0))
       case 'price-high':
-        return sorted.sort((a, b) => b.price_value - a.price_value)
+        return sorted.sort((a, b) => (b.price_value || 0) - (a.price_value || 0))
       case 'bestselling':
       default:
-        return sorted.sort((a, b) => b.in_stock - a.in_stock)
+        return sorted.sort((a, b) => (b.in_stock || 0) - (a.in_stock || 0))
     }
   }, [products, sortOption, categoryFilters.ordering])
 
@@ -97,59 +131,58 @@ export function CategoryListingPageContent({
     onFiltersChange(updatedFilters)
   }
 
-  // Build breadcrumbs từ categorySlug (URL) - domain hiện tại
-  // Tìm category name từ product data nếu category path match với categorySlug
+  // Build breadcrumbs from category_array in product data
   const breadcrumbItems = useMemo(() => {
     const items: Array<{ label: string; href?: string }> = [
       { label: 'Trang chủ', href: '/' }
     ]
     
-    // Parse categorySlug từ URL thành các phần
-    const slugParts = categorySlug.split('/')
-    let accumulatedPath = ''
+    // Get category_array from first product (all products have same category path)
+    let categoryArray: Array<{ name: string; slug: string }> = []
     
-    // Tìm category names từ product data - chỉ match đúng với path từ URL
-    const findCategoryName = (targetSlug: string, targetPath: string, targetIndex: number): string | null => {
-      // Tìm trong products để lấy category name
-      for (const product of products) {
-        if (product.category_info?.category) {
-          const categoryArray = product.category_info.category
-          
-          // Chỉ xét các category có index <= targetIndex (đảm bảo match đúng level)
-          if (categoryArray.length > targetIndex) {
-            let productPath = ''
-            
-            for (let i = 0; i <= targetIndex && i < categoryArray.length; i++) {
-              productPath += i === 0 ? categoryArray[i].slug : `/${categoryArray[i].slug}`
-            }
-            
-            // Chỉ match nếu path chính xác bằng targetPath
-            if (productPath === targetPath) {
-              return categoryArray[targetIndex].name
-            }
-          }
-        }
-      }
-      return null
+    if (products.length > 0 && products[0].category_info?.category) {
+      categoryArray = products[0].category_info.category
     }
     
-    slugParts.forEach((slugPart, index) => {
-      accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
-      const isLast = index === slugParts.length - 1
+    // If we have category_array from API, use it but only the levels that match categorySlug
+    if (categoryArray.length > 0) {
+      // Build the path from categorySlug to determine how many levels we should display
+      const slugParts = categorySlug.split('/')
       
-      // Tìm category name từ product data - chỉ match đúng với path từ URL
-      const categoryName = findCategoryName(slugPart, accumulatedPath, index)
-      const label = categoryName || slugPart.replace(/-/g, ' ')
+      // Only include category items up to the number of slug parts
+      const relevantCategories = categoryArray.slice(0, slugParts.length)
       
-      if (!isLast) {
-        items.push({ label, href: `/${accumulatedPath}` })
-      } else {
-        items.push({ label })
-      }
-    })
+      let accumulatedPath = ''
+      relevantCategories.forEach((cat, index) => {
+        accumulatedPath += index === 0 ? cat.slug : `/${cat.slug}`
+        const isLast = index === relevantCategories.length - 1
+        
+        if (!isLast) {
+          items.push({ label: cat.name, href: `/${accumulatedPath}` })
+        } else {
+          items.push({ label: cat.name })
+        }
+      })
+    } else {
+      // Fallback: build from slug parts if no category_array available
+      const slugParts = categorySlug.split('/')
+      let accumulatedPath = ''
+      
+      slugParts.forEach((slugPart, index) => {
+        accumulatedPath += index === 0 ? slugPart : `/${slugPart}`
+        const isLast = index === slugParts.length - 1
+        const label = slugPart.replace(/-/g, ' ')
+        
+        if (!isLast) {
+          items.push({ label, href: `/${accumulatedPath}` })
+        } else {
+          items.push({ label })
+        }
+      })
+    }
     
     return items
-  }, [products, categorySlug])
+  }, [categorySlug, products])
 
   if (loading) {
     return (
@@ -163,8 +196,8 @@ export function CategoryListingPageContent({
           {/* Sidebar skeleton */}
           <div className="hidden lg:block flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
             <div className="sticky w-full space-y-4 rounded-lg border border-gray-200 bg-white p-4" style={{ top: `${SIDEBAR.STICKY_TOP}px` }}>
-              <div className="h-8 bg-gray-200 rounded animate-pulse" />
-              <div className="h-64 bg-gray-200 rounded animate-pulse" />
+            <div className="h-8 bg-gray-200 rounded animate-pulse" />
+            <div className="h-64 bg-gray-200 rounded animate-pulse" />
             </div>
           </div>
           
@@ -231,17 +264,39 @@ export function CategoryListingPageContent({
       <div className="mb-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
+
+      {/* Category Name */}
+      {lastCategoryName && (
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          {lastCategoryName}
+        </h1>
+      )}
+
+      {/* Subcategories Horizontal List */}
+      {subcategories && subcategories.length > 0 && (
+        <SubcategoriesHorizontalList
+          subcategories={subcategories}
+          currentCategorySlug={categorySlug}
+        />
+      )}
       
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Filters - Desktop */}
+        {/* Always show filter sidebar (except when overLimit, which is handled in page.tsx) */}
         <aside className="hidden lg:flex flex-shrink-0" style={{ width: `${SIDEBAR.WIDTH}px` }}>
           <div className="sticky w-full" style={{ top: `${SIDEBAR.STICKY_TOP}px` }}>
-            <ProductFiltersSidebar
-              filters={categoryFilters}
-              onFiltersChange={handleFiltersChange}
-              categories={categories}
-              brands={brands}
-            />
+            {filtersLoading || dynamicFilters === undefined ? (
+              <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+                <p className="text-sm text-gray-500">Đang tải bộ lọc...</p>
+              </div>
+            ) : (
+              <DynamicFiltersSidebar
+                filters={dynamicFilters || []}
+                activeFilters={categoryFilters}
+                onFiltersChange={handleFiltersChange}
+              />
+            )}
           </div>
         </aside>
 
@@ -266,19 +321,25 @@ export function CategoryListingPageContent({
                   <CloseIcon />
                 </button>
               </div>
-              <ProductFiltersSidebar
-                filters={categoryFilters}
-                onFiltersChange={handleFiltersChange}
-                categories={categories}
-                brands={brands}
-              />
+              {filtersLoading || dynamicFilters === undefined ? (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+                  <p className="text-sm text-gray-500">Đang tải bộ lọc...</p>
+                </div>
+              ) : (
+                <DynamicFiltersSidebar
+                  filters={dynamicFilters || []}
+                  activeFilters={categoryFilters}
+                  onFiltersChange={handleFiltersChange}
+                />
+              )}
             </aside>
           </>
         )}
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          {/* Mobile Filter Button */}
+          {/* Mobile Filter Button - Always show (except when overLimit, which is handled in page.tsx) */}
           <div className="lg:hidden mb-4">
             <button
               onClick={() => setShowMobileFilters(true)}
@@ -296,6 +357,20 @@ export function CategoryListingPageContent({
             onViewModeChange={setViewMode}
             productCount={totalCount}
           />
+
+          {/* Active Filters */}
+          {dynamicFilters && dynamicFilters.length > 0 && (
+            <ActiveFilters
+              activeFilters={categoryFilters}
+              filterGroups={dynamicFilters}
+              onRemoveFilter={(filterKey) => {
+                const newFilters = { ...filters }
+                delete newFilters[filterKey as keyof ProductFilters]
+                onFiltersChange(newFilters)
+              }}
+              onClearAll={() => handleFiltersChange({})}
+            />
+          )}
 
           {/* Notice */}
           <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -330,8 +405,7 @@ export function CategoryListingPageContent({
                   'Sản phẩm'
                 
                 const priceDisplay = product.price_display || PRICE_CONSULT
-              
-                const productImageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined)
+                const productImageUrl = product.image_url || product.images?.[0]
                 
                 return (
                   <ProductCard
@@ -342,10 +416,11 @@ export function CategoryListingPageContent({
                       price_display: priceDisplay,
                       price: product.price_value || 0,
                       image_url: productImageUrl,
-                      packaging: product.package_size || undefined,
+                      packaging: product.package_size,
                       medicine_unit_id: product.id,
                       category_slug: productCategorySlug,
                       medicine_slug: productMedicineSlug,
+                      in_stock: product.in_stock,
                     }}
                   />
                 )
@@ -367,4 +442,3 @@ export function CategoryListingPageContent({
     </Container>
   )
 }
-

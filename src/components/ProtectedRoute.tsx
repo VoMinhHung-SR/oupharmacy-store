@@ -1,8 +1,8 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLoginModal } from '@/contexts/LoginModalContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -10,14 +10,14 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth()
-  const router = useRouter()
+  const { openModal } = useLoginModal()
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       const currentPath = window.location.pathname
-      router.push(`/login?returnUrl=${encodeURIComponent(currentPath)}`)
+      openModal(currentPath)
     }
-  }, [isAuthenticated, loading, router])
+  }, [isAuthenticated, loading, openModal])
 
   if (loading) {
     return (

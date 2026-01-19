@@ -5,7 +5,12 @@ import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/products/ProductImageGallery'
+import { ProductDescriptionSection } from '@/components/products/ProductDescriptionSection'
+import { ShareButton } from '@/components/products/ShareButton'
+import { RelatedProducts } from '@/components/products/RelatedProducts'
+import { RecentlyViewed, saveToRecentlyViewed } from '@/components/products/RecentlyViewed'
 import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
@@ -28,14 +33,15 @@ export function ProductDetailPageContent({
 }: ProductDetailPageContentProps) {
   const router = useRouter()
   const { add, items } = useCart()
+  const { toggle: toggleWishlist, isInWishlist } = useWishlist()
   const [quantity, setQuantity] = useState(1)
   const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
 
+  const productImages = product?.images || []
   const productImageUrl = product 
-    ? (product.image_url || (product.images && product.images.length > 0 ? product.images[0] : null))
+    ? (product.image_url || (productImages.length > 0 ? productImages[0] : null))
     : null
 
-  // Helper function để tạo cart item object
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
     return {
@@ -48,7 +54,6 @@ export function ProductDetailPageContent({
     }
   }
 
-  // Helper function để validate stock
   const validateStock = () => {
     if (!product) return false
     const existingItem = items.find((i) => i.medicine_unit_id === product.id)
@@ -77,7 +82,6 @@ export function ProductDetailPageContent({
     add(getCartItem(), quantity)
   }
 
-  // Watch for cart update after "Buy Now" action
   useEffect(() => {
     if (pendingBuyNowRef.current) {
       const { productId, expectedQty } = pendingBuyNowRef.current
@@ -90,6 +94,12 @@ export function ProductDetailPageContent({
     }
   }, [items, router])
 
+  useEffect(() => {
+    if (product) {
+      saveToRecentlyViewed(product)
+    }
+  }, [product])
+
   const handleBuyNow = () => {
     if (!product) return
     const validation = validateStock()
@@ -99,20 +109,19 @@ export function ProductDetailPageContent({
     add(getCartItem(), quantity)
   }
 
-  if (loading) {
+  if (loading && !product) {
     return (
       <Container className="pb-6">
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/products' },
+            { label: 'Sản phẩm', href: '/search' },
             { label: 'Đang tải...' },
           ]}
           className="py-4"
         />
         <div className="bg-white rounded-lg p-6 space-y-6">
           <div className="grid gap-8 md:grid-cols-2">
-            {/* Left: Image Gallery Skeleton */}
             <div className="space-y-4">
               <div className="aspect-square w-full animate-pulse rounded-lg bg-gray-200" />
               <div className="flex gap-2">
@@ -122,40 +131,31 @@ export function ProductDetailPageContent({
               </div>
             </div>
 
-            {/* Right: Product Details Skeleton */}
             <div className="space-y-6">
-              {/* Brand */}
               <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
 
-              {/* Product Name */}
               <div className="space-y-2">
                 <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
                 <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200" />
               </div>
 
-              {/* Product ID & Rating */}
               <div className="h-4 w-48 animate-pulse rounded bg-gray-200" />
 
-              {/* Price */}
               <div className="h-10 w-40 animate-pulse rounded bg-gray-200" />
 
-              {/* Unit Selection */}
               <div className="space-y-2">
                 <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
                 <div className="h-10 w-24 animate-pulse rounded-full bg-gray-200" />
               </div>
 
-              {/* Product Information */}
               <div className="space-y-3 border-t border-gray-200 pt-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="h-4 w-full animate-pulse rounded bg-gray-200" />
                 ))}
               </div>
 
-              {/* Stock Status */}
               <div className="h-16 w-full animate-pulse rounded-lg bg-gray-200" />
 
-              {/* Quantity Selector */}
               <div className="space-y-2">
                 <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
                 <div className="flex items-center gap-3">
@@ -165,7 +165,6 @@ export function ProductDetailPageContent({
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
                 <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
                 <div className="h-12 flex-1 animate-pulse rounded-lg bg-gray-200" />
@@ -183,7 +182,7 @@ export function ProductDetailPageContent({
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/products' },
+            { label: 'Sản phẩm', href: '/search' },
           ]}
           className="py-4"
         />
@@ -261,36 +260,80 @@ export function ProductDetailPageContent({
 
   const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT
 
+  const handleWishlistToggle = () => {
+    if (!product) return
+    
+    toggleWishlist({
+      id: product.id.toString(),
+      medicine_unit_id: product.id,
+      name: product.medicine.name,
+      price: product.price_value,
+      price_display: product.price_display,
+      image_url: productImageUrl || product.image_url,
+      packaging: product.package_size,
+      category_slug: categorySlug,
+      medicine_slug: medicineSlug,
+    })
+  }
+
+  const productUrl = typeof window !== 'undefined' 
+    ? window.location.href 
+    : `/${categorySlug}/${medicineSlug}`
+
   return (
     <Container className="pb-6">
       <Breadcrumb items={breadcrumbItems} className="py-4" />
       <div className="bg-white rounded-lg p-6 space-y-6">
         <div className="grid gap-8 md:grid-cols-2">
-          {/* Left: Product Images */}
           <div>
             <ProductImageGallery
               mainImage={productImageUrl ?? undefined}
+              images={productImages}
               productName={product.medicine.name}
             />
           </div>
 
-          {/* Right: Product Details */}
           <div className="space-y-6">
-            {/* Brand */}
             {product.brand && (
+              <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
                 Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
               </div>
+                <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleWishlistToggle}
+                    className={`p-1.5 rounded-lg border transition-colors ${
+                    isInWishlist(product.id)
+                      ? 'border-red-300 bg-red-50 text-red-600'
+                      : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                  <svg
+                      className="w-4 h-4"
+                    fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+                <ShareButton productName={product.medicine.name} productUrl={productUrl} />
+              </div>
+              </div>
             )}
 
-            {/* Product Name */}
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900 leading-tight">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-semibold text-gray-900 leading-tight flex-1">
                 {product.medicine.name}
               </h1>
             </div>
 
-            {/* Product ID & Rating (Placeholder) */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>{product.id.toString().padStart(8, '0')}</span>
               <span>•</span>
@@ -304,7 +347,6 @@ export function ProductDetailPageContent({
               <span>9 bình luận</span>
             </div>
 
-            {/* Price or Consult Notice */}
             {isConsultPrice ? (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm text-amber-800">
@@ -319,7 +361,6 @@ export function ProductDetailPageContent({
                   </div>
                 </div>
 
-                {/* Unit Selection */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
                     Chọn đơn vị tính
@@ -333,7 +374,6 @@ export function ProductDetailPageContent({
               </>
             )}
 
-            {/* Product Information */}
             <div className="space-y-3 border-t border-gray-200 pt-4">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
@@ -349,10 +389,36 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
+              {product.registration_number && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Số đăng ký:</span>{' '}
+                  <span className="text-gray-600">{product.registration_number}</span>
+                  {product.link && (
+                    <Link href={product.link} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700 underline">
+                      Xem giấy công bố sản phẩm
+                    </Link>
+                  )}
+                </div>
+              )}
+
               {product.package_size && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
                   <span className="text-gray-600">{product.package_size}</span>
+                </div>
+              )}
+
+              {product.manufacturer && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Nhà sản xuất:</span>{' '}
+                  <span className="text-gray-600">{product.manufacturer}</span>
+                </div>
+              )}
+
+              {product.origin && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Nước sản xuất:</span>{' '}
+                  <span className="text-gray-600">{product.origin}</span>
                 </div>
               )}
 
@@ -362,16 +428,21 @@ export function ProductDetailPageContent({
                   <span className="text-gray-600">{product.medicine.ingredients}</span>
                 </div>
               )}
+
+              {product.shelf_life && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Hạn sử dụng:</span>{' '}
+                  <span className="text-gray-600">{product.shelf_life}</span>
+                </div>
+              )}
             </div>
 
-            {/* Stock Status */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div className="text-sm font-medium text-gray-700">
                 Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
               </div>
             </div>
 
-            {/* Quantity Selector - Only show if not consult price */}
             {!isConsultPrice && product.in_stock > 0 && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -407,13 +478,10 @@ export function ProductDetailPageContent({
               </div>
             )}
 
-            {/* Action Buttons */}
             {isConsultPrice ? (
               <div className="flex flex-col gap-3 pt-2">
                 <Button
-                  onClick={() => {
-                    // TODO: Navigate to consultation page or open consultation modal
-                  }}
+                  onClick={() => {}}
                   className="w-full"
                   size="lg"
                 >
@@ -421,9 +489,7 @@ export function ProductDetailPageContent({
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    // TODO: Navigate to pharmacy finder
-                  }}
+                  onClick={() => {}}
                   className="w-full"
                   size="lg"
                 >
@@ -452,16 +518,31 @@ export function ProductDetailPageContent({
               </div>
             )}
 
-            {/* Additional Info */}
-            {product.medicine.adverse_effect && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <h3 className="mb-2 text-sm font-semibold text-amber-900">Chống chỉ định:</h3>
-                <p className="text-sm text-amber-800">{product.medicine.adverse_effect}</p>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-2">
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Đổi trả trong 30 ngày kể từ ngày mua hàng</span>
               </div>
-            )}
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Miễn phí 100% đổi thuốc</span>
+              </div>
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Miễn phí vận chuyển theo chính sách giao hàng</span>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
+      <div className="mt-6">
+        <ProductDescriptionSection product={product} />
+      </div>
+
+      {product && (
+        <>
+          <RelatedProducts currentProduct={product} />
+          <RecentlyViewed />
+        </>
+      )}
     </Container>
   )
 }
