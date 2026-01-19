@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, getProduct, getProductsByCategorySlug, getProductByCategoryAndMedicineSlug, ProductFilters, Product, ProductListResponse } from '../services/products'
+import { getProducts, getProduct, getProductsByCategorySlug, getProductByCategoryAndMedicineSlug, ProductFilters, Product, ProductListResponse, CategoryProductsResponse } from '../services/products'
 
 export function useProducts(filters?: ProductFilters) {
   return useQuery<ProductListResponse | undefined, Error>({
@@ -43,7 +43,7 @@ export function useProductsByCategorySlug(
   categorySlug: string | undefined,
   filters?: Omit<ProductFilters, 'category'>
 ) {
-  return useQuery<ProductListResponse | undefined, Error>({
+  return useQuery<CategoryProductsResponse | undefined, Error>({
     queryKey: ['products-by-category-slug', categorySlug, filters],
     queryFn: async () => {
       if (!categorySlug) {
