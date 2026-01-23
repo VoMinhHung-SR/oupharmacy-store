@@ -8,12 +8,30 @@ export interface CategoryLevel2 {
   total?: number
 }
 
+export interface ProductMinimal {
+  id: number
+  medicine_id: number
+  name: string
+  slug: string
+  thumbnail: string | null
+  price_value: number
+  original_price_value: number | null
+  discount_percent: number
+  package_size: string | null
+  in_stock: number
+  is_out_of_stock: boolean
+  is_hot: boolean
+  product_ranking: number
+  badges: string[]
+}
+
 export interface CategoryLevel1 {
   id: number
   name: string
   slug: string
   path_slug: string
   level2: CategoryLevel2[]
+  top_products?: ProductMinimal[]
 }
 
 export interface CategoryLevel0 {
@@ -54,7 +72,7 @@ export async function getCategory(id: number) {
 export async function getCategoriesSSG(): Promise<CategoryLevel0[]> {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/store'
   const url = `${BASE_URL}/categories/`
-  
+
   try {
     const response = await fetch(url, {
       method: 'GET',
