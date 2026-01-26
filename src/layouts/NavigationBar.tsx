@@ -24,6 +24,7 @@ interface ProductMinimal {
   medicine_id: number
   name: string
   slug: string
+  web_slug: string
   thumbnail: string | null
   price_value: number
   original_price_value: number | null
@@ -128,7 +129,7 @@ const Level2Items: React.FC<Level2ItemsProps> = ({ items, hasMore, viewMoreHref 
 const ProductCard: React.FC<{ product: ProductMinimal }> = ({ product }) => {
   return (
     <Link
-      href={`/medicine/${product.slug}`}
+      href={product.web_slug}
       className="flex flex-col gap-2 p-2 border-2 border-transparent hover:border-primary-500 rounded-lg transition-all group"
     >
       <div className="aspect-square relative overflow-hidden rounded-md bg-gray-100">
@@ -271,7 +272,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const dropdownWidth = hasAnyLevel2 ? '1000px' : '280px'
   const bridgeWidth = hasAnyLevel2 ? '1000px' : '280px'
-
   return (
     <>
       <div
