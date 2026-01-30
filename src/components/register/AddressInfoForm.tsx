@@ -1,14 +1,21 @@
 'use client'
 import React, { useEffect } from 'react'
 import { Controller, Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
-import type { RegisterFormData } from '@/lib/validations/auth'
 import { getDistrictsByCity, type City } from '@/lib/services/location'
 
+interface AddressFormData {
+  location: {
+    city: number
+    district: number
+    address: string
+  }
+}
+
 interface AddressInfoFormProps {
-  control: Control<RegisterFormData>
-  errors: FieldErrors<RegisterFormData>
-  setValue: UseFormSetValue<RegisterFormData>
-  watch: UseFormWatch<RegisterFormData>
+  control: Control<AddressFormData>
+  errors: FieldErrors<AddressFormData>
+  setValue: UseFormSetValue<AddressFormData>
+  watch: UseFormWatch<AddressFormData>
   isLoading: boolean
   cities: City[]
   onCityChange?: (cityId: number) => void
@@ -71,9 +78,8 @@ export default function AddressInfoForm({
                   field.onChange(value)
                   setValue('location.district', -1)
                 }}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
-                  errors.location?.city ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.city ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                  }`}
                 disabled={isLoading}
               >
                 <option value={-1}>Chọn thành phố</option>
@@ -105,9 +111,8 @@ export default function AddressInfoForm({
                   field.onChange(Number(e.target.value))
                 }}
                 disabled={!selectedCity || selectedCity <= 0 || isLoading}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
-                  errors.location?.district ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.district ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                  }`}
               >
                 <option value={-1}>Chọn quận/huyện</option>
                 {districts.map((district) => (
@@ -143,9 +148,8 @@ export default function AddressInfoForm({
                   onAddressInputChange(e.target.value)
                 }
               }}
-              className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
-                errors.location?.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                }`}
               disabled={isLoading}
             />
           )}

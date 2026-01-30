@@ -16,9 +16,9 @@ import { ArrowLeftIcon, LocationIcon, UserIcon, XIcon } from '@/components/icons
 import Image from 'next/image'
 
 const profileSchema = Yup.object().shape({
-  first_name: Yup.string().trim().max(150, 'Tên không được vượt quá 150 ký tự'),
-  last_name: Yup.string().trim().max(150, 'Họ không được vượt quá 150 ký tự'),
-  name: Yup.string().trim().max(254, 'Tên đầy đủ không được vượt quá 254 ký tự'),
+  first_name: Yup.string().trim().nullable().defined().max(150, 'Tên không được vượt quá 150 ký tự'),
+  last_name: Yup.string().trim().nullable().defined().max(150, 'Họ không được vượt quá 150 ký tự'),
+  name: Yup.string().trim().nullable().defined().max(254, 'Tên đầy đủ không được vượt quá 254 ký tự'),
   email: Yup.string()
     .trim()
     .required('Vui lòng nhập email')
@@ -26,6 +26,8 @@ const profileSchema = Yup.object().shape({
     .matches(REGEX_EMAIL, 'Email không hợp lệ'),
   phone_number: Yup.string()
     .trim()
+    .nullable()
+    .defined()
     .matches(REGEX_PHONE_NUMBER, 'Số điện thoại không hợp lệ'),
 })
 
@@ -87,7 +89,7 @@ export default function ProfilePage() {
     if (saved) {
       try {
         setAddresses(JSON.parse(saved))
-      } catch {}
+      } catch { }
     }
   }, [])
 
@@ -99,11 +101,18 @@ export default function ProfilePage() {
 
     setLoading(true)
     try {
-      const response = await updateProfile(user.id, data, token)
+      const updateData = {
+        first_name: data.first_name ?? undefined,
+        last_name: data.last_name ?? undefined,
+        name: data.name ?? undefined,
+        email: data.email,
+        phone_number: data.phone_number ?? undefined,
+      }
+      const response = await updateProfile(user.id, updateData, token)
       if (response.error) {
         throw new Error(response.error)
       }
-      
+
       await refreshUser()
       toastSuccess('Cập nhật thông tin thành công')
     } catch (error: any) {
@@ -232,9 +241,8 @@ export default function ProfilePage() {
                   id="first_name"
                   type="text"
                   {...register('first_name')}
-                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                    errors.first_name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.first_name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                    }`}
                   disabled={loading}
                 />
                 {errors.first_name && (
@@ -250,9 +258,8 @@ export default function ProfilePage() {
                   id="last_name"
                   type="text"
                   {...register('last_name')}
-                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                    errors.last_name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.last_name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                    }`}
                   disabled={loading}
                 />
                 {errors.last_name && (
@@ -268,9 +275,8 @@ export default function ProfilePage() {
                   id="name"
                   type="text"
                   {...register('name')}
-                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                    errors.name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                    }`}
                   disabled={loading}
                 />
                 {errors.name && (
@@ -286,9 +292,8 @@ export default function ProfilePage() {
                   id="email"
                   type="email"
                   {...register('email')}
-                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                    errors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                    }`}
                   disabled={loading}
                 />
                 {errors.email && (
@@ -305,9 +310,8 @@ export default function ProfilePage() {
                   type="tel"
                   {...register('phone_number')}
                   placeholder="0123456789"
-                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                    errors.phone_number ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.phone_number ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                    }`}
                   disabled={loading}
                 />
                 {errors.phone_number && (

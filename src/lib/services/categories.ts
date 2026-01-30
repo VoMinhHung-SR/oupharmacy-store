@@ -23,6 +23,7 @@ export interface ProductMinimal {
   is_hot: boolean
   product_ranking: number
   badges: string[]
+  web_slug: string
 }
 
 export interface CategoryLevel1 {
