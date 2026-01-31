@@ -40,7 +40,7 @@ export default async function NavigationBarWrapper() {
         })) || [],
         topProducts: level1.top_products?.map((p) => ({
           ...p,
-          web_slug: p.web_slug || `/${level0.path_slug || level0.slug}/${level1.path_slug || level1.slug}/${p.slug}`
+          web_slug: p.web_slug ? (p.web_slug.startsWith('/') ? p.web_slug : `/${p.web_slug}`) : `/${level0.path_slug || level0.slug}/${level1.path_slug || level1.slug}/${p.slug}`
         })) || [],
       }
     }) || [],
