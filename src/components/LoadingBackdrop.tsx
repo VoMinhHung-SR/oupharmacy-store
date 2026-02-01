@@ -14,12 +14,12 @@ interface LoadingBackdropProps {
 export const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
     isOpen,
     loadingText,
-    opacity = 0.5,
+    opacity = 0.3,
     size = 'md',
     zIndex = 9999,
 }) => {
     const [mounted, setMounted] = useState(false)
-    
+
     useEffect(() => {
         setMounted(true)
     }, [])
@@ -48,7 +48,7 @@ export const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
     }
     const sizeClasses = {
         sm: 'w-8 h-8 border-2',
-        md: 'w-12 h-12 border-3',
+        md: 'w-12 h-12 border-[3px]',
         lg: 'w-16 h-16 border-4',
     }
 
@@ -56,31 +56,25 @@ export const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
 
     return createPortal(
         <div
-            className="fixed inset-0 flex items-center justify-center transition-opacity duration-300"
+            className="fixed inset-0 flex items-center justify-center"
             style={{
-                backgroundColor: `rgba(0, 0, 0, ${opacity})`,
-                backdropFilter: 'blur(4px)',
-                WebkitBackdropFilter: 'blur(4px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
                 zIndex,
             }}
             role="dialog"
             aria-modal="true"
             aria-label="Loading"
         >
-            <div className="flex flex-col items-center gap-4 animate-fadeIn">
-                {/* Spinner */}
+            <div className="flex flex-col items-center gap-4">
+                {/* Spinner Xanh Primary */}
                 <div
-                    className={`${spinnerSize} border-primary-200 border-t-primary-600 rounded-full animate-spin`}
+                    className={`${spinnerSize} border-gray-100 border-t-primary-500 rounded-full animate-spin shadow-sm`}
+                    style={{ borderTopColor: '#0284c7' }} // Ensure primary color is used
                     role="status"
                     aria-live="polite"
                 />
-
-                {/* Loading Text */}
-                {loadingText && (
-                    <p className="text-white text-sm font-medium animate-pulse">
-                        {loadingText}
-                    </p>
-                )}
             </div>
         </div>,
         document.body
