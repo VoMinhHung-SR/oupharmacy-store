@@ -8,12 +8,15 @@ interface Product {
   id: string
   name: string
   price: number
+  price_display?: string
   originalPrice?: number
   discount?: number
   image_url?: string
   packaging?: string
   medicine_unit_id?: number
   in_stock?: number
+  category_slug?: string
+  medicine_slug?: string
 }
 
 interface BestsellingProductsProps {

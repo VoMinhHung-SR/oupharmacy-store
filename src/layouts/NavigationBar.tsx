@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import Container from '@/components/Container'
+import { LoadingBackdrop } from '@/components/LoadingBackdrop'
 
 interface NavigationCategoryLevel2 {
   id: number
@@ -126,10 +128,16 @@ const Level2Items: React.FC<Level2ItemsProps> = ({ items, hasMore, viewMoreHref 
   )
 }
 
-const ProductCard: React.FC<{ product: ProductMinimal }> = ({ product }) => {
+const ProductCard: React.FC<{ product: ProductMinimal; onNavigate: () => void }> = ({ product, onNavigate }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Trigger loading state
+    onNavigate()
+  }
+
   return (
     <Link
       href={product.web_slug}
+      onClick={handleClick}
       className="flex flex-col gap-2 p-2 border-2 border-transparent hover:border-primary-500 rounded-lg transition-all group"
     >
       <div className="aspect-square relative overflow-hidden rounded-md bg-gray-100">
@@ -166,7 +174,7 @@ const ProductCard: React.FC<{ product: ProductMinimal }> = ({ product }) => {
   )
 }
 
-const TopProducts: React.FC<{ products: ProductMinimal[]; categoryHref: string }> = ({ products, categoryHref }) => {
+const TopProducts: React.FC<{ products: ProductMinimal[]; categoryHref: string; onNavigate: () => void }> = ({ products, categoryHref, onNavigate }) => {
   if (!products || products.length === 0) return null
 
   return (
@@ -185,7 +193,7 @@ const TopProducts: React.FC<{ products: ProductMinimal[]; categoryHref: string }
       </div>
       <div className="grid grid-cols-5 gap-4">
         {products.slice(0, 5).map(product => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} onNavigate={onNavigate} />
         ))}
       </div>
     </div>
@@ -199,6 +207,7 @@ interface DropdownProps {
   position: { top: number; left: number }
   onLevel1Hover: (id: number) => void
   onClose: () => void
+  onProductNavigate: () => void
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -206,7 +215,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   hoveredLevel1Id,
   position,
   onLevel1Hover,
-  onClose
+  onClose,
+  onProductNavigate
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const bridgeRef = useRef<HTMLDivElement>(null)
@@ -325,6 +335,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                     <TopProducts
                       products={activeLevel1.topProducts}
                       categoryHref={activeLevel1.href}
+                      onNavigate={onProductNavigate}
                     />
                   </div>
                 )}
@@ -347,14 +358,22 @@ const Dropdown: React.FC<DropdownProps> = ({
 }
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] }) => {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null)
   const [hoveredLevel1Id, setHoveredLevel1Id] = useState<number | null>(null)
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null)
+  const [isNavigating, setIsNavigating] = useState(false)
   const categoryRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Auto-hide loading khi route thay đổi
+  useEffect(() => {
+    setIsNavigating(false)
+  }, [pathname, searchParams])
 
   const checkScrollButtons = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -478,103 +497,120 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
     setDropdownPosition(null)
   }, [])
 
+  const handleProductNavigate = useCallback(() => {
+    setIsNavigating(true)
+    // Close dropdown khi navigate
+    setHoveredCategoryId(null)
+    setHoveredLevel1Id(null)
+    setDropdownPosition(null)
+  }, [])
+
   const hoveredCategory = useMemo(() => {
     return categories.find(cat => cat.id === hoveredCategoryId)
   }, [categories, hoveredCategoryId])
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm relative z-20" style={{ overflow: 'visible' }}>
-      <Container className="relative" style={{ overflow: 'visible' }}>
-        <div className="flex items-center gap-0 relative" style={{ overflow: 'visible' }}>
-          {canScrollLeft && (
-            <button
-              onClick={() => scroll('left')}
-              className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-l-lg transition-colors h-full flex items-center"
-              aria-label="Scroll left"
+    <>
+      <nav className="bg-white border-b border-gray-200 shadow-sm relative z-20" style={{ overflow: 'visible' }}>
+        <Container className="relative" style={{ overflow: 'visible' }}>
+          <div className="flex items-center gap-0 relative" style={{ overflow: 'visible' }}>
+            {canScrollLeft && (
+              <button
+                onClick={() => scroll('left')}
+                className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-l-lg transition-colors h-full flex items-center"
+                aria-label="Scroll left"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            <div
+              ref={scrollContainerRef}
+              className="flex items-center gap-6 overflow-x-auto overflow-y-visible scrollbar-hide flex-1 min-w-0"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          )}
+              {categories.map((category) => {
+                const hasChildren = category.children && category.children.length > 0
+                const isHovered = hoveredCategoryId === category.id
 
-          <div
-            ref={scrollContainerRef}
-            className="flex items-center gap-6 overflow-x-auto overflow-y-visible scrollbar-hide flex-1 min-w-0"
-          >
-            {categories.map((category) => {
-              const hasChildren = category.children && category.children.length > 0
-              const isHovered = hoveredCategoryId === category.id
-
-              return (
-                <div
-                  key={category.id}
-                  data-category-id={category.id}
-                  ref={(el) => {
-                    if (el) {
-                      categoryRefs.current.set(category.id, el)
-                    } else {
-                      categoryRefs.current.delete(category.id)
-                    }
-                  }}
-                  className="relative"
-                  onMouseEnter={() => {
-                    if (hasChildren) {
-                      handleCategoryMouseEnter(category.id)
-                    }
-                  }}
-                  onMouseLeave={handleCategoryMouseLeave}
-                >
-                  <Link
-                    href={category.href}
-                    className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-all whitespace-nowrap ${isHovered ? 'text-primary-700 border-primary-700' : ''
-                      }`}
+                return (
+                  <div
+                    key={category.id}
+                    data-category-id={category.id}
+                    ref={(el) => {
+                      if (el) {
+                        categoryRefs.current.set(category.id, el)
+                      } else {
+                        categoryRefs.current.delete(category.id)
+                      }
+                    }}
+                    className="relative"
+                    onMouseEnter={() => {
+                      if (hasChildren) {
+                        handleCategoryMouseEnter(category.id)
+                      }
+                    }}
+                    onMouseLeave={handleCategoryMouseLeave}
                   >
-                    <span className="text-sm font-medium">{category.name}</span>
-                    {hasChildren && (
-                      <svg
-                        className={`w-4 h-4 transition-transform ${isHovered ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Dropdown menu */}
-          {hoveredCategoryId !== null && dropdownPosition && hoveredCategory && (
-            <div data-dropdown>
-              <Dropdown
-                category={hoveredCategory}
-                hoveredLevel1Id={hoveredLevel1Id}
-                position={dropdownPosition}
-                onLevel1Hover={handleLevel1Hover}
-                onClose={handleDropdownClose}
-              />
+                    <Link
+                      href={category.href}
+                      className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-all whitespace-nowrap ${isHovered ? 'text-primary-700 border-primary-700' : ''
+                        }`}
+                    >
+                      <span className="text-sm font-medium">{category.name}</span>
+                      {hasChildren && (
+                        <svg
+                          className={`w-4 h-4 transition-transform ${isHovered ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </Link>
+                  </div>
+                )
+              })}
             </div>
-          )}
 
-          {/* Right scroll button */}
-          {canScrollRight && (
-            <button
-              onClick={() => scroll('right')}
-              className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-r-lg transition-colors h-full flex items-center"
-              aria-label="Scroll right"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          )}
-        </div>
-      </Container>
-    </nav>
+            {/* Dropdown menu */}
+            {hoveredCategoryId !== null && dropdownPosition && hoveredCategory && (
+              <div data-dropdown>
+                <Dropdown
+                  category={hoveredCategory}
+                  hoveredLevel1Id={hoveredLevel1Id}
+                  position={dropdownPosition}
+                  onLevel1Hover={handleLevel1Hover}
+                  onClose={handleDropdownClose}
+                  onProductNavigate={handleProductNavigate}
+                />
+              </div>
+            )}
+
+            {/* Right scroll button */}
+            {canScrollRight && (
+              <button
+                onClick={() => scroll('right')}
+                className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-r-lg transition-colors h-full flex items-center"
+                aria-label="Scroll right"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </Container>
+      </nav>
+
+      {/* Loading Backdrop */}
+      <LoadingBackdrop
+        isOpen={isNavigating}
+        size="md"
+      />
+    </>
   )
 }
 
