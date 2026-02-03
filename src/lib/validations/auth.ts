@@ -48,7 +48,7 @@ export const registerSchema = Yup.object().shape({
     .trim()
     .required('Vui lòng nhập số điện thoại')
     .matches(REGEX_PHONE_NUMBER, 'Số điện thoại không hợp lệ'),
-  dob: Yup.string().trim().nullable(),
+  dob: Yup.string().trim().nullable().defined(),
   gender: Yup.number().min(0).max(2).default(0),
 })
 

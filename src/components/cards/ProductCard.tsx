@@ -12,7 +12,7 @@ interface ProductCardProps {
   product: {
     id: string
     name: string
-    price_display: string
+    price_display?: string
     price: number
     originalPrice?: number
     discount?: number
@@ -35,7 +35,6 @@ const getProductLink = (product: ProductCardProps['product']): string | null => 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
-  
   const discount = useMemo(() => {
     if (product.discount) return product.discount
     if (product.originalPrice && product.originalPrice > product.price) {
@@ -95,7 +94,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       window.location.href = productLink
     }
   }
-  
   // Nếu không có link, hiển thị thông báo thay vì crash
   if (!productLink) {
     return (
@@ -143,7 +141,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700 min-h-[2.5rem]">
             {product.name}
           </div>
-          
           {isConsultPrice ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
               <p className="text-xs text-amber-800">
