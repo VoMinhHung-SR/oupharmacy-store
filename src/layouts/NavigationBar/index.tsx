@@ -249,7 +249,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                   >
                     <Link
                       href={category.href}
-                      className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded ${
+                      className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
                         isHovered ? 'text-primary-700 border-primary-700' : ''
                       }`}
                       aria-haspopup={hasChildren ? 'true' : undefined}
