@@ -4,15 +4,16 @@ import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useAuth } from '@/contexts/AuthContext'
 import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { toastError } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
-import { Button } from '@/components/Button'
 import Breadcrumb from '@/components/Breadcrumb'
 
-export default function CheckoutInformationPage() {
+export default function CheckoutThongTinPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const { information, setInformation } = useCheckout()
   const { items, total } = useCart()
   const [loading, setLoading] = useState(false)
@@ -33,7 +34,6 @@ export default function CheckoutInformationPage() {
     },
   })
 
-  // Load saved information if available
   useEffect(() => {
     if (information) {
       setValue('name', information.name)
@@ -43,19 +43,28 @@ export default function CheckoutInformationPage() {
     }
   }, [information, setValue])
 
+  useEffect(() => {
+    if (information || !user) return
+    const name =
+      user.name ||
+      [user.first_name, user.last_name].filter(Boolean).join(' ').trim() ||
+      user.username ||
+      ''
+    if (name) setValue('name', name)
+    if (user.email) setValue('email', user.email)
+    if (user.phone_number) setValue('phone', user.phone_number)
+  }, [user, information, setValue])
+
   const onSubmit = async (data: CheckoutInformationFormData) => {
     setLoading(true)
     try {
-      // Save information to context
       setInformation({
         name: data.name,
         phone: data.phone,
         email: data.email,
         address: data.address,
       })
-
-      // Navigate to shipping page
-      router.push('/checkout/shipping')
+      router.push('/don-hang/van-chuyen')
     } catch (err: any) {
       const errorMsg = err.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
       toastError(errorMsg)
@@ -64,7 +73,6 @@ export default function CheckoutInformationPage() {
     }
   }
 
-  // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0) {
       router.push('/gio-hang')
@@ -201,7 +209,6 @@ export default function CheckoutInformationPage() {
           </div>
         </form>
 
-        {/* Order Summary */}
         <div className="rounded-lg border bg-white p-4 h-fit">
           <h2 className="text-lg font-semibold mb-4">Tóm tắt đơn hàng</h2>
           <div className="space-y-3 mb-4">

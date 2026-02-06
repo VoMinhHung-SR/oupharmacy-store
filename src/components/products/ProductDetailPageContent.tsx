@@ -89,7 +89,7 @@ export function ProductDetailPageContent({
       
       if (itemInCart && itemInCart.qty >= expectedQty) {
         pendingBuyNowRef.current = null
-        router.push('/checkout')
+        router.push('/don-hang')
       }
     }
   }, [items, router])

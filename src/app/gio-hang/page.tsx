@@ -228,7 +228,7 @@ export default function CartPage() {
 
                     <div className="space-y-3">
                       <Link
-                        href="/checkout"
+                        href="/don-hang/thanh-toan"
                         className="block w-full rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white hover:bg-primary-700 transition-colors"
                       >
                         Thanh toán
