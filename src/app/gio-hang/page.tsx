@@ -5,7 +5,7 @@ import { Button } from '@/components/Button'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Container } from '@/components/Container'
-import { ImagePlaceholderIcon } from '@/components/icons'
+import { ChevronLeftIcon, CartIcon, ImagePlaceholderIcon } from '@/components/icons'
 
 export default function CartPage() {
   const { items, remove, total, clear, updateQuantity } = useCart()
@@ -51,21 +51,16 @@ export default function CartPage() {
             href="/" 
             className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeftIcon className="w-5 h-5" />
             <span className="text-sm font-medium">Tiếp tục mua sắm</span>
           </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Giỏ hàng</h1>
           <div className="w-32"></div> {/* Spacer for centering */}
         </div>
 
         {items.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
             <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+              <CartIcon className="w-16 h-16 mx-auto" strokeWidth={1.5} />
             </div>
             <p className="text-gray-600 mb-4">Chưa có sản phẩm nào trong giỏ hàng</p>
             <Link 

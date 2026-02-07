@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { toastError } from '@/lib/utils/toast'
 import Breadcrumb from '@/components/Breadcrumb'
+import { Container } from '@/components/Container'
 
 export default function CheckoutVanChuyenPage() {
   const router = useRouter()
@@ -45,7 +46,7 @@ export default function CheckoutVanChuyenPage() {
   }
 
   return (
-    <div className="space-y-6 py-8 px-4">
+    <Container className="space-y-6 py-8">
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },
@@ -58,7 +59,7 @@ export default function CheckoutVanChuyenPage() {
       <h1 className="text-2xl font-semibold text-gray-900">Phương thức vận chuyển</h1>
 
       <div className="grid gap-6 md:grid-cols-[1fr_320px]">
-        <div className="space-y-4 rounded-lg border bg-white p-6">
+        <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
           {methodsLoading && (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" aria-busy="true" />
@@ -124,16 +125,16 @@ export default function CheckoutVanChuyenPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border bg-white p-4 h-fit">
-          <h2 className="text-lg font-semibold mb-4">Tóm tắt đơn hàng</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 h-fit">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h2>
           <div className="space-y-3 mb-4">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <div className="flex-1">
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-gray-600">x{item.qty}</div>
+                  <div className="font-medium text-gray-900">{item.name}</div>
+                  <div className="text-gray-700">x{item.qty}</div>
                 </div>
-                <div className="text-right font-medium">
+                <div className="text-right font-medium text-gray-900">
                   {(item.price * item.qty).toLocaleString('vi-VN')}₫
                 </div>
               </div>
@@ -142,21 +143,21 @@ export default function CheckoutVanChuyenPage() {
           <div className="border-t pt-3 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Tạm tính</span>
-              <span>{total.toLocaleString('vi-VN')}₫</span>
+              <span className="text-gray-900">{total.toLocaleString('vi-VN')}₫</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Phí vận chuyển</span>
-              <span>
+              <span className="text-gray-900">
                 {selectedMethod ? `${shippingFee.toLocaleString('vi-VN')}₫` : 'Chọn phương thức'}
               </span>
             </div>
             <div className="flex justify-between items-center pt-2 border-t">
-              <span className="font-semibold">Tổng cộng</span>
-              <span className="text-lg font-semibold">{orderTotal.toLocaleString('vi-VN')}₫</span>
+              <span className="font-semibold text-gray-900">Tổng cộng</span>
+              <span className="text-lg font-semibold text-gray-900">{orderTotal.toLocaleString('vi-VN')}₫</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }

@@ -10,6 +10,7 @@ import { useCart } from '@/contexts/CartContext'
 import { toastError } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
 import Breadcrumb from '@/components/Breadcrumb'
+import { Container } from '@/components/Container'
 
 export default function CheckoutThongTinPage() {
   const router = useRouter()
@@ -84,7 +85,7 @@ export default function CheckoutThongTinPage() {
   }
 
   return (
-    <div className="space-y-6 py-8 px-4">
+    <Container className="space-y-6 py-8">
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },
@@ -97,7 +98,7 @@ export default function CheckoutThongTinPage() {
 
       <div className="grid gap-6 md:grid-cols-[1fr_320px]">
         <form
-          className="space-y-4 rounded-lg border bg-white p-6"
+          className="space-y-4 rounded-lg border border-gray-200 bg-white p-6"
           onSubmit={handleSubmit(onSubmit, (errors) => {
             const firstError = Object.values(errors)[0]
             if (firstError?.message) {
@@ -209,29 +210,29 @@ export default function CheckoutThongTinPage() {
           </div>
         </form>
 
-        <div className="rounded-lg border bg-white p-4 h-fit">
-          <h2 className="text-lg font-semibold mb-4">Tóm tắt đơn hàng</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 h-fit">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h2>
           <div className="space-y-3 mb-4">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <div className="flex-1">
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-gray-600">x{item.qty}</div>
+                  <div className="font-medium text-gray-900">{item.name}</div>
+                  <div className="text-gray-700">x{item.qty}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium">{(item.price * item.qty).toLocaleString('vi-VN')}₫</div>
+                  <div className="font-medium text-gray-900">{(item.price * item.qty).toLocaleString('vi-VN')}₫</div>
                 </div>
               </div>
             ))}
           </div>
           <div className="border-t pt-3">
             <div className="flex justify-between items-center">
-              <div className="font-semibold">Tạm tính</div>
-              <div className="text-lg font-semibold">{total.toLocaleString('vi-VN')}₫</div>
+              <div className="font-semibold text-gray-900">Tạm tính</div>
+              <div className="text-lg font-semibold text-gray-900">{total.toLocaleString('vi-VN')}₫</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }

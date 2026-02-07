@@ -7,6 +7,7 @@ import Container from '@/components/Container'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
+import { CartIcon } from '@/components/icons'
 import { useCart } from '@/contexts/CartContext'
 
 export const Header: React.FC = () => {
@@ -72,7 +73,7 @@ export const Header: React.FC = () => {
             </form>
 
             {/* Right actions */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-4 flex-shrink-0">
               {isAuthenticated ? (
                 <AvatarBadge />
               ) : (
@@ -85,11 +86,15 @@ export const Header: React.FC = () => {
               )}
               <Link
                 href="/gio-hang"
-                className="relative px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
+                className="relative flex items-center gap-2 px-4 py-2 text-sm font-medium text-white hover:text-primary-100 hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
+                aria-label={t('cart')}
               >
-                {t('cart')}
+                <CartIcon className="w-5 h-5" strokeWidth={2} />
+                <span className="hidden sm:inline">{t('cart')}</span>
                 {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{items.length}</span>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center font-bold px-1">
+                    {items.length}
+                  </span>
                 )}
               </Link>
             </div>
