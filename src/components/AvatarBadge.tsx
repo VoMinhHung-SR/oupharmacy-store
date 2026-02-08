@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { useWishlist } from '@/contexts/WishlistContext'
+import { ChevronDownIcon } from '@/components/icons'
+import { AVATAR_STATUS } from '@/lib/constant'
 
 export const AvatarBadge: React.FC = () => {
   const { user, logout } = useAuth()
@@ -39,10 +41,13 @@ export const AvatarBadge: React.FC = () => {
     return user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'User'
   }
 
-  // Get user avatar
-  const getUserAvatar = () => {
+  // Get user avatar; treat USER_NULL / ERROR_CLOUDINARY as no avatar (show initials)
+  const getUserAvatar = (): string | null => {
     if (!user) return null
-    return user.avatar_path || user.avatar || null
+    const url = user.avatar_path || user.avatar || null
+    if (!url) return null
+    if (url === AVATAR_STATUS.USER_NULL || url === AVATAR_STATUS.ERROR_CLOUDINARY) return null
+    return url
   }
 
   // Get initials for avatar fallback
@@ -56,42 +61,38 @@ export const AvatarBadge: React.FC = () => {
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex-shrink-0 min-w-0 max-w-[200px]" ref={dropdownRef}>
       {/* Avatar Badge */}
       <button
+        type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+        className="flex items-center gap-2 h-10 px-3 py-2 rounded-full group hover:text-primary-100 transition-colors min-w-0 w-full max-w-full"
       >
-        <div className="relative">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center">
+        <div className="relative flex-shrink-0">
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center shrink-0">
             {getUserAvatar() ? (
               <Image
                 src={getUserAvatar()!}
                 alt={getUserDisplayName()}
-                width={40}
-                height={40}
-                className="object-cover"
+                width={32}
+                height={32}
+                className="object-cover w-full h-full"
               />
             ) : (
-              <span className="text-white font-semibold text-sm">
+              <span className="text-white font-semibold text-xs leading-none select-none">
                 {getUserInitials()}
               </span>
             )}
           </div>
-          {/* Badge indicator - có thể dùng để hiển thị notification hoặc status */}
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-primary-700 rounded-full" aria-hidden />
         </div>
-        <span className="hidden md:block text-sm font-medium text-white max-w-[120px] truncate">
+        <span className="hidden md:block text-sm font-medium group-hover:text-primary-100 text-white truncate min-w-0 text-left max-w-[100px]">
           {getUserDisplayName()}
         </span>
-        <svg
-          className={`w-4 h-4 text-white transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <ChevronDownIcon
+          className="w-4 h-4 text-white shrink-0 group-hover:text-primary-100"
+          rotated={isDropdownOpen}
+        />
       </button>
 
       {/* Dropdown Menu */}
