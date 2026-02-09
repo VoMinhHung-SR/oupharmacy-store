@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   // Protected routes - authentication
   // Note: We don't redirect to /login anymore, the client-side will open login modal
   // The protected routes will handle authentication check on client-side
-  const protectedPaths = ['/checkout', '/tai-khoan']
+  const protectedPaths = ['/don-hang', '/tai-khoan']
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   
   // We still check token in middleware for server-side protection
@@ -32,7 +32,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/(vi|en)/:path*',
-    '/checkout/:path*', // Protected checkout routes
+    '/don-hang/:path*', // Protected checkout routes
     '/tai-khoan/:path*',  // Protected account routes
   ]
 }

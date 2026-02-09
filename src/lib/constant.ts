@@ -89,3 +89,19 @@ export const PRODUCT_FILTERS = {
 
 export const PRICE_CONSULT = 'CONSULT' as const
 export const EMAIL_SUPPORT = 'oupharmacymanagement@gmail.com' as const
+
+// NavigationBar dropdown (viewport-fit best practice)
+export const NAVBAR_DROPDOWN = {
+  GAP: 8,
+  VIEWPORT_MARGIN: 16,
+  MIN_HEIGHT: 280,
+  WIDTH_SMALL: 280,
+  WIDTH_LARGE: 1000,
+  SCROLL_AMOUNT: 300,
+} as const
+
+export const AVATAR_STATUS = {
+  DEFAULT: 'https://res.cloudinary.com/dl6artkyb/image/upload/v1666353307/OUPharmacy/logo_oupharmacy_kz2yzd.png',
+  ERROR_CLOUDINARY: 'https://res.cloudinary.com/dl6artkyb/null',
+  USER_NULL: 'https://res.cloudinary.com/dl6artkyb/users/avatar/null',
+} as const
