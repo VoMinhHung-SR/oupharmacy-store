@@ -105,3 +105,10 @@ export const AVATAR_STATUS = {
   ERROR_CLOUDINARY: 'https://res.cloudinary.com/dl6artkyb/null',
   USER_NULL: 'https://res.cloudinary.com/dl6artkyb/users/avatar/null',
 } as const
+
+// Checkout Legacy Step Paths
+export const CHECKOUT_LEGACY_STEP_PATHS = [
+  '/don-hang/thong-tin',
+  '/don-hang/van-chuyen',
+  '/don-hang/thanh-toan',
+] as const

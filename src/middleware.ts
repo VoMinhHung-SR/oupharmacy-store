@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { CHECKOUT_LEGACY_STEP_PATHS } from './lib/constant'
+
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  
+
+  if (CHECKOUT_LEGACY_STEP_PATHS.includes(pathname as (typeof CHECKOUT_LEGACY_STEP_PATHS)[number])) {
+    return NextResponse.redirect(new URL('/don-hang', request.url))
+  }
+
   if (pathname.startsWith('/vi') || pathname.startsWith('/en')) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/(vi|en)/, '') || '/'
     return NextResponse.redirect(url)
   }
-  
+
   // Protected routes - authentication
   // Note: We don't redirect to /login anymore, the client-side will open login modal
   // The protected routes will handle authentication check on client-side

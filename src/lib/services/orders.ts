@@ -6,6 +6,8 @@ export interface OrderItem {
   quantity: number
   price: number
   subtotal?: number
+  name?: string
+  image_url?: string
 }
 
 export interface Order {
