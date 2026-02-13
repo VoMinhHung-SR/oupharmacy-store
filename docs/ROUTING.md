@@ -10,16 +10,13 @@
 - `/products/[id]` - Redirects to `/{category-slug}/{medicine-slug}` format
 
 ## Components
-hang
+
 - `ProductDetailPageContent` - Component cho product detail
 - `CategoryListingPageContent` - Component cho category listing
 
 ## Checkout Routes
 
-- `/don-hang` - Trang index thanh toán
-- `/don-hang/thong-tin` - Thông tin khách hàng
-- `/don-hang/van-chuyen` - Chọn phương thức vận chuyển
-- `/don-hang/thanh-toan` - Chọn phương thức thanh toán & đặt hàng
+- `/don-hang` - Trang thanh toán
 - `/don-hang/xac-nhan-don-hang` - Xác nhận đơn hàng (query: `order_id`)
 
 ## Examples
