@@ -54,3 +54,7 @@ export async function updateOrderStatus(orderId: number, status: Order['status']
   return apiPatch<Order>(`/orders/${orderId}/update-status/`, { status })
 }
 
+export async function cancelOrder(orderId: number) {
+  return apiPost<Order>(`/orders/${orderId}/cancel/`)
+}
+
