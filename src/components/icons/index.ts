@@ -23,4 +23,5 @@ export { XIcon } from './XIcon'
 export { GoogleIcon } from './GoogleIcon'
 export { CategoryIcon } from './CategoryIcon'
 export { CartIcon } from './CartIcon'
+export { SpinnerIcon } from './SpinnerIcon'
 

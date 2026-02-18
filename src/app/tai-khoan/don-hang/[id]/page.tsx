@@ -2,12 +2,13 @@
 
 import React, { useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useOrder } from '@/lib/hooks/useOrders'
+import { useOrder, useCancelOrder } from '@/lib/hooks/useOrders'
 import { Container } from '@/components/Container'
 import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import Image from 'next/image'
 import { ImagePlaceholderIcon, ArrowLeftIcon } from '@/components/icons'
+import { toastSuccess, toastError } from '@/lib/utils/toast'
 
 interface Props {
   params: { id: string }
@@ -26,6 +27,19 @@ export default function OrderDetailPage({ params }: Props) {
   const { openModal, isOpen } = useLoginModal()
   const orderId = parseInt(params.id)
   const { data: order, isLoading, error } = useOrder(orderId)
+  const cancelOrderMutation = useCancelOrder()
+
+  const handleCancelOrder = async () => {
+    if (!order || order.status !== 'PENDING') return
+    const confirmed = typeof window !== 'undefined' && window.confirm('Bạn có chắc muốn hủy đơn hàng này?')
+    if (!confirmed) return
+    try {
+      await cancelOrderMutation.mutateAsync(orderId)
+      toastSuccess('Đã hủy đơn hàng thành công.')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Hủy đơn hàng thất bại. Vui lòng thử lại.')
+    }
+  }
 
   useEffect(() => {
     // Only open modal if not loading, not authenticated, and modal is not already open
@@ -98,9 +112,21 @@ export default function OrderDetailPage({ params }: Props) {
     <div className="space-y-6">
             {/* Order Info Card */}
             <div className="rounded-lg border border-gray-200 bg-white p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 className="text-lg font-semibold text-gray-900">Thông tin đơn hàng</h2>
-                {getStatusBadge(order.status)}
+                <div className="flex items-center gap-2">
+                  {getStatusBadge(order.status)}
+                  {order.status === 'PENDING' && (
+                    <button
+                      type="button"
+                      onClick={handleCancelOrder}
+                      disabled={cancelOrderMutation.isPending}
+                      className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {cancelOrderMutation.isPending ? 'Đang xử lý...' : 'Hủy đơn hàng'}
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>

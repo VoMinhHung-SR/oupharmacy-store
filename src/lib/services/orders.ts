@@ -6,6 +6,8 @@ export interface OrderItem {
   quantity: number
   price: number
   subtotal?: number
+  name?: string
+  image_url?: string
 }
 
 export interface Order {
@@ -50,5 +52,9 @@ export async function createOrder(order: Order) {
 
 export async function updateOrderStatus(orderId: number, status: Order['status']) {
   return apiPatch<Order>(`/orders/${orderId}/update-status/`, { status })
+}
+
+export async function cancelOrder(orderId: number) {
+  return apiPost<Order>(`/orders/${orderId}/cancel/`)
 }
 

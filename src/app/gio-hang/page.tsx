@@ -54,7 +54,7 @@ export default function CartPage() {
             <ChevronLeftIcon className="w-5 h-5" />
             <span className="text-sm font-medium">Tiếp tục mua sắm</span>
           </Link>
-          <div className="w-32"></div> {/* Spacer for centering */}
+          <div className="w-32"></div>
         </div>
 
         {items.length === 0 ? (
@@ -160,7 +160,7 @@ export default function CartPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                                   </svg>
                                 </button>
-                                <span className="px-3 py-1.5 text-sm font-medium min-w-[3rem] text-center">
+                                <span className="px-3 py-1.5 text-sm font-medium min-w-[3rem] text-center text-gray-600">
                                   {item.qty}
                                 </span>
                                 <button
@@ -223,7 +223,7 @@ export default function CartPage() {
 
                     <div className="space-y-3">
                       <Link
-                        href="/don-hang/thanh-toan"
+                        href="/don-hang"
                         className="block w-full rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white hover:bg-primary-700 transition-colors"
                       >
                         Thanh toán

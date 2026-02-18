@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getOrders, getOrder, createOrder, updateOrderStatus, Order, OrderListResponse } from '../services/orders'
+import { getOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, Order, OrderListResponse } from '../services/orders'
 
 export function useOrders(userId?: number) {
   return useQuery<Order[] | OrderListResponse | undefined, Error>({
@@ -61,6 +61,24 @@ export function useUpdateOrderStatus() {
     onSuccess: (data, variables) => {
       // Invalidate cả order detail và orders list
       queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+  })
+}
+
+export function useCancelOrder() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await cancelOrder(orderId)
+      if (response.error) {
+        throw new Error(response.error)
+      }
+      return response.data
+    },
+    onSuccess: (_, orderId) => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
       queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
   })
