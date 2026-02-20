@@ -42,19 +42,19 @@ export async function getOrders(userId?: number) {
   return apiGet<OrderListResponse>('/orders/')
 }
 
-export async function getOrder(id: number) {
-  return apiGet<Order>(`/orders/${id}/`)
+export async function getOrder(orderNumber: string) {
+  return apiGet<Order>(`/orders/${orderNumber}/`)
 }
 
 export async function createOrder(order: Order) {
   return apiPost<Order>('/orders/', order)
 }
 
-export async function updateOrderStatus(orderId: number, status: Order['status']) {
-  return apiPatch<Order>(`/orders/${orderId}/update-status/`, { status })
+export async function updateOrderStatus(orderNumber: string, status: Order['status']) {
+  return apiPatch<Order>(`/orders/${orderNumber}/update-status/`, { status })
 }
 
-export async function cancelOrder(orderId: number) {
-  return apiPost<Order>(`/orders/${orderId}/cancel/`)
+export async function cancelOrder(orderNumber: string) {
+  return apiPost<Order>(`/orders/${orderNumber}/cancel/`)
 }
 

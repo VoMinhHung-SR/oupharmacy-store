@@ -150,12 +150,12 @@ export default function CheckoutPage() {
         address: formValues.address,
       })
       const created = await createOrderMutation.mutateAsync(payload)
-      const orderId = created?.id
       clearCart()
       clearCheckout()
-      router.push(
-        orderId != null ? `/don-hang/xac-nhan-don-hang?order_id=${orderId}` : '/don-hang/xac-nhan-don-hang'
-      )
+      const orderNumber = created?.order_number
+      const orderId = created?.id
+      const query = orderNumber ? `order_number=${orderNumber}` : orderId != null ? `order_id=${orderId}` : ''
+      router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Đặt hàng thất bại. Vui lòng thử lại.'
       toastError(message)

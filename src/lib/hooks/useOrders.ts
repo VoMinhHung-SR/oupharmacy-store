@@ -15,17 +15,17 @@ export function useOrders(userId?: number) {
   })
 }
 
-export function useOrder(id: number) {
+export function useOrder(orderNumber: string) {
   return useQuery<Order | undefined, Error>({
-    queryKey: ['order', id],
+    queryKey: ['order', orderNumber],
     queryFn: async () => {
-      const response = await getOrder(id)
+      const response = await getOrder(orderNumber)
       if (response.error) {
         throw new Error(response.error)
       }
       return response.data
     },
-    enabled: !!id,
+    enabled: !!orderNumber,
   })
 }
 
@@ -51,8 +51,8 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number; status: Order['status'] }) => {
-      const response = await updateOrderStatus(orderId, status)
+    mutationFn: async ({ orderNumber, status }: { orderNumber: string; status: Order['status'] }) => {
+      const response = await updateOrderStatus(orderNumber, status)
       if (response.error) {
         throw new Error(response.error)
       }
@@ -60,7 +60,7 @@ export function useUpdateOrderStatus() {
     },
     onSuccess: (data, variables) => {
       // Invalidate cả order detail và orders list
-      queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] })
+      queryClient.invalidateQueries({ queryKey: ['order', variables.orderNumber] })
       queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
   })
@@ -70,15 +70,15 @@ export function useCancelOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (orderId: number) => {
-      const response = await cancelOrder(orderId)
+    mutationFn: async (orderNumber: string) => {
+      const response = await cancelOrder(orderNumber)
       if (response.error) {
         throw new Error(response.error)
       }
       return response.data
     },
-    onSuccess: (_, orderId) => {
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
+    onSuccess: (_, orderNumber) => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderNumber] })
       queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
   })

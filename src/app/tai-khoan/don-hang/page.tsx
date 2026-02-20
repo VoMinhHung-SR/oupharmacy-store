@@ -139,7 +139,7 @@ export default function OrdersListPage() {
                       </td>
                       <td className="p-4 text-right">
                         <Link
-                          href={`/tai-khoan/don-hang/${order.id}`}
+                          href={`/tai-khoan/don-hang/${order.order_number ?? order.id}`}
                           className="text-primary-700 hover:text-primary-800 font-medium transition-colors"
                         >
                           Chi tiết

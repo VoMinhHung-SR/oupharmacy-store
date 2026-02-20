@@ -11,7 +11,7 @@ import { ImagePlaceholderIcon, ArrowLeftIcon } from '@/components/icons'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 
 interface Props {
-  params: { id: string }
+  params: { orderNumber: string }
 }
 
 const statusMap: Record<string, { label: string; color: string }> = {
@@ -25,8 +25,8 @@ const statusMap: Record<string, { label: string; color: string }> = {
 export default function OrderDetailPage({ params }: Props) {
   const { isAuthenticated, loading } = useAuth()
   const { openModal, isOpen } = useLoginModal()
-  const orderId = parseInt(params.id)
-  const { data: order, isLoading, error } = useOrder(orderId)
+  const orderNumber = params.orderNumber
+  const { data: order, isLoading, error } = useOrder(orderNumber)
   const cancelOrderMutation = useCancelOrder()
 
   const handleCancelOrder = async () => {
@@ -34,7 +34,7 @@ export default function OrderDetailPage({ params }: Props) {
     const confirmed = typeof window !== 'undefined' && window.confirm('Bạn có chắc muốn hủy đơn hàng này?')
     if (!confirmed) return
     try {
-      await cancelOrderMutation.mutateAsync(orderId)
+      await cancelOrderMutation.mutateAsync(orderNumber)
       toastSuccess('Đã hủy đơn hàng thành công.')
     } catch (err) {
       toastError(err instanceof Error ? err.message : 'Hủy đơn hàng thất bại. Vui lòng thử lại.')
@@ -44,9 +44,9 @@ export default function OrderDetailPage({ params }: Props) {
   useEffect(() => {
     // Only open modal if not loading, not authenticated, and modal is not already open
     if (!loading && !isAuthenticated && !isOpen) {
-      openModal(`/tai-khoan/don-hang/${params.id}`)
+      openModal(`/tai-khoan/don-hang/${params.orderNumber}`)
     }
-  }, [isAuthenticated, loading, openModal, isOpen, params.id])
+  }, [isAuthenticated, loading, openModal, isOpen, params.orderNumber])
 
   if (!isAuthenticated) {
     return null
@@ -86,7 +86,7 @@ export default function OrderDetailPage({ params }: Props) {
             <span className="text-sm font-medium">Quay lại danh sách</span>
           </Link>
           <h1 className="text-2xl font-semibold text-gray-900">
-            Chi tiết đơn hàng {order?.order_number || `#${orderId}`}
+            Chi tiết đơn hàng {order?.order_number ?? (order?.id != null ? `#${order.id}` : orderNumber)}
           </h1>
         </div>
 
