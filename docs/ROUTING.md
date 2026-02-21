@@ -17,7 +17,9 @@
 ## Checkout Routes
 
 - `/don-hang` - Trang thanh toán
-- `/don-hang/xac-nhan-don-hang` - Xác nhận đơn hàng (query: `order_id`)
+- `/don-hang/xac-nhan-don-hang` - Xác nhận đơn hàng (query: `order_number` ưu tiên, `order_id` fallback)
+- `/tai-khoan/don-hang` - Danh sách đơn hàng
+- `/tai-khoan/don-hang/[orderNumber]` - Chi tiết đơn hàng (dùng `order_number` hoặc `id`)
 
 ## Examples
 

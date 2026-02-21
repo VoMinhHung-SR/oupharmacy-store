@@ -100,10 +100,48 @@ export default function OrderDetailPage({ params }: Props) {
 
         {/* Error State */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-            <p className="text-red-800">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-red-800 mb-6">
               Có lỗi xảy ra khi tải thông tin đơn hàng: {error.message}
             </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/tai-khoan/don-hang"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Về danh sách đơn
+              </Link>
+              <Link
+                href="/"
+                className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Tiếp tục mua sắm
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Not found / empty state */}
+        {!isLoading && !error && !order && orderNumber && (
+          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h2>
+            <p className="text-gray-600 mb-6">
+              Mã đơn không tồn tại hoặc bạn không có quyền xem.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/tai-khoan/don-hang"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Về danh sách đơn
+              </Link>
+              <Link
+                href="/"
+                className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Tiếp tục mua sắm
+              </Link>
+            </div>
           </div>
         )}
 
