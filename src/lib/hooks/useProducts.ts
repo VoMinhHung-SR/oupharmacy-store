@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { getProducts, getProduct, getProductsByCategorySlug, getProductByCategoryAndMedicineSlug, ProductFilters, Product, ProductListResponse, CategoryProductsResponse } from '../services/products'
 
-export function useProducts(filters?: ProductFilters) {
+export function useProducts(filters?: ProductFilters, options?: { enabled?: boolean }) {
+  const enabled = options?.enabled !== false
   return useQuery<ProductListResponse | undefined, Error>({
     queryKey: ['products', filters],
     queryFn: async () => {
@@ -11,7 +12,7 @@ export function useProducts(filters?: ProductFilters) {
       }
       return response.data
     },
-    enabled: true,
+    enabled,
   })
 }
 

@@ -115,7 +115,7 @@ export function ProductDetailPageContent({
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/search' },
+            { label: 'Sản phẩm', href: '/tim-kiem' },
             { label: 'Đang tải...' },
           ]}
           className="py-4"
@@ -182,7 +182,7 @@ export function ProductDetailPageContent({
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/search' },
+            { label: 'Sản phẩm', href: '/tim-kiem' },
           ]}
           className="py-4"
         />
