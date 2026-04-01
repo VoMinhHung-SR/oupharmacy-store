@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, Product, ProductFilters } from '@/lib/services/products'
+import { getProducts, Product, ProductFilters, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Container } from '@/components/Container'
 
@@ -71,19 +71,18 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
             product.category?.slug || 
             product.category?.name?.toLowerCase().replace(/\s+/g, '-')
           
-          const medicineSlug = product.medicine.slug || 
-            product.medicine.name?.toLowerCase().replace(/\s+/g, '-')
+          const medicineSlug = getProductSlug(product)
 
           return (
             <ProductCard
               key={product.id}
               product={{
                 id: product.id.toString(),
-                name: product.medicine.name,
+                name: getProductName(product),
                 price_display: product.price_display || '',
                 price: product.price_value,
                 image_url: productImageUrl || undefined,
-                packaging: product.package_size,
+                packaging: getProductPackaging(product),
                 medicine_unit_id: product.id,
                 category_slug: categorySlug,
                 medicine_slug: medicineSlug,

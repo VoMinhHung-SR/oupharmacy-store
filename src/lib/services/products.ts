@@ -8,11 +8,23 @@ export interface Product {
   image?: string
   image_url?: string
   images?: string[]  
-  images_urls?: string[]  
   package_size?: string  
-  prices?: any[]  
-  price_obj?: any  
   medicine: {
+    id: number
+    name: string
+    mid?: string
+    slug?: string
+    web_name?: string
+    description?: string
+    ingredients?: string
+    usage?: string
+    dosage?: string
+    adverse_effect?: string
+    careful?: string
+    preservation?: string
+    brand_id?: number
+  }
+  product?: {
     id: number
     name: string
     mid?: string
@@ -49,7 +61,6 @@ export interface Product {
   manufacturer?: string
   shelf_life?: string
   specifications?: any
-  link?: string
   product_ranking?: number
   display_code?: number
   is_published?: boolean
@@ -134,6 +145,53 @@ export interface ProductFilters {
   page_size?: number
 }
 
+type RawProduct = any
+
+export function getProductEntity(product: Product) {
+  return product?.product || product?.medicine || ({} as NonNullable<Product["medicine"]>)
+}
+
+export function getProductName(product: Product) {
+  const entity = getProductEntity(product)
+  return entity.web_name || entity.name || 'Sản phẩm'
+}
+
+export function getProductSlug(product: Product) {
+  const entity = getProductEntity(product)
+  if (entity.slug) return entity.slug
+  if (!entity.name) return undefined
+  return entity.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
+export function getProductPackaging(product: Product) {
+  return product.package_size || (product as any).packing || (product as any).packaging || ''
+}
+
+function normalizeProduct(raw: RawProduct): Product {
+  const entity = raw?.product || raw?.medicine || {}
+  const packageSize = raw?.package_size ?? raw?.packing ?? raw?.packaging ?? null
+  const normalized: Product = {
+    ...raw,
+    medicine: entity,
+    product: entity,
+    package_size: packageSize,
+    price_value: Number(raw?.price_value ?? 0) || 0,
+    in_stock: Number(raw?.in_stock ?? 0) || 0,
+  }
+  return normalized
+}
+
+function normalizeProductListPayload(payload: ProductListResponse | CategoryProductsResponse | undefined) {
+  if (!payload) return payload
+  if (Array.isArray((payload as any).results)) {
+    return {
+      ...payload,
+      results: (payload as any).results.map(normalizeProduct),
+    }
+  }
+  return payload
+}
+
 /**
  * Build URLSearchParams from filters object
  */
@@ -156,11 +214,19 @@ export async function getProducts(filters?: ProductFilters) {
   const queryString = params.toString()
   const path = `/products/${queryString ? `?${queryString}` : ''}`
   
-  return apiGet<ProductListResponse>(path)
+  const res = await apiGet<ProductListResponse>(path)
+  return {
+    ...res,
+    data: normalizeProductListPayload(res.data as ProductListResponse | undefined) as ProductListResponse | undefined,
+  }
 }
 
 export async function getProduct(id: number) {
-  return apiGet<Product>(`/products/${id}/`)
+  const res = await apiGet<Product>(`/products/${id}/`)
+  return {
+    ...res,
+    data: res.data ? normalizeProduct(res.data as RawProduct) : undefined,
+  }
 }
 
 /**
@@ -179,7 +245,11 @@ export async function getProductsByCategorySlug(
   const queryString = params.toString()
   const path = `/${categorySlug}${queryString ? `?${queryString}` : ''}`
   
-  return apiGet<CategoryProductsResponse>(path)
+  const res = await apiGet<CategoryProductsResponse>(path)
+  return {
+    ...res,
+    data: normalizeProductListPayload(res.data as CategoryProductsResponse | undefined) as CategoryProductsResponse | undefined,
+  }
 }
 
 /**
@@ -195,6 +265,10 @@ export async function getProductByCategoryAndMedicineSlug(
   medicineSlug: string
 ): Promise<ApiResponse<Product>> {
   const path = `/${categorySlug}/${medicineSlug}`
-  return apiGet<Product>(path)
+  const res = await apiGet<Product>(path)
+  return {
+    ...res,
+    data: res.data ? normalizeProduct(res.data as RawProduct) : undefined,
+  }
 }
 

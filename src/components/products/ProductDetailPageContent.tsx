@@ -14,7 +14,7 @@ import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
-import { Product } from '@/lib/services/products'
+import { Product, getProductEntity, getProductName, getProductPackaging } from '@/lib/services/products'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -41,16 +41,19 @@ export function ProductDetailPageContent({
   const productImageUrl = product 
     ? (product.image_url || (productImages.length > 0 ? productImages[0] : null))
     : null
+  const productEntity = product ? getProductEntity(product) : null
+  const productName = product ? getProductName(product) : ''
+  const productPackaging = product ? getProductPackaging(product) : ''
 
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
     return {
       id: product.id.toString(),
       medicine_unit_id: product.id,
-      name: product.medicine.name,
+      name: productName,
       price: product.price_value,
       image_url: productImageUrl || product.image_url,
-      packaging: product.package_size,
+      packaging: productPackaging,
     }
   }
 
@@ -254,7 +257,7 @@ export function ProductDetailPageContent({
   }
 
   breadcrumbItems.push({
-    label: product.medicine.name,
+    label: productName,
     href: `/${categorySlug}/${medicineSlug}`,
   })
 
@@ -266,11 +269,11 @@ export function ProductDetailPageContent({
     toggleWishlist({
       id: product.id.toString(),
       medicine_unit_id: product.id,
-      name: product.medicine.name,
+      name: productName,
       price: product.price_value,
       price_display: product.price_display,
       image_url: productImageUrl || product.image_url,
-      packaging: product.package_size,
+      packaging: productPackaging,
       category_slug: categorySlug,
       medicine_slug: medicineSlug,
     })
@@ -289,7 +292,7 @@ export function ProductDetailPageContent({
             <ProductImageGallery
               mainImage={productImageUrl ?? undefined}
               images={productImages}
-              productName={product.medicine.name}
+              productName={productName}
             />
           </div>
 
@@ -323,14 +326,14 @@ export function ProductDetailPageContent({
                     />
                   </svg>
                 </button>
-                <ShareButton productName={product.medicine.name} productUrl={productUrl} />
+                <ShareButton productName={productName} productUrl={productUrl} />
               </div>
               </div>
             )}
 
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-semibold text-gray-900 leading-tight flex-1">
-                {product.medicine.name}
+                {productName}
               </h1>
             </div>
 
@@ -377,7 +380,7 @@ export function ProductDetailPageContent({
             <div className="space-y-3 border-t border-gray-200 pt-4">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
-                <span className="text-gray-600">{product.medicine.name}</span>
+                <span className="text-gray-600">{productName}</span>
               </div>
 
               {product.category && (
@@ -401,10 +404,10 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
-              {product.package_size && (
+              {productPackaging && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
-                  <span className="text-gray-600">{product.package_size}</span>
+                  <span className="text-gray-600">{productPackaging}</span>
                 </div>
               )}
 
@@ -422,10 +425,10 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
-              {product.medicine.ingredients && (
+              {productEntity?.ingredients && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Thành phần:</span>{' '}
-                  <span className="text-gray-600">{product.medicine.ingredients}</span>
+                  <span className="text-gray-600">{productEntity.ingredients}</span>
                 </div>
               )}
 

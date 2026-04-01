@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { ProductFilters, Product } from '@/lib/services/products'
+import { ProductFilters, Product, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { DynamicFiltersSidebar } from './DynamicFiltersSidebar'
@@ -265,13 +265,6 @@ export function CategoryListingPageContent({
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
-      {/* Category Name */}
-      {lastCategoryName && (
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          {lastCategoryName}
-        </h1>
-      )}
-
       {/* Subcategories Horizontal List */}
       {subcategories && subcategories.length > 0 && (
         <SubcategoriesHorizontalList
@@ -395,14 +388,8 @@ export function CategoryListingPageContent({
                     ? product.category_info.category.map(cat => cat.slug).join('/')
                     : categorySlug)
                 
-                const productMedicineSlug = product.medicine?.slug || 
-                  (product.medicine?.name 
-                    ? product.medicine.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-                    : undefined)
-                
-                const productName = product.medicine?.name || 
-                  product.medicine?.web_name || 
-                  'Sản phẩm'
+                const productMedicineSlug = getProductSlug(product)
+                const productName = getProductName(product)
                 
                 const priceDisplay = product.price_display || PRICE_CONSULT
                 const productImageUrl = product.image_url || product.images?.[0]
@@ -416,7 +403,7 @@ export function CategoryListingPageContent({
                       price_display: priceDisplay,
                       price: product.price_value || 0,
                       image_url: productImageUrl,
-                      packaging: product.package_size,
+                      packaging: getProductPackaging(product),
                       medicine_unit_id: product.id,
                       category_slug: productCategorySlug,
                       medicine_slug: productMedicineSlug,

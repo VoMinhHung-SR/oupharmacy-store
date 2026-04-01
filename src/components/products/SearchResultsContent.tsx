@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { Product, ProductFilters } from '@/lib/services/products'
+import { Product, ProductFilters, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
@@ -172,11 +172,8 @@ export function SearchResultsContent({
               (product.category_info?.category?.length
                 ? product.category_info.category.map((cat) => cat.slug).join('/')
                 : '')
-            const productMedicineSlug = product.medicine?.slug ||
-              (product.medicine?.name
-                ? product.medicine.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-                : undefined)
-            const productName = product.medicine?.name || product.medicine?.web_name || 'Sản phẩm'
+            const productMedicineSlug = getProductSlug(product)
+            const productName = getProductName(product)
             const priceDisplay = product.price_display || PRICE_CONSULT
             const productImageUrl = product.image_url || product.images?.[0]
             return (
@@ -188,7 +185,7 @@ export function SearchResultsContent({
                   price_display: priceDisplay,
                   price: product.price_value || 0,
                   image_url: productImageUrl,
-                  packaging: product.package_size,
+                  packaging: getProductPackaging(product),
                   medicine_unit_id: product.id,
                   category_slug: productCategorySlug,
                   medicine_slug: productMedicineSlug,

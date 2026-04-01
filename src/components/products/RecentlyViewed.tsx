@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Product } from '@/lib/services/products'
+import { Product, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Container } from '@/components/Container'
 
@@ -30,12 +30,12 @@ export const saveToRecentlyViewed = (product: Product) => {
 
     const newItem: RecentlyViewedItem = {
       id: product.id,
-      name: product.medicine.name,
+      name: getProductName(product),
       price: product.price_value,
       image_url: product.image_url || (product.images && product.images.length > 0 ? product.images[0] : undefined),
-      packaging: product.package_size,
+      packaging: getProductPackaging(product),
       category_slug: product.category?.path_slug || product.category?.slug,
-      medicine_slug: product.medicine.slug,
+      medicine_slug: getProductSlug(product),
       medicine_unit_id: product.id,
       in_stock: product.in_stock,
       price_display: product.price_display || '',
