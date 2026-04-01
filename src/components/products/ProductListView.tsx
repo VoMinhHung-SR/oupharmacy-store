@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
-import { Product, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
+import { Product, getProductEntity, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
@@ -71,7 +71,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
     }
 
     const inStock = product.in_stock ?? 0
-    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const existingItem = items.find((i) => i.variant_unit_id === product.id)
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
@@ -90,7 +90,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
     add(
       {
         id: product.id.toString(),
-        medicine_unit_id: product.id,
+        variant_unit_id: product.id,
         name: getProductName(product),
         
         price: product.price_value,
@@ -152,8 +152,8 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                 {getProductPackaging(product) && (
                   <p className="text-sm text-gray-500 mb-2">{getProductPackaging(product)}</p>
                 )}
-                {(product.product?.usage || product.medicine?.usage) && (
-                  <p className="text-sm text-gray-600 line-clamp-2">{product.product?.usage || product.medicine?.usage}</p>
+                {getProductEntity(product)?.usage && (
+                  <p className="text-sm text-gray-600 line-clamp-2">{getProductEntity(product)?.usage}</p>
                 )}
               </div>
 

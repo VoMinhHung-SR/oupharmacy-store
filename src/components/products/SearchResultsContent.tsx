@@ -3,12 +3,12 @@
 import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { Product, ProductFilters, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
+import { Product, ProductFilters, buildProductCardPayload } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
 import { Pagination } from '@/components/Pagination'
-import { PAGINATION, PRODUCT_LISTING, PRICE_CONSULT } from '@/lib/constant'
+import { PAGINATION, PRODUCT_LISTING } from '@/lib/constant'
 import { SearchKeywordItem } from '@/lib/services/searchTerms'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
@@ -168,29 +168,10 @@ export function SearchResultsContent({
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {sortedProducts.map((product) => {
-            const productCategorySlug = product.category_info?.categorySlug ||
-              (product.category_info?.category?.length
-                ? product.category_info.category.map((cat) => cat.slug).join('/')
-                : '')
-            const productMedicineSlug = getProductSlug(product)
-            const productName = getProductName(product)
-            const priceDisplay = product.price_display || PRICE_CONSULT
-            const productImageUrl = product.image_url || product.images?.[0]
             return (
               <ProductCard
                 key={product.id}
-                product={{
-                  id: product.id.toString(),
-                  name: productName,
-                  price_display: priceDisplay,
-                  price: product.price_value || 0,
-                  image_url: productImageUrl,
-                  packaging: getProductPackaging(product),
-                  medicine_unit_id: product.id,
-                  category_slug: productCategorySlug,
-                  medicine_slug: productMedicineSlug,
-                  in_stock: product.in_stock,
-                }}
+                product={buildProductCardPayload(product)}
               />
             )
           })}

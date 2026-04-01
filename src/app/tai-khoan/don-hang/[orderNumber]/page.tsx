@@ -220,7 +220,7 @@ export default function OrderDetailPage({ params }: Props) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium text-gray-900 mb-1">
-                          {item.name || `Sản phẩm #${item.medicine_unit_id}`}
+                          {item.name || `Sản phẩm #${item.variant_unit_id}`}
                         </h3>
                         <p className="text-xs text-gray-500 mb-2">
                           Số lượng: {item.quantity}

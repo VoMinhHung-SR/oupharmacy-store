@@ -19,7 +19,7 @@ import { Product, getProductEntity, getProductName, getProductPackaging } from '
 interface ProductDetailPageContentProps {
   product: Product | undefined
   categorySlug: string
-  medicineSlug: string
+  productSlug: string
   loading?: boolean
   error?: Error | null
 }
@@ -27,7 +27,7 @@ interface ProductDetailPageContentProps {
 export function ProductDetailPageContent({
   product,
   categorySlug,
-  medicineSlug,
+  productSlug,
   loading = false,
   error = null,
 }: ProductDetailPageContentProps) {
@@ -49,7 +49,7 @@ export function ProductDetailPageContent({
     if (!product) throw new Error('Product is not available')
     return {
       id: product.id.toString(),
-      medicine_unit_id: product.id,
+      variant_unit_id: product.id,
       name: productName,
       price: product.price_value,
       image_url: productImageUrl || product.image_url,
@@ -59,7 +59,7 @@ export function ProductDetailPageContent({
 
   const validateStock = () => {
     if (!product) return false
-    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const existingItem = items.find((i) => i.variant_unit_id === product.id)
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + quantity
 
@@ -88,7 +88,7 @@ export function ProductDetailPageContent({
   useEffect(() => {
     if (pendingBuyNowRef.current) {
       const { productId, expectedQty } = pendingBuyNowRef.current
-      const itemInCart = items.find((i) => i.medicine_unit_id === productId)
+      const itemInCart = items.find((i) => i.variant_unit_id === productId)
       
       if (itemInCart && itemInCart.qty >= expectedQty) {
         pendingBuyNowRef.current = null
@@ -258,7 +258,7 @@ export function ProductDetailPageContent({
 
   breadcrumbItems.push({
     label: productName,
-    href: `/${categorySlug}/${medicineSlug}`,
+    href: `/${categorySlug}/${productSlug}`,
   })
 
   const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT
@@ -268,20 +268,20 @@ export function ProductDetailPageContent({
     
     toggleWishlist({
       id: product.id.toString(),
-      medicine_unit_id: product.id,
+      variant_unit_id: product.id,
       name: productName,
       price: product.price_value,
       price_display: product.price_display,
       image_url: productImageUrl || product.image_url,
       packaging: productPackaging,
       category_slug: categorySlug,
-      medicine_slug: medicineSlug,
+      product_slug: productSlug,
     })
   }
 
   const productUrl = typeof window !== 'undefined' 
     ? window.location.href 
-    : `/${categorySlug}/${medicineSlug}`
+    : `/${categorySlug}/${productSlug}`
 
   return (
     <Container className="pb-6">

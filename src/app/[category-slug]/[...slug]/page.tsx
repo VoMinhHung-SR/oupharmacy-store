@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet } from '@/lib/api'
-import { Product, ProductListResponse, CategoryProductsResponse } from '@/lib/services/products'
+import { Product, ProductListResponse, CategoryProductsResponse, normalizeProduct } from '@/lib/services/products'
 import { ProductDetailPageContent } from '@/components/products'
 import { CategoryListingPageContent } from '@/components/products'
 import { useDynamicFilters } from '@/lib/hooks/useDynamicFilters'
@@ -73,7 +73,15 @@ export default function NestedPathPage({ params }: Props) {
       if (response.error) {
         throw new Error(response.error)
       }
-      return response.data
+      const data = response.data
+      if (!data) return data
+      if ('results' in data && Array.isArray(data.results)) {
+        return {
+          ...data,
+          results: data.results.map((p) => normalizeProduct(p as unknown as Record<string, unknown>)),
+        }
+      }
+      return normalizeProduct(data as unknown as Record<string, unknown>) as Product
     },
     enabled: isValidPath,
   })
@@ -122,7 +130,7 @@ export default function NestedPathPage({ params }: Props) {
   )
   
   const parsedCategoryPath = isValidPath ? parts.slice(0, -1).join('/') : undefined
-  const parsedMedicineSlug = isValidPath ? parts[parts.length - 1] : undefined
+  const parsedProductSlug = isValidPath ? parts[parts.length - 1] : undefined
   
   const categoryName = useMemo(() => {
     // Priority 1: From productList API response (check if it's CategoryProductsResponse)
@@ -171,7 +179,7 @@ export default function NestedPathPage({ params }: Props) {
         <ProductDetailPageContent
           product={undefined}
           categorySlug={parsedCategoryPath!}
-          medicineSlug={parsedMedicineSlug!}
+          productSlug={parsedProductSlug!}
           loading={true}
           error={null}
         />
@@ -220,7 +228,7 @@ export default function NestedPathPage({ params }: Props) {
     <ProductDetailPageContent
       product={product}
       categorySlug={parsedCategoryPath!}
-      medicineSlug={parsedMedicineSlug!}
+      productSlug={parsedProductSlug!}
       loading={isLoading}
       error={error as Error | null}
     />

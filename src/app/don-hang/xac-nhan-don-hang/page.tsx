@@ -110,13 +110,13 @@ export default function CheckoutXacNhanDonHangPage() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item: { medicine_unit_id?: number; quantity?: number; price?: number; subtotal?: number; name?: string }, idx: number) => {
+                {items.map((item: { variant_unit_id?: number; quantity?: number; price?: number; subtotal?: number; name?: string }, idx: number) => {
                   const qty = item.quantity ?? 0
                   const price = item.price ?? 0
                   const subtotal = item.subtotal ?? qty * price
                   return (
-                    <tr key={item.medicine_unit_id ?? idx} className="border-b">
-                      <td className="py-2 pr-4">{item.name || `Sản phẩm #${item.medicine_unit_id}`}</td>
+                    <tr key={item.variant_unit_id ?? idx} className="border-b">
+                      <td className="py-2 pr-4">{item.name || `Sản phẩm #${item.variant_unit_id}`}</td>
                       <td className="py-2 pr-4 text-right">{qty}</td>
                       <td className="py-2 pr-4 text-right">{price.toLocaleString('vi-VN')}₫</td>
                       <td className="py-2 text-right">{subtotal.toLocaleString('vi-VN')}₫</td>

@@ -1,14 +1,14 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { ProductFilters, Product, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
+import { ProductFilters, Product, buildProductCardPayload } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { DynamicFiltersSidebar } from './DynamicFiltersSidebar'
 import { SubcategoriesHorizontalList } from './SubcategoriesHorizontalList'
 import { ActiveFilters } from './ActiveFilters'
 import { Subcategory, FilterGroup } from '@/lib/services/products'
-import { PAGINATION, PRICE_CONSULT, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
+import { PAGINATION, PRODUCT_LISTING, SIDEBAR } from '@/lib/constant'
 import { FilterIcon, CloseIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
@@ -381,34 +381,10 @@ export function CategoryListingPageContent({
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {sortedProducts.map((product) => {
-                // Sử dụng category slug từ product data (category_info.categorySlug hoặc build từ category array)
-                // Điều này đảm bảo product link sử dụng đúng category path của sản phẩm
-                const productCategorySlug = product.category_info?.categorySlug ||
-                  (product.category_info?.category && product.category_info.category.length > 0
-                    ? product.category_info.category.map(cat => cat.slug).join('/')
-                    : categorySlug)
-                
-                const productMedicineSlug = getProductSlug(product)
-                const productName = getProductName(product)
-                
-                const priceDisplay = product.price_display || PRICE_CONSULT
-                const productImageUrl = product.image_url || product.images?.[0]
-                
                 return (
                   <ProductCard
                     key={product.id}
-                    product={{
-                      id: product.id.toString(),
-                      name: productName,
-                      price_display: priceDisplay,
-                      price: product.price_value || 0,
-                      image_url: productImageUrl,
-                      packaging: getProductPackaging(product),
-                      medicine_unit_id: product.id,
-                      category_slug: productCategorySlug,
-                      medicine_slug: productMedicineSlug,
-                      in_stock: product.in_stock,
-                    }}
+                    product={buildProductCardPayload(product, categorySlug)}
                   />
                 )
               })}

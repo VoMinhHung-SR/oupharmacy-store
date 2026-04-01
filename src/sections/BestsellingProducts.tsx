@@ -13,10 +13,10 @@ interface Product {
   discount?: number
   image_url?: string
   packaging?: string
-  medicine_unit_id?: number
+  variant_unit_id?: number
   in_stock?: number
   category_slug?: string
-  medicine_slug?: string
+  product_slug?: string
 }
 
 interface BestsellingProductsProps {

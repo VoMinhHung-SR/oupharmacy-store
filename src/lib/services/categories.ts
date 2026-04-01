@@ -10,14 +10,14 @@ export interface CategoryLevel2 {
 
 export interface ProductMinimal {
   id: number
-  medicine_id: number
+  product_id: number
   name: string
   slug: string
   thumbnail: string | null
   price_value: number
   original_price_value: number | null
   discount_percent: number
-  package_size: string | null
+  packing: string | null
   in_stock: number
   is_out_of_stock: boolean
   is_hot: boolean

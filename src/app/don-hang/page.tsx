@@ -129,7 +129,7 @@ export default function CheckoutPage() {
 
     const payload: Order = {
       items: items.map((i) => ({
-        medicine_unit_id: i.medicine_unit_id,
+        variant_unit_id: i.variant_unit_id,
         quantity: i.qty,
         price: i.price,
       })),

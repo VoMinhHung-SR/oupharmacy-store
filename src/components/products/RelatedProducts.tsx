@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, Product, ProductFilters, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
+import { getProducts, Product, ProductFilters, buildProductCardPayload } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Container } from '@/components/Container'
 
@@ -64,30 +64,10 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
       <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sản phẩm liên quan</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {relatedProducts.map((product) => {
-          const productImageUrl = product.image_url || 
-            (product.images && product.images.length > 0 ? product.images[0] : null)
-          
-          const categorySlug = product.category?.path_slug || 
-            product.category?.slug || 
-            product.category?.name?.toLowerCase().replace(/\s+/g, '-')
-          
-          const medicineSlug = getProductSlug(product)
-
           return (
             <ProductCard
               key={product.id}
-              product={{
-                id: product.id.toString(),
-                name: getProductName(product),
-                price_display: product.price_display || '',
-                price: product.price_value,
-                image_url: productImageUrl || undefined,
-                packaging: getProductPackaging(product),
-                medicine_unit_id: product.id,
-                category_slug: categorySlug,
-                medicine_slug: medicineSlug,
-                in_stock: product.in_stock,
-              }}
+              product={buildProductCardPayload(product)}
             />
           )
         })}
