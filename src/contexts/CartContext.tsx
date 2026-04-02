@@ -3,8 +3,10 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { toastSuccess } from '@/lib/utils/toast'
 
 export interface CartItem {
-  id: string // medicine_unit_id as string for compatibility
-  medicine_unit_id: number
+  /** String form of `variant_unit_id` for React keys / localStorage. */
+  id: string
+  /** Product variant unit id (PVU). */
+  variant_unit_id: number
   name: string
   price: number
   image_url?: string
@@ -25,6 +27,23 @@ const CartContext = createContext<CartContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'oupharmacy_cart'
 
+function migrateCartItem(item: Record<string, unknown>): CartItem {
+  const parsedId = parseInt(String(item.id), 10)
+  const variant_unit_id =
+    (item.variant_unit_id as number | undefined) ??
+    (item.medicine_unit_id as number | undefined) ??
+    (Number.isNaN(parsedId) ? 0 : parsedId)
+  return {
+    id: String(variant_unit_id),
+    variant_unit_id,
+    name: String(item.name ?? ''),
+    price: Number(item.price ?? 0) || 0,
+    image_url: item.image_url as string | undefined,
+    packaging: item.packaging as string | undefined,
+    qty: Number(item.qty ?? 1) || 1,
+  }
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([])
 
@@ -32,13 +51,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
       if (raw) {
-        const parsed = JSON.parse(raw)
-        // Migrate old cart items to new format if needed
-        const migrated = parsed.map((item: any) => ({
-          ...item,
-          medicine_unit_id: item.medicine_unit_id || parseInt(item.id) || 0,
-          id: item.medicine_unit_id?.toString() || item.id,
-        }))
+        const parsed = JSON.parse(raw) as Record<string, unknown>[]
+        const migrated = parsed.map(migrateCartItem)
         setItems(migrated)
       }
     } catch {}
@@ -51,13 +65,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items])
 
   const add = (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
-    const isUpdate = items.some((i) => i.medicine_unit_id === item.medicine_unit_id)
+    const isUpdate = items.some((i) => i.variant_unit_id === item.variant_unit_id)
 
     setItems((prev) => {
-      const exist = prev.find((i) => i.medicine_unit_id === item.medicine_unit_id)
+      const exist = prev.find((i) => i.variant_unit_id === item.variant_unit_id)
       return exist
-        ? prev.map((i) => (i.medicine_unit_id === item.medicine_unit_id ? { ...i, qty: i.qty + qty } : i))
-        : [...prev, { ...item, qty, id: item.medicine_unit_id.toString() }]
+        ? prev.map((i) => (i.variant_unit_id === item.variant_unit_id ? { ...i, qty: i.qty + qty } : i))
+        : [...prev, { ...item, qty, id: item.variant_unit_id.toString() }]
     })
 
     toastSuccess(isUpdate ? `Đã cập nhật số lượng ${item.name} trong giỏ hàng` : `Đã thêm ${item.name} vào giỏ hàng`)
@@ -73,9 +87,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateQuantity = (id: string, qty: number) => {
     if (qty < 1) return
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, qty } : i))
-    )
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)))
   }
 
   const clear = () => setItems([])

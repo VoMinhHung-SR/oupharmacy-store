@@ -6,14 +6,14 @@ import { useAuth } from '@/contexts/AuthContext'
 
 export interface WishlistItem {
   id: string
-  medicine_unit_id: number
+  variant_unit_id: number
   name: string
   price: number
   price_display?: string
   image_url?: string
   packaging?: string
   category_slug?: string
-  medicine_slug?: string
+  product_slug?: string
 }
 
 interface WishlistContextValue {
@@ -30,6 +30,26 @@ const WishlistContext = createContext<WishlistContextValue | undefined>(undefine
 
 const STORAGE_KEY = 'oupharmacy_wishlist'
 
+function migrateWishlistItem(raw: Record<string, unknown>): WishlistItem {
+  const variant_unit_id =
+    (raw.variant_unit_id as number | undefined) ??
+    (raw.medicine_unit_id as number | undefined) ??
+    0
+  const product_slug =
+    (raw.product_slug as string | undefined) ?? (raw.medicine_slug as string | undefined)
+  return {
+    id: String(raw.id ?? variant_unit_id),
+    variant_unit_id,
+    name: String(raw.name ?? ''),
+    price: Number(raw.price ?? 0) || 0,
+    price_display: raw.price_display as string | undefined,
+    image_url: raw.image_url as string | undefined,
+    packaging: raw.packaging as string | undefined,
+    category_slug: raw.category_slug as string | undefined,
+    product_slug,
+  }
+}
+
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
   const [items, setItems] = useState<WishlistItem[]>([])
@@ -43,8 +63,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
       if (raw) {
-        const parsed = JSON.parse(raw)
-        setItems(parsed)
+        const parsed = JSON.parse(raw) as Record<string, unknown>[]
+        setItems(parsed.map(migrateWishlistItem))
       }
     } catch {}
   }, [isAuthenticated])
@@ -63,7 +83,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return
     }
 
-    const exists = items.some((i) => i.medicine_unit_id === item.medicine_unit_id)
+    const exists = items.some((i) => i.variant_unit_id === item.variant_unit_id)
     if (exists) {
       toastWarning('Sản phẩm đã có trong danh sách yêu thích')
       return
@@ -88,7 +108,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const isInWishlist = (id: string | number): boolean => {
     if (!isAuthenticated) return false
-    return items.some((item) => item.medicine_unit_id === Number(id) || item.id === String(id))
+    return items.some((item) => item.variant_unit_id === Number(id) || item.id === String(id))
   }
 
   const toggle = (item: WishlistItem) => {
@@ -97,8 +117,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return
     }
 
-    if (isInWishlist(item.medicine_unit_id)) {
-      const existingItem = items.find((i) => i.medicine_unit_id === item.medicine_unit_id)
+    if (isInWishlist(item.variant_unit_id)) {
+      const existingItem = items.find((i) => i.variant_unit_id === item.variant_unit_id)
       if (existingItem) {
         remove(existingItem.id)
       }

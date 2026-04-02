@@ -2,7 +2,8 @@ import { apiGet, apiPost, apiPatch } from '../api'
 
 export interface OrderItem {
   id?: number
-  medicine_unit_id: number
+  /** Product variant unit id (maps to API `medicine_unit_id`). */
+  variant_unit_id: number
   quantity: number
   price: number
   subtotal?: number
@@ -35,26 +36,87 @@ export interface OrderListResponse {
   results: Order[]
 }
 
-export async function getOrders(userId?: number) {
-  if (userId) {
-    return apiGet<Order[]>(`/orders/by-user/${userId}/`)
+function normalizeOrderItem(raw: Record<string, unknown>): OrderItem {
+  const vid = raw.variant_unit_id ?? raw.medicine_unit_id
+  return {
+    id: raw.id as number | undefined,
+    variant_unit_id: Number(vid) || 0,
+    quantity: Number(raw.quantity ?? 0) || 0,
+    price: Number(raw.price ?? 0) || 0,
+    subtotal: raw.subtotal !== undefined ? Number(raw.subtotal) : undefined,
+    name: raw.name as string | undefined,
+    image_url: raw.image_url as string | undefined,
   }
-  return apiGet<OrderListResponse>('/orders/')
 }
 
-export async function getOrder(id: number) {
-  return apiGet<Order>(`/orders/${id}/`)
+function normalizeOrder(raw: Record<string, unknown>): Order {
+  const items = Array.isArray(raw.items)
+    ? (raw.items as Record<string, unknown>[]).map((i) => normalizeOrderItem(i))
+    : []
+  return {
+    ...(raw as unknown as Order),
+    items,
+  }
+}
+
+function serializeOrderForApi(order: Order): Record<string, unknown> {
+  return {
+    ...order,
+    items: order.items.map((item) => ({
+      id: item.id,
+      medicine_unit_id: item.variant_unit_id,
+      quantity: item.quantity,
+      price: item.price,
+      subtotal: item.subtotal,
+      name: item.name,
+      image_url: item.image_url,
+    })),
+  }
+}
+
+export async function getOrders(userId?: number) {
+  if (userId) {
+    const res = await apiGet<Order[] | Record<string, unknown>[]>(`/orders/by-user/${userId}/`)
+    if (res.data && Array.isArray(res.data)) {
+      return {
+        ...res,
+        data: res.data.map((o) => normalizeOrder(o as Record<string, unknown>)),
+      }
+    }
+    return res as ReturnType<typeof apiGet<Order[]>>
+  }
+  const res = await apiGet<OrderListResponse>('/orders/')
+  if (res.data?.results) {
+    return {
+      ...res,
+      data: {
+        ...res.data,
+        results: res.data.results.map((o) => normalizeOrder(o as unknown as Record<string, unknown>)),
+      },
+    }
+  }
+  return res
+}
+
+export async function getOrder(orderNumber: string) {
+  const res = await apiGet<Order>(`/orders/${orderNumber}/`)
+  if (res.data) {
+    return {
+      ...res,
+      data: normalizeOrder(res.data as unknown as Record<string, unknown>),
+    }
+  }
+  return res
 }
 
 export async function createOrder(order: Order) {
-  return apiPost<Order>('/orders/', order)
+  return apiPost<Order>('/orders/', serializeOrderForApi(order) as unknown as Order)
 }
 
-export async function updateOrderStatus(orderId: number, status: Order['status']) {
-  return apiPatch<Order>(`/orders/${orderId}/update-status/`, { status })
+export async function updateOrderStatus(orderNumber: string, status: Order['status']) {
+  return apiPatch<Order>(`/orders/${orderNumber}/update-status/`, { status })
 }
 
-export async function cancelOrder(orderId: number) {
-  return apiPost<Order>(`/orders/${orderId}/cancel/`)
+export async function cancelOrder(orderNumber: string) {
+  return apiPost<Order>(`/orders/${orderNumber}/cancel/`)
 }
-

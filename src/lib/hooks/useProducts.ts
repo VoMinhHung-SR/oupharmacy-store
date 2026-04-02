@@ -1,7 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, getProduct, getProductsByCategorySlug, getProductByCategoryAndMedicineSlug, ProductFilters, Product, ProductListResponse, CategoryProductsResponse } from '../services/products'
+import {
+  getProducts,
+  getProduct,
+  getProductsByCategorySlug,
+  getProductByCategoryAndProductSlug,
+  ProductFilters,
+  Product,
+  ProductListResponse,
+  CategoryProductsResponse,
+} from '../services/products'
 
-export function useProducts(filters?: ProductFilters) {
+export function useProducts(filters?: ProductFilters, options?: { enabled?: boolean }) {
+  const enabled = options?.enabled !== false
   return useQuery<ProductListResponse | undefined, Error>({
     queryKey: ['products', filters],
     queryFn: async () => {
@@ -11,7 +21,7 @@ export function useProducts(filters?: ProductFilters) {
       }
       return response.data
     },
-    enabled: true,
+    enabled,
   })
 }
 
@@ -60,27 +70,24 @@ export function useProductsByCategorySlug(
 }
 
 /**
- * Hook để lấy chi tiết sản phẩm theo category slug và medicine slug
- * @param categorySlug - Category slug (ví dụ: 'thuc-pham-chuc-nang')
- * @param medicineSlug - Medicine slug (ví dụ: 'vitamin-c-1000mg')
+ * Chi tiết sản phẩm theo category path + product slug (segment cuối URL).
  */
-export function useProductByCategoryAndMedicineSlug(
+export function useProductByCategoryAndProductSlug(
   categorySlug: string | undefined,
-  medicineSlug: string | undefined
+  productSlug: string | undefined
 ) {
   return useQuery<Product | undefined, Error>({
-    queryKey: ['product-by-category-medicine-slug', categorySlug, medicineSlug],
+    queryKey: ['product-by-category-product-slug', categorySlug, productSlug],
     queryFn: async () => {
-      if (!categorySlug || !medicineSlug) {
-        throw new Error('Category slug and medicine slug are required')
+      if (!categorySlug || !productSlug) {
+        throw new Error('Category slug and product slug are required')
       }
-      const response = await getProductByCategoryAndMedicineSlug(categorySlug, medicineSlug)
+      const response = await getProductByCategoryAndProductSlug(categorySlug, productSlug)
       if (response.error) {
         throw new Error(response.error)
       }
       return response.data
     },
-    enabled: !!categorySlug && !!medicineSlug,
+    enabled: !!categorySlug && !!productSlug,
   })
 }
-

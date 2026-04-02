@@ -8,11 +8,13 @@ import Breadcrumb from '@/components/Breadcrumb'
 
 export default function CheckoutXacNhanDonHangPage() {
   const searchParams = useSearchParams()
+  const orderNumberParam = searchParams.get('order_number')
   const orderIdParam = searchParams.get('order_id')
-  const orderId = orderIdParam ? parseInt(orderIdParam, 10) : 0
-  const { data: order, isLoading, error } = useOrder(orderId)
+  const orderIdNum = orderIdParam != null && orderIdParam !== '' ? parseInt(orderIdParam, 10) : NaN
+  const orderIdentifier = orderNumberParam ?? (Number.isNaN(orderIdNum) ? '' : String(orderIdParam))
+  const { data: order, isLoading, error } = useOrder(orderIdentifier)
 
-  if (!orderIdParam || Number.isNaN(orderId)) {
+  if (!orderIdentifier) {
     return (
       <div className="space-y-6 py-8 px-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
@@ -108,13 +110,13 @@ export default function CheckoutXacNhanDonHangPage() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item: { medicine_unit_id?: number; quantity?: number; price?: number; subtotal?: number; name?: string }, idx: number) => {
+                {items.map((item: { variant_unit_id?: number; quantity?: number; price?: number; subtotal?: number; name?: string }, idx: number) => {
                   const qty = item.quantity ?? 0
                   const price = item.price ?? 0
                   const subtotal = item.subtotal ?? qty * price
                   return (
-                    <tr key={item.medicine_unit_id ?? idx} className="border-b">
-                      <td className="py-2 pr-4">{item.name || `Sản phẩm #${item.medicine_unit_id}`}</td>
+                    <tr key={item.variant_unit_id ?? idx} className="border-b">
+                      <td className="py-2 pr-4">{item.name || `Sản phẩm #${item.variant_unit_id}`}</td>
                       <td className="py-2 pr-4 text-right">{qty}</td>
                       <td className="py-2 pr-4 text-right">{price.toLocaleString('vi-VN')}₫</td>
                       <td className="py-2 text-right">{subtotal.toLocaleString('vi-VN')}₫</td>
@@ -152,7 +154,7 @@ export default function CheckoutXacNhanDonHangPage() {
 
         <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-200">
           <Link
-            href="/tai-khoan/don-hang"
+            href={order.order_number || order.id != null ? `/tai-khoan/don-hang/${order.order_number ?? order.id}` : '/tai-khoan/don-hang'}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             Xem đơn hàng

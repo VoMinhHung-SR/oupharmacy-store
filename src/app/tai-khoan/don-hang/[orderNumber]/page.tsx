@@ -11,7 +11,7 @@ import { ImagePlaceholderIcon, ArrowLeftIcon } from '@/components/icons'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 
 interface Props {
-  params: { id: string }
+  params: { orderNumber: string }
 }
 
 const statusMap: Record<string, { label: string; color: string }> = {
@@ -25,8 +25,8 @@ const statusMap: Record<string, { label: string; color: string }> = {
 export default function OrderDetailPage({ params }: Props) {
   const { isAuthenticated, loading } = useAuth()
   const { openModal, isOpen } = useLoginModal()
-  const orderId = parseInt(params.id)
-  const { data: order, isLoading, error } = useOrder(orderId)
+  const orderNumber = params.orderNumber
+  const { data: order, isLoading, error } = useOrder(orderNumber)
   const cancelOrderMutation = useCancelOrder()
 
   const handleCancelOrder = async () => {
@@ -34,7 +34,7 @@ export default function OrderDetailPage({ params }: Props) {
     const confirmed = typeof window !== 'undefined' && window.confirm('Bạn có chắc muốn hủy đơn hàng này?')
     if (!confirmed) return
     try {
-      await cancelOrderMutation.mutateAsync(orderId)
+      await cancelOrderMutation.mutateAsync(orderNumber)
       toastSuccess('Đã hủy đơn hàng thành công.')
     } catch (err) {
       toastError(err instanceof Error ? err.message : 'Hủy đơn hàng thất bại. Vui lòng thử lại.')
@@ -44,9 +44,9 @@ export default function OrderDetailPage({ params }: Props) {
   useEffect(() => {
     // Only open modal if not loading, not authenticated, and modal is not already open
     if (!loading && !isAuthenticated && !isOpen) {
-      openModal(`/tai-khoan/don-hang/${params.id}`)
+      openModal(`/tai-khoan/don-hang/${params.orderNumber}`)
     }
-  }, [isAuthenticated, loading, openModal, isOpen, params.id])
+  }, [isAuthenticated, loading, openModal, isOpen, params.orderNumber])
 
   if (!isAuthenticated) {
     return null
@@ -86,7 +86,7 @@ export default function OrderDetailPage({ params }: Props) {
             <span className="text-sm font-medium">Quay lại danh sách</span>
           </Link>
           <h1 className="text-2xl font-semibold text-gray-900">
-            Chi tiết đơn hàng {order?.order_number || `#${orderId}`}
+            Chi tiết đơn hàng {order?.order_number ?? (order?.id != null ? `#${order.id}` : orderNumber)}
           </h1>
         </div>
 
@@ -100,10 +100,48 @@ export default function OrderDetailPage({ params }: Props) {
 
         {/* Error State */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-            <p className="text-red-800">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-red-800 mb-6">
               Có lỗi xảy ra khi tải thông tin đơn hàng: {error.message}
             </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/tai-khoan/don-hang"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Về danh sách đơn
+              </Link>
+              <Link
+                href="/"
+                className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Tiếp tục mua sắm
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Not found / empty state */}
+        {!isLoading && !error && !order && orderNumber && (
+          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h2>
+            <p className="text-gray-600 mb-6">
+              Mã đơn không tồn tại hoặc bạn không có quyền xem.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/tai-khoan/don-hang"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Về danh sách đơn
+              </Link>
+              <Link
+                href="/"
+                className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Tiếp tục mua sắm
+              </Link>
+            </div>
           </div>
         )}
 
@@ -182,7 +220,7 @@ export default function OrderDetailPage({ params }: Props) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium text-gray-900 mb-1">
-                          {item.name || `Sản phẩm #${item.medicine_unit_id}`}
+                          {item.name || `Sản phẩm #${item.variant_unit_id}`}
                         </h3>
                         <p className="text-xs text-gray-500 mb-2">
                           Số lượng: {item.quantity}

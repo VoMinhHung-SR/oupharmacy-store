@@ -11,6 +11,7 @@ export interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onNavigate }) => {
+  const packagingLabel = product.packing || 'Hộp'
   return (
     <Link
       href={product.web_slug}
@@ -56,12 +57,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onNavigate })
             title={
               product.price_value === 0
                 ? 'Tư vấn'
-                : `${product.price_value.toLocaleString('vi-VN')}đ / ${product.package_size || 'Hộp'}`
+                : `${product.price_value.toLocaleString('vi-VN')}đ / ${packagingLabel}`
             }
           >
             {product.price_value === 0
               ? 'Tư vấn'
-              : `${product.price_value.toLocaleString('vi-VN')}đ / ${product.package_size || 'Hộp'}`}
+              : `${product.price_value.toLocaleString('vi-VN')}đ / ${packagingLabel}`}
           </span>
           {product.original_price_value &&
             product.original_price_value > product.price_value && (

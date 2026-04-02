@@ -62,7 +62,7 @@ export default function WishlistPage() {
 
     addToCart({
       id: item.id,
-      medicine_unit_id: item.medicine_unit_id,
+      variant_unit_id: item.variant_unit_id,
       name: item.name,
       price: item.price,
       image_url: item.image_url,
@@ -82,7 +82,7 @@ export default function WishlistPage() {
     selected.forEach(item => {
       addToCart({
         id: item.id,
-        medicine_unit_id: item.medicine_unit_id,
+        variant_unit_id: item.variant_unit_id,
         name: item.name,
         price: item.price,
         image_url: item.image_url,
@@ -126,8 +126,8 @@ export default function WishlistPage() {
   }
 
   const getProductLink = (item: typeof items[0]) => {
-    if (item.category_slug && item.medicine_slug) {
-      return `/${item.category_slug}/${item.medicine_slug}`
+    if (item.category_slug && item.product_slug) {
+      return `/${item.category_slug}/${item.product_slug}`
     }
     return '#'
   }
