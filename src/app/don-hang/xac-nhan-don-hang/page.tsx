@@ -6,7 +6,7 @@ import React from 'react'
 import { useOrder } from '@/lib/hooks/useOrders'
 import Breadcrumb from '@/components/Breadcrumb'
 
-export default function CheckoutXacNhanDonHangPage() {
+export default function OrderConfirmationPage() {
   const searchParams = useSearchParams()
   const orderNumberParam = searchParams.get('order_number')
   const orderIdParam = searchParams.get('order_id')

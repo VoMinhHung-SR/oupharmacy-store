@@ -67,4 +67,5 @@ Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 ## Plans & template
 
 - Kế hoạch feat: `.cursor/plans/` trong repo này.
+- Tên file plan: **`[UnDone] … .plan.md`** khi mở việc; đổi thành **`[Done] …`** khi đóng feat (chi tiết: `PersonalProject/.cursor/rules/planning-project-plans-folder.mdc`).
 - Template mới: [`.cursor/plans/_template.plan.md`](.cursor/plans/_template.plan.md).

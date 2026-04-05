@@ -36,6 +36,24 @@ export interface OrderListResponse {
   results: Order[]
 }
 
+export interface OrderListFilters {
+  page?: number
+  page_size?: number
+  status?: Order['status']
+  ordering?: string
+}
+
+function buildOrderListQuery(filters?: OrderListFilters): string {
+  if (!filters) return ''
+  const p = new URLSearchParams()
+  if (filters.page != null) p.set('page', String(filters.page))
+  if (filters.page_size != null) p.set('page_size', String(filters.page_size))
+  if (filters.status) p.set('status', filters.status)
+  if (filters.ordering) p.set('ordering', filters.ordering)
+  const s = p.toString()
+  return s ? `?${s}` : ''
+}
+
 function normalizeOrderItem(raw: Record<string, unknown>): OrderItem {
   const vid = raw.variant_unit_id ?? raw.medicine_unit_id
   return {
@@ -74,18 +92,31 @@ function serializeOrderForApi(order: Order): Record<string, unknown> {
   }
 }
 
-export async function getOrders(userId?: number) {
+export async function getOrders(userId?: number, filters?: OrderListFilters) {
+  const qs = buildOrderListQuery(filters)
   if (userId) {
-    const res = await apiGet<Order[] | Record<string, unknown>[]>(`/orders/by-user/${userId}/`)
+    const res = await apiGet<Order[] | OrderListResponse | Record<string, unknown>[]>(
+      `/orders/by-user/${userId}/${qs}`
+    )
     if (res.data && Array.isArray(res.data)) {
       return {
         ...res,
         data: res.data.map((o) => normalizeOrder(o as Record<string, unknown>)),
       }
     }
+    if (res.data && typeof res.data === 'object' && 'results' in res.data && Array.isArray((res.data as OrderListResponse).results)) {
+      const list = res.data as OrderListResponse
+      return {
+        ...res,
+        data: {
+          ...list,
+          results: list.results.map((o) => normalizeOrder(o as unknown as Record<string, unknown>)),
+        },
+      }
+    }
     return res as ReturnType<typeof apiGet<Order[]>>
   }
-  const res = await apiGet<OrderListResponse>('/orders/')
+  const res = await apiGet<OrderListResponse>(`/orders/${qs}`)
   if (res.data?.results) {
     return {
       ...res,

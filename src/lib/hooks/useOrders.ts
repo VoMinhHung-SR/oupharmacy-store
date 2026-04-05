@@ -1,11 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, Order, OrderListResponse } from '../services/orders'
+import {
+  getOrders,
+  getOrder,
+  createOrder,
+  updateOrderStatus,
+  cancelOrder,
+  Order,
+  OrderListResponse,
+  OrderListFilters,
+} from '../services/orders'
 
-export function useOrders(userId?: number) {
+export function useOrders(userId?: number, filters?: OrderListFilters) {
   return useQuery<Order[] | OrderListResponse | undefined, Error>({
-    queryKey: ['orders', userId],
+    queryKey: ['orders', userId, filters],
     queryFn: async () => {
-      const response = await getOrders(userId)
+      const response = await getOrders(userId, filters)
       if (response.error) {
         throw new Error(response.error)
       }

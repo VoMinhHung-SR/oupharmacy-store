@@ -10,7 +10,7 @@ import { SearchResultsContent } from '@/components/products'
 import { PAGINATION } from '@/lib/constant'
 import type { SearchKeywordItem } from '@/lib/services/searchTerms'
 
-export default function TimKiemPage() {
+export default function SearchPage() {
   const searchParams = useSearchParams()
   const q = (searchParams.get('q') || '').trim()
 

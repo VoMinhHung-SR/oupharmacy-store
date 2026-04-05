@@ -112,3 +112,13 @@ export const CHECKOUT_LEGACY_STEP_PATHS = [
   '/don-hang/van-chuyen',
   '/don-hang/thanh-toan',
 ] as const
+
+/** Trang chủ — lối tắt */
+export const HOME_QUICK_LINKS = [
+  { icon: '💊', title: 'Cần mua thuốc', href: '/tim-kiem' },
+  { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si' },
+  { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
+  { icon: '📍', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc' },
+  { icon: '💉', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin' },
+  { icon: '🔍', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang' },
+] as const
