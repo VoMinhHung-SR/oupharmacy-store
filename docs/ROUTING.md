@@ -15,6 +15,7 @@
 - `CategoryListingPageContent` - Component cho category listing
 
 ## Trang tiếp thị / placeholder (Sắp ra mắt)
+
 - `/tu-van-duoc-si` — Tư vấn dược sĩ
 - `/tim-nha-thuoc` — Tìm nhà thuốc
 - `/tiem-vac-xin` — Tiêm vắc xin
@@ -26,8 +27,8 @@
 
 - `/don-hang` - Trang thanh toán
 - `/don-hang/xac-nhan-don-hang` - Xác nhận đơn hàng (query: `order_number` ưu tiên, `order_id` fallback)
-- `/tai-khoan/don-hang` - Danh sách đơn hàng
-- `/tai-khoan/don-hang/[orderNumber]` - Chi tiết đơn hàng (dùng `order_number` hoặc `id`)
+- `/tai-khoan/don-hang` - Danh sách đơn hàng (lọc trạng thái, sort ngày, phân trang; query: `page`, `page_size`, `status`, `ordering`)
+- `/tai-khoan/don-hang/[orderNumber]` - Chi tiết đơn hàng (dùng `order_number` hoặc `id`). Roadmap (plan `order-workflow-advanced` trong `.cursor/plans/`): tìm mã đơn trên list, tracking, in/PDF.
 
 ## Examples
 

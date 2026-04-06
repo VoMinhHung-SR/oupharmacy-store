@@ -9,6 +9,7 @@ export interface ContactSubmissionPayload {
   phone?: string
   subject?: string
   message: string
+  request_type?: 'support' | 'policy' | 'other'
 }
 
 export type ContactSubmitResult =
@@ -16,12 +17,9 @@ export type ContactSubmitResult =
   | { data?: undefined; error: string }
 
 export async function submitContactMessage(
-  _payload: ContactSubmissionPayload
+  payload: ContactSubmissionPayload
 ): Promise<ContactSubmitResult> {
-  return {
-    error:
-      'Yêu cầu thất bại. Vui lòng liên hệ hỗ trợ hoặc thử lại sau.',
-  }
+  return submitContactMessageViaApi(payload)
 }
 
 export async function submitContactMessageViaApi(

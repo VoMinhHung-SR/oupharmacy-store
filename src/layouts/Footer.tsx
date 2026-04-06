@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
             <ul className="mt-2 space-y-2">
               <li><Link href="/tro-giup" className="hover:text-primary-700">Trung tâm trợ giúp</Link></li>
               <li><Link href="/chinh-sach-doi-tra" className="hover:text-primary-700">Chính sách đổi trả</Link></li>
-              <li><Link href="/contact" className="hover:text-primary-700">Liên hệ</Link></li>
+              <li><Link href="/lien-he" className="hover:text-primary-700">Liên hệ</Link></li>
             </ul>
           </div>
           <div>

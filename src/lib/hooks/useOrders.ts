@@ -20,7 +20,7 @@ export function useOrders(userId?: number, filters?: OrderListFilters) {
       }
       return response.data
     },
-    enabled: true,
+    enabled: !!userId,
   })
 }
 

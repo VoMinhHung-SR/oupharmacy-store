@@ -42,7 +42,7 @@ export function ComingSoonPage({
             Về trang chủ
           </Link>
           <Link
-            href="/contact"
+            href="/lien-he"
             className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
             Liên hệ
