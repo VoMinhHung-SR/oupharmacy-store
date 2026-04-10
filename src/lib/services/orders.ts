@@ -2,8 +2,13 @@ import { apiGet, apiPost, apiPatch } from '../api'
 
 export interface OrderItem {
   id?: number
-  /** Product variant unit id (maps to API `medicine_unit_id`). */
+  /**
+   * FE legacy key (historically named as unit id), currently stores ProductVariant id
+   * used for order creation as `product_variant`.
+   */
   variant_unit_id: number
+  /** Optional ProductVariantUnit id for APIs supporting explicit unit selection. */
+  product_variant_unit_id?: number
   quantity: number
   price: number
   subtotal?: number
@@ -14,6 +19,8 @@ export interface OrderItem {
 export interface Order {
   id?: number
   order_number?: string
+  tracking_code?: string
+  tracking_timeline?: Array<{ status: string; time?: string; note?: string }>
   user_id?: number
   user?: any
   items: OrderItem[]
@@ -41,6 +48,8 @@ export interface OrderListFilters {
   page_size?: number
   status?: Order['status']
   ordering?: string
+  search?: string
+  order_number?: string
 }
 
 function buildOrderListQuery(filters?: OrderListFilters): string {
@@ -50,15 +59,19 @@ function buildOrderListQuery(filters?: OrderListFilters): string {
   if (filters.page_size != null) p.set('page_size', String(filters.page_size))
   if (filters.status) p.set('status', filters.status)
   if (filters.ordering) p.set('ordering', filters.ordering)
+  if (filters.search) p.set('search', filters.search)
+  if (filters.order_number) p.set('order_number', filters.order_number)
   const s = p.toString()
   return s ? `?${s}` : ''
 }
 
 function normalizeOrderItem(raw: Record<string, unknown>): OrderItem {
-  const vid = raw.variant_unit_id ?? raw.medicine_unit_id
+  const vid = raw.variant_unit_id ?? raw.medicine_unit_id ?? raw.product_variant
   return {
     id: raw.id as number | undefined,
     variant_unit_id: Number(vid) || 0,
+    product_variant_unit_id:
+      raw.product_variant_unit !== undefined ? Number(raw.product_variant_unit) || undefined : undefined,
     quantity: Number(raw.quantity ?? 0) || 0,
     price: Number(raw.price ?? 0) || 0,
     subtotal: raw.subtotal !== undefined ? Number(raw.subtotal) : undefined,
@@ -74,6 +87,10 @@ function normalizeOrder(raw: Record<string, unknown>): Order {
   return {
     ...(raw as unknown as Order),
     items,
+    tracking_code: (raw.tracking_code as string | undefined) || undefined,
+    tracking_timeline: Array.isArray(raw.tracking_timeline)
+      ? (raw.tracking_timeline as Array<{ status: string; time?: string; note?: string }>)
+      : undefined,
   }
 }
 
@@ -82,7 +99,8 @@ function serializeOrderForApi(order: Order): Record<string, unknown> {
     ...order,
     items: order.items.map((item) => ({
       id: item.id,
-      medicine_unit_id: item.variant_unit_id,
+      product_variant: item.variant_unit_id,
+      ...(item.product_variant_unit_id ? { product_variant_unit: item.product_variant_unit_id } : {}),
       quantity: item.quantity,
       price: item.price,
       subtotal: item.subtotal,

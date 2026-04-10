@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess } from '@/lib/utils/toast'
-import { ArrowLeftIcon } from '@/components/icons'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 interface NotificationPreferences {
   email: {
@@ -92,18 +92,9 @@ export default function NotificationsPage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="max-w-2xl space-y-6">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/tai-khoan"
-            className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Quay lại</span>
-          </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Tùy chọn thông báo</h1>
-        </div>
+    <AccountPageShell>
+      <div className="space-y-6">
+        <AccountPageHeader title="Tùy chọn thông báo" />
 
         <div className="space-y-6">
           {/* Email Notifications */}
@@ -208,7 +199,7 @@ export default function NotificationsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end rounded-lg border border-gray-200 bg-white p-6">
             <button
               onClick={handleSave}
               disabled={loading}
@@ -219,6 +210,6 @@ export default function NotificationsPage() {
           </div>
         </div>
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }

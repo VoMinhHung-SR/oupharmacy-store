@@ -77,6 +77,34 @@ export default function OrderConfirmationPage() {
   }
 
   const items = order.items ?? []
+  const trackingHref =
+    order.order_number || order.id != null
+      ? `/tai-khoan/don-hang/${order.order_number ?? order.id}`
+      : '/tai-khoan/don-hang'
+  const statusText: Record<string, string> = {
+    PENDING: 'Đang chờ xử lý',
+    CONFIRMED: 'Đã xác nhận',
+    SHIPPING: 'Đang giao hàng',
+    DELIVERED: 'Đã giao',
+    CANCELLED: 'Đã hủy',
+  }
+  const statusColor: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    CONFIRMED: 'bg-blue-100 text-blue-800',
+    SHIPPING: 'bg-purple-100 text-purple-800',
+    DELIVERED: 'bg-green-100 text-green-800',
+    CANCELLED: 'bg-red-100 text-red-800',
+  }
+  const createdAtLabel = order.created_date
+    ? new Date(order.created_date).toLocaleString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'N/A'
+  const formatVnd = (value?: number) => `${Math.round(Number(value ?? 0)).toLocaleString('vi-VN')}đ`
 
   return (
     <div className="space-y-6 py-8 px-4">
@@ -88,25 +116,62 @@ export default function OrderConfirmationPage() {
         ]}
       />
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Đặt hàng thành công</h1>
-        <p className="text-gray-600 mb-6">
-          Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn:{' '}
-          <span className="font-medium text-gray-900">
-            {order.order_number ?? `#${order.id}`}
-          </span>
-        </p>
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-xl border border-green-200 bg-green-50 p-5">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white">
+              <span className="text-sm font-bold">✓</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">Đặt hàng thành công</h1>
+              <p className="mt-1 text-gray-700">
+                Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn:{' '}
+                <span className="font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</span>
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <div className="border-t border-gray-200 pt-6 space-y-4">
+        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <p className="text-sm text-blue-900">
+            Bạn có thể theo dõi đơn hàng của mình tại đây:{' '}
+            <Link href={trackingHref} className="font-semibold underline hover:text-blue-700">
+              Theo dõi đơn hàng của bạn
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Mã đơn hàng</p>
+            <p className="mt-1 text-sm font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Thời gian đặt</p>
+            <p className="mt-1 text-sm font-medium text-gray-900">{createdAtLabel}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Trạng thái</p>
+            <span
+              className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                statusColor[order.status ?? 'PENDING'] ?? 'bg-gray-100 text-gray-700'
+              }`}
+            >
+              {statusText[order.status ?? 'PENDING'] ?? (order.status ?? 'PENDING')}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-6 border-t border-gray-200 pt-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Chi tiết đơn hàng</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-gray-600">
-                  <th className="pb-2 pr-4">Sản phẩm</th>
-                  <th className="pb-2 pr-4 text-right">SL</th>
-                  <th className="pb-2 pr-4 text-right">Đơn giá</th>
-                  <th className="pb-2 text-right">Thành tiền</th>
+                  <th className="pb-3 pr-4">Sản phẩm</th>
+                  <th className="pb-3 pr-4 text-right">SL</th>
+                  <th className="pb-3 pr-4 text-right">Đơn giá</th>
+                  <th className="pb-3 text-right">Thành tiền</th>
                 </tr>
               </thead>
               <tbody>
@@ -116,28 +181,30 @@ export default function OrderConfirmationPage() {
                   const subtotal = item.subtotal ?? qty * price
                   return (
                     <tr key={item.variant_unit_id ?? idx} className="border-b">
-                      <td className="py-2 pr-4">{item.name || `Sản phẩm #${item.variant_unit_id}`}</td>
-                      <td className="py-2 pr-4 text-right">{qty}</td>
-                      <td className="py-2 pr-4 text-right">{price.toLocaleString('vi-VN')}₫</td>
-                      <td className="py-2 text-right">{subtotal.toLocaleString('vi-VN')}₫</td>
+                      <td className="py-3 pr-4 font-medium text-gray-800">
+                        {item.name || `Sản phẩm #${item.variant_unit_id}`}
+                      </td>
+                      <td className="py-3 pr-4 text-right text-gray-700">{qty}</td>
+                      <td className="py-3 pr-4 text-right text-gray-700">{formatVnd(price)}</td>
+                      <td className="py-3 text-right font-semibold text-gray-900">{formatVnd(subtotal)}</td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
           </div>
-          <div className="border-t border-gray-200 pt-4 space-y-1 text-sm">
+          <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Tạm tính</span>
-              <span>{order.subtotal?.toLocaleString('vi-VN') ?? 0}₫</span>
+              <span className="text-gray-700">Tạm tính</span>
+              <span className="font-medium text-gray-900">{formatVnd(order.subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Phí vận chuyển</span>
-              <span>{order.shipping_fee?.toLocaleString('vi-VN') ?? 0}₫</span>
+              <span className="text-gray-700">Phí vận chuyển</span>
+              <span className="font-medium text-gray-900">{formatVnd(order.shipping_fee)}</span>
             </div>
             <div className="flex justify-between font-semibold text-base pt-2 text-gray-900">
               <span>Tổng cộng</span>
-              <span className="text-primary-700">{order.total?.toLocaleString('vi-VN') ?? 0}₫</span>
+              <span className="text-primary-700">{formatVnd(order.total)}</span>
             </div>
           </div>
           {order.shipping_address && (
@@ -146,18 +213,14 @@ export default function OrderConfirmationPage() {
               <p className="text-gray-600 text-sm">{order.shipping_address}</p>
             </div>
           )}
-          <div className="pt-4">
-            <span className="text-sm text-gray-600">Trạng thái: </span>
-            <span className="text-sm font-medium">{order.status ?? 'PENDING'}</span>
-          </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-200">
+        <div className="flex flex-wrap justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
           <Link
-            href={order.order_number || order.id != null ? `/tai-khoan/don-hang/${order.order_number ?? order.id}` : '/tai-khoan/don-hang'}
+            href={trackingHref}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
-            Xem đơn hàng
+            Theo dõi đơn hàng
           </Link>
           <Link
             href="/"
