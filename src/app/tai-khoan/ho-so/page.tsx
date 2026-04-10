@@ -5,15 +5,16 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { REGEX_EMAIL, REGEX_PHONE_NUMBER } from '@/lib/constant'
 import { updateProfile } from '@/lib/services/auth'
-import { ArrowLeftIcon, LocationIcon, UserIcon, XIcon } from '@/components/icons'
+import { LocationIcon, UserIcon, XIcon } from '@/components/icons'
 import Image from 'next/image'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 const profileSchema = Yup.object().shape({
   first_name: Yup.string().trim().nullable().defined().max(150, 'Tên không được vượt quá 150 ký tự'),
@@ -180,19 +181,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="max-w-2xl space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link
-            href="/tai-khoan"
-            className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Quay lại</span>
-          </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Hồ sơ cá nhân</h1>
-        </div>
+    <AccountPageShell>
+      <div className="space-y-6">
+        <AccountPageHeader title="Hồ sơ cá nhân" />
 
         {/* Section 1: Profile Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -321,7 +312,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Actions */}
-            <div className="flex justify-end gap-3">
+            <div className="mt-2 flex justify-end gap-3 border-t border-gray-200 pt-4">
               <Link href="/tai-khoan">
                 <Button variant="outline" disabled={loading}>
                   Hủy
@@ -453,7 +444,7 @@ export default function ProfilePage() {
           />
         )}
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }
 

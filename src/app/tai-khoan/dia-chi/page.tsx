@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
-import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
-import { ArrowLeftIcon, LocationIcon, XIcon } from '@/components/icons'
+import { LocationIcon, XIcon } from '@/components/icons'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 interface Address {
   id: string
@@ -86,30 +86,22 @@ export default function AddressesPage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="max-w-4xl space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/tai-khoan"
-              className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
+    <AccountPageShell>
+      <div className="space-y-6">
+        <AccountPageHeader
+          title="Sổ địa chỉ"
+          rightSlot={
+            <Button
+              variant="primary"
+              onClick={() => {
+                setEditingAddress(null)
+                setShowForm(true)
+              }}
             >
-              <ArrowLeftIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Quay lại</span>
-            </Link>
-            <h1 className="text-2xl font-semibold text-gray-900">Sổ địa chỉ</h1>
-          </div>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setEditingAddress(null)
-              setShowForm(true)
-            }}
-          >
-            Thêm địa chỉ mới
-          </Button>
-        </div>
+              Thêm địa chỉ mới
+            </Button>
+          }
+        />
 
         {/* Addresses List */}
         {addresses.length === 0 ? (
@@ -222,7 +214,7 @@ export default function AddressesPage() {
           />
         )}
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }
 

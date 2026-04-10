@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import { useLoginModal } from '@/contexts/LoginModalContext'
-import { UserIcon, LocationIcon, CreditCardIcon, BellIcon, SettingsIcon, LockIcon, KeyIcon, OrderIcon } from '@/components/icons'
+import { UserIcon, CreditCardIcon, BellIcon, SettingsIcon, LockIcon, KeyIcon, OrderIcon } from '@/components/icons'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
 
 export default function AccountPage() {
   const { user, isAuthenticated, loading } = useAuth()
@@ -20,11 +20,11 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <Container className="py-6">
+      <AccountPageShell>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
         </div>
-      </Container>
+      </AccountPageShell>
     )
   }
 
@@ -78,9 +78,9 @@ export default function AccountPage() {
   ]
 
   return (
-    <Container className="py-6">
+    <AccountPageShell>
       <div className="space-y-6">
-        <div>
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
           <h1 className="text-2xl font-semibold text-gray-900">Tài khoản của tôi</h1>
           <p className="text-sm text-gray-600 mt-1">
             Xin chào, {user?.name || user?.email}
@@ -115,6 +115,6 @@ export default function AccountPage() {
           ))}
         </div>
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }

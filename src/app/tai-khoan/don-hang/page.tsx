@@ -5,10 +5,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOrders } from '@/lib/hooks/useOrders'
 import type { Order, OrderListResponse } from '@/lib/services/orders'
-import { Container } from '@/components/Container'
 import { useLoginModal } from '@/contexts/LoginModalContext'
-import { ArrowLeftIcon, OrderIcon } from '@/components/icons'
+import { OrderIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 const PAGE_SIZE = 10
 
@@ -29,6 +30,15 @@ export default function OrdersListPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [page, setPage] = useState(1)
+  const [searchText, setSearchText] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchText.trim())
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchText])
 
   const apiFilters = useMemo(
     () => ({
@@ -36,15 +46,16 @@ export default function OrdersListPage() {
       page_size: PAGE_SIZE,
       ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
       ordering: sortOrder === 'newest' ? '-created_date' : 'created_date',
+      ...(debouncedSearch ? { search: debouncedSearch, order_number: debouncedSearch } : {}),
     }),
-    [page, statusFilter, sortOrder]
+    [page, statusFilter, sortOrder, debouncedSearch]
   )
 
   const { data: ordersData, isLoading, error } = useOrders(user?.id, apiFilters)
 
   useEffect(() => {
     setPage(1)
-  }, [statusFilter, sortOrder])
+  }, [statusFilter, sortOrder, debouncedSearch])
 
   useEffect(() => {
     if (!loading && !isAuthenticated && !isOpen) {
@@ -63,6 +74,10 @@ export default function OrdersListPage() {
       if (statusFilter !== 'ALL') {
         list = list.filter((o) => o.status === statusFilter)
       }
+      if (debouncedSearch) {
+        const needle = debouncedSearch.toLowerCase()
+        list = list.filter((o) => (o.order_number || `${o.id || ''}`).toLowerCase().includes(needle))
+      }
       list.sort((a, b) => {
         const ta = new Date(a.created_date || 0).getTime()
         const tb = new Date(b.created_date || 0).getTime()
@@ -80,15 +95,20 @@ export default function OrdersListPage() {
     }
 
     const pr = ordersData as OrderListResponse
-    const results = (pr.results || []) as Order[]
-    const total = typeof pr.count === 'number' ? pr.count : results.length
+    let results = (pr.results || []) as Order[]
+    if (debouncedSearch) {
+      const needle = debouncedSearch.toLowerCase()
+      results = results.filter((o) => (o.order_number || `${o.id || ''}`).toLowerCase().includes(needle))
+    }
+    const total = debouncedSearch ? results.length : typeof pr.count === 'number' ? pr.count : results.length
+    const noResult = results.length === 0
     return {
       orders: results,
       totalCount: total,
-      rawEmpty: total === 0 && results.length === 0,
-      filteredEmpty: false,
+      rawEmpty: !debouncedSearch && noResult,
+      filteredEmpty: !!debouncedSearch && noResult,
     }
-  }, [ordersData, statusFilter, sortOrder, page])
+  }, [ordersData, statusFilter, sortOrder, page, debouncedSearch])
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
@@ -120,22 +140,22 @@ export default function OrdersListPage() {
   const showEmptyFilter = !isLoading && !error && filteredEmpty
 
   return (
-    <Container className="py-6">
+    <AccountPageShell>
       <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/tai-khoan"
-              className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Quay lại</span>
-            </Link>
-            <h1 className="text-2xl font-semibold text-gray-900">Đơn hàng của tôi</h1>
-          </div>
-
-          {!isLoading && !error && !rawEmpty && (
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <AccountPageHeader
+          title="Đơn hàng của tôi"
+          rightSlot={
+            !isLoading && !error && !rawEmpty ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="whitespace-nowrap">Mã đơn</span>
+                <input
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="VD: ORD2026..."
+                  className="w-52 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                />
+              </label>
               <label className="flex items-center gap-2 text-sm text-gray-700">
                 <span className="whitespace-nowrap">Trạng thái</span>
                 <select
@@ -162,9 +182,10 @@ export default function OrdersListPage() {
                   <option value="oldest">Cũ nhất trước</option>
                 </select>
               </label>
-            </div>
-          )}
-        </div>
+              </div>
+            ) : null
+          }
+        />
 
         {isLoading && (
           <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
@@ -198,13 +219,20 @@ export default function OrdersListPage() {
 
         {showEmptyFilter && (
           <div className="rounded-lg border border-gray-200 bg-white p-10 text-center">
-            <p className="text-gray-600 mb-4">Không có đơn hàng phù hợp bộ lọc.</p>
+            <p className="text-gray-600 mb-4">
+              {debouncedSearch
+                ? `Không tìm thấy đơn hàng với mã "${debouncedSearch}".`
+                : 'Không có đơn hàng phù hợp bộ lọc.'}
+            </p>
             <button
               type="button"
-              onClick={() => setStatusFilter('ALL')}
+              onClick={() => {
+                setStatusFilter('ALL')
+                setSearchText('')
+              }}
               className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
             >
-              Xóa lọc trạng thái
+              Xóa bộ lọc
             </button>
           </div>
         )}
@@ -261,6 +289,6 @@ export default function OrdersListPage() {
           </>
         )}
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }

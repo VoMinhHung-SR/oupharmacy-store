@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
@@ -12,7 +12,7 @@ import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useShippingMethod } from '@/lib/hooks/useShipping'
 import { useCreateOrder } from '@/lib/hooks/useOrders'
 import type { Order } from '@/lib/services/orders'
-import { toastError } from '@/lib/utils/toast'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
@@ -44,6 +44,7 @@ export default function CheckoutPage() {
     selectedShippingMethod == null && shippingMethodId != null ? shippingMethodId : 0
   )
   const createOrderMutation = useCreateOrder()
+  const hasCompletedOrderRef = useRef(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
@@ -74,6 +75,7 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
+    if (hasCompletedOrderRef.current) return
     if (items.length === 0) {
       router.replace('/gio-hang')
     }
@@ -143,6 +145,7 @@ export default function CheckoutPage() {
     }
 
     try {
+      hasCompletedOrderRef.current = true
       setInformation({
         name: formValues.name,
         phone: formValues.phone,
@@ -150,6 +153,7 @@ export default function CheckoutPage() {
         address: formValues.address,
       })
       const created = await createOrderMutation.mutateAsync(payload)
+      toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
       clearCart()
       clearCheckout()
       const orderNumber = created?.order_number
@@ -157,6 +161,7 @@ export default function CheckoutPage() {
       const query = orderNumber ? `order_number=${orderNumber}` : orderId != null ? `order_id=${orderId}` : ''
       router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
+      hasCompletedOrderRef.current = false
       const message = err instanceof Error ? err.message : 'Đặt hàng thất bại. Vui lòng thử lại.'
       toastError(message)
     }
