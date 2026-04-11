@@ -2,17 +2,16 @@ import { apiGet, ApiResponse } from '../api'
 
 export interface Product {
   id: number
-  price_value: number 
-  price_display?: string  
+  price_value: number
+  price_display?: string
   in_stock: number
   image?: string
   image_url?: string
-  images?: string[]  
-  images_urls?: string[]  
-  package_size?: string  
-  prices?: any[]  
-  price_obj?: any  
-  medicine: {
+  images?: string[]
+  /** Packaging label (storeApp schema). */
+  packing?: string | null
+  /** Canonical product entity (storeApp schema). */
+  product: {
     id: number
     name: string
     mid?: string
@@ -45,11 +44,12 @@ export interface Product {
     name: string
   } | null
   registration_number?: string
+  /** External link (e.g. product disclosure). */
+  link?: string
   origin?: string
   manufacturer?: string
   shelf_life?: string
   specifications?: any
-  link?: string
   product_ranking?: number
   display_code?: number
   is_published?: boolean
@@ -134,12 +134,107 @@ export interface ProductFilters {
   page_size?: number
 }
 
+type RawProduct = Record<string, unknown>
+
+export interface ProductCardPayload {
+  id: string
+  name: string
+  price_display?: string
+  price: number
+  image_url?: string
+  packaging?: string
+  /** Product variant unit id (PVU / `ProductVariant.id` in store API). */
+  variant_unit_id?: number
+  category_slug?: string
+  product_slug?: string
+  in_stock?: number
+}
+
+export function getProductEntity(product: Product) {
+  return product?.product ?? ({} as Product['product'])
+}
+
+export function getProductName(product: Product) {
+  const entity = getProductEntity(product)
+  return entity.web_name || entity.name || 'Sản phẩm'
+}
+
+export function getProductSlug(product: Product) {
+  const entity = getProductEntity(product)
+  if (entity.slug) return entity.slug
+  if (!entity.name) return undefined
+  return entity.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
+export function getProductPackaging(product: Product) {
+  return product.packing ?? ''
+}
+
+export function getProductImageUrl(product: Product) {
+  return product.image_url || product.images?.[0]
+}
+
+export function getProductCategorySlug(product: Product, fallbackCategorySlug?: string) {
+  return (
+    product.category_info?.categorySlug ||
+    (product.category_info?.category?.length
+      ? product.category_info.category.map((cat) => cat.slug).join('/')
+      : fallbackCategorySlug || product.category?.path_slug || product.category?.slug || '')
+  )
+}
+
+export function buildProductCardPayload(product: Product, fallbackCategorySlug?: string): ProductCardPayload {
+  const categorySlug = getProductCategorySlug(product, fallbackCategorySlug)
+  const productSlug = getProductSlug(product)
+  return {
+    id: product.id.toString(),
+    name: getProductName(product),
+    price_display: product.price_display || undefined,
+    price: product.price_value || 0,
+    image_url: getProductImageUrl(product),
+    packaging: getProductPackaging(product) || undefined,
+    variant_unit_id: product.id,
+    category_slug: categorySlug || undefined,
+    product_slug: productSlug,
+    in_stock: product.in_stock,
+  }
+}
+
+/** Normalize a single API product payload (list/detail/category). */
+export function normalizeProduct(raw: RawProduct): Product {
+  const entity = (raw.product ?? raw.medicine ?? {}) as Product['product']
+  const packing =
+    (raw.packing as string | null | undefined) ??
+    (raw.package_size as string | null | undefined) ??
+    (raw.packaging as string | null | undefined) ??
+    null
+  const normalized: Product = {
+    ...(raw as unknown as Product),
+    product: entity,
+    packing,
+    price_value: Number(raw.price_value ?? 0) || 0,
+    in_stock: Number(raw.in_stock ?? 0) || 0,
+  }
+  return normalized
+}
+
+function normalizeProductListPayload(payload: ProductListResponse | CategoryProductsResponse | undefined) {
+  if (!payload) return payload
+  if (Array.isArray((payload as ProductListResponse).results)) {
+    return {
+      ...payload,
+      results: (payload as ProductListResponse).results.map((p) => normalizeProduct(p as unknown as RawProduct)),
+    }
+  }
+  return payload
+}
+
 /**
  * Build URLSearchParams from filters object
  */
 function buildSearchParams(filters?: ProductFilters): URLSearchParams {
   const params = new URLSearchParams()
-  
+
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -147,7 +242,7 @@ function buildSearchParams(filters?: ProductFilters): URLSearchParams {
       }
     })
   }
-  
+
   return params
 }
 
@@ -155,18 +250,26 @@ export async function getProducts(filters?: ProductFilters) {
   const params = buildSearchParams(filters)
   const queryString = params.toString()
   const path = `/products/${queryString ? `?${queryString}` : ''}`
-  
-  return apiGet<ProductListResponse>(path)
+
+  const res = await apiGet<ProductListResponse>(path)
+  return {
+    ...res,
+    data: normalizeProductListPayload(res.data as ProductListResponse | undefined) as ProductListResponse | undefined,
+  }
 }
 
 export async function getProduct(id: number) {
-  return apiGet<Product>(`/products/${id}/`)
+  const res = await apiGet<Product>(`/products/${id}/`)
+  return {
+    ...res,
+    data: res.data ? normalizeProduct(res.data as unknown as RawProduct) : undefined,
+  }
 }
 
 /**
  * Lấy danh sách sản phẩm theo category slug từ URL path
  * Ví dụ: getProductsByCategorySlug('thuc-pham-chuc-nang/vitamin-khoang-chat')
- * 
+ *
  * @param categorySlug - Category slug (có thể là nested path như 'thuc-pham-chuc-nang/vitamin-khoang-chat')
  * @param filters - Optional filters (min_price, max_price, in_stock, page, page_size, etc.)
  * @returns ProductListResponse với danh sách sản phẩm thuộc category
@@ -178,23 +281,27 @@ export async function getProductsByCategorySlug(
   const params = buildSearchParams(filters)
   const queryString = params.toString()
   const path = `/${categorySlug}${queryString ? `?${queryString}` : ''}`
-  
-  return apiGet<CategoryProductsResponse>(path)
+
+  const res = await apiGet<CategoryProductsResponse>(path)
+  return {
+    ...res,
+    data: normalizeProductListPayload(res.data as CategoryProductsResponse | undefined) as
+      | CategoryProductsResponse
+      | undefined,
+  }
 }
 
 /**
- * Lấy chi tiết sản phẩm theo category slug và medicine slug
- * Ví dụ: getProductByCategoryAndMedicineSlug('thuc-pham-chuc-nang', 'vitamin-c-1000mg')
- * 
- * @param categorySlug - Category slug (ví dụ: 'thuc-pham-chuc-nang')
- * @param medicineSlug - Medicine slug (ví dụ: 'vitamin-c-1000mg')
- * @returns Product với chi tiết sản phẩm
+ * Chi tiết sản phẩm theo category path + product slug (URL segment cuối).
  */
-export async function getProductByCategoryAndMedicineSlug(
+export async function getProductByCategoryAndProductSlug(
   categorySlug: string,
-  medicineSlug: string
+  productSlug: string
 ): Promise<ApiResponse<Product>> {
-  const path = `/${categorySlug}/${medicineSlug}`
-  return apiGet<Product>(path)
+  const path = `/${categorySlug}/${productSlug}`
+  const res = await apiGet<Product>(path)
+  return {
+    ...res,
+    data: res.data ? normalizeProduct(res.data as unknown as RawProduct) : undefined,
+  }
 }
-

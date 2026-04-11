@@ -2,19 +2,35 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Container from '@/components/Container'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
 import { CartIcon, SearchIcon, UserIcon } from '@/components/icons'
 import { useCart } from '@/contexts/CartContext'
+import { getPopularSearchTerms } from '@/lib/services/searchTerms'
+import type { SearchKeywordItem } from '@/lib/services/searchTerms'
+
+const FALLBACK_POPULAR_TERMS = ['Omega 3', 'Canxi', 'Dung dịch vệ sinh', 'Sữa rửa mặt', 'Thuốc nhỏ mắt', 'Kẽm', 'Men vi sinh', 'Kem chống nắng']
 
 export const Header: React.FC = () => {
   const t = useTranslations('common')
   const { isAuthenticated } = useAuth()
   const { openModal } = useLoginModal()
   const { items } = useCart()
+  const [popularTerms, setPopularTerms] = useState<SearchKeywordItem[]>([])
+
+  useEffect(() => {
+    getPopularSearchTerms(20).then((res) => {
+      if (res.data && Array.isArray(res.data)) setPopularTerms(res.data)
+    })
+  }, [])
+
+  const displayTerms = popularTerms.length > 0
+    ? popularTerms.map((item) => item.keyword)
+    : FALLBACK_POPULAR_TERMS
+
   return (
     <header className="sticky top-0 left-0 right-0 z-30 w-full bg-primary-600 text-white shadow-lg">
       {/* Top bar - Tải ứng dụng | Tư vấn ngay */}
@@ -44,7 +60,7 @@ export const Header: React.FC = () => {
             </Link>
 
             {/* Search bar - pill trắng nổi bật, icon tối bên trong */}
-            <form action="/search" className="flex-1 max-w-2xl">
+            <form action="/tim-kiem" method="get" className="flex-1 max-w-2xl">
               <div className="relative flex items-center bg-white rounded-full overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-primary-400 focus-within:ring-offset-2 focus-within:ring-offset-primary-600">
                 <input
                   name="q"
@@ -102,10 +118,10 @@ export const Header: React.FC = () => {
           {/* Tìm kiếm phổ biến */}
           <div className="mt-3 flex items-center gap-3 text-sm text-white/90 flex-wrap">
             <span className="font-medium text-white">Tìm kiếm phổ biến:</span>
-            {['Omega 3', 'Canxi', 'Dung dịch vệ sinh', 'Sữa rửa mặt', 'Thuốc nhỏ mắt', 'Kẽm', 'Men vi sinh', 'Kem chống nắng'].map((term) => (
+            {displayTerms.map((term) => (
               <Link
                 key={term}
-                href={`/search?q=${encodeURIComponent(term)}`}
+                href={`/tim-kiem?q=${encodeURIComponent(term)}`}
                 className="hover:text-white transition-colors text-white/80"
               >
                 {term}

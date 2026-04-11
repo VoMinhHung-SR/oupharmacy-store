@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
-import { Product } from '@/lib/services/products'
+import { Product, getProductEntity, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
@@ -42,13 +42,14 @@ interface ProductListViewProps {
 }
 
 const getProductLink = (product: Product): string | null => {
-  if (product.medicine?.slug) {
+  const slug = getProductSlug(product)
+  if (slug) {
     // Ưu tiên sử dụng categorySlug từ category_info, sau đó build từ category array
     const categorySlug = product.category_info?.categorySlug ||
       (product.category_info?.category && product.category_info.category.length > 0
         ? product.category_info.category.map(cat => cat.slug).join('/')
         : null)
-    return categorySlug ? `/${categorySlug}/${product.medicine.slug}` : null
+    return categorySlug ? `/${categorySlug}/${slug}` : null
   }
   return null
 }
@@ -70,7 +71,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
     }
 
     const inStock = product.in_stock ?? 0
-    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const existingItem = items.find((i) => i.variant_unit_id === product.id)
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
@@ -89,11 +90,12 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
     add(
       {
         id: product.id.toString(),
-        medicine_unit_id: product.id,
-        name: product.medicine.name,
+        variant_unit_id: product.id,
+        name: getProductName(product),
+        
         price: product.price_value,
         image_url: getProductImageUrl(product),
-        packaging: product.package_size,
+        packaging: getProductPackaging(product),
       },
       1
     )
@@ -128,7 +130,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                 return imageUrl ? (
                   <Image
                     src={imageUrl}
-                    alt={product.medicine.name}
+                    alt={getProductName(product)}
                     width={128}
                     height={128}
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -145,13 +147,13 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
             <div className="flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 group-hover:text-primary-700 mb-2">
-                  {product.medicine.name}
+                  {getProductName(product)}
                 </h3>
-                {product.package_size && (
-                  <p className="text-sm text-gray-500 mb-2">{product.package_size}</p>
+                {getProductPackaging(product) && (
+                  <p className="text-sm text-gray-500 mb-2">{getProductPackaging(product)}</p>
                 )}
-                {product.medicine.usage && (
-                  <p className="text-sm text-gray-600 line-clamp-2">{product.medicine.usage}</p>
+                {getProductEntity(product)?.usage && (
+                  <p className="text-sm text-gray-600 line-clamp-2">{getProductEntity(product)?.usage}</p>
                 )}
               </div>
 

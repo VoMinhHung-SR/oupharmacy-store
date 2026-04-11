@@ -5,13 +5,14 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { changePassword } from '@/lib/services/auth'
-import { ArrowLeftIcon, EyeIcon, EyeOffIcon } from '@/components/icons'
+import { EyeIcon, EyeOffIcon } from '@/components/icons'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 const changePasswordSchema = Yup.object().shape({
   currentPassword: Yup.string()
@@ -88,18 +89,9 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="max-w-2xl space-y-6">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/tai-khoan"
-            className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Quay lại</span>
-          </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Đổi mật khẩu</h1>
-        </div>
+    <AccountPageShell>
+      <div className="space-y-6">
+        <AccountPageHeader title="Đổi mật khẩu" />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-6">
@@ -204,7 +196,7 @@ export default function ChangePasswordPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 rounded-lg border border-gray-200 bg-white p-6">
             <Link href="/tai-khoan">
               <Button variant="outline" disabled={loading}>
                 Hủy
@@ -216,6 +208,6 @@ export default function ChangePasswordPage() {
           </div>
         </form>
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }

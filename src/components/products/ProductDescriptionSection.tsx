@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { Product } from '@/lib/services/products'
+import { Product, getProductEntity, getProductName } from '@/lib/services/products'
 
 interface ProductDescriptionSectionProps {
   product: Product
@@ -53,22 +53,25 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
   // Refs for each section
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
+  const productEntity = useMemo(() => getProductEntity(product), [product])
+  const productName = useMemo(() => getProductName(product), [product])
+
   // Memoize parsed ingredients
   const ingredients = useMemo(
-    () => parseIngredients(product.medicine.ingredients),
-    [product.medicine.ingredients]
+    () => parseIngredients(productEntity?.ingredients),
+    [productEntity?.ingredients]
   )
 
   // Memoize content checks
   const contentChecks = useMemo(() => ({
     hasIngredients: ingredients.length > 0,
-    hasDescription: !!product.medicine.description,
-    hasUsage: !!product.medicine.usage,
-    hasDosage: !!product.medicine.dosage,
-    hasAdverseEffect: !!product.medicine.adverse_effect,
-    hasCareful: !!product.medicine.careful,
-    hasPreservation: !!product.medicine.preservation,
-  }), [ingredients, product.medicine])
+    hasDescription: !!productEntity?.description,
+    hasUsage: !!productEntity?.usage,
+    hasDosage: !!productEntity?.dosage,
+    hasAdverseEffect: !!productEntity?.adverse_effect,
+    hasCareful: !!productEntity?.careful,
+    hasPreservation: !!productEntity?.preservation,
+  }), [ingredients, productEntity])
 
   // Memoize sections
   const sections: Section[] = useMemo(() => [
@@ -290,10 +293,10 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                 className="scroll-mt-32"
               >
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  {product.medicine.name} là gì?
+                  {productName} là gì?
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.description}
+                  {productEntity?.description}
                 </div>
               </div>
             )}
@@ -308,7 +311,7 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                 className="scroll-mt-32"
               >
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Thành phần của {product.medicine.name}
+                  Thành phần của {productName}
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-300">
@@ -349,10 +352,10 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                 className="scroll-mt-32"
               >
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Công dụng của {product.medicine.name}
+                  Công dụng của {productName}
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.usage}
+                  {productEntity?.usage}
                 </div>
               </div>
             )}
@@ -370,7 +373,7 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                   Cách dùng
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.dosage}
+                  {productEntity?.dosage}
                 </div>
               </div>
             )}
@@ -388,7 +391,7 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                   Tác dụng phụ
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.adverse_effect}
+                  {productEntity?.adverse_effect}
                 </div>
               </div>
             )}
@@ -406,7 +409,7 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                   Lưu ý
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.careful}
+                  {productEntity?.careful}
                 </div>
               </div>
             )}
@@ -424,7 +427,7 @@ export function ProductDescriptionSection({ product }: ProductDescriptionSection
                   Bảo quản
                 </h3>
                 <div className="text-gray-700 whitespace-pre-line">
-                  {product.medicine.preservation}
+                  {productEntity?.preservation}
                 </div>
               </div>
             )}

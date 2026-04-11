@@ -18,16 +18,16 @@ interface ProductCardProps {
     discount?: number
     image_url?: string
     packaging?: string
-    medicine_unit_id?: number
+    variant_unit_id?: number
     category_slug?: string
-    medicine_slug?: string
+    product_slug?: string
     in_stock?: number
   }
 }
 
 const getProductLink = (product: ProductCardProps['product']): string | null => {
-  if (product.category_slug && product.medicine_slug) {
-    return `/${product.category_slug}/${product.medicine_slug}`
+  if (product.category_slug && product.product_slug) {
+    return `/${product.category_slug}/${product.product_slug}`
   }
   return null
 }
@@ -56,10 +56,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       return
     }
 
-    if (!product.medicine_unit_id) return
+    if (!product.variant_unit_id) return
 
     const inStock = product.in_stock ?? 0
-    const existingItem = items.find((i) => i.medicine_unit_id === product.medicine_unit_id)
+    const existingItem = items.find((i) => i.variant_unit_id === product.variant_unit_id)
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
@@ -78,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     add(
       {
         id: product.id,
-        medicine_unit_id: product.medicine_unit_id,
+        variant_unit_id: product.variant_unit_id,
         name: product.name,
         price: product.price,
         image_url: product.image_url,
@@ -213,5 +213,3 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 }
 
 export default ProductCard
-
-

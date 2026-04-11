@@ -18,7 +18,7 @@ export default function About() {
               <a href="/about" className="text-primary-600 font-semibold">
                 Giới thiệu
               </a>
-              <a href="/contact" className="text-gray-700 hover:text-primary-600 transition-colors">
+              <a href="/lien-he" className="text-gray-700 hover:text-primary-600 transition-colors">
                 Liên hệ
               </a>
             </nav>

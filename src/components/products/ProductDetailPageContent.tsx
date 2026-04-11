@@ -14,12 +14,12 @@ import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
-import { Product } from '@/lib/services/products'
+import { Product, getProductEntity, getProductName, getProductPackaging } from '@/lib/services/products'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
   categorySlug: string
-  medicineSlug: string
+  productSlug: string
   loading?: boolean
   error?: Error | null
 }
@@ -27,7 +27,7 @@ interface ProductDetailPageContentProps {
 export function ProductDetailPageContent({
   product,
   categorySlug,
-  medicineSlug,
+  productSlug,
   loading = false,
   error = null,
 }: ProductDetailPageContentProps) {
@@ -41,22 +41,25 @@ export function ProductDetailPageContent({
   const productImageUrl = product 
     ? (product.image_url || (productImages.length > 0 ? productImages[0] : null))
     : null
+  const productEntity = product ? getProductEntity(product) : null
+  const productName = product ? getProductName(product) : ''
+  const productPackaging = product ? getProductPackaging(product) : ''
 
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
     return {
       id: product.id.toString(),
-      medicine_unit_id: product.id,
-      name: product.medicine.name,
+      variant_unit_id: product.id,
+      name: productName,
       price: product.price_value,
       image_url: productImageUrl || product.image_url,
-      packaging: product.package_size,
+      packaging: productPackaging,
     }
   }
 
   const validateStock = () => {
     if (!product) return false
-    const existingItem = items.find((i) => i.medicine_unit_id === product.id)
+    const existingItem = items.find((i) => i.variant_unit_id === product.id)
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + quantity
 
@@ -85,7 +88,7 @@ export function ProductDetailPageContent({
   useEffect(() => {
     if (pendingBuyNowRef.current) {
       const { productId, expectedQty } = pendingBuyNowRef.current
-      const itemInCart = items.find((i) => i.medicine_unit_id === productId)
+      const itemInCart = items.find((i) => i.variant_unit_id === productId)
       
       if (itemInCart && itemInCart.qty >= expectedQty) {
         pendingBuyNowRef.current = null
@@ -115,7 +118,7 @@ export function ProductDetailPageContent({
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/search' },
+            { label: 'Sản phẩm', href: '/tim-kiem' },
             { label: 'Đang tải...' },
           ]}
           className="py-4"
@@ -182,7 +185,7 @@ export function ProductDetailPageContent({
         <Breadcrumb
           items={[
             { label: 'Trang chủ', href: '/' },
-            { label: 'Sản phẩm', href: '/search' },
+            { label: 'Sản phẩm', href: '/tim-kiem' },
           ]}
           className="py-4"
         />
@@ -254,8 +257,8 @@ export function ProductDetailPageContent({
   }
 
   breadcrumbItems.push({
-    label: product.medicine.name,
-    href: `/${categorySlug}/${medicineSlug}`,
+    label: productName,
+    href: `/${categorySlug}/${productSlug}`,
   })
 
   const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT
@@ -265,20 +268,20 @@ export function ProductDetailPageContent({
     
     toggleWishlist({
       id: product.id.toString(),
-      medicine_unit_id: product.id,
-      name: product.medicine.name,
+      variant_unit_id: product.id,
+      name: productName,
       price: product.price_value,
       price_display: product.price_display,
       image_url: productImageUrl || product.image_url,
-      packaging: product.package_size,
+      packaging: productPackaging,
       category_slug: categorySlug,
-      medicine_slug: medicineSlug,
+      product_slug: productSlug,
     })
   }
 
   const productUrl = typeof window !== 'undefined' 
     ? window.location.href 
-    : `/${categorySlug}/${medicineSlug}`
+    : `/${categorySlug}/${productSlug}`
 
   return (
     <Container className="pb-6">
@@ -289,7 +292,7 @@ export function ProductDetailPageContent({
             <ProductImageGallery
               mainImage={productImageUrl ?? undefined}
               images={productImages}
-              productName={product.medicine.name}
+              productName={productName}
             />
           </div>
 
@@ -323,14 +326,14 @@ export function ProductDetailPageContent({
                     />
                   </svg>
                 </button>
-                <ShareButton productName={product.medicine.name} productUrl={productUrl} />
+                <ShareButton productName={productName} productUrl={productUrl} />
               </div>
               </div>
             )}
 
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-semibold text-gray-900 leading-tight flex-1">
-                {product.medicine.name}
+                {productName}
               </h1>
             </div>
 
@@ -377,7 +380,7 @@ export function ProductDetailPageContent({
             <div className="space-y-3 border-t border-gray-200 pt-4">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Tên chính hãng:</span>{' '}
-                <span className="text-gray-600">{product.medicine.name}</span>
+                <span className="text-gray-600">{productName}</span>
               </div>
 
               {product.category && (
@@ -401,10 +404,10 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
-              {product.package_size && (
+              {productPackaging && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
-                  <span className="text-gray-600">{product.package_size}</span>
+                  <span className="text-gray-600">{productPackaging}</span>
                 </div>
               )}
 
@@ -422,10 +425,10 @@ export function ProductDetailPageContent({
                 </div>
               )}
 
-              {product.medicine.ingredients && (
+              {productEntity?.ingredients && (
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Thành phần:</span>{' '}
-                  <span className="text-gray-600">{product.medicine.ingredients}</span>
+                  <span className="text-gray-600">{productEntity.ingredients}</span>
                 </div>
               )}
 

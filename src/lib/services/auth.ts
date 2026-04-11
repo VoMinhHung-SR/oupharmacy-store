@@ -238,3 +238,13 @@ export async function changePassword(
     return { error: errorMessage }
   }
 }
+
+export async function requestPasswordReset(
+  email: string
+): Promise<{ data?: { message?: string }; error?: string }> {
+  void email
+  return {
+    error:
+      'Yêu cầu thất bại. Vui lòng liên hệ hỗ trợ hoặc thử lại sau.',
+  }
+}

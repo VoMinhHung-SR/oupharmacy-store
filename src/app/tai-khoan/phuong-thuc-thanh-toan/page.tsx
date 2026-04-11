@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
-import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
-import { ArrowLeftIcon, CreditCardIcon } from '@/components/icons'
+import { CreditCardIcon } from '@/components/icons'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 
 interface PaymentMethod {
   id: string
@@ -95,21 +95,9 @@ export default function PaymentMethodsPage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="max-w-4xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/tai-khoan"
-              className="flex items-center gap-2 text-gray-600 hover:text-primary-700 transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Quay lại</span>
-            </Link>
-            <h1 className="text-2xl font-semibold text-gray-900">Phương thức thanh toán</h1>
-          </div>
-          <Button variant="primary">Thêm phương thức</Button>
-        </div>
+    <AccountPageShell>
+      <div className="space-y-6">
+        <AccountPageHeader title="Phương thức thanh toán" rightSlot={<Button variant="primary">Thêm phương thức</Button>} />
 
         {methods.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
@@ -178,6 +166,6 @@ export default function PaymentMethodsPage() {
           </div>
         )}
       </div>
-    </Container>
+    </AccountPageShell>
   )
 }
