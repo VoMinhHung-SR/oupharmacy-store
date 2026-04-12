@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import { login as loginApi, register as registerApi, getCurrentUser, firebaseSocialLogin, type User } from '@/lib/services/auth'
 import { STORAGE_KEY } from '@/lib/constant'
-import { setEncodedItem, getEncodedItem, removeEncodedItem } from '@/lib/utils/storage'
+import { clearAuthStorage, persistAuthTokens, refreshSessionWithStoredRefresh } from '@/lib/auth'
+import { setEncodedItem, getEncodedItem } from '@/lib/utils/storage'
 import { toastSuccess } from '@/lib/utils/toast'
 
 interface AuthContextValue {
@@ -28,33 +29,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const loadAuth = async () => {
       try {
-        const storedToken = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY.TOKEN) : null
-        const storedUser = getEncodedItem<User>(STORAGE_KEY.USER)
+        let storedToken = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY.TOKEN) : null
+        const storedRefresh = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY.REFRESH_TOKEN) : null
 
-        if (storedToken) {
-          setToken(storedToken)
-          
-          if (storedUser) {
-            setUser(storedUser)
-          } else {
-            const result = await getCurrentUser(storedToken)
-            if (result.data) {
-              setUser(result.data)
-              setEncodedItem(STORAGE_KEY.USER, result.data)
-            } else {
-              localStorage.removeItem(STORAGE_KEY.TOKEN)
-              localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN)
-              removeEncodedItem(STORAGE_KEY.USER)
-              setToken(null)
-              setUser(null)
-            }
+        if (!storedToken && storedRefresh) {
+          storedToken = await refreshSessionWithStoredRefresh()
+        }
+
+        if (!storedToken) {
+          return
+        }
+
+        setToken(storedToken)
+
+        let userResult = await getCurrentUser(storedToken)
+        if (!userResult.data && userResult.status === 401 && storedRefresh) {
+          const newAccess = await refreshSessionWithStoredRefresh()
+          if (newAccess) {
+            storedToken = newAccess
+            setToken(newAccess)
+            userResult = await getCurrentUser(newAccess)
           }
+        }
+
+        if (userResult.data) {
+          setUser(userResult.data)
+          setEncodedItem(STORAGE_KEY.USER, userResult.data)
+        } else {
+          clearAuthStorage()
+          setToken(null)
+          setUser(null)
         }
       } catch (error) {
         console.error('Error loading auth:', error)
-        localStorage.removeItem(STORAGE_KEY.TOKEN)
-        localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN)
-        removeEncodedItem(STORAGE_KEY.USER)
+        clearAuthStorage()
         setToken(null)
         setUser(null)
       } finally {
@@ -73,16 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const { access_token, refresh_token } = result.data
-    
+
     setToken(access_token)
-    localStorage.setItem(STORAGE_KEY.TOKEN, access_token)
-    
-    if (typeof document !== 'undefined') {
-      document.cookie = `token=${access_token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
-    }
-    if (refresh_token) {
-      localStorage.setItem(STORAGE_KEY.REFRESH_TOKEN, refresh_token)
-    }
+    persistAuthTokens(access_token, refresh_token)
 
     const userResult = await getCurrentUser(access_token)
     if (userResult.data) {
@@ -112,14 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { access_token, refresh_token, user } = response.data
 
     setToken(access_token)
-    localStorage.setItem(STORAGE_KEY.TOKEN, access_token)
-
-    if (typeof document !== 'undefined') {
-      document.cookie = `token=${access_token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
-    }
-    if (refresh_token) {
-      localStorage.setItem(STORAGE_KEY.REFRESH_TOKEN, refresh_token)
-    }
+    persistAuthTokens(access_token, refresh_token)
 
     setUser(user)
     setEncodedItem(STORAGE_KEY.USER, user)
@@ -140,18 +134,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(() => {
     setToken(null)
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY.TOKEN)
-    localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN)
-    removeEncodedItem(STORAGE_KEY.USER)
-    if (typeof document !== 'undefined') {
-      document.cookie = 'token=; path=/; max-age=0'
-    }
+    clearAuthStorage()
   }, [])
 
   const refreshUser = useCallback(async () => {
     if (!token) return
 
-    const result = await getCurrentUser(token)
+    let accessToken = token
+    let result = await getCurrentUser(accessToken)
+    if (!result.data && result.status === 401) {
+      const newAccess = await refreshSessionWithStoredRefresh()
+      if (newAccess) {
+        accessToken = newAccess
+        setToken(newAccess)
+        result = await getCurrentUser(newAccess)
+      }
+    }
+
     if (result.data) {
       setUser(result.data)
       setEncodedItem(STORAGE_KEY.USER, result.data)
