@@ -26,7 +26,26 @@
     "next": "Next",
     "previous": "Previous",
     "submit": "Submit",
-    "close": "Close"
+    "close": "Close",
+    "headerSearch": {
+      "placeholder": "Search by name, display name, or packaging…",
+      "ariaLabel": "Search products",
+      "panelAria": "Search suggestions and recommendations",
+      "submitAria": "Submit search",
+      "voiceDisabled": "Voice search — coming soon",
+      "scanDisabled": "Scan code — coming soon",
+      "history": "Recent",
+      "clearHistory": "Clear all",
+      "removeItem": "Remove from history",
+      "popular": "Top searches",
+      "hot": "Featured products",
+      "deals": "Deals",
+      "suggestions": "Suggestions",
+      "viewAll": "View all results",
+      "noResults": "No matching products",
+      "consultPrice": "Contact for pricing",
+      "clearInput": "Clear search"
+    }
   },
   "product": {
     "title": "Product",

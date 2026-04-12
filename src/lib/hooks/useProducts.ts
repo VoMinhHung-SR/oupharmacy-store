@@ -10,8 +10,12 @@ import {
   CategoryProductsResponse,
 } from '../services/products'
 
-export function useProducts(filters?: ProductFilters, options?: { enabled?: boolean }) {
+export function useProducts(
+  filters?: ProductFilters,
+  options?: { enabled?: boolean; staleTime?: number }
+) {
   const enabled = options?.enabled !== false
+  const staleTime = options?.staleTime
   return useQuery<ProductListResponse | undefined, Error>({
     queryKey: ['products', filters],
     queryFn: async () => {
@@ -22,6 +26,7 @@ export function useProducts(filters?: ProductFilters, options?: { enabled?: bool
       return response.data
     },
     enabled,
+    ...(staleTime !== undefined ? { staleTime } : {}),
   })
 }
 
