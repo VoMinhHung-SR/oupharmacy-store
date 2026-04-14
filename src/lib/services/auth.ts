@@ -76,6 +76,38 @@ export async function getOAuth2Info(): Promise<{ data?: OAuth2Info; error?: stri
   }
 }
 
+export async function refreshAccessToken(
+  refreshToken: string
+): Promise<{ data?: LoginResponse; error?: string; status?: number }> {
+  try {
+    const oauthInfo = await getOAuth2Info()
+    if (oauthInfo.error || !oauthInfo.data) {
+      return {
+        error: oauthInfo.error || 'Không thể lấy thông tin OAuth2',
+        status: 0,
+      }
+    }
+
+    const response = await axios.post<LoginResponse>(`${MAIN_API_URL}/o/token/`, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: oauthInfo.data.client_id,
+      client_secret: oauthInfo.data.client_secret,
+    })
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.error_description ||
+      error.response?.data?.error ||
+      error.message ||
+      'Làm mới phiên đăng nhập thất bại'
+    return {
+      error: errorMessage,
+      status: error.response?.status,
+    }
+  }
+}
+
 export async function login(
   email: string,
   password: string
@@ -110,7 +142,7 @@ export async function login(
 
 export async function getCurrentUser(
   token: string
-): Promise<{ data?: User; error?: string }> {
+): Promise<{ data?: User; error?: string; status?: number }> {
   try {
     const response = await axios.get<User>(`${MAIN_API_URL}/users/current-user/`, {
       headers: {
@@ -118,13 +150,14 @@ export async function getCurrentUser(
       },
     })
 
-    return { data: response.data }
+    return { data: response.data, status: response.status }
   } catch (error: any) {
     return {
       error:
         error.response?.data?.detail ||
         error.message ||
         'Không thể lấy thông tin user',
+      status: error.response?.status,
     }
   }
 }

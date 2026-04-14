@@ -1,5 +1,13 @@
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
+import axios, {
+  AxiosInstance,
+  AxiosError,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from 'axios'
 import { STORAGE_KEY } from './constant'
+import { refreshSessionWithStoredRefresh } from '@/lib/auth'
+
+type InternalRequestConfigRetry = InternalAxiosRequestConfig & { _retry?: boolean }
 
 export interface ApiResponse<T> {
   data?: T
@@ -45,13 +53,31 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// Response interceptor - xử lý errors globally
+// Response interceptor: 401 → refresh access token once, then retry
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error)
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalRequestConfigRetry | undefined
+    const status = error.response?.status
+
+    if (status !== 401 || !originalRequest || originalRequest._retry) {
+      return Promise.reject(error)
+    }
+
+    const reqUrl = `${originalRequest.baseURL || ''}${originalRequest.url || ''}`
+    if (reqUrl.includes('/o/token/')) {
+      return Promise.reject(error)
+    }
+
+    originalRequest._retry = true
+    const newToken = await refreshSessionWithStoredRefresh()
+    if (!newToken) {
+      return Promise.reject(error)
+    }
+
+    originalRequest.headers = originalRequest.headers || {}
+    originalRequest.headers.Authorization = `Bearer ${newToken}`
+    return axiosInstance(originalRequest)
   }
 )
 
