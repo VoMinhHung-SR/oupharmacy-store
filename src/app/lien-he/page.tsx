@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Card } from '@/components/cards/Card'
 import { Button } from '@/components/Button'
 import { submitContactMessage } from '@/lib/services/contact'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 type ContactFormData = {
   firstName: string
@@ -83,10 +84,14 @@ export default function ContactPage() {
     setIsSubmitting(false)
     if (result.error) {
       setSubmitError(result.error)
+      toastError(result.error)
       return
     }
 
-    setSubmitSuccess('Gửi yêu cầu thành công. Chúng tôi sẽ phản hồi sớm nhất.')
+    const successMessage =
+      'Cảm ơn bạn đã tin tưởng lựa chọn chúng tôi. Chúng tôi sẽ phản hồi yêu cầu của bạn trong thời gian sớm nhất.'
+    setSubmitSuccess(successMessage)
+    toastSuccess('Gửi yêu cầu thành công. Chúng tôi sẽ phản hồi sớm nhất.')
     setForm(initialFormData)
   }
 

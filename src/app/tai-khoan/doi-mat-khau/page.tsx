@@ -31,7 +31,7 @@ const changePasswordSchema = Yup.object().shape({
 type ChangePasswordFormData = Yup.InferType<typeof changePasswordSchema>
 
 export default function ChangePasswordPage() {
-  const { isAuthenticated, token, loading: authLoading } = useAuth()
+  const { isAuthenticated, user, token, loading: authLoading } = useAuth()
   const { openModal, isOpen } = useLoginModal()
   const [loading, setLoading] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -56,7 +56,7 @@ export default function ChangePasswordPage() {
   })
 
   const onSubmit = async (data: ChangePasswordFormData) => {
-    if (!token) {
+    if (!token || !user?.id) {
       toastError('Vui lòng đăng nhập để đổi mật khẩu')
       return
     }
@@ -64,6 +64,7 @@ export default function ChangePasswordPage() {
     setLoading(true)
     try {
       const response = await changePassword(
+        user.id,
         {
           current_password: data.currentPassword,
           new_password: data.newPassword,
