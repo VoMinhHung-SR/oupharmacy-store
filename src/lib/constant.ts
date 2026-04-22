@@ -2,6 +2,8 @@ export const STORAGE_KEY = {
   TOKEN: 'oupharmacy_token',
   REFRESH_TOKEN: 'oupharmacy_refresh_token',
   USER: 'oupharmacy_user',
+  /** Lịch sử tìm kiếm header (localStorage, tối đa ~10 mục). */
+  SEARCH_HISTORY: 'oupharmacy-search-history',
 }
 
 export const TOAST_TYPE = {
@@ -98,6 +100,19 @@ export const NAVBAR_DROPDOWN = {
   WIDTH_SMALL: 280,
   WIDTH_LARGE: 1000,
   SCROLL_AMOUNT: 300,
+} as const
+
+/** Header search combobox — debounce, cache, page sizes */
+export const HEADER_SEARCH = {
+  DEBOUNCE_MS: 300,
+  MIN_QUERY_LEN: 2,
+  HISTORY_MAX: 10,
+  SUGGEST_PAGE_SIZE: 8,
+  HOT_PAGE_SIZE: 6,
+  DEALS_FETCH_SIZE: 40,
+  DEALS_SHOW: 6,
+  PANEL_STALE_MS: 5 * 60 * 1000,
+  SUGGEST_STALE_MS: 30_000,
 } as const
 
 export const AVATAR_STATUS = {

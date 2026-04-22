@@ -76,6 +76,38 @@ export async function getOAuth2Info(): Promise<{ data?: OAuth2Info; error?: stri
   }
 }
 
+export async function refreshAccessToken(
+  refreshToken: string
+): Promise<{ data?: LoginResponse; error?: string; status?: number }> {
+  try {
+    const oauthInfo = await getOAuth2Info()
+    if (oauthInfo.error || !oauthInfo.data) {
+      return {
+        error: oauthInfo.error || 'Không thể lấy thông tin OAuth2',
+        status: 0,
+      }
+    }
+
+    const response = await axios.post<LoginResponse>(`${MAIN_API_URL}/o/token/`, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: oauthInfo.data.client_id,
+      client_secret: oauthInfo.data.client_secret,
+    })
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.error_description ||
+      error.response?.data?.error ||
+      error.message ||
+      'Làm mới phiên đăng nhập thất bại'
+    return {
+      error: errorMessage,
+      status: error.response?.status,
+    }
+  }
+}
+
 export async function login(
   email: string,
   password: string
@@ -110,7 +142,7 @@ export async function login(
 
 export async function getCurrentUser(
   token: string
-): Promise<{ data?: User; error?: string }> {
+): Promise<{ data?: User; error?: string; status?: number }> {
   try {
     const response = await axios.get<User>(`${MAIN_API_URL}/users/current-user/`, {
       headers: {
@@ -118,13 +150,14 @@ export async function getCurrentUser(
       },
     })
 
-    return { data: response.data }
+    return { data: response.data, status: response.status }
   } catch (error: any) {
     return {
       error:
         error.response?.data?.detail ||
         error.message ||
         'Không thể lấy thông tin user',
+      status: error.response?.status,
     }
   }
 }
@@ -211,14 +244,86 @@ export interface ChangePasswordData {
   new_password: string
 }
 
+function extractApiErrorMessage(error: any, fallback: string): string {
+  // TODO: Move FE-side error translation to a shared utility (or backend error codes/i18n) instead of hardcoded rules in auth service.
+  const toVietnameseError = (message: string): string => {
+    const normalized = message.trim()
+    const lower = normalized.toLowerCase()
+    // Message from BE status: TODO: enhance later
+    if (lower.includes('this password is too common')) {
+      return 'Mật khẩu quá phổ biến, vui lòng chọn mật khẩu khác.'
+    }
+    if (lower.includes('this password is too short')) {
+      return 'Mật khẩu quá ngắn.'
+    }
+    if (lower.includes('this password is entirely numeric')) {
+      return 'Mật khẩu không được chỉ bao gồm chữ số.'
+    }
+    if (lower.includes('this field is required')) {
+      return 'Vui lòng nhập đầy đủ thông tin bắt buộc.'
+    }
+    if (lower.includes('unable to log in with provided credentials')) {
+      return 'Thông tin đăng nhập không chính xác.'
+    }
+    if (lower.includes('invalid token')) {
+      return 'Liên kết hoặc phiên làm việc không hợp lệ.'
+    }
+    if (lower.includes('token is invalid or expired')) {
+      return 'Liên kết đã hết hạn hoặc không hợp lệ.'
+    }
+    if (lower.includes('status code 400')) {
+      return 'Yêu cầu không thành công. Vui lòng kiểm tra thông tin và thử lại.'
+    }
+    return normalized
+  }
+
+  const data = error?.response?.data
+
+  if (typeof data === 'string' && data.trim()) {
+    return toVietnameseError(data)
+  }
+
+  if (data && typeof data === 'object') {
+    const directMessage =
+      data.detail ||
+      data.message ||
+      data.error ||
+      data.non_field_errors?.[0] ||
+      data.current_password?.[0] ||
+      data.new_password?.[0] ||
+      data.email?.[0]
+
+    if (typeof directMessage === 'string' && directMessage.trim()) {
+      return toVietnameseError(directMessage)
+    }
+
+    const firstValue = Object.values(data)[0]
+    if (Array.isArray(firstValue) && typeof firstValue[0] === 'string') {
+      return toVietnameseError(firstValue[0])
+    }
+    if (typeof firstValue === 'string' && firstValue.trim()) {
+      return toVietnameseError(firstValue)
+    }
+  }
+
+  if (typeof error?.message === 'string') {
+    return toVietnameseError(error.message)
+  }
+
+  return fallback
+}
+
 export async function changePassword(
+  userId: number,
   data: ChangePasswordData,
   token: string
 ): Promise<{ data?: { message: string }; error?: string }> {
   try {
     const response = await axios.post<{ message: string }>(
-      `${MAIN_API_URL}/users/change-password/`,
-      data,
+      `${MAIN_API_URL}/users/${userId}/change-password/`,
+      {
+        new_password: data.new_password,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -228,13 +333,10 @@ export async function changePassword(
 
     return { data: response.data }
   } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.detail ||
-      error.response?.data?.current_password?.[0] ||
-      error.response?.data?.new_password?.[0] ||
-      error.response?.data?.message ||
-      error.message ||
-      'Đổi mật khẩu thất bại'
+    const errorMessage = extractApiErrorMessage(
+      error,
+      'Mật khẩu hiện tại không đúng hoặc mật khẩu mới chưa hợp lệ.'
+    )
     return { error: errorMessage }
   }
 }
@@ -242,9 +344,17 @@ export async function changePassword(
 export async function requestPasswordReset(
   email: string
 ): Promise<{ data?: { message?: string }; error?: string }> {
-  void email
-  return {
-    error:
-      'Yêu cầu thất bại. Vui lòng liên hệ hỗ trợ hoặc thử lại sau.',
+  try {
+    const response = await axios.post<{ message?: string }>(
+      `${MAIN_API_URL}/auth/forgot-password/`,
+      { email: email.trim() }
+    )
+    return { data: response.data }
+  } catch (error: any) {
+    const errorMessage = extractApiErrorMessage(
+      error,
+      'Yêu cầu không thành công. Vui lòng thử lại sau.'
+    )
+    return { error: errorMessage }
   }
 }

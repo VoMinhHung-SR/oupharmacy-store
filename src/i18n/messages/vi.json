@@ -26,7 +26,26 @@
     "next": "Tiếp theo",
     "previous": "Trước",
     "submit": "Gửi",
-    "close": "Đóng"
+    "close": "Đóng",
+    "headerSearch": {
+      "placeholder": "Tìm theo tên, tên web hoặc quy cách đóng gói…",
+      "ariaLabel": "Tìm kiếm sản phẩm",
+      "panelAria": "Gợi ý và gợi ý tìm kiếm",
+      "submitAria": "Gửi tìm kiếm",
+      "voiceDisabled": "Tìm bằng giọng nói — sắp có",
+      "scanDisabled": "Quét mã — sắp có",
+      "history": "Gần đây",
+      "clearHistory": "Xóa tất cả",
+      "removeItem": "Xóa khỏi lịch sử",
+      "popular": "Tra cứu hàng đầu",
+      "hot": "Sản phẩm nổi bật",
+      "deals": "Ưu đãi",
+      "suggestions": "Gợi ý",
+      "viewAll": "Xem tất cả kết quả",
+      "noResults": "Không tìm thấy sản phẩm phù hợp",
+      "consultPrice": "Liên hệ tư vấn giá",
+      "clearInput": "Xóa nội dung tìm kiếm"
+    }
   },
   "product": {
     "title": "Sản phẩm",

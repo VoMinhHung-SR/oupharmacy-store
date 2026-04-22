@@ -53,6 +53,11 @@ export interface Product {
   product_ranking?: number
   display_code?: number
   is_published?: boolean
+  /** Giá niêm yết / so sánh (default unit), dùng hiển thị giảm giá. */
+  compare_at_price?: number | null
+  /** % giảm so với compare_at_price (BE tính từ default unit). */
+  discount_percent?: number
+  is_hot?: boolean
   active: boolean
   created_date: string
   updated_date: string
@@ -132,6 +137,8 @@ export interface ProductFilters {
   ordering?: string
   page?: number
   page_size?: number
+  /** Lọc variant is_hot=true (store API). */
+  is_hot?: boolean
 }
 
 type RawProduct = Record<string, unknown>
@@ -141,6 +148,8 @@ export interface ProductCardPayload {
   name: string
   price_display?: string
   price: number
+  originalPrice?: number
+  discount?: number
   image_url?: string
   packaging?: string
   /** Product variant unit id (PVU / `ProductVariant.id` in store API). */
@@ -186,11 +195,19 @@ export function getProductCategorySlug(product: Product, fallbackCategorySlug?: 
 export function buildProductCardPayload(product: Product, fallbackCategorySlug?: string): ProductCardPayload {
   const categorySlug = getProductCategorySlug(product, fallbackCategorySlug)
   const productSlug = getProductSlug(product)
+  const compare = product.compare_at_price
+  const hasCompare = typeof compare === 'number' && compare > (product.price_value || 0)
+  const discountPct =
+    typeof product.discount_percent === 'number' && product.discount_percent > 0
+      ? product.discount_percent
+      : undefined
   return {
     id: product.id.toString(),
     name: getProductName(product),
     price_display: product.price_display || undefined,
     price: product.price_value || 0,
+    originalPrice: hasCompare ? compare : undefined,
+    discount: discountPct,
     image_url: getProductImageUrl(product),
     packaging: getProductPackaging(product) || undefined,
     variant_unit_id: product.id,
@@ -208,12 +225,20 @@ export function normalizeProduct(raw: RawProduct): Product {
     (raw.package_size as string | null | undefined) ??
     (raw.packaging as string | null | undefined) ??
     null
+  const compareRaw = raw.compare_at_price
+  const compareAt =
+    compareRaw === null || compareRaw === undefined
+      ? undefined
+      : Number(compareRaw)
   const normalized: Product = {
     ...(raw as unknown as Product),
     product: entity,
     packing,
     price_value: Number(raw.price_value ?? 0) || 0,
     in_stock: Number(raw.in_stock ?? 0) || 0,
+    compare_at_price: compareAt !== undefined && !Number.isNaN(compareAt) ? compareAt : undefined,
+    discount_percent: Number(raw.discount_percent ?? 0) || 0,
+    is_hot: Boolean(raw.is_hot),
   }
   return normalized
 }
@@ -237,9 +262,9 @@ function buildSearchParams(filters?: ProductFilters): URLSearchParams {
 
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value))
-      }
+      if (value === undefined || value === null || value === '') return
+      if (key === 'is_hot' && value !== true) return
+      params.append(key, String(value))
     })
   }
 
