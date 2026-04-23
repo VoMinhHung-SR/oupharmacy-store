@@ -1,8 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
-import { Card } from '@/components/cards/Card'
 import { Button } from '@/components/Button'
 import { submitContactMessage } from '@/lib/services/contact'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
@@ -96,40 +94,18 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary-600">OUPharmacy</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Trang chủ
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Giới thiệu
-              </Link>
-              <Link href="/lien-he" className="text-primary-600 font-semibold">
-                Liên hệ
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Liên hệ với chúng tôi</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+    <main className="min-h-screen bg-[#f7f9fc]">
+      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-8 text-center">
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Liên hệ với chúng tôi</h1>
+          <p className="mx-auto max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
               Chúng tôi luôn sẵn sàng hỗ trợ và tư vấn cho bạn về giải pháp OUPharmacy System
-            </p>
-          </div>
+          </p>
+        </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
-            <Card>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Gửi tin nhắn</h2>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 lg:col-span-7">
+            <h2 className="mb-5 text-xl font-semibold text-gray-900">Gửi tin nhắn</h2>
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -243,11 +219,10 @@ export default function ContactPage() {
                   {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
                 </Button>
               </form>
-            </Card>
+          </div>
 
-            <div className="space-y-8">
-              <Card>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Thông tin liên hệ</h3>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 lg:col-span-5">
+            <h3 className="mb-4 text-xl font-semibold text-gray-900">Thông tin liên hệ</h3>
                 <div className="space-y-4">
                   <div className="flex items-start">
                     <svg className="w-6 h-6 text-primary-600 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,8 +266,6 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </div>
-              </Card>
-            </div>
           </div>
         </div>
       </section>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ComingSoonPage } from '@/components/common/ComingSoonPage'
+import { StaticFeaturePlaceholder } from '@/components/common/StaticFeaturePlaceholder'
 
 export const metadata: Metadata = {
   title: 'Tra cứu thuốc chính hãng | OUPharmacy',
@@ -8,14 +8,10 @@ export const metadata: Metadata = {
 
 export default function AuthenticProductLookupPage() {
   return (
-    <ComingSoonPage
-      icon="🔍"
+    <StaticFeaturePlaceholder
+      icon={<span aria-hidden="true">🔍</span>}
       title="Tra cứu thuốc chính hãng"
       description="Công cụ xác thực sản phẩm đang được phát triển. Hiện tại quý khách có thể mua hàng chính hãng qua cửa hàng trực tuyến của chúng tôi."
-      breadcrumbItems={[
-        { label: 'Trang chủ', href: '/' },
-        { label: 'Tra cứu thuốc chính hãng' },
-      ]}
     />
   )
 }

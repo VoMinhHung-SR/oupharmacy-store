@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ComingSoonPage } from '@/components/common/ComingSoonPage'
+import { StaticFeaturePlaceholder } from '@/components/common/StaticFeaturePlaceholder'
 
 export const metadata: Metadata = {
   title: 'Tiêm vắc xin | OUPharmacy',
@@ -8,14 +8,10 @@ export const metadata: Metadata = {
 
 export default function VaccinationPage() {
   return (
-    <ComingSoonPage
-      icon="💉"
+    <StaticFeaturePlaceholder
+      icon={<span aria-hidden="true">💉</span>}
       title="Tiêm vắc xin"
       description="Dịch vụ đặt lịch và thông tin tiêm chủng đang được chuẩn bị. Quý khách vui lòng theo dõi thông báo trên trang chủ."
-      breadcrumbItems={[
-        { label: 'Trang chủ', href: '/' },
-        { label: 'Tiêm vắc xin' },
-      ]}
     />
   )
 }
