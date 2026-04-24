@@ -31,11 +31,12 @@ export const Header: React.FC = () => {
   const displayTerms = popularTerms.length > 0
     ? popularTerms.map((item) => item.keyword)
     : FALLBACK_POPULAR_TERMS
+  const compactTerms = displayTerms.slice(0, 6)
 
   return (
     <header className="sticky top-0 left-0 right-0 z-30 w-full bg-primary-600 text-white shadow-lg">
       {/* Top bar - Tải ứng dụng | Tư vấn ngay */}
-      <div className="bg-primary-700/80 text-white text-sm py-2 border-b border-white/10">
+      <div className="border-b border-white/10 bg-primary-700/80 py-1.5 text-xs text-white">
         <Container>
           <div className="flex justify-between items-center">
             <div className="hidden md:flex items-center gap-4">
@@ -49,21 +50,21 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Main header */}
-      <div className="py-4">
+      <div className="py-3">
         <Container>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
               <div className="flex flex-col">
-                <span className="text-2xl font-bold text-white">NHÀ THUỐC</span>
-                <span className="text-xl font-semibold text-primary-100">OUPHARMACY</span>
+                <span className="text-xl font-bold leading-tight text-white lg:text-2xl">NHÀ THUỐC</span>
+                <span className="text-base font-semibold leading-tight text-primary-100 lg:text-lg">OUPHARMACY</span>
               </div>
             </Link>
 
             <HeaderSearchDropdown popularTerms={displayTerms} />
 
             {/* Right actions */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0">
               {isAuthenticated ? (
                 <AvatarBadge />
               ) : (
@@ -78,7 +79,7 @@ export const Header: React.FC = () => {
               )}
               <Link
                 href="/gio-hang"
-                className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary-700 hover:bg-primary-800 text-white text-sm font-medium transition-colors whitespace-nowrap shadow-sm"
+                className="relative flex items-center gap-2 rounded-full bg-primary-700 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors whitespace-nowrap hover:bg-primary-800"
                 aria-label={t('cart')}
               >
                 <CartIcon className="w-5 h-5 shrink-0" strokeWidth={2} />
@@ -93,9 +94,9 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Tìm kiếm phổ biến */}
-          <div className="mt-3 flex items-center gap-3 text-sm text-white/90 flex-wrap">
+          <div className="mt-2 hidden items-center gap-3 text-xs text-white/90 lg:flex">
             <span className="font-medium text-white">Tìm kiếm phổ biến:</span>
-            {displayTerms.map((term) => (
+            {compactTerms.map((term) => (
               <Link
                 key={term}
                 href={`/tim-kiem?q=${encodeURIComponent(term)}`}
