@@ -1,6 +1,10 @@
 "use client"
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { toastSuccess } from '@/lib/utils/toast'
+import { useAuth } from './AuthContext'
+import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from '@/lib/hooks/useCarts'
+import { getCurrentCart } from '@/lib/services/carts'
+import { useQueryClient } from '@tanstack/react-query'
 
 export interface CartItem {
   /** String form of `variant_unit_id` for React keys / localStorage. */
@@ -21,6 +25,13 @@ interface CartContextValue {
   updateQuantity: (id: string, qty: number) => void
   clear: () => void
   total: number
+  subtotal?: number
+  shippingFee?: number
+  discountAmount?: number
+  shippingDiscountAmount?: number
+  shippingMethodId?: number | null
+  version?: number
+  isLoading?: boolean
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
@@ -45,9 +56,17 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
 }
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth()
+  const queryClient = useQueryClient()
+  const { data: serverCart, isLoading: serverCartLoading } = useCurrentCart(isAuthenticated)
+  const addMutation = useAddCartItem()
+  const removeMutation = useRemoveCartItem()
+  const updateMutation = useUpdateCartItem()
+
   const [items, setItems] = useState<CartItem[]>([])
 
   useEffect(() => {
+    if (isAuthenticated) return
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
       if (raw) {
@@ -56,15 +75,88 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setItems(migrated)
       }
     } catch {}
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
+    if (isAuthenticated) return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     } catch {}
-  }, [items])
+  }, [items, isAuthenticated])
 
-  const add = (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
+  const serverItems = useMemo<CartItem[]>(() => {
+    if (!serverCart?.items) return []
+    return serverCart.items.map((item) => ({
+      id: String(item.id),
+      variant_unit_id: Number(item.product_variant) || 0,
+      name: item.name || '',
+      price: Number(item.unit_price_snapshot) || 0,
+      qty: Number(item.quantity) || 1,
+    }))
+  }, [serverCart])
+
+  // Merge anonymous local cart into server cart once user logs in.
+  useEffect(() => {
+    if (!isAuthenticated || typeof window === 'undefined') return
+    let cancelled = false
+
+    const syncAnonymousCart = async () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY)
+        if (!raw) return
+        const parsed = JSON.parse(raw) as Record<string, unknown>[]
+        const localItems = parsed.map(migrateCartItem).filter((i) => i.variant_unit_id > 0 && i.qty > 0)
+        if (localItems.length === 0) {
+          localStorage.removeItem(STORAGE_KEY)
+          return
+        }
+
+        let latest = await getCurrentCart()
+        if (latest.error || !latest.data) return
+        let version = latest.data.version
+
+        for (const item of localItems) {
+          if (cancelled) return
+          const merged = await addMutation.mutateAsync({
+            product_variant_id: item.variant_unit_id,
+            quantity: item.qty,
+            expected_version: version,
+          })
+          version = merged.version
+        }
+
+        if (!cancelled) {
+          localStorage.removeItem(STORAGE_KEY)
+          await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
+        }
+      } catch {
+        // Preserve local cart for later retry when synchronization fails.
+      }
+    }
+
+    syncAnonymousCart()
+    return () => {
+      cancelled = true
+    }
+  }, [addMutation, isAuthenticated, queryClient])
+
+  const add = useCallback((item: Omit<CartItem, 'qty'>, qty: number = 1) => {
+    if (isAuthenticated) {
+      const version = serverCart?.version
+      if (version == null) return
+      addMutation
+        .mutateAsync({
+          product_variant_id: item.variant_unit_id,
+          quantity: qty,
+          expected_version: version,
+        })
+        .then(() => {
+          toastSuccess(`Đã thêm ${item.name} vào giỏ hàng`)
+        })
+        .catch(() => {})
+      return
+    }
+
     const isUpdate = items.some((i) => i.variant_unit_id === item.variant_unit_id)
 
     setItems((prev) => {
@@ -75,25 +167,96 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
 
     toastSuccess(isUpdate ? `Đã cập nhật số lượng ${item.name} trong giỏ hàng` : `Đã thêm ${item.name} vào giỏ hàng`)
-  }
+  }, [addMutation, isAuthenticated, items, serverCart?.version])
 
-  const remove = (id: string) => {
+  const remove = useCallback((id: string) => {
+    if (isAuthenticated) {
+      const version = serverCart?.version
+      if (version == null) return
+      const item = serverItems.find((i) => i.id === id)
+      removeMutation
+        .mutateAsync({
+          item_id: Number(id),
+          expected_version: version,
+        })
+        .then(() => {
+          if (item) {
+            toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
+          }
+        })
+        .catch(() => {})
+      return
+    }
+
     const item = items.find((i) => i.id === id)
     setItems((prev) => prev.filter((i) => i.id !== id))
     if (item) {
       toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
     }
-  }
+  }, [isAuthenticated, items, removeMutation, serverCart?.version, serverItems])
 
-  const updateQuantity = (id: string, qty: number) => {
+  const updateQuantity = useCallback((id: string, qty: number) => {
     if (qty < 1) return
+    if (isAuthenticated) {
+      const version = serverCart?.version
+      if (version == null) return
+      updateMutation
+        .mutateAsync({
+          item_id: Number(id),
+          quantity: qty,
+          expected_version: version,
+        })
+        .catch(() => {})
+      return
+    }
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)))
-  }
+  }, [isAuthenticated, serverCart?.version, updateMutation])
 
-  const clear = () => setItems([])
-  const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items])
+  const clear = useCallback(() => {
+    if (isAuthenticated) {
+      const activeItems = serverItems
+      let version = serverCart?.version
+      if (version == null) return
+      ;(async () => {
+        for (const item of activeItems) {
+          const updated = await removeMutation.mutateAsync({
+            item_id: Number(item.id),
+            expected_version: version as number,
+          })
+          version = updated.version
+        }
+      })().catch(() => {})
+      return
+    }
+    setItems([])
+  }, [isAuthenticated, removeMutation, serverCart?.version, serverItems])
 
-  const value = useMemo(() => ({ items, add, remove, updateQuantity, clear, total }), [items, total])
+  const resolvedItems = isAuthenticated ? serverItems : items
+  const total = useMemo(() => {
+    if (isAuthenticated) {
+      return Number(serverCart?.total ?? 0)
+    }
+    return items.reduce((s, i) => s + i.price * i.qty, 0)
+  }, [isAuthenticated, items, serverCart?.total])
+
+  const value = useMemo(
+    () => ({
+      items: resolvedItems,
+      add,
+      remove,
+      updateQuantity,
+      clear,
+      total,
+      subtotal: isAuthenticated ? Number(serverCart?.subtotal ?? 0) : total,
+      shippingFee: isAuthenticated ? Number(serverCart?.shipping_fee ?? 0) : 0,
+      shippingMethodId: isAuthenticated ? (serverCart?.shipping_method?.id ?? null) : null,
+      discountAmount: isAuthenticated ? Number(serverCart?.discount_amount ?? 0) : 0,
+      shippingDiscountAmount: isAuthenticated ? Number(serverCart?.shipping_discount_amount ?? 0) : 0,
+      version: isAuthenticated ? serverCart?.version : undefined,
+      isLoading: isAuthenticated ? serverCartLoading : false,
+    }),
+    [add, clear, isAuthenticated, remove, resolvedItems, serverCart, serverCartLoading, total, updateQuantity]
+  )
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 

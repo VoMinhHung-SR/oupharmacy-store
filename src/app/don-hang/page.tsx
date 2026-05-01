@@ -10,8 +10,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useShippingMethod } from '@/lib/hooks/useShipping'
-import { useCreateOrder } from '@/lib/hooks/useOrders'
-import type { Order } from '@/lib/services/orders'
+import { useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -37,24 +36,36 @@ export default function CheckoutPage() {
     setPaymentMethodId,
     clear: clearCheckout,
   } = useCheckout()
-  const { items, total, clear: clearCart } = useCart()
+  const {
+    items,
+    total,
+    subtotal,
+    shippingFee: cartShippingFee,
+    version: cartVersion,
+    shippingMethodId: serverShippingMethodId,
+  } = useCart()
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
   const { data: fallbackShippingMethod } = useShippingMethod(
-    selectedShippingMethod == null && shippingMethodId != null ? shippingMethodId : 0
+    selectedShippingMethod == null && (serverShippingMethodId ?? shippingMethodId) != null ? (serverShippingMethodId ?? shippingMethodId ?? 0) : 0
   )
-  const createOrderMutation = useCreateOrder()
+  const checkoutCartMutation = useCheckoutCart()
+  const selectShippingMutation = useSelectShippingMethod()
   const hasCompletedOrderRef = useRef(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
-  const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === shippingMethodId)
+  const selectedShippingId = serverShippingMethodId ?? shippingMethodId
+  const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
+  const normalizedServerShippingFee = Number(cartShippingFee) > 0 ? Number(cartShippingFee) : undefined
   const shippingFee =
+    normalizedServerShippingFee ??
     selectedShippingMethod?.price ??
     fallbackShippingMethod?.price ??
     selectedShippingMethodFromList?.price ??
     0
-  const orderTotal = total + shippingFee
+  const orderSubtotal = subtotal ?? total
+  const orderTotal = total
 
   const {
     register,
@@ -117,7 +128,7 @@ export default function CheckoutPage() {
       toastError('Vui lòng điền đầy đủ và đúng thông tin khách hàng.')
       return
     }
-    if (shippingMethodId == null) {
+    if (selectedShippingId == null) {
       toastError('Vui lòng chọn phương thức vận chuyển')
       return
     }
@@ -125,24 +136,11 @@ export default function CheckoutPage() {
       toastError('Vui lòng chọn phương thức thanh toán')
       return
     }
-    const method = shippingMethods.find((m) => m.id === shippingMethodId)
-    const fee = method?.price ?? selectedShippingMethod?.price ?? fallbackShippingMethod?.price ?? 0
-    const formValues = getValues()
-
-    const payload: Order = {
-      items: items.map((i) => ({
-        variant_unit_id: i.variant_unit_id,
-        quantity: i.qty,
-        price: i.price,
-      })),
-      subtotal: total,
-      shipping_fee: fee,
-      total: total + fee,
-      shipping_method: shippingMethodId,
-      payment_method: paymentMethodId,
-      shipping_address: formValues.address,
-      status: 'PENDING',
+    if (cartVersion == null) {
+      toastError('Không thể xác định phiên bản giỏ hàng. Vui lòng thử lại.')
+      return
     }
+    const formValues = getValues()
 
     try {
       hasCompletedOrderRef.current = true
@@ -152,13 +150,21 @@ export default function CheckoutPage() {
         email: formValues.email,
         address: formValues.address,
       })
-      const created = await createOrderMutation.mutateAsync(payload)
+      const created = await checkoutCartMutation.mutateAsync({
+        payment_method_id: paymentMethodId,
+        shipping_address: formValues.address,
+        notes: undefined,
+        expected_version: cartVersion,
+      })
       toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
-      clearCart()
       clearCheckout()
-      const orderNumber = created?.order_number
-      const orderId = created?.id
-      const query = orderNumber ? `order_number=${orderNumber}` : orderId != null ? `order_id=${orderId}` : ''
+      const orderNumber = String(created?.order_number || '')
+      const orderId = Number(created?.id)
+      const query = orderNumber
+        ? `order_number=${orderNumber}`
+        : Number.isFinite(orderId)
+          ? `order_id=${orderId}`
+          : ''
       router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
       hasCompletedOrderRef.current = false
@@ -167,7 +173,7 @@ export default function CheckoutPage() {
     }
   }
 
-  const isSubmitting = createOrderMutation.isPending
+  const isSubmitting = checkoutCartMutation.isPending
   const canSubmit =
     !methodsLoadingPayment &&
     !methodsLoadingShipping &&
@@ -199,10 +205,24 @@ export default function CheckoutPage() {
           />
           <CheckoutShippingSection
             methods={shippingMethods}
-            selectedId={shippingMethodId}
+            selectedId={selectedShippingId}
             onSelect={(id, method) => {
-              setShippingMethodId(id)
-              setSelectedShippingMethod(method)
+              if (cartVersion == null) {
+                toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
+                return
+              }
+              selectShippingMutation
+                .mutateAsync({
+                  shipping_method_id: id,
+                  expected_version: cartVersion,
+                })
+                .then(() => {
+                  setShippingMethodId(id)
+                  setSelectedShippingMethod(method)
+                })
+                .catch((error: Error) => {
+                  toastError(error.message || 'Chọn phương thức vận chuyển thất bại')
+                })
             }}
             isLoading={methodsLoadingShipping}
             error={methodsErrorShipping}
@@ -222,7 +242,7 @@ export default function CheckoutPage() {
         <div className="w-full min-w-0">
           <CheckoutOrderSummary
             items={items}
-            subtotal={total}
+            subtotal={orderSubtotal}
             shippingFee={shippingFee}
             total={orderTotal}
             hasShippingSelected={Boolean(selectedShippingMethodFromList ?? selectedShippingMethod)}

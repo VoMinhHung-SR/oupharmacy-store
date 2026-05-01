@@ -8,8 +8,9 @@ import { Container } from '@/components/Container'
 import { ChevronLeftIcon, CartIcon, ImagePlaceholderIcon } from '@/components/icons'
 
 export default function CartPage() {
-  const { items, remove, total, clear, updateQuantity } = useCart()
+  const { items, remove, total, subtotal, clear, updateQuantity } = useCart()
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set(items.map(i => i.id)))
+  const isPartialSelectionDisabled = true
 
   // Toggle select all
   const toggleSelectAll = () => {
@@ -30,11 +31,6 @@ export default function CartPage() {
     }
     setSelectedItems(newSelected)
   }
-
-  // Calculate subtotal for selected items
-  const selectedTotal = items
-    .filter(item => selectedItems.has(item.id))
-    .reduce((sum, item) => sum + item.price * item.qty, 0)
 
   // Update quantity
   const handleQuantityChange = (id: string, newQty: number) => {
@@ -89,6 +85,8 @@ export default function CartPage() {
                       type="checkbox"
                       checked={selectedItems.size === items.length && items.length > 0}
                       onChange={toggleSelectAll}
+                      disabled={isPartialSelectionDisabled}
+                      title="Chức năng chọn từng sản phẩm sẽ sớm được hỗ trợ trong luồng cart-first."
                       className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
                     <span className="text-sm font-medium text-gray-700">
@@ -112,6 +110,8 @@ export default function CartPage() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelectItem(item.id)}
+                              disabled={isPartialSelectionDisabled}
+                              title="Chức năng chọn từng sản phẩm sẽ sớm được hỗ trợ trong luồng cart-first."
                             className="w-4 h-4 mt-0.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                           />
                         </label>
@@ -203,12 +203,17 @@ export default function CartPage() {
               <div className="lg:sticky lg:top-24 h-fit">
                 <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
                   <h2 className="text-lg font-semibold text-gray-900">Tạm tính</h2>
+                  {isPartialSelectionDisabled && (
+                    <p className="text-xs text-gray-500">
+                      Checkout hiện tại áp dụng cho toàn bộ giỏ hàng (cart-first). Chọn từng sản phẩm sẽ được bổ sung ở bản sau.
+                    </p>
+                  )}
                   
                   <div className="space-y-3 pt-4 border-t border-gray-200">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Tổng tiền</span>
                       <span className="text-gray-900 font-medium">
-                        {total.toLocaleString('vi-VN')}₫
+                        {(subtotal ?? total).toLocaleString('vi-VN')}₫
                       </span>
                     </div>
                   </div>
@@ -217,7 +222,7 @@ export default function CartPage() {
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-lg font-semibold text-gray-900">Thành tiền</span>
                       <span className="text-2xl font-bold text-primary-700">
-                        {selectedTotal > 0 ? selectedTotal.toLocaleString('vi-VN') : total.toLocaleString('vi-VN')}₫
+                        {total.toLocaleString('vi-VN')}₫
                       </span>
                     </div>
 
