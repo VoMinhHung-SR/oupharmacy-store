@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { toastSuccess } from '@/lib/utils/toast'
+import { toastError, toastSuccess, toastWarning } from '@/lib/utils/toast'
 import { useAuth } from './AuthContext'
 import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from '@/lib/hooks/useCarts'
 import { getCurrentCart } from '@/lib/services/carts'
@@ -20,7 +20,8 @@ export interface CartItem {
 
 interface CartContextValue {
   items: CartItem[]
-  add: (item: Omit<CartItem, 'qty'>, qty?: number) => void
+  /** Resolves after server/local cart update; rejects when authenticated add fails or cart is not ready. */
+  add: (item: Omit<CartItem, 'qty'>, qty?: number) => Promise<void>
   remove: (id: string) => void
   updateQuantity: (id: string, qty: number) => void
   clear: () => void
@@ -132,6 +133,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
         }
       } catch {
+        toastWarning('Không thể đồng bộ giỏ hàng từ phiên chưa đăng nhập. Vui lòng thử lại sau.')
         // Preserve local cart for later retry when synchronization fails.
       }
     }
@@ -142,20 +144,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [addMutation, isAuthenticated, queryClient])
 
-  const add = useCallback((item: Omit<CartItem, 'qty'>, qty: number = 1) => {
+  const add = useCallback(async (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
     if (isAuthenticated) {
       const version = serverCart?.version
-      if (version == null) return
-      addMutation
-        .mutateAsync({
+      if (version == null) {
+        toastError('Đang tải giỏ hàng, vui lòng thử lại.')
+        throw new Error('Cart not ready')
+      }
+      try {
+        await addMutation.mutateAsync({
           product_variant_id: item.variant_unit_id,
           quantity: qty,
           expected_version: version,
         })
-        .then(() => {
-          toastSuccess(`Đã thêm ${item.name} vào giỏ hàng`)
-        })
-        .catch(() => {})
+        toastSuccess(`Đã thêm ${item.name} vào giỏ hàng`)
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Không thêm được vào giỏ hàng.'
+        toastError(msg)
+        throw e instanceof Error ? e : new Error(msg)
+      }
       return
     }
 
@@ -216,22 +223,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clear = useCallback(() => {
     if (isAuthenticated) {
-      const activeItems = serverItems
-      let version = serverCart?.version
-      if (version == null) return
-      ;(async () => {
-        for (const item of activeItems) {
-          const updated = await removeMutation.mutateAsync({
-            item_id: Number(item.id),
-            expected_version: version as number,
-          })
-          version = updated.version
-        }
-      })().catch(() => {})
+      void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
       return
     }
     setItems([])
-  }, [isAuthenticated, removeMutation, serverCart?.version, serverItems])
+  }, [isAuthenticated, queryClient])
 
   const resolvedItems = isAuthenticated ? serverItems : items
   const total = useMemo(() => {

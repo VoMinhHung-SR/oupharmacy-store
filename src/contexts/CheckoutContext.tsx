@@ -1,6 +1,5 @@
 "use client"
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import type { ShippingMethod } from '@/lib/services/shipping'
 
 export interface CheckoutInformation {
   name: string
@@ -11,13 +10,9 @@ export interface CheckoutInformation {
 
 interface CheckoutContextValue {
   information: CheckoutInformation | null
-  shippingMethodId: number | null
-  selectedShippingMethod: ShippingMethod | null
   paymentMethodId: number | null
   notes: string
   setInformation: (info: CheckoutInformation) => void
-  setShippingMethodId: (id: number | null) => void
-  setSelectedShippingMethod: (method: ShippingMethod | null) => void
   setPaymentMethodId: (id: number | null) => void
   setNotes: (notes: string) => void
   clear: () => void
@@ -29,8 +24,6 @@ const STORAGE_KEY = 'oupharmacy_checkout'
 
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [information, setInformationState] = useState<CheckoutInformation | null>(null)
-  const [shippingMethodId, setShippingMethodIdState] = useState<number | null>(null)
-  const [selectedShippingMethod, setSelectedShippingMethodState] = useState<ShippingMethod | null>(null)
   const [paymentMethodId, setPaymentMethodIdState] = useState<number | null>(null)
   const [notes, setNotesState] = useState<string>('')
 
@@ -42,12 +35,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const parsed = JSON.parse(raw)
         if (parsed.information) {
           setInformationState(parsed.information)
-        }
-        if (parsed.shippingMethodId) {
-          setShippingMethodIdState(parsed.shippingMethodId)
-        }
-        if (parsed.selectedShippingMethod) {
-          setSelectedShippingMethodState(parsed.selectedShippingMethod)
         }
         if (parsed.paymentMethodId) {
           setPaymentMethodIdState(parsed.paymentMethodId)
@@ -64,25 +51,15 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const data = {
         information,
-        shippingMethodId,
-        selectedShippingMethod,
         paymentMethodId,
         notes,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch {}
-  }, [information, shippingMethodId, selectedShippingMethod, paymentMethodId, notes])
+  }, [information, paymentMethodId, notes])
 
   const setInformation = (info: CheckoutInformation) => {
     setInformationState(info)
-  }
-
-  const setShippingMethodId = (id: number | null) => {
-    setShippingMethodIdState(id)
-  }
-
-  const setSelectedShippingMethod = (method: ShippingMethod | null) => {
-    setSelectedShippingMethodState(method)
   }
 
   const setPaymentMethodId = (id: number | null) => {
@@ -95,8 +72,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const clear = () => {
     setInformationState(null)
-    setShippingMethodIdState(null)
-    setSelectedShippingMethodState(null)
     setPaymentMethodIdState(null)
     setNotesState('')
     try {
@@ -107,18 +82,14 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const value = useMemo(
     () => ({
       information,
-      shippingMethodId,
-      selectedShippingMethod,
       paymentMethodId,
       notes,
       setInformation,
-      setShippingMethodId,
-      setSelectedShippingMethod,
       setPaymentMethodId,
       setNotes,
       clear,
     }),
-    [information, shippingMethodId, selectedShippingMethod, paymentMethodId, notes]
+    [information, paymentMethodId, notes]
   )
 
   return <CheckoutContext.Provider value={value}>{children}</CheckoutContext.Provider>

@@ -9,6 +9,7 @@ import { ProductDescriptionSection } from '@/components/products/ProductDescript
 import { ShareButton } from '@/components/products/ShareButton'
 import { RelatedProducts } from '@/components/products/RelatedProducts'
 import { RecentlyViewed, saveToRecentlyViewed } from '@/components/products/RecentlyViewed'
+import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
@@ -32,6 +33,7 @@ export function ProductDetailPageContent({
   error = null,
 }: ProductDetailPageContentProps) {
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
   const { add, items } = useCart()
   const { toggle: toggleWishlist, isInWishlist } = useWishlist()
   const [quantity, setQuantity] = useState(1)
@@ -82,20 +84,20 @@ export function ProductDetailPageContent({
     if (!product) return
     const validation = validateStock()
     if (!validation) return
-    add(getCartItem(), quantity)
+    void add(getCartItem(), quantity)
   }
 
+  // Anonymous cart updates synchronously in parent state; wait for items before navigating.
   useEffect(() => {
-    if (pendingBuyNowRef.current) {
-      const { productId, expectedQty } = pendingBuyNowRef.current
-      const itemInCart = items.find((i) => i.variant_unit_id === productId)
-      
-      if (itemInCart && itemInCart.qty >= expectedQty) {
-        pendingBuyNowRef.current = null
-        router.push('/don-hang')
-      }
+    if (isAuthenticated || !pendingBuyNowRef.current) return
+    const { productId, expectedQty } = pendingBuyNowRef.current
+    const itemInCart = items.find((i) => i.variant_unit_id === productId)
+
+    if (itemInCart && itemInCart.qty >= expectedQty) {
+      pendingBuyNowRef.current = null
+      router.push('/don-hang')
     }
-  }, [items, router])
+  }, [items, router, isAuthenticated])
 
   useEffect(() => {
     if (product) {
@@ -103,13 +105,23 @@ export function ProductDetailPageContent({
     }
   }, [product])
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product) return
     const validation = validateStock()
     if (!validation) return
 
+    if (isAuthenticated) {
+      try {
+        await add(getCartItem(), quantity)
+        router.push('/don-hang')
+      } catch {
+        // Errors are toasted in CartContext.add
+      }
+      return
+    }
+
     pendingBuyNowRef.current = { productId: product.id, expectedQty: validation.totalQty }
-    add(getCartItem(), quantity)
+    void add(getCartItem(), quantity)
   }
 
   if (loading && !product) {

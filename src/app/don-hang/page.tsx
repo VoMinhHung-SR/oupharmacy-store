@@ -9,7 +9,6 @@ import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
-import { useShippingMethod } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useRemoveVoucher, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
@@ -21,6 +20,7 @@ import {
   CheckoutPaymentSection,
   CheckoutOrderSummary,
   CheckoutVoucherSection,
+  CheckoutNotesSection,
 } from '@/components/checkout'
 
 export default function CheckoutPage() {
@@ -29,12 +29,10 @@ export default function CheckoutPage() {
   const {
     information,
     setInformation,
-    shippingMethodId,
-    setShippingMethodId,
-    setSelectedShippingMethod,
-    selectedShippingMethod,
     paymentMethodId,
     setPaymentMethodId,
+    notes,
+    setNotes,
     clear: clearCheckout,
   } = useCheckout()
   const {
@@ -51,9 +49,6 @@ export default function CheckoutPage() {
   } = useCart()
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
-  const { data: fallbackShippingMethod } = useShippingMethod(
-    selectedShippingMethod == null && (serverShippingMethodId ?? shippingMethodId) != null ? (serverShippingMethodId ?? shippingMethodId ?? 0) : 0
-  )
   const checkoutCartMutation = useCheckoutCart()
   const selectShippingMutation = useSelectShippingMethod()
   const applyVoucherMutation = useApplyVoucher()
@@ -62,15 +57,9 @@ export default function CheckoutPage() {
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
-  const selectedShippingId = serverShippingMethodId ?? shippingMethodId
+  const selectedShippingId = serverShippingMethodId ?? null
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
-  const normalizedServerShippingFee = Number(cartShippingFee) > 0 ? Number(cartShippingFee) : undefined
-  const shippingFee =
-    normalizedServerShippingFee ??
-    selectedShippingMethod?.price ??
-    fallbackShippingMethod?.price ??
-    selectedShippingMethodFromList?.price ??
-    0
+  const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
   const orderTotal = total
 
@@ -157,10 +146,11 @@ export default function CheckoutPage() {
         email: formValues.email,
         address: formValues.address,
       })
+      const trimmedNotes = notes.trim()
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
         shipping_address: formValues.address,
-        notes: undefined,
+        notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
       })
       toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
@@ -246,10 +236,11 @@ export default function CheckoutPage() {
             handleSubmit={handleSubmit}
             onSubmit={onInfoSubmit}
           />
+          <CheckoutNotesSection value={notes} onChange={setNotes} />
           <CheckoutShippingSection
             methods={shippingMethods}
             selectedId={selectedShippingId}
-            onSelect={(id, method) => {
+            onSelect={(id) => {
               if (cartVersion == null) {
                 toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
                 return
@@ -259,10 +250,7 @@ export default function CheckoutPage() {
                   shipping_method_id: id,
                   expected_version: cartVersion,
                 })
-                .then(() => {
-                  setShippingMethodId(id)
-                  setSelectedShippingMethod(method)
-                })
+                .then(() => {})
                 .catch((error: Error) => {
                   toastError(error.message || 'Chọn phương thức vận chuyển thất bại')
                 })
@@ -295,7 +283,7 @@ export default function CheckoutPage() {
             subtotal={orderSubtotal}
             shippingFee={shippingFee}
             total={orderTotal}
-            hasShippingSelected={Boolean(selectedShippingMethodFromList ?? selectedShippingMethod)}
+            hasShippingSelected={Boolean(selectedShippingMethodFromList)}
             discountAmount={discountAmount}
             shippingDiscountAmount={shippingDiscountAmount}
           />

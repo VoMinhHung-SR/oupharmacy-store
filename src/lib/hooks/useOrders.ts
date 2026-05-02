@@ -38,6 +38,10 @@ export function useOrder(orderNumber: string) {
   })
 }
 
+/**
+ * @deprecated Use `useCheckoutCart` from `src/lib/hooks/useCarts.ts` for checkout flow.
+ * This hook remains only for legacy compatibility.
+ */
 export function useCreateOrder() {
   const queryClient = useQueryClient()
 
