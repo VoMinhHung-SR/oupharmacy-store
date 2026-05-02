@@ -15,6 +15,8 @@ interface CheckoutOrderSummaryProps {
   shippingFee: number
   total: number
   hasShippingSelected: boolean
+  discountAmount?: number
+  shippingDiscountAmount?: number
 }
 
 export function CheckoutOrderSummary({
@@ -23,6 +25,8 @@ export function CheckoutOrderSummary({
   shippingFee,
   total,
   hasShippingSelected,
+  discountAmount = 0,
+  shippingDiscountAmount = 0,
 }: CheckoutOrderSummaryProps) {
   return (
     <div className="w-full min-w-0 rounded-lg border border-gray-200 bg-white p-5 h-fit md:sticky md:top-24">
@@ -51,6 +55,18 @@ export function CheckoutOrderSummary({
             {hasShippingSelected ? `${shippingFee.toLocaleString('vi-VN')}₫` : 'Chọn phương thức'}
           </span>
         </div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Giảm giá đơn hàng</span>
+            <span className="text-green-700">-{discountAmount.toLocaleString('vi-VN')}₫</span>
+          </div>
+        )}
+        {shippingDiscountAmount > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Giảm phí vận chuyển</span>
+            <span className="text-green-700">-{shippingDiscountAmount.toLocaleString('vi-VN')}₫</span>
+          </div>
+        )}
         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
           <span className="font-semibold text-gray-900">Tổng cộng</span>
           <span className="text-lg font-semibold text-primary-700">{total.toLocaleString('vi-VN')}₫</span>

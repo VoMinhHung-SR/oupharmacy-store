@@ -30,6 +30,8 @@ interface CartContextValue {
   discountAmount?: number
   shippingDiscountAmount?: number
   shippingMethodId?: number | null
+  orderVoucherCode?: string | null
+  shippingVoucherCode?: string | null
   version?: number
   isLoading?: boolean
 }
@@ -250,6 +252,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subtotal: isAuthenticated ? Number(serverCart?.subtotal ?? 0) : total,
       shippingFee: isAuthenticated ? Number(serverCart?.shipping_fee ?? 0) : 0,
       shippingMethodId: isAuthenticated ? (serverCart?.shipping_method?.id ?? null) : null,
+      orderVoucherCode: isAuthenticated ? (serverCart?.order_voucher_code ?? null) : null,
+      shippingVoucherCode: isAuthenticated ? (serverCart?.shipping_voucher_code ?? null) : null,
       discountAmount: isAuthenticated ? Number(serverCart?.discount_amount ?? 0) : 0,
       shippingDiscountAmount: isAuthenticated ? Number(serverCart?.shipping_discount_amount ?? 0) : 0,
       version: isAuthenticated ? serverCart?.version : undefined,

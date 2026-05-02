@@ -10,7 +10,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useShippingMethod } from '@/lib/hooks/useShipping'
-import { useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { useApplyVoucher, useCheckoutCart, useRemoveVoucher, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -20,6 +20,7 @@ import {
   CheckoutShippingSection,
   CheckoutPaymentSection,
   CheckoutOrderSummary,
+  CheckoutVoucherSection,
 } from '@/components/checkout'
 
 export default function CheckoutPage() {
@@ -41,6 +42,10 @@ export default function CheckoutPage() {
     total,
     subtotal,
     shippingFee: cartShippingFee,
+    discountAmount = 0,
+    shippingDiscountAmount = 0,
+    orderVoucherCode,
+    shippingVoucherCode,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
   } = useCart()
@@ -51,6 +56,8 @@ export default function CheckoutPage() {
   )
   const checkoutCartMutation = useCheckoutCart()
   const selectShippingMutation = useSelectShippingMethod()
+  const applyVoucherMutation = useApplyVoucher()
+  const removeVoucherMutation = useRemoveVoucher()
   const hasCompletedOrderRef = useRef(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
@@ -181,6 +188,42 @@ export default function CheckoutPage() {
     shippingMethods.length > 0 &&
     !isSubmitting
 
+  const handleApplyVoucher = async (payload: { order_voucher_code?: string; shipping_voucher_code?: string }) => {
+    if (cartVersion == null) {
+      toastError('Không thể áp dụng mã giảm giá. Vui lòng thử lại.')
+      return
+    }
+    if (!payload.order_voucher_code && !payload.shipping_voucher_code) {
+      toastError('Vui lòng nhập ít nhất 1 mã giảm giá.')
+      return
+    }
+    try {
+      await applyVoucherMutation.mutateAsync({
+        expected_version: cartVersion,
+        ...payload,
+      })
+      toastSuccess('Áp dụng mã giảm giá thành công.')
+    } catch (error: unknown) {
+      toastError(error instanceof Error ? error.message : 'Áp dụng mã giảm giá thất bại.')
+    }
+  }
+
+  const handleRemoveVoucher = async (target: 'order' | 'shipping' | 'all') => {
+    if (cartVersion == null) {
+      toastError('Không thể gỡ mã giảm giá. Vui lòng thử lại.')
+      return
+    }
+    try {
+      await removeVoucherMutation.mutateAsync({
+        target,
+        expected_version: cartVersion,
+      })
+      toastSuccess('Đã gỡ mã giảm giá.')
+    } catch (error: unknown) {
+      toastError(error instanceof Error ? error.message : 'Gỡ mã giảm giá thất bại.')
+    }
+  }
+
   if (items.length === 0) {
     return null
   }
@@ -237,6 +280,13 @@ export default function CheckoutPage() {
             canSubmit={canSubmit}
             onPlaceOrder={handlePlaceOrder}
           />
+          <CheckoutVoucherSection
+            onApplyVoucher={handleApplyVoucher}
+            onRemoveVoucher={handleRemoveVoucher}
+            isApplying={applyVoucherMutation.isPending || removeVoucherMutation.isPending}
+            orderVoucherCode={orderVoucherCode ?? undefined}
+            shippingVoucherCode={shippingVoucherCode ?? undefined}
+          />
         </div>
 
         <div className="w-full min-w-0">
@@ -246,6 +296,8 @@ export default function CheckoutPage() {
             shippingFee={shippingFee}
             total={orderTotal}
             hasShippingSelected={Boolean(selectedShippingMethodFromList ?? selectedShippingMethod)}
+            discountAmount={discountAmount}
+            shippingDiscountAmount={shippingDiscountAmount}
           />
         </div>
       </div>
