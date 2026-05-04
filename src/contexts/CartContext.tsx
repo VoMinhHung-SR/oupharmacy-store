@@ -1,13 +1,15 @@
 "use client"
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { toastError, toastSuccess, toastWarning } from '@/lib/utils/toast'
-import { useAuth } from './AuthContext'
-import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from '@/lib/hooks/useCarts'
-import { getCurrentCart } from '@/lib/services/carts'
-import { useQueryClient } from '@tanstack/react-query'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { toastError, toastSuccess, toastWarning } from "@/lib/utils/toast"
+import { useAuth } from "./AuthContext"
+import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from "@/lib/hooks/useCarts"
+import { getCurrentCart } from "@/lib/services/carts"
+import { useQueryClient } from "@tanstack/react-query"
+
+const LINE_SELECT_SESSION_KEY = "oupharmacy_cart_line_select_v1"
 
 export interface CartItem {
-  /** String form of `variant_unit_id` for React keys / localStorage. */
+  /** String form of `variant_unit_id` for React keys / localStorage; server cart uses `CartItem.id`. */
   id: string
   /** Product variant unit id (PVU). */
   variant_unit_id: number
@@ -16,12 +18,25 @@ export interface CartItem {
   image_url?: string
   packaging?: string
   qty: number
+  /** Included in localStorage for guest cart; server cart merges session map by `id`. */
+  selected?: boolean
+}
+
+export interface CartSelectionTotals {
+  selectedSubtotal: number
+  selectedCount: number
+  /** 0..1 — share of server subtotal covered by selected lines (authenticated). */
+  selectionRatio: number
+  estimatedOrderDiscount: number
+  estimatedShippingDiscount: number
+  estimatedShippingFee: number
+  estimatedTotal: number
 }
 
 interface CartContextValue {
   items: CartItem[]
   /** Resolves after server/local cart update; rejects when authenticated add fails or cart is not ready. */
-  add: (item: Omit<CartItem, 'qty'>, qty?: number) => Promise<void>
+  add: (item: Omit<CartItem, "qty" | "selected">, qty?: number) => Promise<void>
   remove: (id: string) => void
   updateQuantity: (id: string, qty: number) => void
   clear: () => void
@@ -35,11 +50,14 @@ interface CartContextValue {
   shippingVoucherCode?: string | null
   version?: number
   isLoading?: boolean
+  setItemSelected: (id: string, selected: boolean) => void
+  setAllItemsSelected: (selected: boolean) => void
+  selectionTotals: CartSelectionTotals
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
 
-const STORAGE_KEY = 'oupharmacy_cart'
+const STORAGE_KEY = "oupharmacy_cart"
 
 function migrateCartItem(item: Record<string, unknown>): CartItem {
   const parsedId = parseInt(String(item.id), 10)
@@ -50,12 +68,33 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
   return {
     id: String(variant_unit_id),
     variant_unit_id,
-    name: String(item.name ?? ''),
+    name: String(item.name ?? ""),
     price: Number(item.price ?? 0) || 0,
     image_url: item.image_url as string | undefined,
     packaging: item.packaging as string | undefined,
     qty: Number(item.qty ?? 1) || 1,
+    selected: item.selected === false ? false : true,
   }
+}
+
+function readServerLineSelection(): Record<string, boolean> {
+  if (typeof window === "undefined") return {}
+  try {
+    const raw = sessionStorage.getItem(LINE_SELECT_SESSION_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== "object") return {}
+    return parsed as Record<string, boolean>
+  } catch {
+    return {}
+  }
+}
+
+function writeServerLineSelection(map: Record<string, boolean>) {
+  if (typeof window === "undefined") return
+  try {
+    sessionStorage.setItem(LINE_SELECT_SESSION_KEY, JSON.stringify(map))
+  } catch {}
 }
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -67,11 +106,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateMutation = useUpdateCartItem()
 
   const [items, setItems] = useState<CartItem[]>([])
+  const [serverLineSelection, setServerLineSelection] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setServerLineSelection({})
+      return
+    }
+    setServerLineSelection(readServerLineSelection())
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    writeServerLineSelection(serverLineSelection)
+  }, [isAuthenticated, serverLineSelection])
 
   useEffect(() => {
     if (isAuthenticated) return
     try {
-      const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+      const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null
       if (raw) {
         const parsed = JSON.parse(raw) as Record<string, unknown>[]
         const migrated = parsed.map(migrateCartItem)
@@ -92,15 +145,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return serverCart.items.map((item) => ({
       id: String(item.id),
       variant_unit_id: Number(item.product_variant) || 0,
-      name: item.name || '',
+      name: item.name || "",
       price: Number(item.unit_price_snapshot) || 0,
+      image_url: item.image_url || undefined,
       qty: Number(item.quantity) || 1,
     }))
   }, [serverCart])
 
-  // Merge anonymous local cart into server cart once user logs in.
   useEffect(() => {
-    if (!isAuthenticated || typeof window === 'undefined') return
+    if (!isAuthenticated) return
+    const valid = new Set(serverItems.map((i) => i.id))
+    setServerLineSelection((prev) => {
+      let changed = false
+      const next = { ...prev }
+      for (const k of Object.keys(next)) {
+        if (!valid.has(k)) {
+          delete next[k]
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [isAuthenticated, serverItems])
+
+  useEffect(() => {
+    if (!isAuthenticated || typeof window === "undefined") return
     let cancelled = false
 
     const syncAnonymousCart = async () => {
@@ -133,8 +202,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
         }
       } catch {
-        toastWarning('Không thể đồng bộ giỏ hàng từ phiên chưa đăng nhập. Vui lòng thử lại sau.')
-        // Preserve local cart for later retry when synchronization fails.
+        toastWarning("Không thể đồng bộ giỏ hàng từ phiên chưa đăng nhập. Vui lòng thử lại sau.")
       }
     }
 
@@ -144,82 +212,128 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [addMutation, isAuthenticated, queryClient])
 
-  const add = useCallback(async (item: Omit<CartItem, 'qty'>, qty: number = 1) => {
-    if (isAuthenticated) {
-      const version = serverCart?.version
-      if (version == null) {
-        toastError('Đang tải giỏ hàng, vui lòng thử lại.')
-        throw new Error('Cart not ready')
+  const setItemSelected = useCallback(
+    (id: string, selected: boolean) => {
+      if (!isAuthenticated) {
+        setItems((prev) => prev.map((i) => (i.id === id ? { ...i, selected } : i)))
+        return
       }
-      try {
-        await addMutation.mutateAsync({
-          product_variant_id: item.variant_unit_id,
-          quantity: qty,
-          expected_version: version,
-        })
-        toastSuccess(`Đã thêm ${item.name} vào giỏ hàng`)
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Không thêm được vào giỏ hàng.'
-        toastError(msg)
-        throw e instanceof Error ? e : new Error(msg)
+      setServerLineSelection((prev) => ({ ...prev, [id]: selected }))
+    },
+    [isAuthenticated]
+  )
+
+  const setAllItemsSelected = useCallback(
+    (selected: boolean) => {
+      if (!isAuthenticated) {
+        setItems((prev) => prev.map((i) => ({ ...i, selected })))
+        return
       }
-      return
-    }
+      setServerLineSelection(() => {
+        const next: Record<string, boolean> = {}
+        for (const i of serverItems) {
+          next[i.id] = selected
+        }
+        return next
+      })
+    },
+    [isAuthenticated, serverItems]
+  )
 
-    const isUpdate = items.some((i) => i.variant_unit_id === item.variant_unit_id)
+  const add = useCallback(
+    async (item: Omit<CartItem, "qty" | "selected">, qty: number = 1) => {
+      if (isAuthenticated) {
+        const version = serverCart?.version
+        if (version == null) {
+          toastError("Đang tải giỏ hàng, vui lòng thử lại.")
+          throw new Error("Cart not ready")
+        }
+        try {
+          await addMutation.mutateAsync({
+            product_variant_id: item.variant_unit_id,
+            quantity: qty,
+            expected_version: version,
+          })
+          toastSuccess(`Đã thêm ${item.name} vào giỏ hàng`)
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : "Không thêm được vào giỏ hàng."
+          toastError(msg)
+          throw e instanceof Error ? e : new Error(msg)
+        }
+        return
+      }
 
-    setItems((prev) => {
-      const exist = prev.find((i) => i.variant_unit_id === item.variant_unit_id)
-      return exist
-        ? prev.map((i) => (i.variant_unit_id === item.variant_unit_id ? { ...i, qty: i.qty + qty } : i))
-        : [...prev, { ...item, qty, id: item.variant_unit_id.toString() }]
-    })
+      const isUpdate = items.some((i) => i.variant_unit_id === item.variant_unit_id)
 
-    toastSuccess(isUpdate ? `Đã cập nhật số lượng ${item.name} trong giỏ hàng` : `Đã thêm ${item.name} vào giỏ hàng`)
-  }, [addMutation, isAuthenticated, items, serverCart?.version])
+      setItems((prev) => {
+        const exist = prev.find((i) => i.variant_unit_id === item.variant_unit_id)
+        return exist
+          ? prev.map((i) =>
+              i.variant_unit_id === item.variant_unit_id ? { ...i, qty: i.qty + qty, selected: i.selected !== false } : i
+            )
+          : [...prev, { ...item, qty, id: item.variant_unit_id.toString(), selected: true }]
+      })
 
-  const remove = useCallback((id: string) => {
-    if (isAuthenticated) {
-      const version = serverCart?.version
-      if (version == null) return
-      const item = serverItems.find((i) => i.id === id)
-      removeMutation
-        .mutateAsync({
-          item_id: Number(id),
-          expected_version: version,
+      toastSuccess(
+        isUpdate ? `Đã cập nhật số lượng ${item.name} trong giỏ hàng` : `Đã thêm ${item.name} vào giỏ hàng`
+      )
+    },
+    [addMutation, isAuthenticated, items, serverCart?.version]
+  )
+
+  const remove = useCallback(
+    (id: string) => {
+      if (isAuthenticated) {
+        const version = serverCart?.version
+        if (version == null) return
+        const item = serverItems.find((i) => i.id === id)
+        removeMutation
+          .mutateAsync({
+            item_id: Number(id),
+            expected_version: version,
+          })
+          .then(() => {
+            if (item) {
+              toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
+            }
+          })
+          .catch(() => {})
+        setServerLineSelection((prev) => {
+          const next = { ...prev }
+          delete next[id]
+          return next
         })
-        .then(() => {
-          if (item) {
-            toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
-          }
-        })
-        .catch(() => {})
-      return
-    }
+        return
+      }
 
-    const item = items.find((i) => i.id === id)
-    setItems((prev) => prev.filter((i) => i.id !== id))
-    if (item) {
-      toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
-    }
-  }, [isAuthenticated, items, removeMutation, serverCart?.version, serverItems])
+      const item = items.find((i) => i.id === id)
+      setItems((prev) => prev.filter((i) => i.id !== id))
+      if (item) {
+        toastSuccess(`Đã xóa ${item.name} khỏi giỏ hàng`)
+      }
+    },
+    [isAuthenticated, items, removeMutation, serverCart?.version, serverItems]
+  )
 
-  const updateQuantity = useCallback((id: string, qty: number) => {
-    if (qty < 1) return
-    if (isAuthenticated) {
-      const version = serverCart?.version
-      if (version == null) return
-      updateMutation
-        .mutateAsync({
-          item_id: Number(id),
-          quantity: qty,
-          expected_version: version,
-        })
-        .catch(() => {})
-      return
-    }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)))
-  }, [isAuthenticated, serverCart?.version, updateMutation])
+  const updateQuantity = useCallback(
+    (id: string, qty: number) => {
+      if (qty < 1) return
+      if (isAuthenticated) {
+        const version = serverCart?.version
+        if (version == null) return
+        updateMutation
+          .mutateAsync({
+            item_id: Number(id),
+            quantity: qty,
+            expected_version: version,
+          })
+          .catch(() => {})
+        return
+      }
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)))
+    },
+    [isAuthenticated, serverCart?.version, updateMutation]
+  )
 
   const clear = useCallback(() => {
     if (isAuthenticated) {
@@ -229,13 +343,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems([])
   }, [isAuthenticated, queryClient])
 
-  const resolvedItems = isAuthenticated ? serverItems : items
+  const resolvedItems = useMemo<CartItem[]>(() => {
+    if (isAuthenticated) {
+      return serverItems.map((i) => ({
+        ...i,
+        selected: serverLineSelection[i.id] !== false,
+      }))
+    }
+    return items.map((i) => ({ ...i, selected: i.selected !== false }))
+  }, [isAuthenticated, items, serverItems, serverLineSelection])
+
   const total = useMemo(() => {
     if (isAuthenticated) {
       return Number(serverCart?.total ?? 0)
     }
     return items.reduce((s, i) => s + i.price * i.qty, 0)
   }, [isAuthenticated, items, serverCart?.total])
+
+  const selectionTotals = useMemo((): CartSelectionTotals => {
+    const selectedLines = resolvedItems.filter((i) => i.selected)
+    const selectedSubtotal = selectedLines.reduce((s, i) => s + i.price * i.qty, 0)
+    const selectedCount = selectedLines.length
+    const grossSubtotal = isAuthenticated ? Number(serverCart?.subtotal ?? 0) : total
+    const ratio =
+      isAuthenticated && grossSubtotal > 0 ? Math.min(1, selectedSubtotal / grossSubtotal) : selectedCount === 0 ? 0 : 1
+    const discount = isAuthenticated ? Number(serverCart?.discount_amount ?? 0) : 0
+    const shipDisc = isAuthenticated ? Number(serverCart?.shipping_discount_amount ?? 0) : 0
+    const shipFee = isAuthenticated ? Number(serverCart?.shipping_fee ?? 0) : 0
+    const estimatedOrderDiscount = discount * ratio
+    const estimatedShippingDiscount = shipDisc * ratio
+    const estimatedShippingFee = shipFee
+    const estimatedTotal = Math.max(
+      0,
+      selectedSubtotal - estimatedOrderDiscount - estimatedShippingDiscount + estimatedShippingFee
+    )
+    return {
+      selectedSubtotal,
+      selectedCount,
+      selectionRatio: ratio,
+      estimatedOrderDiscount,
+      estimatedShippingDiscount,
+      estimatedShippingFee,
+      estimatedTotal,
+    }
+  }, [isAuthenticated, resolvedItems, serverCart, total])
 
   const value = useMemo(
     () => ({
@@ -254,14 +405,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       shippingDiscountAmount: isAuthenticated ? Number(serverCart?.shipping_discount_amount ?? 0) : 0,
       version: isAuthenticated ? serverCart?.version : undefined,
       isLoading: isAuthenticated ? serverCartLoading : false,
+      setItemSelected,
+      setAllItemsSelected,
+      selectionTotals,
     }),
-    [add, clear, isAuthenticated, remove, resolvedItems, serverCart, serverCartLoading, total, updateQuantity]
+    [
+      add,
+      clear,
+      isAuthenticated,
+      remove,
+      resolvedItems,
+      selectionTotals,
+      serverCart,
+      serverCartLoading,
+      setAllItemsSelected,
+      setItemSelected,
+      total,
+      updateQuantity,
+    ]
   )
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 
 export function useCart() {
   const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used within CartProvider')
+  if (!ctx) throw new Error("useCart must be used within CartProvider")
   return ctx
 }

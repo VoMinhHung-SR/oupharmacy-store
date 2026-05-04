@@ -12,9 +12,12 @@ interface CheckoutContextValue {
   information: CheckoutInformation | null
   paymentMethodId: number | null
   notes: string
+  /** Cart line ids (server `CartItem.id` as string) to pay for; null = entire cart. */
+  checkoutScopedLineIds: string[] | null
   setInformation: (info: CheckoutInformation) => void
   setPaymentMethodId: (id: number | null) => void
   setNotes: (notes: string) => void
+  setCheckoutScopedLineIds: (ids: string[] | null) => void
   clear: () => void
 }
 
@@ -26,6 +29,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [information, setInformationState] = useState<CheckoutInformation | null>(null)
   const [paymentMethodId, setPaymentMethodIdState] = useState<number | null>(null)
   const [notes, setNotesState] = useState<string>('')
+  const [checkoutScopedLineIds, setCheckoutScopedLineIdsState] = useState<string[] | null>(null)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -42,6 +46,15 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (typeof parsed.notes === 'string') {
           setNotesState(parsed.notes)
         }
+        if (
+          parsed.checkoutScopedLineIds === null ||
+          (Array.isArray(parsed.checkoutScopedLineIds) &&
+            parsed.checkoutScopedLineIds.every((x: unknown) => typeof x === 'string'))
+        ) {
+          setCheckoutScopedLineIdsState(
+            Array.isArray(parsed.checkoutScopedLineIds) ? parsed.checkoutScopedLineIds : null
+          )
+        }
       }
     } catch {}
   }, [])
@@ -53,10 +66,11 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         information,
         paymentMethodId,
         notes,
+        checkoutScopedLineIds,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch {}
-  }, [information, paymentMethodId, notes])
+  }, [information, paymentMethodId, notes, checkoutScopedLineIds])
 
   const setInformation = (info: CheckoutInformation) => {
     setInformationState(info)
@@ -70,10 +84,15 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setNotesState(nextNotes)
   }
 
+  const setCheckoutScopedLineIds = (ids: string[] | null) => {
+    setCheckoutScopedLineIdsState(ids)
+  }
+
   const clear = () => {
     setInformationState(null)
     setPaymentMethodIdState(null)
     setNotesState('')
+    setCheckoutScopedLineIdsState(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch {}
@@ -84,12 +103,14 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       information,
       paymentMethodId,
       notes,
+      checkoutScopedLineIds,
       setInformation,
       setPaymentMethodId,
       setNotes,
+      setCheckoutScopedLineIds,
       clear,
     }),
-    [information, paymentMethodId, notes]
+    [information, paymentMethodId, notes, checkoutScopedLineIds]
   )
 
   return <CheckoutContext.Provider value={value}>{children}</CheckoutContext.Provider>

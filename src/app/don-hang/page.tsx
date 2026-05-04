@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
@@ -34,6 +34,8 @@ export default function CheckoutPage() {
     notes,
     setNotes,
     clear: clearCheckout,
+    checkoutScopedLineIds,
+    setCheckoutScopedLineIds,
   } = useCheckout()
   const {
     items,
@@ -61,7 +63,33 @@ export default function CheckoutPage() {
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
   const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
-  const orderTotal = total
+
+  const scopedIdSet = useMemo(() => {
+    if (!checkoutScopedLineIds || checkoutScopedLineIds.length === 0) return null
+    return new Set(checkoutScopedLineIds)
+  }, [checkoutScopedLineIds])
+
+  const summaryItems = useMemo(() => {
+    if (!scopedIdSet || scopedIdSet.size >= items.length) return items
+    return items.filter((i) => scopedIdSet.has(i.id))
+  }, [items, scopedIdSet])
+
+  const scopedLineSubtotal = useMemo(
+    () => summaryItems.reduce((s, i) => s + i.price * i.qty, 0),
+    [summaryItems]
+  )
+
+  const scopeRatio = useMemo(() => {
+    if (!scopedIdSet || scopedIdSet.size >= items.length || !orderSubtotal) return 1
+    return Math.min(1, scopedLineSubtotal / orderSubtotal)
+  }, [scopedIdSet, scopedLineSubtotal, orderSubtotal, items.length])
+
+  const displayOrderDiscount = discountAmount * scopeRatio
+  const displayShippingDiscount = shippingDiscountAmount * scopeRatio
+  const orderTotal = Math.max(
+    0,
+    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + shippingFee
+  )
 
   const {
     register,
@@ -87,6 +115,15 @@ export default function CheckoutPage() {
       router.replace('/gio-hang')
     }
   }, [items.length, router])
+
+  useEffect(() => {
+    if (!checkoutScopedLineIds?.length) return
+    const valid = checkoutScopedLineIds.every((id) => items.some((i) => i.id === id))
+    if (!valid) {
+      toastError('Một số sản phẩm đã chọn không còn trong giỏ. Đang áp dụng lại toàn bộ giỏ.')
+      setCheckoutScopedLineIds(null)
+    }
+  }, [checkoutScopedLineIds, items, setCheckoutScopedLineIds])
 
   useEffect(() => {
     if (information) {
@@ -147,11 +184,19 @@ export default function CheckoutPage() {
         address: formValues.address,
       })
       const trimmedNotes = notes.trim()
+      const scope =
+        checkoutScopedLineIds &&
+        checkoutScopedLineIds.length > 0 &&
+        checkoutScopedLineIds.length < items.length &&
+        checkoutScopedLineIds.every((id) => items.some((i) => i.id === id))
+          ? checkoutScopedLineIds.map((id) => Number(id))
+          : undefined
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
         shipping_address: formValues.address,
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
+        ...(scope ? { cart_item_ids: scope } : {}),
       })
       toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
       clearCheckout()
@@ -279,13 +324,13 @@ export default function CheckoutPage() {
 
         <div className="w-full min-w-0">
           <CheckoutOrderSummary
-            items={items}
-            subtotal={orderSubtotal}
+            items={summaryItems}
+            subtotal={scopedLineSubtotal}
             shippingFee={shippingFee}
             total={orderTotal}
             hasShippingSelected={Boolean(selectedShippingMethodFromList)}
-            discountAmount={discountAmount}
-            shippingDiscountAmount={shippingDiscountAmount}
+            discountAmount={displayOrderDiscount}
+            shippingDiscountAmount={displayShippingDiscount}
           />
         </div>
       </div>

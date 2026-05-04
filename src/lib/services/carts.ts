@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number
   unit_price_snapshot: number
   name?: string | null
+  image_url?: string | null
   created_date?: string
   updated_date?: string
 }
@@ -67,6 +68,8 @@ export interface CheckoutCartPayload extends CartMutationBase {
   payment_method_id: number
   shipping_address: string
   notes?: string
+  /** When set, only these server cart line ids are purchased; cart stays active if lines remain. */
+  cart_item_ids?: number[]
 }
 
 export async function getCurrentCart() {
