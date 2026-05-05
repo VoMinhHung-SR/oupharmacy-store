@@ -12,10 +12,18 @@ import { Container } from "@/components/Container"
 import { useApplyVoucher } from "@/lib/hooks/useCarts"
 import { toastError, toastSuccess } from "@/lib/utils/toast"
 import {
+  CartIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CartIcon,
+  CloseIcon,
+  EmptyOfferIllustration,
   ImagePlaceholderIcon,
+  InfoIcon,
+  MinusIcon,
+  PercentInCircleIcon,
+  PlusIcon,
+  TrashIcon,
 } from "@/components/icons"
 
 function formatMoney(n: number) {
@@ -473,7 +481,7 @@ export default function CartPage() {
                 className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
                 aria-label="Đóng"
               >
-                <CloseIcon />
+                <CloseIcon className="h-5 w-5" />
               </button>
             </div>
 
@@ -571,9 +579,7 @@ function QuantityStepper(props: {
         className="px-2.5 py-2 text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Giảm số lượng"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-        </svg>
+        <MinusIcon />
       </button>
       <span className="min-w-[2.25rem] select-none px-1 py-2 text-center text-sm font-semibold text-slate-800">
         {qty}
@@ -584,9 +590,7 @@ function QuantityStepper(props: {
         className="px-2.5 py-2 text-slate-600 transition-colors hover:bg-slate-50"
         aria-label="Tăng số lượng"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
+        <PlusIcon />
       </button>
     </div>
   )
@@ -604,68 +608,9 @@ function UnitSelect({ value }: { value: string }) {
         <option value={value}>{value}</option>
       </select>
       <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronDownIcon className="h-3 w-3" size={12} />
       </span>
     </div>
   )
 }
 
-function TrashIcon() {
-  return (
-    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-      />
-    </svg>
-  )
-}
-
-function PercentInCircleIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <circle cx="12" cy="12" r="9" />
-      <path strokeLinecap="round" d="M9 15l6-6M10 10h.01M14 14h.01" />
-    </svg>
-  )
-}
-
-function CloseIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-    </svg>
-  )
-}
-
-function EmptyOfferIllustration({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 96 96"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M20 38h56v40H20z" strokeLinecap="round" />
-      <path d="M20 38L48 22l28 16" strokeLinecap="round" />
-      <path d="M48 22v56" />
-      <path d="M36 52h24" strokeLinecap="round" strokeDasharray="4 4" opacity="0.6" />
-    </svg>
-  )
-}
-
-function InfoIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <path strokeLinecap="round" d="M12 16v-5M12 8h.01" />
-    </svg>
-  )
-}
