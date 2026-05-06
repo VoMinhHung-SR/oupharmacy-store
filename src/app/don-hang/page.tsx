@@ -69,10 +69,19 @@ export default function CheckoutPage() {
     return new Set(checkoutScopedLineIds)
   }, [checkoutScopedLineIds])
 
-  const summaryItems = useMemo(() => {
-    if (!scopedIdSet || scopedIdSet.size >= items.length) return items
-    return items.filter((i) => scopedIdSet.has(i.id))
+  const hasScopedSubset = useMemo(() => {
+    if (!scopedIdSet || scopedIdSet.size === 0 || scopedIdSet.size >= items.length) return false
+    const itemIdSet = new Set(items.map((i) => i.id))
+    for (const scopedId of Array.from(scopedIdSet)) {
+      if (!itemIdSet.has(scopedId)) return false
+    }
+    return true
   }, [items, scopedIdSet])
+
+  const summaryItems = useMemo(() => {
+    if (!hasScopedSubset || !scopedIdSet) return items
+    return items.filter((i) => scopedIdSet.has(i.id))
+  }, [hasScopedSubset, items, scopedIdSet])
 
   const scopedLineSubtotal = useMemo(
     () => summaryItems.reduce((s, i) => s + i.price * i.qty, 0),
@@ -80,9 +89,9 @@ export default function CheckoutPage() {
   )
 
   const scopeRatio = useMemo(() => {
-    if (!scopedIdSet || scopedIdSet.size >= items.length || !orderSubtotal) return 1
+    if (!hasScopedSubset || !orderSubtotal) return 1
     return Math.min(1, scopedLineSubtotal / orderSubtotal)
-  }, [scopedIdSet, scopedLineSubtotal, orderSubtotal, items.length])
+  }, [hasScopedSubset, scopedLineSubtotal, orderSubtotal])
 
   const displayOrderDiscount = discountAmount * scopeRatio
   const displayShippingDiscount = shippingDiscountAmount * scopeRatio
@@ -117,13 +126,11 @@ export default function CheckoutPage() {
   }, [items.length, router])
 
   useEffect(() => {
-    if (!checkoutScopedLineIds?.length) return
-    const valid = checkoutScopedLineIds.every((id) => items.some((i) => i.id === id))
-    if (!valid) {
+    if (checkoutScopedLineIds?.length && !hasScopedSubset && checkoutScopedLineIds.length < items.length) {
       toastError('Một số sản phẩm đã chọn không còn trong giỏ. Đang áp dụng lại toàn bộ giỏ.')
       setCheckoutScopedLineIds(null)
     }
-  }, [checkoutScopedLineIds, items, setCheckoutScopedLineIds])
+  }, [checkoutScopedLineIds, hasScopedSubset, items.length, setCheckoutScopedLineIds])
 
   useEffect(() => {
     if (information) {
@@ -185,10 +192,7 @@ export default function CheckoutPage() {
       })
       const trimmedNotes = notes.trim()
       const scope =
-        checkoutScopedLineIds &&
-        checkoutScopedLineIds.length > 0 &&
-        checkoutScopedLineIds.length < items.length &&
-        checkoutScopedLineIds.every((id) => items.some((i) => i.id === id))
+        hasScopedSubset && checkoutScopedLineIds
           ? checkoutScopedLineIds.map((id) => Number(id))
           : undefined
       const created = await checkoutCartMutation.mutateAsync({

@@ -25,6 +25,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@/components/icons"
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/constant"
 
 function formatMoney(n: number) {
   return `${Math.round(n).toLocaleString("vi-VN")}₫`
@@ -171,13 +172,13 @@ export default function CartPage() {
               <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
                 <div className="border-b border-primary-100/80 bg-primary-50 px-4 py-3 md:px-5">
                   <p className="text-sm text-primary-900">
-                    <span className="font-semibold">Miễn phí vận chuyển</span> đối với đơn hàng trên
-                    300.000₫
+                    <span className="font-semibold">Miễn phí vận chuyển</span> đối với đơn hàng trên 
+                    { formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-4 py-3 md:px-5">
-                  <label className="flex cursor-pointer items-center gap-2">
+                <div className="border-b border-slate-100 px-4 py-3 md:px-5 lg:grid lg:grid-cols-[2rem_5.5rem_minmax(0,1fr)_7.5rem_9.5rem_6.5rem_2.25rem] lg:items-center lg:gap-4">
+                  <label className="flex cursor-pointer items-center gap-2 lg:col-span-3">
                     <input
                       ref={selectAllRef}
                       type="checkbox"
@@ -189,7 +190,7 @@ export default function CartPage() {
                       Chọn tất cả ({items.length})
                     </span>
                   </label>
-                  <div className="ml-auto hidden min-w-0 flex-1 gap-0 text-xs font-medium uppercase tracking-wide text-slate-400 lg:grid lg:grid-cols-[7rem_9.5rem_6.5rem] lg:justify-items-end lg:pr-14 lg:text-[11px]">
+                  <div className="hidden text-xs font-medium uppercase tracking-wide text-slate-400 lg:col-span-3 lg:grid lg:grid-cols-[7.5rem_9.5rem_6.5rem] lg:justify-items-end lg:text-[11px]">
                     <span>Giá thành</span>
                     <span className="justify-self-center">Số lượng</span>
                     <span className="justify-self-end">Đơn vị</span>
@@ -212,7 +213,7 @@ export default function CartPage() {
                               checked={isSelected}
                               onChange={() => setItemSelected(item.id, !isSelected)}
                               className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                            />
+                            />ưu đãi
                           </label>
                           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                             {item.image_url ? (
@@ -407,9 +408,6 @@ export default function CartPage() {
                         >
                           Mua hàng
                         </button>
-                        <Button variant="outline" onClick={clear} className="w-full rounded-xl py-3">
-                          Xóa giỏ hàng
-                        </Button>
                       </div>
 
                       <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-500">

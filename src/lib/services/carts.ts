@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number
   unit_price_snapshot: number
   name?: string | null
+  packing?: string | null
   image_url?: string | null
   created_date?: string
   updated_date?: string

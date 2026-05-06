@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { toastError, toastSuccess, toastWarning } from "@/lib/utils/toast"
 import { useAuth } from "./AuthContext"
 import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from "@/lib/hooks/useCarts"
@@ -7,6 +7,8 @@ import { getCurrentCart } from "@/lib/services/carts"
 import { useQueryClient } from "@tanstack/react-query"
 
 const LINE_SELECT_SESSION_KEY = "oupharmacy_cart_line_select_v1"
+const MAX_ANONYMOUS_SYNC_RETRIES = 3
+const RETRY_DELAY_MS = 350
 
 export interface CartItem {
   /** String form of `variant_unit_id` for React keys / localStorage; server cart uses `CartItem.id`. */
@@ -107,10 +109,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [items, setItems] = useState<CartItem[]>([])
   const [serverLineSelection, setServerLineSelection] = useState<Record<string, boolean>>({})
+  const hasAttemptedAnonymousSyncRef = useRef(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
       setServerLineSelection({})
+      hasAttemptedAnonymousSyncRef.current = false
       return
     }
     setServerLineSelection(readServerLineSelection())
@@ -148,6 +152,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name: item.name || "",
       price: Number(item.unit_price_snapshot) || 0,
       image_url: item.image_url || undefined,
+      packaging: item.packing || undefined,
       qty: Number(item.quantity) || 1,
     }))
   }, [serverCart])
@@ -170,39 +175,59 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (!isAuthenticated || typeof window === "undefined") return
+    if (hasAttemptedAnonymousSyncRef.current) return
+    hasAttemptedAnonymousSyncRef.current = true
     let cancelled = false
+    const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms))
 
     const syncAnonymousCart = async () => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-        if (!raw) return
-        const parsed = JSON.parse(raw) as Record<string, unknown>[]
-        const localItems = parsed.map(migrateCartItem).filter((i) => i.variant_unit_id > 0 && i.qty > 0)
-        if (localItems.length === 0) {
-          localStorage.removeItem(STORAGE_KEY)
-          return
-        }
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as Record<string, unknown>[]
+      const localItems = parsed.map(migrateCartItem).filter((i) => i.variant_unit_id > 0 && i.qty > 0)
+      if (localItems.length === 0) {
+        localStorage.removeItem(STORAGE_KEY)
+        return
+      }
 
-        let latest = await getCurrentCart()
-        if (latest.error || !latest.data) return
-        let version = latest.data.version
+      let synced = false
+      for (let attempt = 1; attempt <= MAX_ANONYMOUS_SYNC_RETRIES && !cancelled; attempt += 1) {
+        try {
+          const latest = await getCurrentCart()
+          if (latest.error || !latest.data) {
+            throw new Error("Unable to fetch current cart")
+          }
+          let version = latest.data.version
 
-        for (const item of localItems) {
-          if (cancelled) return
-          const merged = await addMutation.mutateAsync({
-            product_variant_id: item.variant_unit_id,
-            quantity: item.qty,
-            expected_version: version,
-          })
-          version = merged.version
-        }
+          for (const item of localItems) {
+            if (cancelled) return
+            const merged = await addMutation.mutateAsync({
+              product_variant_id: item.variant_unit_id,
+              quantity: item.qty,
+              expected_version: version,
+            })
+            version = merged.version
+          }
 
-        if (!cancelled) {
-          localStorage.removeItem(STORAGE_KEY)
-          await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
+          synced = true
+          break
+        } catch {
+          if (attempt < MAX_ANONYMOUS_SYNC_RETRIES) {
+            await delay(RETRY_DELAY_MS * attempt)
+          }
         }
-      } catch {
-        toastWarning("Không thể đồng bộ giỏ hàng từ phiên chưa đăng nhập. Vui lòng thử lại sau.")
+      }
+
+      if (!cancelled && synced) {
+        localStorage.removeItem(STORAGE_KEY)
+        await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
+        return
+      }
+
+      if (!cancelled) {
+        toastWarning(
+          "Không thể đồng bộ giỏ hàng từ phiên chưa đăng nhập. Vui lòng refresh trình duyệt và thử lại."
+        )
       }
     }
 
@@ -215,10 +240,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setItemSelected = useCallback(
     (id: string, selected: boolean) => {
       if (!isAuthenticated) {
-        setItems((prev) => prev.map((i) => (i.id === id ? { ...i, selected } : i)))
+        setItems((prev) => {
+          let changed = false
+          const next = prev.map((i) => {
+            if (i.id !== id || i.selected === selected) return i
+            changed = true
+            return { ...i, selected }
+          })
+          return changed ? next : prev
+        })
         return
       }
-      setServerLineSelection((prev) => ({ ...prev, [id]: selected }))
+      setServerLineSelection((prev) => {
+        if (prev[id] === selected) return prev
+        return { ...prev, [id]: selected }
+      })
     },
     [isAuthenticated]
   )
@@ -226,7 +262,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setAllItemsSelected = useCallback(
     (selected: boolean) => {
       if (!isAuthenticated) {
-        setItems((prev) => prev.map((i) => ({ ...i, selected })))
+        setItems((prev) => {
+          const shouldUpdate = prev.some((i) => i.selected !== selected)
+          if (!shouldUpdate) return prev
+          return prev.map((i) => ({ ...i, selected }))
+        })
         return
       }
       setServerLineSelection(() => {
