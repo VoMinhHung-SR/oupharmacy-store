@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
@@ -37,6 +37,7 @@ export function ProductDetailPageContent({
   const { add, items } = useCart()
   const { toggle: toggleWishlist, isInWishlist } = useWishlist()
   const [quantity, setQuantity] = useState(1)
+  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null)
   const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
 
   const productImages = product?.images || []
@@ -46,22 +47,36 @@ export function ProductDetailPageContent({
   const productEntity = product ? getProductEntity(product) : null
   const productName = product ? getProductName(product) : ''
   const productPackaging = product ? getProductPackaging(product) : ''
+  const unitOptions = useMemo(() => product?.unit_options || [], [product?.unit_options])
+  const selectedUnit =
+    unitOptions.find((unit) => unit.unit_id === selectedUnitId) ||
+    unitOptions.find((unit) => unit.is_default) ||
+    unitOptions[0] ||
+    null
+  const effectivePriceValue = selectedUnit?.price_value ?? product?.price_value ?? 0
+  const effectivePriceDisplay = selectedUnit?.price_display ?? product?.price_display
+  const effectiveCompareAtPrice = selectedUnit?.compare_at_price ?? product?.compare_at_price ?? null
+  const selectedUnitName = selectedUnit?.unit_name || productPackaging
 
   const getCartItem = () => {
     if (!product) throw new Error('Product is not available')
     return {
       id: product.id.toString(),
       variant_unit_id: product.id,
+      product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
       name: productName,
-      price: product.price_value,
+      price: effectivePriceValue,
       image_url: productImageUrl || product.image_url,
-      packaging: productPackaging,
+      packaging: selectedUnitName,
     }
   }
 
   const validateStock = () => {
     if (!product) return false
-    const existingItem = items.find((i) => i.variant_unit_id === product.id)
+    const selectedUnitIdForCart = selectedUnit?.unit_id ?? product.default_unit_id ?? null
+    const existingItem = items.find(
+      (i) => i.variant_unit_id === product.id && (i.product_variant_unit_id ?? null) === selectedUnitIdForCart
+    )
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + quantity
 
@@ -104,6 +119,18 @@ export function ProductDetailPageContent({
       saveToRecentlyViewed(product)
     }
   }, [product])
+
+  useEffect(() => {
+    if (!unitOptions.length) {
+      setSelectedUnitId(null)
+      return
+    }
+    const defaultUnitId =
+      unitOptions.find((unit) => unit.is_default)?.unit_id ||
+      unitOptions[0]?.unit_id ||
+      null
+    setSelectedUnitId(defaultUnitId)
+  }, [product?.id, unitOptions])
 
   const handleBuyNow = async () => {
     if (!product) return
@@ -273,7 +300,7 @@ export function ProductDetailPageContent({
     href: `/${categorySlug}/${productSlug}`,
   })
 
-  const isConsultPrice = product.price_display === PRICE_CONSULT || String(product.price_value) === PRICE_CONSULT
+  const isConsultPrice = effectivePriceDisplay === PRICE_CONSULT || String(effectivePriceValue) === PRICE_CONSULT
 
   const handleWishlistToggle = () => {
     if (!product) return
@@ -281,11 +308,12 @@ export function ProductDetailPageContent({
     toggleWishlist({
       id: product.id.toString(),
       variant_unit_id: product.id,
+      product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
       name: productName,
-      price: product.price_value,
-      price_display: product.price_display,
+      price: effectivePriceValue,
+      price_display: effectivePriceDisplay || undefined,
       image_url: productImageUrl || product.image_url,
-      packaging: productPackaging,
+      packaging: selectedUnitName,
       category_slug: categorySlug,
       product_slug: productSlug,
     })
@@ -372,8 +400,13 @@ export function ProductDetailPageContent({
               <>
                 <div>
                   <div className="text-3xl font-bold text-primary-700">
-                    {product.price_value.toLocaleString('vi-VN')}₫
+                    {effectivePriceValue.toLocaleString('vi-VN')}₫
                   </div>
+                  {effectiveCompareAtPrice && effectiveCompareAtPrice > effectivePriceValue && (
+                    <div className="text-base text-gray-400 line-through">
+                      {effectiveCompareAtPrice.toLocaleString('vi-VN')}₫
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -381,9 +414,19 @@ export function ProductDetailPageContent({
                     Chọn đơn vị tính
                   </label>
                   <div className="flex gap-2">
-                    <button className="rounded-full border-2 border-primary-600 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700">
-                      Hộp
-                    </button>
+                    {(unitOptions.length ? unitOptions : [{ unit_id: 0, unit_name: selectedUnitName || 'Mặc định', price_value: effectivePriceValue, quantity_in_base: 1 }]).map((unit) => (
+                      <button
+                        key={unit.unit_id}
+                        onClick={() => setSelectedUnitId(unit.unit_id)}
+                        className={`rounded-full border-2 px-4 py-2 text-sm font-medium ${
+                          (selectedUnit?.unit_id ?? product.default_unit_id ?? 0) === unit.unit_id
+                            ? 'border-primary-600 bg-primary-50 text-primary-700'
+                            : 'border-gray-300 bg-white text-gray-700'
+                        }`}
+                      >
+                        {unit.unit_name}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </>
@@ -420,6 +463,12 @@ export function ProductDetailPageContent({
                 <div className="text-sm">
                   <span className="font-medium text-gray-700">Quy cách:</span>{' '}
                   <span className="text-gray-600">{productPackaging}</span>
+                </div>
+              )}
+              {selectedUnitName && (
+                <div className="text-sm">
+                  <span className="font-medium text-gray-700">Đơn vị chọn:</span>{' '}
+                  <span className="text-gray-600">{selectedUnitName}</span>
                 </div>
               )}
 

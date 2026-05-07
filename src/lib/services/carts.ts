@@ -9,6 +9,12 @@ export interface CartItem {
   unit_price_snapshot: number
   name?: string | null
   packing?: string | null
+  unit_options?: {
+    id: number
+    unit_name: string
+    is_default?: boolean
+    price_value?: number
+  }[]
   image_url?: string | null
   created_date?: string
   updated_date?: string
@@ -45,7 +51,8 @@ export interface AddCartItemPayload extends CartMutationBase {
 
 export interface UpdateCartItemPayload extends CartMutationBase {
   item_id: number
-  quantity: number
+  quantity?: number
+  product_variant_unit_id?: number
 }
 
 export interface RemoveCartItemPayload extends CartMutationBase {
@@ -83,7 +90,8 @@ export async function addCartItem(payload: AddCartItemPayload) {
 
 export async function updateCartItem(payload: UpdateCartItemPayload) {
   return apiPatch<Cart>(`/carts/items/${payload.item_id}/`, {
-    quantity: payload.quantity,
+    ...(payload.quantity != null ? { quantity: payload.quantity } : {}),
+    ...(payload.product_variant_unit_id != null ? { product_variant_unit_id: payload.product_variant_unit_id } : {}),
     expected_version: payload.expected_version,
   })
 }

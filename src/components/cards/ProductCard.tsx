@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
+import type { ProductUnitOption } from '@/lib/services/products'
 
 interface ProductCardProps {
   product: {
@@ -19,6 +20,9 @@ interface ProductCardProps {
     image_url?: string
     packaging?: string
     variant_unit_id?: number
+    product_variant_unit_id?: number
+    unit_options?: ProductUnitOption[]
+    default_unit_name?: string
     category_slug?: string
     product_slug?: string
     in_stock?: number
@@ -35,6 +39,23 @@ const getProductLink = (product: ProductCardProps['product']): string | null => 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
+  const unitOptions = useMemo(() => product.unit_options || [], [product.unit_options])
+  const defaultUnitId = useMemo(() => {
+    if (!unitOptions.length) return product.product_variant_unit_id
+    return unitOptions.find((unit) => unit.is_default)?.unit_id || unitOptions[0]?.unit_id
+  }, [unitOptions, product.product_variant_unit_id])
+  const [selectedUnitId, setSelectedUnitId] = useState<number | undefined>(defaultUnitId)
+  const selectedUnit = useMemo(
+    () => unitOptions.find((unit) => unit.unit_id === selectedUnitId) || unitOptions[0],
+    [unitOptions, selectedUnitId]
+  )
+  const unitGridClassName = useMemo(() => {
+    const count = unitOptions.length
+    if (count === 2) return 'grid-cols-2'
+    if (count === 3) return 'grid-cols-3'
+    if (count === 4) return 'grid-cols-2'
+    return 'grid-cols-3'
+  }, [unitOptions.length])
   const discount = useMemo(() => {
     if (product.discount) return product.discount
     if (product.originalPrice && product.originalPrice > product.price) {
@@ -44,8 +65,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product])
 
   const isConsultPrice = useMemo(
-    () => product.price_display === PRICE_CONSULT || String(product.price) === PRICE_CONSULT,
-    [product]
+    () =>
+      (selectedUnit?.price_display || product.price_display) === PRICE_CONSULT ||
+      String(selectedUnit?.price_value ?? product.price) === PRICE_CONSULT,
+    [product.price_display, product.price, selectedUnit]
   )
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -59,7 +82,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (!product.variant_unit_id) return
 
     const inStock = product.in_stock ?? 0
-    const existingItem = items.find((i) => i.variant_unit_id === product.variant_unit_id)
+    const selectedUnitIdForCart = selectedUnit?.unit_id ?? product.product_variant_unit_id ?? null
+    const existingItem = items.find(
+      (i) =>
+        i.variant_unit_id === product.variant_unit_id &&
+        (i.product_variant_unit_id ?? null) === selectedUnitIdForCart
+    )
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
@@ -79,10 +107,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {
         id: product.id,
         variant_unit_id: product.variant_unit_id,
+        product_variant_unit_id: selectedUnit?.unit_id ?? product.product_variant_unit_id,
         name: product.name,
-        price: product.price,
+        price: selectedUnit?.price_value ?? product.price,
         image_url: product.image_url,
-        packaging: product.packaging,
+        packaging: selectedUnit?.unit_name || product.packaging,
       },
       1
     )
@@ -151,17 +180,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <>
               <div className="flex items-center gap-2">
                 <div className="text-primary-700 font-bold text-base">
-                  {product.price.toLocaleString('vi-VN')}₫
+                  {(selectedUnit?.price_value ?? product.price).toLocaleString('vi-VN')}₫
                 </div>
-                {product.originalPrice && product.originalPrice > product.price && (
+                {selectedUnit?.unit_name && (
+                  <div className="text-primary-700 text-sm">/ {selectedUnit.unit_name}</div>
+                )}
+                {(selectedUnit?.compare_at_price || product.originalPrice) &&
+                  (selectedUnit?.compare_at_price || product.originalPrice)! >
+                    (selectedUnit?.price_value ?? product.price) && (
                   <div className="text-gray-400 text-sm line-through ml-auto">
-                    {product.originalPrice.toLocaleString('vi-VN')}₫
+                    {(selectedUnit?.compare_at_price || product.originalPrice || 0).toLocaleString('vi-VN')}₫
                   </div>
                 )}
               </div>
 
               {product.packaging && (
                 <div className="text-xs text-gray-500">{product.packaging}</div>
+              )}
+              {unitOptions.length > 1 && (
+                <div className={`mt-2 grid w-full ${unitGridClassName} gap-1`}>
+                  {unitOptions.map((unit) => (
+                    <button
+                      key={unit.unit_id}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setSelectedUnitId(unit.unit_id)
+                      }}
+                      className={`h-7 rounded-md border px-2 text-xs text-center transition-colors ${
+                        (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
+                          ? 'border-primary-600 bg-white text-primary-700'
+                          : 'border-gray-300 bg-gray-100 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {unit.unit_name}
+                    </button>
+                  ))}
+                </div>
               )}
             </>
           )}

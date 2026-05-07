@@ -94,17 +94,20 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Tìm kiếm phổ biến */}
-          <div className="mt-2 hidden items-center gap-3 text-xs text-white/90 lg:flex">
-            <span className="font-medium text-white">Tìm kiếm phổ biến:</span>
-            {compactTerms.map((term) => (
-              <Link
-                key={term}
-                href={`/tim-kiem?q=${encodeURIComponent(term)}`}
-                className="hover:text-white transition-colors text-white/80"
-              >
-                {term}
-              </Link>
-            ))}
+          <div className="mt-2 hidden items-center gap-3 overflow-hidden text-xs text-white/90 lg:flex">
+            <span className="shrink-0 font-medium text-white">Tìm kiếm phổ biến:</span>
+            <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+              {compactTerms.map((term) => (
+                <Link
+                  key={term}
+                  href={`/tim-kiem?q=${encodeURIComponent(term)}`}
+                  className="inline-block max-w-[180px] shrink-0 truncate text-white/80 transition-colors hover:text-white"
+                  title={term}
+                >
+                  {term}
+                </Link>
+              ))}
+            </div>
           </div>
         </Container>
       </div>

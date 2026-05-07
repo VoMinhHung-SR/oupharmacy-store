@@ -1,5 +1,15 @@
 import { apiGet, ApiResponse } from '../api'
 
+export interface ProductUnitOption {
+  unit_id: number
+  unit_name: string
+  quantity_in_base: number
+  price_value: number
+  price_display?: string | null
+  compare_at_price?: number | null
+  is_default?: boolean
+}
+
 export interface Product {
   id: number
   price_value: number
@@ -57,6 +67,9 @@ export interface Product {
   compare_at_price?: number | null
   /** % giảm so với compare_at_price (BE tính từ default unit). */
   discount_percent?: number
+  default_unit_id?: number | null
+  default_unit_name?: string | null
+  unit_options?: ProductUnitOption[]
   is_hot?: boolean
   active: boolean
   created_date: string
@@ -154,6 +167,9 @@ export interface ProductCardPayload {
   packaging?: string
   /** Product variant unit id (PVU / `ProductVariant.id` in store API). */
   variant_unit_id?: number
+  product_variant_unit_id?: number
+  unit_options?: ProductUnitOption[]
+  default_unit_name?: string
   category_slug?: string
   product_slug?: string
   in_stock?: number
@@ -201,16 +217,34 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
     typeof product.discount_percent === 'number' && product.discount_percent > 0
       ? product.discount_percent
       : undefined
+  const unitOptions = Array.isArray(product.unit_options) ? product.unit_options : []
+  const defaultUnit =
+    unitOptions.find((unit) => unit.is_default) ||
+    unitOptions[0] ||
+    (product.default_unit_id
+      ? {
+          unit_id: product.default_unit_id,
+          unit_name: product.default_unit_name || '',
+          quantity_in_base: 1,
+          price_value: product.price_value || 0,
+          price_display: product.price_display,
+          compare_at_price: product.compare_at_price,
+          is_default: true,
+        }
+      : undefined)
   return {
     id: product.id.toString(),
     name: getProductName(product),
-    price_display: product.price_display || undefined,
-    price: product.price_value || 0,
+    price_display: (defaultUnit?.price_display || product.price_display) || undefined,
+    price: defaultUnit?.price_value ?? product.price_value ?? 0,
     originalPrice: hasCompare ? compare : undefined,
     discount: discountPct,
     image_url: getProductImageUrl(product),
     packaging: getProductPackaging(product) || undefined,
     variant_unit_id: product.id,
+    product_variant_unit_id: defaultUnit?.unit_id,
+    unit_options: unitOptions,
+    default_unit_name: defaultUnit?.unit_name || product.default_unit_name || undefined,
     category_slug: categorySlug || undefined,
     product_slug: productSlug,
     in_stock: product.in_stock,
@@ -238,6 +272,23 @@ export function normalizeProduct(raw: RawProduct): Product {
     in_stock: Number(raw.in_stock ?? 0) || 0,
     compare_at_price: compareAt !== undefined && !Number.isNaN(compareAt) ? compareAt : undefined,
     discount_percent: Number(raw.discount_percent ?? 0) || 0,
+    default_unit_id:
+      raw.default_unit_id == null ? null : Number(raw.default_unit_id),
+    default_unit_name: (raw.default_unit_name as string | undefined) ?? null,
+    unit_options: Array.isArray(raw.unit_options)
+      ? raw.unit_options.map((unit) => ({
+          unit_id: Number((unit as Record<string, unknown>).unit_id ?? 0) || 0,
+          unit_name: String((unit as Record<string, unknown>).unit_name ?? ''),
+          quantity_in_base: Number((unit as Record<string, unknown>).quantity_in_base ?? 1) || 1,
+          price_value: Number((unit as Record<string, unknown>).price_value ?? 0) || 0,
+          price_display: ((unit as Record<string, unknown>).price_display as string | undefined) ?? null,
+          compare_at_price:
+            (unit as Record<string, unknown>).compare_at_price == null
+              ? null
+              : Number((unit as Record<string, unknown>).compare_at_price),
+          is_default: Boolean((unit as Record<string, unknown>).is_default),
+        }))
+      : [],
     is_hot: Boolean(raw.is_hot),
   }
   return normalized

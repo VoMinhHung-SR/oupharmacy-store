@@ -15,6 +15,9 @@ export interface CartItem {
   id: string
   /** Product variant unit id (PVU). */
   variant_unit_id: number
+  /** Selected server unit id for this cart line. */
+  product_variant_unit_id?: number | null
+  unit_options?: { id: number; unit_name: string; is_default?: boolean; price_value?: number }[]
   name: string
   price: number
   image_url?: string
@@ -41,6 +44,7 @@ interface CartContextValue {
   add: (item: Omit<CartItem, "qty" | "selected">, qty?: number) => Promise<void>
   remove: (id: string) => void
   updateQuantity: (id: string, qty: number) => void
+  updateItemUnit: (id: string, productVariantUnitId: number) => Promise<void>
   clear: () => void
   total: number
   subtotal?: number
@@ -68,8 +72,10 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
     (item.medicine_unit_id as number | undefined) ??
     (Number.isNaN(parsedId) ? 0 : parsedId)
   return {
-    id: String(variant_unit_id),
+    id: String(item.id ?? variant_unit_id),
     variant_unit_id,
+    product_variant_unit_id:
+      item.product_variant_unit_id == null ? null : Number(item.product_variant_unit_id),
     name: String(item.name ?? ""),
     price: Number(item.price ?? 0) || 0,
     image_url: item.image_url as string | undefined,
@@ -149,6 +155,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return serverCart.items.map((item) => ({
       id: String(item.id),
       variant_unit_id: Number(item.product_variant) || 0,
+      product_variant_unit_id: item.product_variant_unit ?? null,
+      unit_options: Array.isArray(item.unit_options)
+        ? item.unit_options.map((unit) => ({
+            id: Number(unit.id) || 0,
+            unit_name: String(unit.unit_name ?? ""),
+            is_default: Boolean(unit.is_default),
+            price_value: Number(unit.price_value ?? 0) || 0,
+          }))
+        : [],
       name: item.name || "",
       price: Number(item.unit_price_snapshot) || 0,
       image_url: item.image_url || undefined,
@@ -203,6 +218,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (cancelled) return
             const merged = await addMutation.mutateAsync({
               product_variant_id: item.variant_unit_id,
+              ...(item.product_variant_unit_id ? { product_variant_unit_id: item.product_variant_unit_id } : {}),
               quantity: item.qty,
               expected_version: version,
             })
@@ -291,6 +307,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           await addMutation.mutateAsync({
             product_variant_id: item.variant_unit_id,
+            ...(item.product_variant_unit_id ? { product_variant_unit_id: item.product_variant_unit_id } : {}),
             quantity: qty,
             expected_version: version,
           })
@@ -303,15 +320,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return
       }
 
-      const isUpdate = items.some((i) => i.variant_unit_id === item.variant_unit_id)
+      const isSameLine = (line: CartItem) =>
+        line.variant_unit_id === item.variant_unit_id &&
+        (line.product_variant_unit_id ?? null) === (item.product_variant_unit_id ?? null)
+      const isUpdate = items.some(isSameLine)
 
       setItems((prev) => {
-        const exist = prev.find((i) => i.variant_unit_id === item.variant_unit_id)
+        const exist = prev.find(isSameLine)
+        const lineId = `${item.variant_unit_id}:${item.product_variant_unit_id ?? 0}`
         return exist
           ? prev.map((i) =>
-              i.variant_unit_id === item.variant_unit_id ? { ...i, qty: i.qty + qty, selected: i.selected !== false } : i
+              isSameLine(i) ? { ...i, qty: i.qty + qty, selected: i.selected !== false } : i
             )
-          : [...prev, { ...item, qty, id: item.variant_unit_id.toString(), selected: true }]
+          : [...prev, { ...item, qty, id: lineId, selected: true }]
       })
 
       toastSuccess(
@@ -375,6 +396,75 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [isAuthenticated, serverCart?.version, updateMutation]
   )
 
+  const updateItemUnit = useCallback(
+    async (id: string, productVariantUnitId: number) => {
+      if (!isAuthenticated) {
+        setItems((prev) => {
+          const current = prev.find((line) => line.id === id)
+          if (!current) return prev
+
+          const currentUnitId = current.product_variant_unit_id ?? null
+          if (currentUnitId === productVariantUnitId) return prev
+
+          const target = prev.find(
+            (line) =>
+              line.id !== id &&
+              line.variant_unit_id === current.variant_unit_id &&
+              (line.product_variant_unit_id ?? null) === productVariantUnitId
+          )
+
+          const selectedUnitMeta =
+            current.unit_options?.find((unit) => unit.id === productVariantUnitId) ?? null
+
+          if (target) {
+            // Merge quantities when target unit line already exists.
+            return prev
+              .map((line) => {
+                if (line.id === target.id) {
+                  const nextPrice =
+                    selectedUnitMeta?.price_value != null ? selectedUnitMeta.price_value : line.price
+                  return {
+                    ...line,
+                    qty: line.qty + current.qty,
+                    price: nextPrice,
+                    packaging: selectedUnitMeta?.unit_name || line.packaging,
+                    selected: line.selected !== false || current.selected !== false,
+                  }
+                }
+                return line
+              })
+              .filter((line) => line.id !== id)
+          }
+
+          const nextId = `${current.variant_unit_id}:${productVariantUnitId}`
+          return prev.map((line) => {
+            if (line.id !== id) return line
+            const nextPrice =
+              selectedUnitMeta?.price_value != null ? selectedUnitMeta.price_value : line.price
+            return {
+              ...line,
+              id: nextId,
+              product_variant_unit_id: productVariantUnitId,
+              price: nextPrice,
+              packaging: selectedUnitMeta?.unit_name || line.packaging,
+            }
+          })
+        })
+        return
+      }
+      const version = serverCart?.version
+      if (version == null) {
+        throw new Error("Cart not ready")
+      }
+      await updateMutation.mutateAsync({
+        item_id: Number(id),
+        product_variant_unit_id: productVariantUnitId,
+        expected_version: version,
+      })
+    },
+    [isAuthenticated, serverCart?.version, updateMutation]
+  )
+
   const clear = useCallback(() => {
     if (isAuthenticated) {
       void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
@@ -434,6 +524,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       add,
       remove,
       updateQuantity,
+      updateItemUnit,
       clear,
       total,
       subtotal: isAuthenticated ? Number(serverCart?.subtotal ?? 0) : total,
@@ -462,6 +553,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setItemSelected,
       total,
       updateQuantity,
+      updateItemUnit,
     ]
   )
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

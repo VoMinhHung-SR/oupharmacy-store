@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import { Product, getProductEntity, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
@@ -60,6 +60,18 @@ const getProductImageUrl = (product: Product): string | undefined => {
 
 export const ProductListView: React.FC<ProductListViewProps> = ({ products }) => {
   const { add, items } = useCart()
+  const [selectedUnitByVariant, setSelectedUnitByVariant] = useState<Record<number, number>>({})
+
+  const getSelectedUnit = (product: Product) => {
+    const unitOptions = product.unit_options || []
+    if (!unitOptions.length) return null
+    const selectedId = selectedUnitByVariant[product.id]
+    return (
+      unitOptions.find((unit) => unit.unit_id === selectedId) ||
+      unitOptions.find((unit) => unit.is_default) ||
+      unitOptions[0]
+    )
+  }
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault()
@@ -70,8 +82,12 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
       return
     }
 
+    const selectedUnit = getSelectedUnit(product)
     const inStock = product.in_stock ?? 0
-    const existingItem = items.find((i) => i.variant_unit_id === product.id)
+    const selectedUnitId = selectedUnit?.unit_id ?? product.default_unit_id ?? null
+    const existingItem = items.find(
+      (i) => i.variant_unit_id === product.id && (i.product_variant_unit_id ?? null) === selectedUnitId
+    )
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
@@ -91,11 +107,11 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
       {
         id: product.id.toString(),
         variant_unit_id: product.id,
+        product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
         name: getProductName(product),
-        
-        price: product.price_value,
+        price: selectedUnit?.price_value ?? product.price_value,
         image_url: getProductImageUrl(product),
-        packaging: getProductPackaging(product),
+        packaging: selectedUnit?.unit_name || getProductPackaging(product),
       },
       1
     )
@@ -149,8 +165,10 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
                 <h3 className="text-lg font-medium text-gray-900 group-hover:text-primary-700 mb-2">
                   {getProductName(product)}
                 </h3>
-                {getProductPackaging(product) && (
-                  <p className="text-sm text-gray-500 mb-2">{getProductPackaging(product)}</p>
+                {(getSelectedUnit(product)?.unit_name || getProductPackaging(product)) && (
+                  <p className="text-sm text-gray-500 mb-2">
+                    {getSelectedUnit(product)?.unit_name || getProductPackaging(product)}
+                  </p>
                 )}
                 {getProductEntity(product)?.usage && (
                   <p className="text-sm text-gray-600 line-clamp-2">{getProductEntity(product)?.usage}</p>
@@ -187,8 +205,30 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
               ) : (
                 <div className="flex items-center justify-between mt-4 gap-4">
                   <div className="text-primary-700 font-bold text-xl">
-                    {product.price_value.toLocaleString('vi-VN')}₫
+                    {(getSelectedUnit(product)?.price_value ?? product.price_value).toLocaleString('vi-VN')}₫
                   </div>
+                  {(product.unit_options?.length || 0) > 1 && (
+                    <div className="flex flex-wrap gap-1">
+                      {(product.unit_options || []).map((unit) => (
+                        <button
+                          key={unit.unit_id}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            setSelectedUnitByVariant((prev) => ({ ...prev, [product.id]: unit.unit_id }))
+                          }}
+                          className={`rounded border px-2 py-1 text-xs ${
+                            (getSelectedUnit(product)?.unit_id ?? product.default_unit_id) === unit.unit_id
+                              ? 'border-primary-600 text-primary-700 bg-primary-50'
+                              : 'border-gray-300 text-gray-600 bg-white'
+                          }`}
+                        >
+                          {unit.unit_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button
                       type="button"

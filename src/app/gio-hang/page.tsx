@@ -42,6 +42,7 @@ export default function CartPage() {
     remove,
     clear,
     updateQuantity,
+    updateItemUnit,
     discountAmount = 0,
     orderVoucherCode,
     version: cartVersion,
@@ -51,6 +52,9 @@ export default function CartPage() {
   } = useCart()
   const [offerModalOpen, setOfferModalOpen] = useState(false)
   const [voucherCode, setVoucherCode] = useState("")
+  const [updatingUnitByItemId, setUpdatingUnitByItemId] = useState<Record<string, boolean>>({})
+  const [pendingUnitChoiceByItemId, setPendingUnitChoiceByItemId] = useState<Record<string, number>>({})
+  const unitChangeTimersRef = useRef<Record<string, ReturnType<typeof window.setTimeout>>>({})
   const voucherInputRef = useRef<HTMLInputElement>(null)
   const selectAllRef = useRef<HTMLInputElement>(null)
   const offerModalTitleId = useId()
@@ -92,6 +96,55 @@ export default function CartPage() {
     if (newQty < 1) return
     updateQuantity(id, newQty)
   }
+
+  const handleUnitChange = useCallback(
+    async (id: string, nextUnitId: number) => {
+      if (!Number.isFinite(nextUnitId) || nextUnitId <= 0) return
+      setUpdatingUnitByItemId((prev) => ({ ...prev, [id]: true }))
+      try {
+        await updateItemUnit(id, nextUnitId)
+      } catch (e: unknown) {
+        toastError(e instanceof Error ? e.message : "Không thể đổi đơn vị đóng gói.")
+      } finally {
+        setUpdatingUnitByItemId((prev) => {
+          const next = { ...prev }
+          delete next[id]
+          return next
+        })
+        setPendingUnitChoiceByItemId((prev) => {
+          const next = { ...prev }
+          delete next[id]
+          return next
+        })
+      }
+    },
+    [updateItemUnit]
+  )
+
+  const scheduleUnitChange = useCallback(
+    (id: string, currentUnitId: number, nextUnitId: number) => {
+      if (!Number.isFinite(nextUnitId) || nextUnitId <= 0 || nextUnitId === currentUnitId) return
+      setPendingUnitChoiceByItemId((prev) => ({ ...prev, [id]: nextUnitId }))
+      const existingTimer = unitChangeTimersRef.current[id]
+      if (existingTimer) {
+        window.clearTimeout(existingTimer)
+      }
+      unitChangeTimersRef.current[id] = window.setTimeout(() => {
+        delete unitChangeTimersRef.current[id]
+        void handleUnitChange(id, nextUnitId)
+      }, 220)
+    },
+    [handleUnitChange]
+  )
+
+  useEffect(() => {
+    return () => {
+      for (const timer of Object.values(unitChangeTimersRef.current)) {
+        window.clearTimeout(timer)
+      }
+      unitChangeTimersRef.current = {}
+    }
+  }, [])
 
   const submitCartVoucher = useCallback(async () => {
     const code = voucherCode.trim()
@@ -202,6 +255,13 @@ export default function CartPage() {
                     const isSelected = item.selected
                     const lineTotal = item.price * item.qty
                     const unitLabel = item.packaging?.trim() || "Gói"
+                    const unitOptions =
+                      item.unit_options && item.unit_options.length > 0
+                        ? item.unit_options
+                        : [{ id: item.product_variant_unit_id ?? 0, unit_name: unitLabel }]
+                    const selectedUnitId =
+                      pendingUnitChoiceByItemId[item.id] ?? item.product_variant_unit_id ?? unitOptions[0]?.id ?? 0
+                    const isUpdatingUnit = Boolean(updatingUnitByItemId[item.id])
 
                     return (
                       <div key={item.id} className="px-4 py-4 md:px-5">
@@ -213,7 +273,7 @@ export default function CartPage() {
                               checked={isSelected}
                               onChange={() => setItemSelected(item.id, !isSelected)}
                               className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                            />ưu đãi
+                            />
                           </label>
                           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                             {item.image_url ? (
@@ -251,7 +311,12 @@ export default function CartPage() {
                               onInc={() => handleQuantityChange(item.id, item.qty + 1)}
                               disableDec={item.qty <= 1}
                             />
-                            <UnitSelect value={unitLabel} />
+                            <UnitSelect
+                              value={selectedUnitId}
+                              options={unitOptions}
+                              disabled={isUpdatingUnit || unitOptions.length <= 1}
+                              onChange={(nextUnitId) => scheduleUnitChange(item.id, selectedUnitId, nextUnitId)}
+                            />
                           </div>
                         </div>
 
@@ -300,7 +365,12 @@ export default function CartPage() {
                             />
                           </div>
                           <div className="flex justify-end">
-                            <UnitSelect value={unitLabel} />
+                            <UnitSelect
+                              value={selectedUnitId}
+                              options={unitOptions}
+                              disabled={isUpdatingUnit || unitOptions.length <= 1}
+                              onChange={(nextUnitId) => scheduleUnitChange(item.id, selectedUnitId, nextUnitId)}
+                            />
                           </div>
                           <button
                             type="button"
@@ -594,16 +664,27 @@ function QuantityStepper(props: {
   )
 }
 
-function UnitSelect({ value }: { value: string }) {
+function UnitSelect(props: {
+  value: number
+  options: { id: number; unit_name: string }[]
+  disabled?: boolean
+  onChange: (nextUnitId: number) => void
+}) {
+  const { value, options, disabled = false, onChange } = props
   return (
     <div className="relative">
       <select
-        disabled
+        disabled={disabled}
         value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
         aria-label="Đơn vị"
-        className="w-full min-w-[5.5rem] cursor-default appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm font-medium text-slate-700 shadow-sm"
+        className="w-full min-w-[5.5rem] appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm font-medium text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <option value={value}>{value}</option>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.unit_name}
+          </option>
+        ))}
       </select>
       <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400">
         <ChevronDownIcon className="h-3 w-3" size={12} />
