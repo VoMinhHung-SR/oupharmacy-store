@@ -81,20 +81,21 @@ export async function getCategoriesSSG(): Promise<CategoryLevel0[]> {
         'Content-Type': 'application/json',
         'Accept-Language': 'vi',
       },
-      // SSG với ISR: revalidate mỗi 1 giờ
-      // Nếu muốn pure SSG (không revalidate), dùng: cache: 'force-cache'
-      next: { revalidate: 3600 }, // 1 giờ
+      next: { revalidate: 3600 },
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      console.warn(
+        `[getCategoriesSSG] BE returned ${response.status} ${response.statusText} for ${url}. Falling back to empty list.`,
+      )
+      return []
     }
 
     const data = await response.json()
     return data as CategoryLevel0[]
   } catch (error) {
-    console.error('Error fetching categories for SSG:', error)
-    throw error
+    console.warn('[getCategoriesSSG] Fetch failed, falling back to empty list:', error)
+    return []
   }
 }
 

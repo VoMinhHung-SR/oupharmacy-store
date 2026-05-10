@@ -22,7 +22,19 @@ module.exports = {
         '3xl': '24px',
         'full': '9999px',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            color: 'rgb(55 65 81)', // gray-700
+            'h2, h3, h4': { color: 'rgb(17 24 39)', marginTop: '1.25em', marginBottom: '0.5em' },
+            'p, li': { marginTop: '0.5em', marginBottom: '0.5em' },
+            'ul, ol': { marginTop: '0.5em', marginBottom: '0.5em', paddingLeft: '1.25em' },
+            a: { color: 'rgb(37 99 235)', textDecoration: 'none' },
+            'a:hover': { textDecoration: 'underline' },
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 }
