@@ -142,7 +142,8 @@ export function useCheckoutCart() {
     mutationFn: async (payload: CheckoutCartPayload) =>
       executeWithVersionRetry(checkoutCart, payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
+      // Ensure cart `version` (and lines) match server before the next mutation (e.g. select shipping).
+      await queryClient.refetchQueries({ queryKey: CART_QUERY_KEY })
     },
   })
 }

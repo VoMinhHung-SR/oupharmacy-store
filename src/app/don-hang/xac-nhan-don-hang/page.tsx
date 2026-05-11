@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import React from 'react'
 import { useOrder } from '@/lib/hooks/useOrders'
 import Breadcrumb from '@/components/Breadcrumb'
+import { Container } from '@/components/Container'
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams()
@@ -16,12 +17,12 @@ export default function OrderConfirmationPage() {
 
   if (!orderIdentifier) {
     return (
-      <div className="space-y-6 py-8 px-4">
+      <Container className="space-y-6 py-6 sm:py-8">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+        <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
           <p className="text-gray-600 mb-6">Link xác nhận không hợp lệ hoặc đã hết hạn.</p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/tai-khoan/don-hang"
               className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -36,28 +37,30 @@ export default function OrderConfirmationPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </Container>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" aria-busy="true" />
-      </div>
+      <Container className="py-16 sm:py-24">
+        <div className="flex min-h-[32vh] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary-600" aria-busy="true" />
+        </div>
+      </Container>
     )
   }
 
   if (error || !order) {
     return (
-      <div className="space-y-6 py-8 px-4">
+      <Container className="space-y-6 py-6 sm:py-8">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+        <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
           <p className="text-gray-600 mb-6">
             Đơn hàng không tồn tại hoặc bạn không có quyền xem.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/tai-khoan/don-hang"
               className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -72,7 +75,7 @@ export default function OrderConfirmationPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </Container>
     )
   }
 
@@ -107,7 +110,7 @@ export default function OrderConfirmationPage() {
   const formatVnd = (value?: number) => `${Math.round(Number(value ?? 0)).toLocaleString('vi-VN')}đ`
 
   return (
-    <div className="space-y-6 py-8 px-4">
+    <Container className="space-y-6 py-6 sm:py-8">
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },
@@ -116,15 +119,16 @@ export default function OrderConfirmationPage() {
         ]}
       />
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
-        <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white">
+      <div className="mx-auto w-full max-w-4xl">
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 md:p-8">
+        <div className="rounded-xl border border-green-200 bg-green-50 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-white sm:mt-0.5">
               <span className="text-sm font-bold">✓</span>
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Đặt hàng thành công</h1>
-              <p className="mt-1 text-gray-700">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Đặt hàng thành công</h1>
+              <p className="mt-1 break-words text-gray-700">
                 Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn:{' '}
                 <span className="font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</span>
               </p>
@@ -132,8 +136,8 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm text-blue-900">
+        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
+          <p className="text-sm text-blue-900 break-words">
             Bạn có thể theo dõi đơn hàng của mình tại đây:{' '}
             <Link href={trackingHref} className="font-semibold underline hover:text-blue-700">
               Theo dõi đơn hàng của bạn
@@ -141,7 +145,7 @@ export default function OrderConfirmationPage() {
           </p>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
             <p className="text-xs uppercase tracking-wide text-gray-500">Mã đơn hàng</p>
             <p className="mt-1 text-sm font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</p>
@@ -162,16 +166,16 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        <div className="mt-6 border-t border-gray-200 pt-6 space-y-4">
+        <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
           <h2 className="text-lg font-medium text-gray-900">Chi tiết đơn hàng</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="-mx-1 overflow-x-auto sm:mx-0">
+            <table className="w-full min-w-[36rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-gray-600">
-                  <th className="pb-3 pr-4">Sản phẩm</th>
-                  <th className="pb-3 pr-4 text-right">SL</th>
-                  <th className="pb-3 pr-4 text-right">Đơn giá</th>
-                  <th className="pb-3 text-right">Thành tiền</th>
+                  <th className="pb-3 pr-3 sm:pr-4">Sản phẩm</th>
+                  <th className="whitespace-nowrap pb-3 px-2 text-right sm:pr-4">SL</th>
+                  <th className="whitespace-nowrap pb-3 px-2 text-right sm:pr-4">Đơn giá</th>
+                  <th className="whitespace-nowrap pb-3 pl-2 text-right">Thành tiền</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,30 +185,30 @@ export default function OrderConfirmationPage() {
                   const subtotal = item.subtotal ?? qty * price
                   return (
                     <tr key={item.variant_unit_id ?? idx} className="border-b">
-                      <td className="py-3 pr-4 font-medium text-gray-800">
-                        {item.name || `Sản phẩm #${item.variant_unit_id}`}
+                      <td className="max-w-[12rem] py-3 pr-3 font-medium text-gray-800 sm:max-w-none sm:pr-4">
+                        <span className="line-clamp-2 sm:line-clamp-none">{item.name || `Sản phẩm #${item.variant_unit_id}`}</span>
                       </td>
-                      <td className="py-3 pr-4 text-right text-gray-700">{qty}</td>
-                      <td className="py-3 pr-4 text-right text-gray-700">{formatVnd(price)}</td>
-                      <td className="py-3 text-right font-semibold text-gray-900">{formatVnd(subtotal)}</td>
+                      <td className="whitespace-nowrap py-3 px-2 text-right text-gray-700 sm:pr-4">{qty}</td>
+                      <td className="whitespace-nowrap py-3 px-2 text-right text-gray-700 sm:pr-4">{formatVnd(price)}</td>
+                      <td className="whitespace-nowrap py-3 pl-2 text-right font-semibold text-gray-900">{formatVnd(subtotal)}</td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
           </div>
-          <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-4 space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="space-y-2 rounded-lg border border-blue-100 bg-blue-50/40 p-4 text-sm">
+            <div className="flex justify-between gap-4">
               <span className="text-gray-700">Tạm tính</span>
-              <span className="font-medium text-gray-900">{formatVnd(order.subtotal)}</span>
+              <span className="shrink-0 font-medium text-gray-900">{formatVnd(order.subtotal)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-4">
               <span className="text-gray-700">Phí vận chuyển</span>
-              <span className="font-medium text-gray-900">{formatVnd(order.shipping_fee)}</span>
+              <span className="shrink-0 font-medium text-gray-900">{formatVnd(order.shipping_fee)}</span>
             </div>
-            <div className="flex justify-between font-semibold text-base pt-2 text-gray-900">
+            <div className="flex justify-between gap-4 pt-2 text-base font-semibold text-gray-900">
               <span>Tổng cộng</span>
-              <span className="text-primary-700">{formatVnd(order.total)}</span>
+              <span className="shrink-0 text-primary-700">{formatVnd(order.total)}</span>
             </div>
           </div>
           {order.shipping_address && (
@@ -215,21 +219,22 @@ export default function OrderConfirmationPage() {
           )}
         </div>
 
-        <div className="flex flex-wrap justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
-          <Link
-            href={trackingHref}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            Theo dõi đơn hàng
-          </Link>
+        <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-4">
           <Link
             href="/"
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="px-6 py-2 text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-left"
           >
             Tiếp tục mua sắm
           </Link>
+          <Link
+            href={trackingHref}
+            className="px-6 py-2 text-center bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-left"
+          >
+            Theo dõi đơn hàng
+          </Link>
+        </div>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }
