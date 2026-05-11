@@ -128,6 +128,8 @@ export const CHECKOUT_LEGACY_STEP_PATHS = [
   '/don-hang/thanh-toan',
 ] as const
 
+export const FREE_SHIPPING_THRESHOLD = 300000 as const
+
 /** Trang chủ — lối tắt */
 export const HOME_QUICK_LINKS = [
   { icon: '💊', title: 'Cần mua thuốc', href: '/tim-kiem' },

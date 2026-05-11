@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
@@ -34,6 +34,8 @@ export default function CheckoutPage() {
     notes,
     setNotes,
     clear: clearCheckout,
+    checkoutScopedLineIds,
+    setCheckoutScopedLineIds,
   } = useCheckout()
   const {
     items,
@@ -61,7 +63,42 @@ export default function CheckoutPage() {
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
   const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
-  const orderTotal = total
+
+  const scopedIdSet = useMemo(() => {
+    if (!checkoutScopedLineIds || checkoutScopedLineIds.length === 0) return null
+    return new Set(checkoutScopedLineIds)
+  }, [checkoutScopedLineIds])
+
+  const hasScopedSubset = useMemo(() => {
+    if (!scopedIdSet || scopedIdSet.size === 0 || scopedIdSet.size >= items.length) return false
+    const itemIdSet = new Set(items.map((i) => i.id))
+    for (const scopedId of Array.from(scopedIdSet)) {
+      if (!itemIdSet.has(scopedId)) return false
+    }
+    return true
+  }, [items, scopedIdSet])
+
+  const summaryItems = useMemo(() => {
+    if (!hasScopedSubset || !scopedIdSet) return items
+    return items.filter((i) => scopedIdSet.has(i.id))
+  }, [hasScopedSubset, items, scopedIdSet])
+
+  const scopedLineSubtotal = useMemo(
+    () => summaryItems.reduce((s, i) => s + i.price * i.qty, 0),
+    [summaryItems]
+  )
+
+  const scopeRatio = useMemo(() => {
+    if (!hasScopedSubset || !orderSubtotal) return 1
+    return Math.min(1, scopedLineSubtotal / orderSubtotal)
+  }, [hasScopedSubset, scopedLineSubtotal, orderSubtotal])
+
+  const displayOrderDiscount = discountAmount * scopeRatio
+  const displayShippingDiscount = shippingDiscountAmount * scopeRatio
+  const orderTotal = Math.max(
+    0,
+    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + shippingFee
+  )
 
   const {
     register,
@@ -87,6 +124,13 @@ export default function CheckoutPage() {
       router.replace('/gio-hang')
     }
   }, [items.length, router])
+
+  useEffect(() => {
+    if (checkoutScopedLineIds?.length && !hasScopedSubset && checkoutScopedLineIds.length < items.length) {
+      toastError('Một số sản phẩm đã chọn không còn trong giỏ. Đang áp dụng lại toàn bộ giỏ.')
+      setCheckoutScopedLineIds(null)
+    }
+  }, [checkoutScopedLineIds, hasScopedSubset, items.length, setCheckoutScopedLineIds])
 
   useEffect(() => {
     if (information) {
@@ -147,11 +191,16 @@ export default function CheckoutPage() {
         address: formValues.address,
       })
       const trimmedNotes = notes.trim()
+      const scope =
+        hasScopedSubset && checkoutScopedLineIds
+          ? checkoutScopedLineIds.map((id) => Number(id))
+          : undefined
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
         shipping_address: formValues.address,
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
+        ...(scope ? { cart_item_ids: scope } : {}),
       })
       toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
       clearCheckout()
@@ -279,13 +328,13 @@ export default function CheckoutPage() {
 
         <div className="w-full min-w-0">
           <CheckoutOrderSummary
-            items={items}
-            subtotal={orderSubtotal}
+            items={summaryItems}
+            subtotal={scopedLineSubtotal}
             shippingFee={shippingFee}
             total={orderTotal}
             hasShippingSelected={Boolean(selectedShippingMethodFromList)}
-            discountAmount={discountAmount}
-            shippingDiscountAmount={shippingDiscountAmount}
+            discountAmount={displayOrderDiscount}
+            shippingDiscountAmount={displayShippingDiscount}
           />
         </div>
       </div>

@@ -10,6 +10,7 @@ import { OrderIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
+import { formatVnd } from '@/lib/utils/currency'
 
 const PAGE_SIZE = 10
 
@@ -262,7 +263,7 @@ export default function OrdersListPage() {
                         <td className="p-4 text-gray-600">{formatDate(order.created_date)}</td>
                         <td className="p-4">
                           <span className="font-semibold text-gray-900">
-                            {order.total?.toLocaleString('vi-VN')}₫
+                            {formatVnd(order.total)}
                           </span>
                         </td>
                         <td className="p-4">{getStatusBadge(order.status)}</td>
