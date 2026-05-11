@@ -158,6 +158,10 @@ export async function getOrder(orderNumber: string) {
   return res
 }
 
+/**
+ * @deprecated Use cart-first checkout via `checkoutCart` in `src/lib/services/carts.ts`.
+ * This endpoint is kept temporarily for backward compatibility.
+ */
 export async function createOrder(order: Order) {
   return apiPost<Order>('/orders/', serializeOrderForApi(order) as unknown as Order)
 }

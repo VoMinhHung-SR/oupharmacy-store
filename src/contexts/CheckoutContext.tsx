@@ -1,6 +1,5 @@
 "use client"
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import type { ShippingMethod } from '@/lib/services/shipping'
 
 export interface CheckoutInformation {
   name: string
@@ -11,13 +10,14 @@ export interface CheckoutInformation {
 
 interface CheckoutContextValue {
   information: CheckoutInformation | null
-  shippingMethodId: number | null
-  selectedShippingMethod: ShippingMethod | null
   paymentMethodId: number | null
+  notes: string
+  /** Cart line ids (server `CartItem.id` as string) to pay for; null = entire cart. */
+  checkoutScopedLineIds: string[] | null
   setInformation: (info: CheckoutInformation) => void
-  setShippingMethodId: (id: number | null) => void
-  setSelectedShippingMethod: (method: ShippingMethod | null) => void
   setPaymentMethodId: (id: number | null) => void
+  setNotes: (notes: string) => void
+  setCheckoutScopedLineIds: (ids: string[] | null) => void
   clear: () => void
 }
 
@@ -27,9 +27,9 @@ const STORAGE_KEY = 'oupharmacy_checkout'
 
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [information, setInformationState] = useState<CheckoutInformation | null>(null)
-  const [shippingMethodId, setShippingMethodIdState] = useState<number | null>(null)
-  const [selectedShippingMethod, setSelectedShippingMethodState] = useState<ShippingMethod | null>(null)
   const [paymentMethodId, setPaymentMethodIdState] = useState<number | null>(null)
+  const [notes, setNotesState] = useState<string>('')
+  const [checkoutScopedLineIds, setCheckoutScopedLineIdsState] = useState<string[] | null>(null)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -40,14 +40,20 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (parsed.information) {
           setInformationState(parsed.information)
         }
-        if (parsed.shippingMethodId) {
-          setShippingMethodIdState(parsed.shippingMethodId)
-        }
-        if (parsed.selectedShippingMethod) {
-          setSelectedShippingMethodState(parsed.selectedShippingMethod)
-        }
         if (parsed.paymentMethodId) {
           setPaymentMethodIdState(parsed.paymentMethodId)
+        }
+        if (typeof parsed.notes === 'string') {
+          setNotesState(parsed.notes)
+        }
+        if (
+          parsed.checkoutScopedLineIds === null ||
+          (Array.isArray(parsed.checkoutScopedLineIds) &&
+            parsed.checkoutScopedLineIds.every((x: unknown) => typeof x === 'string'))
+        ) {
+          setCheckoutScopedLineIdsState(
+            Array.isArray(parsed.checkoutScopedLineIds) ? parsed.checkoutScopedLineIds : null
+          )
         }
       }
     } catch {}
@@ -58,35 +64,35 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const data = {
         information,
-        shippingMethodId,
-        selectedShippingMethod,
         paymentMethodId,
+        notes,
+        checkoutScopedLineIds,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch {}
-  }, [information, shippingMethodId, selectedShippingMethod, paymentMethodId])
+  }, [information, paymentMethodId, notes, checkoutScopedLineIds])
 
   const setInformation = (info: CheckoutInformation) => {
     setInformationState(info)
-  }
-
-  const setShippingMethodId = (id: number | null) => {
-    setShippingMethodIdState(id)
-  }
-
-  const setSelectedShippingMethod = (method: ShippingMethod | null) => {
-    setSelectedShippingMethodState(method)
   }
 
   const setPaymentMethodId = (id: number | null) => {
     setPaymentMethodIdState(id)
   }
 
+  const setNotes = (nextNotes: string) => {
+    setNotesState(nextNotes)
+  }
+
+  const setCheckoutScopedLineIds = (ids: string[] | null) => {
+    setCheckoutScopedLineIdsState(ids)
+  }
+
   const clear = () => {
     setInformationState(null)
-    setShippingMethodIdState(null)
-    setSelectedShippingMethodState(null)
     setPaymentMethodIdState(null)
+    setNotesState('')
+    setCheckoutScopedLineIdsState(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch {}
@@ -95,16 +101,16 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const value = useMemo(
     () => ({
       information,
-      shippingMethodId,
-      selectedShippingMethod,
       paymentMethodId,
+      notes,
+      checkoutScopedLineIds,
       setInformation,
-      setShippingMethodId,
-      setSelectedShippingMethod,
       setPaymentMethodId,
+      setNotes,
+      setCheckoutScopedLineIds,
       clear,
     }),
-    [information, shippingMethodId, selectedShippingMethod, paymentMethodId]
+    [information, paymentMethodId, notes, checkoutScopedLineIds]
   )
 
   return <CheckoutContext.Provider value={value}>{children}</CheckoutContext.Provider>
