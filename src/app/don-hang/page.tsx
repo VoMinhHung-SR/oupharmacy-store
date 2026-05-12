@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCheckout } from '@/contexts/CheckoutContext'
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
     trigger,
     getValues,
   } = useForm<CheckoutInformationFormData>({
-    resolver: yupResolver(checkoutInformationSchema),
+    resolver: yupResolver(checkoutInformationSchema) as Resolver<CheckoutInformationFormData>,
     mode: 'onBlur',
     defaultValues: {
       name: information?.name ?? '',
@@ -154,12 +154,12 @@ export default function CheckoutPage() {
   }, [user, information, setValue])
 
   const onInfoSubmit = (data: CheckoutInformationFormData) => {
-    setInformation({
-      name: data.name,
-      phone: data.phone,
-      email: data.email,
-      address: data.address,
-    })
+      setInformation({
+        name: data.name,
+        phone: data.phone,
+        email: data.email ?? '',
+        address: data.address,
+      })
   }
 
   const handlePlaceOrder = async () => {
@@ -187,7 +187,7 @@ export default function CheckoutPage() {
       setInformation({
         name: formValues.name,
         phone: formValues.phone,
-        email: formValues.email,
+        email: formValues.email ?? '',
         address: formValues.address,
       })
       const trimmedNotes = notes.trim()
@@ -230,11 +230,11 @@ export default function CheckoutPage() {
   const handleApplyVoucher = async (payload: { order_voucher_code?: string; shipping_voucher_code?: string }) => {
     if (cartVersion == null) {
       toastError('Không thể áp dụng mã giảm giá. Vui lòng thử lại.')
-      return
+      throw new Error('Cart version missing')
     }
     if (!payload.order_voucher_code && !payload.shipping_voucher_code) {
       toastError('Vui lòng nhập ít nhất 1 mã giảm giá.')
-      return
+      throw new Error('No voucher code')
     }
     try {
       await applyVoucherMutation.mutateAsync({
@@ -244,6 +244,7 @@ export default function CheckoutPage() {
       toastSuccess('Áp dụng mã giảm giá thành công.')
     } catch (error: unknown) {
       toastError(error instanceof Error ? error.message : 'Áp dụng mã giảm giá thất bại.')
+      throw error
     }
   }
 
@@ -277,8 +278,8 @@ export default function CheckoutPage() {
         ]}
       />
 
-      <div className="grid gap-6 md:grid-cols-[1fr_minmax(320px,360px)]">
-        <div className="space-y-6 min-w-0">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] lg:items-start">
+        <div className="min-w-0 space-y-6">
           <CheckoutInfoSection
             register={register}
             errors={errors}
@@ -313,10 +314,10 @@ export default function CheckoutPage() {
             onSelect={setPaymentMethodId}
             isLoading={methodsLoadingPayment}
             error={methodsErrorPayment}
-            isSubmitting={isSubmitting}
-            canSubmit={canSubmit}
-            onPlaceOrder={handlePlaceOrder}
           />
+        </div>
+
+        <aside className="flex min-h-0 min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:pb-2">
           <CheckoutVoucherSection
             onApplyVoucher={handleApplyVoucher}
             onRemoveVoucher={handleRemoveVoucher}
@@ -324,9 +325,6 @@ export default function CheckoutPage() {
             orderVoucherCode={orderVoucherCode ?? undefined}
             shippingVoucherCode={shippingVoucherCode ?? undefined}
           />
-        </div>
-
-        <div className="w-full min-w-0">
           <CheckoutOrderSummary
             items={summaryItems}
             subtotal={scopedLineSubtotal}
@@ -335,8 +333,11 @@ export default function CheckoutPage() {
             hasShippingSelected={Boolean(selectedShippingMethodFromList)}
             discountAmount={displayOrderDiscount}
             shippingDiscountAmount={displayShippingDiscount}
+            onPlaceOrder={handlePlaceOrder}
+            isSubmitting={isSubmitting}
+            canSubmit={canSubmit}
           />
-        </div>
+        </aside>
       </div>
     </Container>
   )

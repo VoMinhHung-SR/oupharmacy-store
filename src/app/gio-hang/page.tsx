@@ -16,7 +16,6 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloseIcon,
   EmptyOfferIllustration,
   ImagePlaceholderIcon,
   InfoIcon,
@@ -25,6 +24,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@/components/icons"
+import { OfferSheet } from "@/components/sheets"
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constant"
 
 function formatMoney(n: number) {
@@ -170,27 +170,10 @@ export default function CartPage() {
   }, [applyVoucherMutation, cartVersion, voucherCode])
 
   useEffect(() => {
-    if (!offerModalOpen) return
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [offerModalOpen])
-
-  useEffect(() => {
     if (!offerModalOpen || !isAuthenticated) return
     const t = window.setTimeout(() => voucherInputRef.current?.focus(), 50)
     return () => window.clearTimeout(t)
   }, [offerModalOpen, isAuthenticated])
-
-  useEffect(() => {
-    if (!offerModalOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOfferModalOpen(false)
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [offerModalOpen])
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
@@ -522,111 +505,83 @@ export default function CartPage() {
         </div>
       </Container>
 
-      {offerModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
-          role="presentation"
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"
-            aria-label="Đóng"
-            onClick={() => setOfferModalOpen(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={offerModalTitleId}
-            className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-              <h2 id={offerModalTitleId} className="text-base font-bold text-slate-900">
-                Ưu đãi dành cho bạn
-              </h2>
+      <OfferSheet
+        open={offerModalOpen}
+        onClose={() => setOfferModalOpen(false)}
+        titleId={offerModalTitleId}
+        title="Ưu đãi dành cho bạn"
+        footer={
+          isAuthenticated ? (
+            <div className="border-t border-slate-100 p-4">
               <button
                 type="button"
-                onClick={() => setOfferModalOpen(false)}
-                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
-                aria-label="Đóng"
+                onClick={() => void submitCartVoucher()}
+                disabled={applyVoucherMutation.isPending}
+                className="w-full rounded-xl bg-primary-600 py-3.5 text-center text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 disabled:opacity-60"
               >
-                <CloseIcon className="h-5 w-5" />
+                {applyVoucherMutation.isPending ? "Đang áp dụng…" : "Áp dụng"}
+              </button>
+            </div>
+          ) : undefined
+        }
+      >
+        {!isAuthenticated ? (
+          <div className="space-y-4 px-5 py-6 text-center text-sm text-slate-600">
+            <p>
+              Mã giảm giá áp dụng cho giỏ hàng đồng bộ trên tài khoản. Vui lòng đăng nhập, hoặc tiếp tục thanh
+              toán để nhập mã ở bước đặt hàng.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <Button
+                type="button"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  setOfferModalOpen(false)
+                  openLoginModal("/gio-hang")
+                }}
+              >
+                Đăng nhập
+              </Button>
+              <Link
+                href="/don-hang"
+                onClick={() => setOfferModalOpen(false)}
+                className="inline-flex w-full items-center justify-center rounded-lg border border-primary-600 px-4 py-2 text-base font-semibold text-primary-600 transition-colors hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
+              >
+                Thanh toán
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 overflow-y-auto px-5 py-4">
+            <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100">
+              <input
+                ref={voucherInputRef}
+                value={voucherCode}
+                onChange={(e) => setVoucherCode(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void submitCartVoucher()
+                }}
+                placeholder="Nhập mã giảm giá"
+                className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={() => void submitCartVoucher()}
+                disabled={applyVoucherMutation.isPending}
+                className="shrink-0 border-l border-slate-200 bg-primary-50 px-4 text-sm font-semibold text-primary-800 transition-colors hover:bg-primary-100 disabled:opacity-50"
+              >
+                Xác nhận
               </button>
             </div>
 
-            {!isAuthenticated ? (
-              <div className="space-y-4 px-5 py-6 text-center text-sm text-slate-600">
-                <p>
-                  Mã giảm giá áp dụng cho giỏ hàng đồng bộ trên tài khoản. Vui lòng đăng nhập, hoặc tiếp tục
-                  thanh toán để nhập mã ở bước đặt hàng.
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                  <Button
-                    type="button"
-                    className="w-full sm:w-auto"
-                    onClick={() => {
-                      setOfferModalOpen(false)
-                      openLoginModal("/gio-hang")
-                    }}
-                  >
-                    Đăng nhập
-                  </Button>
-                  <Link
-                    href="/don-hang"
-                    onClick={() => setOfferModalOpen(false)}
-                    className="inline-flex w-full items-center justify-center rounded-lg border border-primary-600 px-4 py-2 text-base font-semibold text-primary-600 transition-colors hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
-                  >
-                    Thanh toán
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4 overflow-y-auto px-5 py-4">
-                  <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100">
-                    <input
-                      ref={voucherInputRef}
-                      value={voucherCode}
-                      onChange={(e) => setVoucherCode(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") void submitCartVoucher()
-                      }}
-                      placeholder="Nhập mã giảm giá"
-                      className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void submitCartVoucher()}
-                      disabled={applyVoucherMutation.isPending}
-                      className="shrink-0 border-l border-slate-200 bg-primary-50 px-4 text-sm font-semibold text-primary-800 transition-colors hover:bg-primary-100 disabled:opacity-50"
-                    >
-                      Xác nhận
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col items-center rounded-xl bg-slate-50 py-8 text-center">
-                    <EmptyOfferIllustration className="mb-4 h-24 w-24 text-slate-300" />
-                    <p className="max-w-[16rem] text-sm text-slate-500">
-                      Nhập mã giảm giá để được áp dụng những ưu đãi
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-100 p-4">
-                  <button
-                    type="button"
-                    onClick={() => void submitCartVoucher()}
-                    disabled={applyVoucherMutation.isPending}
-                    className="w-full rounded-xl bg-primary-600 py-3.5 text-center text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 disabled:opacity-60"
-                  >
-                    {applyVoucherMutation.isPending ? "Đang áp dụng…" : "Áp dụng"}
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="flex flex-col items-center rounded-xl bg-slate-50 py-8 text-center">
+              <EmptyOfferIllustration className="mb-4 h-24 w-24 text-slate-300" />
+              <p className="max-w-[16rem] text-sm text-slate-500">Nhập mã giảm giá để được áp dụng những ưu đãi</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </OfferSheet>
     </div>
   )
 }

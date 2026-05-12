@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { REGEX_EMAIL, REGEX_PHONE_NUMBER, REGEX_ADDRESS } from '../constant'
+import { REGEX_PHONE_NUMBER, REGEX_ADDRESS } from '../constant'
 
 export const checkoutInformationSchema = Yup.object().shape({
   name: Yup.string()
@@ -13,10 +13,10 @@ export const checkoutInformationSchema = Yup.object().shape({
     .matches(REGEX_PHONE_NUMBER, 'Số điện thoại không hợp lệ'),
   email: Yup.string()
     .trim()
-    .required('Vui lòng nhập email')
-    .email('Email không hợp lệ')
+    .transform((v) => (v === '' ? undefined : v))
     .max(254, 'Email không được vượt quá 254 ký tự')
-    .matches(REGEX_EMAIL, 'Email không hợp lệ'),
+    .email('Email không hợp lệ')
+    .optional(),
   address: Yup.string()
     .trim()
     .required('Vui lòng nhập địa chỉ')
@@ -25,5 +25,10 @@ export const checkoutInformationSchema = Yup.object().shape({
     .matches(REGEX_ADDRESS, 'Địa chỉ chứa ký tự không hợp lệ'),
 })
 
-export type CheckoutInformationFormData = Yup.InferType<typeof checkoutInformationSchema>
+export interface CheckoutInformationFormData {
+  name: string
+  phone: string
+  email?: string
+  address: string
+}
 

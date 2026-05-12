@@ -6,7 +6,7 @@ import type { ShippingMethod } from '@/lib/services/shipping'
 interface CheckoutShippingSectionProps {
   methods: ShippingMethod[]
   selectedId: number | null
-  onSelect: (id: number, method: ShippingMethod) => void
+  onSelect: (id: number) => void
   isLoading: boolean
   error: Error | null
 }
@@ -48,7 +48,7 @@ export function CheckoutShippingSection({
                 name="shipping"
                 value={method.id}
                 checked={selectedId === method.id}
-                onChange={() => onSelect(method.id, method)}
+                onChange={() => onSelect(method.id)}
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500"
               />
               <span className="flex-1">
