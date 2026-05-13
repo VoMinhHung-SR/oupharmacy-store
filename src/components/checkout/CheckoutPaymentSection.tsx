@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import React from 'react'
-import { CreditCardIcon, ChevronLeftIcon, SpinnerIcon } from '@/components/icons'
+import { CreditCardIcon, SpinnerIcon } from '@/components/icons'
 import type { PaymentMethod } from '@/lib/services/payment'
 
 interface CheckoutPaymentSectionProps {
@@ -21,10 +20,10 @@ export function CheckoutPaymentSection({
   error,
 }: CheckoutPaymentSectionProps) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
+    <section className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
+      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900">
         <CreditCardIcon className="h-5 w-5 shrink-0 text-primary-600" />
-        Phương thức thanh toán
+        Chọn phương thức thanh toán
       </h2>
       {isLoading && (
         <div className="flex justify-center py-8" aria-busy="true">
@@ -33,7 +32,7 @@ export function CheckoutPaymentSection({
       )}
       {error && <p className="text-sm text-red-600">Không tải được danh sách thanh toán. Vui lòng thử lại.</p>}
       {!isLoading && !error && methods.length === 0 && (
-        <p className="text-sm text-gray-600">Chưa có phương thức thanh toán.</p>
+        <p className="text-sm text-slate-600">Chưa có phương thức thanh toán.</p>
       )}
       {!isLoading && methods.length > 0 && (
         <div className="space-y-3" role="radiogroup" aria-label="Chọn phương thức thanh toán">
@@ -43,7 +42,7 @@ export function CheckoutPaymentSection({
               className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors ${
                 selectedId === method.id
                   ? 'border-primary-600 bg-primary-50 text-primary-900'
-                  : 'border-gray-200 text-gray-900 hover:border-gray-300'
+                  : 'border-slate-200 text-slate-900 hover:border-slate-300'
               }`}
             >
               <input
@@ -59,16 +58,6 @@ export function CheckoutPaymentSection({
           ))}
         </div>
       )}
-
-      <div className="mt-6 border-t border-gray-100 pt-4">
-        <Link
-          href="/gio-hang"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition hover:text-primary-700"
-        >
-          <ChevronLeftIcon className="h-4 w-4 shrink-0" />
-          Quay lại giỏ hàng
-        </Link>
-      </div>
     </section>
   )
 }

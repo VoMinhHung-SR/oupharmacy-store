@@ -6,6 +6,11 @@ export interface CheckoutInformation {
   phone: string
   email: string
   address: string
+  recipient_name?: string
+  recipient_phone?: string
+  province?: string
+  district?: string
+  ward?: string
 }
 
 interface CheckoutContextValue {

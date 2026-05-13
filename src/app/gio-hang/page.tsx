@@ -207,9 +207,9 @@ export default function CartPage() {
               {/* Left: single card — banner + toolbar + lines */}
               <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
                 <div className="border-b border-primary-100/80 bg-primary-50 px-4 py-3 md:px-5">
-                  <p className="text-sm text-primary-900">
+                  <p className="text-center text-sm text-primary-900">
                     <span className="font-semibold">Miễn phí vận chuyển</span> đối với đơn hàng trên 
-                    { formatMoney(FREE_SHIPPING_THRESHOLD)}
+                    {" " + formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
 
@@ -388,11 +388,12 @@ export default function CartPage() {
                   <div className="p-5 pb-6">
                     <button
                       type="button"
+                      title="Áp dụng ưu đãi để được giảm giá"
                       onClick={() => setOfferModalOpen(true)}
-                      className="mb-5 flex w-full items-center justify-between gap-2 rounded-lg border border-primary-100 bg-primary-50 px-4 py-3 text-left text-sm font-medium text-primary-800 transition-colors hover:bg-primary-100/80"
+                      className="mb-5 flex w-full min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border border-primary-100 bg-primary-50 px-2.5 py-2 text-left text-xs font-medium leading-none tracking-tight text-primary-800 transition-colors hover:bg-primary-100/80 xl:gap-2 xl:px-4 xl:py-3 xl:text-sm xl:leading-normal xl:tracking-normal"
                     >
-                      <span>Áp dụng ưu đãi để được giảm giá</span>
-                      <ChevronRightIcon className="h-5 w-5 shrink-0 text-primary-600" />
+                      <span className="min-w-0 flex-1 truncate">Áp dụng ưu đãi để được giảm giá</span>
+                      <ChevronRightIcon className="h-4 w-4 shrink-0 text-primary-600 xl:h-5 xl:w-5" />
                     </button>
 
                     {isAuthenticated && selectedCount > 0 && selectedCount < items.length && (

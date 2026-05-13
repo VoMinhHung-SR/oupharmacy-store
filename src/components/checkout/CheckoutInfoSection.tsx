@@ -7,70 +7,79 @@ import { UserIcon, LocationIcon } from '@/components/icons'
 import { toastError } from '@/lib/utils/toast'
 
 const inputBase =
-  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
+  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed'
 const inputError = 'border-red-300 focus:ring-red-500'
-const inputNormal = 'border-gray-200'
+const inputNormal = 'border-slate-200'
 
 interface CheckoutInfoSectionProps {
   register: UseFormRegister<CheckoutInformationFormData>
   errors: FieldErrors<CheckoutInformationFormData>
   onSubmit: (data: CheckoutInformationFormData) => void
   handleSubmit: UseFormHandleSubmit<CheckoutInformationFormData>
+  notes: string
+  onNotesChange: (value: string) => void
 }
 
-export function CheckoutInfoSection({ register, errors, onSubmit, handleSubmit }: CheckoutInfoSectionProps) {
+export function CheckoutInfoSection({
+  register,
+  errors,
+  onSubmit,
+  handleSubmit,
+  notes,
+  onNotesChange,
+}: CheckoutInfoSectionProps) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
       <form
         onSubmit={handleSubmit(onSubmit, (errs) => {
           const first = Object.values(errs)[0]
           if (first?.message) toastError(first.message as string)
         })}
-        className="space-y-6"
+        className="space-y-8"
       >
         <div>
-          <h2 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900">
             <UserIcon className="h-5 w-5 shrink-0 text-primary-600" />
             Thông tin người đặt
           </h2>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="checkout-name" className="mb-1 block text-sm font-medium text-gray-700">
-                Họ và tên <span className="text-red-500">*</span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="md:col-span-1">
+              <label htmlFor="checkout-name" className="mb-1 block text-sm font-medium text-slate-700">
+                Họ và tên người đặt <span className="text-red-500">*</span>
               </label>
               <input
                 id="checkout-name"
                 type="text"
                 {...register('name')}
-                placeholder="Nhập họ và tên"
+                placeholder="Họ và tên người đặt"
                 autoComplete="name"
                 className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
-            <div>
-              <label htmlFor="checkout-phone" className="mb-1 block text-sm font-medium text-gray-700">
+            <div className="md:col-span-1">
+              <label htmlFor="checkout-phone" className="mb-1 block text-sm font-medium text-slate-700">
                 Số điện thoại <span className="text-red-500">*</span>
               </label>
               <input
                 id="checkout-phone"
                 type="tel"
                 {...register('phone')}
-                placeholder="Nhập số điện thoại"
+                placeholder="Số điện thoại"
                 autoComplete="tel"
                 className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
             </div>
-            <div>
-              <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium text-gray-700">
-                Email <span className="text-gray-400">(không bắt buộc)</span>
+            <div className="md:col-span-2">
+              <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium text-slate-700">
+                Email <span className="text-slate-400">(không bắt buộc)</span>
               </label>
               <input
                 id="checkout-email"
                 type="email"
                 {...register('email')}
-                placeholder="Nhập email nếu cần nhận xác nhận"
+                placeholder="Email (không bắt buộc)"
                 autoComplete="email"
                 className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
               />
@@ -79,23 +88,119 @@ export function CheckoutInfoSection({ register, errors, onSubmit, handleSubmit }
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-6">
-          <h2 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
+        <div className="border-t border-slate-100 pt-8">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900">
             <LocationIcon className="h-5 w-5 shrink-0 text-primary-600" />
             Thông tin nhận hàng
           </h2>
-          <div>
-            <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium text-gray-700">
-              Địa chỉ giao hàng <span className="text-red-500">*</span>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="checkout-recipient-name" className="mb-1 block text-sm font-medium text-slate-700">
+                Họ và tên người nhận <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="checkout-recipient-name"
+                type="text"
+                {...register('recipient_name')}
+                placeholder="Họ và tên người nhận"
+                autoComplete="section-shipping name"
+                className={`${inputBase} ${errors.recipient_name ? inputError : inputNormal}`}
+              />
+              {errors.recipient_name && (
+                <p className="mt-1 text-sm text-red-600">{errors.recipient_name.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="checkout-recipient-phone" className="mb-1 block text-sm font-medium text-slate-700">
+                Số điện thoại <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="checkout-recipient-phone"
+                type="tel"
+                {...register('recipient_phone')}
+                placeholder="Số điện thoại"
+                autoComplete="section-shipping tel"
+                className={`${inputBase} ${errors.recipient_phone ? inputError : inputNormal}`}
+              />
+              {errors.recipient_phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.recipient_phone.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2.5 text-xs leading-relaxed text-sky-900 sm:text-sm">
+            Địa chỉ nhập theo <span className="font-semibold">ranh giới hành chính sau sáp nhập</span> (không dùng
+            địa danh trước sáp nhập).
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="checkout-province" className="mb-1 block text-sm font-medium text-slate-700">
+                Tỉnh / Thành phố
+              </label>
+              <select
+                id="checkout-province"
+                {...register('province')}
+                className={`${inputBase} ${errors.province ? inputError : inputNormal}`}
+              >
+                <option value="">Chọn Tỉnh/Thành phố</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="checkout-district" className="mb-1 block text-sm font-medium text-slate-700">
+                Quận / Huyện
+              </label>
+              <select
+                id="checkout-district"
+                {...register('district')}
+                className={`${inputBase} ${errors.district ? inputError : inputNormal}`}
+              >
+                <option value="">Chọn Quận/Huyện</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="checkout-ward" className="mb-1 block text-sm font-medium text-slate-700">
+                Phường / Xã
+              </label>
+              <select
+                id="checkout-ward"
+                {...register('ward')}
+                className={`${inputBase} ${errors.ward ? inputError : inputNormal}`}
+              >
+                <option value="">Chọn Phường/Xã</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium text-slate-700">
+              Nhập địa chỉ cụ thể <span className="text-red-500">*</span>
             </label>
             <textarea
               id="checkout-address"
               {...register('address')}
-              placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+              placeholder="Số nhà, tên đường, tòa nhà…"
               rows={3}
               className={`${inputBase} resize-none ${errors.address ? inputError : inputNormal}`}
             />
             {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>}
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="checkout-notes-inline" className="mb-1 block text-sm font-medium text-slate-700">
+              Ghi chú <span className="text-slate-400">(không bắt buộc)</span>
+            </label>
+            <p className="mb-2 text-xs text-slate-500">Ví dụ: gọi trước khi giao 15 phút.</p>
+            <textarea
+              id="checkout-notes-inline"
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="Ghi chú cho đơn hàng"
+              rows={3}
+              maxLength={2000}
+              className={`${inputBase} resize-none ${inputNormal}`}
+            />
           </div>
         </div>
 
