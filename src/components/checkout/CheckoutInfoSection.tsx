@@ -5,6 +5,7 @@ import type { UseFormRegister, FieldErrors, UseFormHandleSubmit } from 'react-ho
 import type { CheckoutInformationFormData } from '@/lib/validations/checkout'
 import { UserIcon, LocationIcon } from '@/components/icons'
 import { toastError } from '@/lib/utils/toast'
+import { TextField } from '@/components/TextField'
 
 const inputBase =
   'w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed'
@@ -44,46 +45,39 @@ export function CheckoutInfoSection({
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-1">
-              <label htmlFor="checkout-name" className="mb-1 block text-sm font-medium text-slate-700">
-                Họ và tên người đặt <span className="text-red-500">*</span>
-              </label>
-              <input
+              <TextField
+                label="Họ và tên người đặt"
+                required
                 id="checkout-name"
                 type="text"
                 {...register('name')}
-                placeholder="Họ và tên người đặt"
                 autoComplete="name"
-                className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
+                error={!!errors.name}
+                helperText={errors.name?.message}
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
             <div className="md:col-span-1">
-              <label htmlFor="checkout-phone" className="mb-1 block text-sm font-medium text-slate-700">
-                Số điện thoại <span className="text-red-500">*</span>
-              </label>
-              <input
+              <TextField
+                label="Số điện thoại"
+                required
                 id="checkout-phone"
                 type="tel"
                 {...register('phone')}
-                placeholder="Số điện thoại"
                 autoComplete="tel"
-                className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
               />
-              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
             </div>
             <div className="md:col-span-2">
-              <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium text-slate-700">
-                Email <span className="text-slate-400">(không bắt buộc)</span>
-              </label>
-              <input
+              <TextField
+                label="Email (không bắt buộc)"
                 id="checkout-email"
                 type="email"
                 {...register('email')}
-                placeholder="Email (không bắt buộc)"
                 autoComplete="email"
-                className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
+                error={!!errors.email}
+                helperText={errors.email?.message}
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
           </div>
         </div>
@@ -96,36 +90,28 @@ export function CheckoutInfoSection({
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="checkout-recipient-name" className="mb-1 block text-sm font-medium text-slate-700">
-                Họ và tên người nhận <span className="text-red-500">*</span>
-              </label>
-              <input
+              <TextField
+                label="Họ và tên người nhận"
+                required
                 id="checkout-recipient-name"
                 type="text"
                 {...register('recipient_name')}
-                placeholder="Họ và tên người nhận"
                 autoComplete="section-shipping name"
-                className={`${inputBase} ${errors.recipient_name ? inputError : inputNormal}`}
+                error={!!errors.recipient_name}
+                helperText={errors.recipient_name?.message}
               />
-              {errors.recipient_name && (
-                <p className="mt-1 text-sm text-red-600">{errors.recipient_name.message}</p>
-              )}
             </div>
             <div>
-              <label htmlFor="checkout-recipient-phone" className="mb-1 block text-sm font-medium text-slate-700">
-                Số điện thoại <span className="text-red-500">*</span>
-              </label>
-              <input
+              <TextField
+                label="Số điện thoại"
+                required
                 id="checkout-recipient-phone"
                 type="tel"
                 {...register('recipient_phone')}
-                placeholder="Số điện thoại"
                 autoComplete="section-shipping tel"
-                className={`${inputBase} ${errors.recipient_phone ? inputError : inputNormal}`}
+                error={!!errors.recipient_phone}
+                helperText={errors.recipient_phone?.message}
               />
-              {errors.recipient_phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.recipient_phone.message}</p>
-              )}
             </div>
           </div>
 
@@ -136,9 +122,6 @@ export function CheckoutInfoSection({
 
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="checkout-province" className="mb-1 block text-sm font-medium text-slate-700">
-                Tỉnh / Thành phố
-              </label>
               <select
                 id="checkout-province"
                 {...register('province')}
@@ -148,9 +131,6 @@ export function CheckoutInfoSection({
               </select>
             </div>
             <div>
-              <label htmlFor="checkout-district" className="mb-1 block text-sm font-medium text-slate-700">
-                Quận / Huyện
-              </label>
               <select
                 id="checkout-district"
                 {...register('district')}
@@ -160,9 +140,6 @@ export function CheckoutInfoSection({
               </select>
             </div>
             <div className="md:col-span-2">
-              <label htmlFor="checkout-ward" className="mb-1 block text-sm font-medium text-slate-700">
-                Phường / Xã
-              </label>
               <select
                 id="checkout-ward"
                 {...register('ward')}
