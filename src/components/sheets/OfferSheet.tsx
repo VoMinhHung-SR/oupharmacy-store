@@ -14,7 +14,7 @@ export interface OfferSheetProps {
 }
 
 /**
- * Bottom sheet / centered dialog — same shell as the cart “Ưu đãi” flow (`gio-hang`).
+ * Bottom sheet / centered dialog — shell chung (nội dung qua `children`).
  */
 export function OfferSheet({ open, onClose, titleId, title, children, footer }: OfferSheetProps) {
   useEffect(() => {
@@ -52,9 +52,9 @@ export function OfferSheet({ open, onClose, titleId, title, children, footer }: 
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+        className="relative z-10 flex max-h-[min(90dvh,44rem)] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
           <h2 id={titleId} className="text-base font-bold text-slate-900">
             {title}
           </h2>
@@ -67,8 +67,8 @@ export function OfferSheet({ open, onClose, titleId, title, children, footer }: 
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        {children}
-        {footer != null ? footer : null}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
+        {footer != null ? <div className="shrink-0">{footer}</div> : null}
       </div>
     </div>
   )

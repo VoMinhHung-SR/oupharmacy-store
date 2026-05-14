@@ -16,7 +16,6 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  EmptyOfferIllustration,
   ImagePlaceholderIcon,
   InfoIcon,
   MinusIcon,
@@ -24,7 +23,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@/components/icons"
-import { OfferSheet } from "@/components/sheets"
+import { OfferSheet, SingleVoucherSheetBody } from "@/components/sheets"
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constant"
 
 function formatMoney(n: number) {
@@ -45,6 +44,7 @@ export default function CartPage() {
     updateItemUnit,
     discountAmount = 0,
     orderVoucherCode,
+    shippingVoucherCode,
     version: cartVersion,
     setItemSelected,
     setAllItemsSelected,
@@ -54,7 +54,7 @@ export default function CartPage() {
   const [voucherCode, setVoucherCode] = useState("")
   const [updatingUnitByItemId, setUpdatingUnitByItemId] = useState<Record<string, boolean>>({})
   const [pendingUnitChoiceByItemId, setPendingUnitChoiceByItemId] = useState<Record<string, number>>({})
-  const unitChangeTimersRef = useRef<Record<string, ReturnType<typeof window.setTimeout>>>({})
+  const unitChangeTimersRef = useRef<Record<string, number>>({})
   const voucherInputRef = useRef<HTMLInputElement>(null)
   const selectAllRef = useRef<HTMLInputElement>(null)
   const offerModalTitleId = useId()
@@ -70,8 +70,9 @@ export default function CartPage() {
 
   const ratio = selectionTotals.selectionRatio
   const discount = Math.max(0, discountAmount) * ratio
-  const directDiscount = orderVoucherCode ? 0 : discount
-  const voucherDiscount = orderVoucherCode ? discount : 0
+  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
+  const directDiscount = hasVoucherApplied ? 0 : discount
+  const voucherDiscount = hasVoucherApplied ? discount : 0
   const hasSavings = discount > 0
 
   const goCheckout = () => {
@@ -177,38 +178,46 @@ export default function CartPage() {
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
-      <Container className="py-6 md:py-8">
-        <div className="space-y-5 md:space-y-6">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
-            >
-              <ChevronLeftIcon className="h-5 w-5 shrink-0" />
-              Tiếp tục mua sắm
-            </Link>
-          </div>
-
+      <Container className="py-4">
+        <div className="space-y-4">
           {items.length === 0 ? (
-            <div className="rounded-xl border border-slate-200/80 bg-white p-12 text-center shadow-sm">
-              <div className="mb-4 text-slate-300">
-                <CartIcon className="mx-auto h-16 w-16" strokeWidth={1.5} />
-              </div>
-              <p className="mb-4 text-slate-600">Chưa có sản phẩm nào trong giỏ hàng</p>
+            <>
               <Link
                 href="/"
-                className="inline-block rounded-xl bg-primary-600 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-primary-700"
+                className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
               >
+                <ChevronLeftIcon className="h-5 w-5 shrink-0" />
                 Tiếp tục mua sắm
               </Link>
-            </div>
+              <div className="rounded-xl border border-slate-200/80 bg-white p-12 text-center shadow-sm">
+                <div className="mb-4 text-slate-300">
+                  <CartIcon className="mx-auto h-16 w-16" strokeWidth={1.5} />
+                </div>
+                <p className="mb-4 text-slate-600">Chưa có sản phẩm nào trong giỏ hàng</p>
+                <Link
+                  href="/"
+                  className="inline-block rounded-xl bg-primary-600 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-primary-700"
+                >
+                  Tiếp tục mua sắm
+                </Link>
+              </div>
+            </>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-8">
+            <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
+              <div className="lg:col-start-1 lg:row-start-1">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
+                >
+                  <ChevronLeftIcon className="h-5 w-5 shrink-0" />
+                  Tiếp tục mua sắm
+                </Link>
+              </div>
               {/* Left: single card — banner + toolbar + lines */}
-              <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)] lg:col-start-1 lg:row-start-2">
                 <div className="border-b border-primary-100/80 bg-primary-50 px-4 py-3 md:px-5">
                   <p className="text-center text-sm text-primary-900">
-                    <span className="font-semibold">Miễn phí vận chuyển</span> đối với đơn hàng trên 
+                    <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng trên 
                     {" " + formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
@@ -383,8 +392,8 @@ export default function CartPage() {
               </div>
 
               {/* Right: summary */}
-              <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
-                <div className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
+              <aside className="flex flex-col gap-4 pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-24 lg:self-start lg:pb-2">
+                <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
                   <div className="p-5 pb-6">
                     <button
                       type="button"
@@ -553,34 +562,13 @@ export default function CartPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4 overflow-y-auto px-5 py-4">
-            <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100">
-              <input
-                ref={voucherInputRef}
-                value={voucherCode}
-                onChange={(e) => setVoucherCode(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void submitCartVoucher()
-                }}
-                placeholder="Nhập mã giảm giá"
-                className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                autoComplete="off"
-              />
-              <button
-                type="button"
-                onClick={() => void submitCartVoucher()}
-                disabled={applyVoucherMutation.isPending}
-                className="shrink-0 border-l border-slate-200 bg-primary-50 px-4 text-sm font-semibold text-primary-800 transition-colors hover:bg-primary-100 disabled:opacity-50"
-              >
-                Xác nhận
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center rounded-xl bg-slate-50 py-8 text-center">
-              <EmptyOfferIllustration className="mb-4 h-24 w-24 text-slate-300" />
-              <p className="max-w-[16rem] text-sm text-slate-500">Nhập mã giảm giá để được áp dụng những ưu đãi</p>
-            </div>
-          </div>
+          <SingleVoucherSheetBody
+            code={voucherCode}
+            onCodeChange={setVoucherCode}
+            inputRef={voucherInputRef}
+            isApplying={applyVoucherMutation.isPending}
+            onSubmit={() => void submitCartVoucher()}
+          />
         )}
       </OfferSheet>
     </div>

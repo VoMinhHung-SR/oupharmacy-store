@@ -94,12 +94,12 @@ export function CheckoutOrderSummary({
             {showStrikethrough && (
               <div className="text-xs text-slate-400 line-through">{formatVnd(preDiscountApprox)}</div>
             )}
-            <div className="text-xl text-primary-700">{formatVnd(total)}</div>
+            <div className="text-xl font-bold text-primary-700">{formatVnd(total)}</div>
           </div>
         </div>
       </div>
 
-      <div className="mt-auto space-y-2 border-t border-slate-100 px-4 pb-4 pt-3">
+      <div className="mt-auto space-y-2 border-t border-slate-100 px-4 pb-5 pt-3">
         <button
           type="button"
           onClick={onPlaceOrder}

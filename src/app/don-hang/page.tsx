@@ -10,7 +10,7 @@ import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
-import { useApplyVoucher, useCheckoutCart, useRemoveVoucher, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { checkoutInformationSchema, composeShippingAddressPayload, type CheckoutInformationFormData } from '@/lib/validations/checkout'
 import { Container } from '@/components/Container'
@@ -45,8 +45,6 @@ export default function CheckoutPage() {
     shippingFee: cartShippingFee,
     discountAmount = 0,
     shippingDiscountAmount = 0,
-    orderVoucherCode,
-    shippingVoucherCode,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
   } = useCart()
@@ -55,7 +53,6 @@ export default function CheckoutPage() {
   const checkoutCartMutation = useCheckoutCart()
   const selectShippingMutation = useSelectShippingMethod()
   const applyVoucherMutation = useApplyVoucher()
-  const removeVoucherMutation = useRemoveVoucher()
   const hasCompletedOrderRef = useRef(false)
   const [hideLineDetail, setHideLineDetail] = useState(false)
 
@@ -289,31 +286,15 @@ export default function CheckoutPage() {
     }
   }
 
-  const handleRemoveVoucher = async (target: 'order' | 'shipping' | 'all') => {
-    if (cartVersion == null) {
-      toastError('Không thể gỡ mã giảm giá. Vui lòng thử lại.')
-      return
-    }
-    try {
-      await removeVoucherMutation.mutateAsync({
-        target,
-        expected_version: cartVersion,
-      })
-      toastSuccess('Đã gỡ mã giảm giá.')
-    } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : 'Gỡ mã giảm giá thất bại.')
-    }
-  }
-
   if (items.length === 0) {
     return null
   }
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
-      <Container className="space-y-5 py-6 md:space-y-6 md:py-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-8">
-          <div className="min-w-0 space-y-5 md:space-y-6">
+      <Container className="py-4">
+        <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
+          <div className="lg:col-start-1 lg:row-start-1">
             <Link
               href="/gio-hang"
               className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
@@ -321,7 +302,9 @@ export default function CheckoutPage() {
               <ChevronLeftIcon className="h-5 w-5 shrink-0" />
               Quay lại giỏ hàng
             </Link>
+          </div>
 
+          <div className="min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
             <CheckoutProductList
               items={productLines}
               lineSubtotal={scopedLineSubtotal}
@@ -366,15 +349,12 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <aside className="flex min-h-0 min-w-0 flex-col lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:pb-2">
-            <div className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
+          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5.25rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
+            <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
               <div className="p-5 pb-4">
                 <CheckoutVoucherSection
                   onApplyVoucher={handleApplyVoucher}
-                  onRemoveVoucher={handleRemoveVoucher}
-                  isApplying={applyVoucherMutation.isPending || removeVoucherMutation.isPending}
-                  orderVoucherCode={orderVoucherCode ?? undefined}
-                  shippingVoucherCode={shippingVoucherCode ?? undefined}
+                  isApplying={applyVoucherMutation.isPending}
                 />
               </div>
               <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
