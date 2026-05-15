@@ -1,7 +1,9 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Controller, Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
-import { getDistrictsByCity, type City } from '@/lib/services/location'
+import { useCommonCities } from '@/contexts/CommonCitiesContext'
+import { getCities, getDistrictsByCity, type City } from '@/lib/services/location'
+import { toastError } from '@/lib/utils/toast'
 
 interface AddressFormData {
   location: {
@@ -17,7 +19,7 @@ interface AddressInfoFormProps {
   setValue: UseFormSetValue<AddressFormData>
   watch: UseFormWatch<AddressFormData>
   isLoading: boolean
-  cities: City[]
+  cities?: City[]
   onCityChange?: (cityId: number) => void
   onAddressInputChange?: (value: string) => void
 }
@@ -28,10 +30,38 @@ export default function AddressInfoForm({
   setValue,
   watch,
   isLoading,
-  cities,
+  cities: citiesProp,
   onCityChange,
   onAddressInputChange,
 }: AddressInfoFormProps) {
+  const { cities: ssrCities, citiesError } = useCommonCities()
+  const [cities, setCities] = useState<City[]>(() => citiesProp ?? ssrCities)
+  const [citiesReady, setCitiesReady] = useState(() => (citiesProp ?? ssrCities).length > 0)
+
+  useEffect(() => {
+    const base = citiesProp ?? ssrCities
+    setCities(base)
+    if (base.length > 0) setCitiesReady(true)
+  }, [citiesProp, ssrCities])
+
+  useEffect(() => {
+    if (citiesProp !== undefined || ssrCities.length > 0 || citiesReady) return
+    let cancelled = false
+    ;(async () => {
+      const r = await getCities()
+      if (cancelled) return
+      if (r.data?.length) setCities(r.data)
+      else {
+        if (r.error) toastError(r.error)
+        else if (citiesError) toastError(citiesError)
+      }
+      setCitiesReady(true)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [citiesProp, ssrCities.length, citiesReady, citiesError])
+
   const selectedCity = watch('location.city')
   const [districts, setDistricts] = React.useState<Array<{ id: number; name: string }>>([])
 
@@ -80,7 +110,7 @@ export default function AddressInfoForm({
                 }}
                 className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.city ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                   }`}
-                disabled={isLoading}
+                disabled={isLoading || !citiesReady}
               >
                 <option value={-1}>Chọn thành phố</option>
                 {cities.map((city) => (

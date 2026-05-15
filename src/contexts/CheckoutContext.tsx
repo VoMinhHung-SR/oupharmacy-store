@@ -8,6 +8,8 @@ export interface CheckoutInformation {
   address: string
   recipient_name?: string
   recipient_phone?: string
+  city_id?: number
+  commune_id?: number
   province?: string
   district?: string
   ward?: string

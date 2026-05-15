@@ -40,7 +40,7 @@ export function CheckoutProductList({ items, lineSubtotal, hideProductNames = fa
             </>
           ) : (
             <>
-              <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> cho đơn từ{' '}
+              <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng trên{' '}
               <span className="text-slate-900">{formatVnd(FREE_SHIPPING_THRESHOLD)}</span>.
             </>
           )}

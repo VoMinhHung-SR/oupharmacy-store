@@ -12,7 +12,11 @@ import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
-import { checkoutInformationSchema, composeShippingAddressPayload, type CheckoutInformationFormData } from '@/lib/validations/checkout'
+import {
+  buildCheckoutDeliveryPayload,
+  checkoutInformationSchema,
+  type CheckoutInformationFormData,
+} from '@/lib/validations/checkout'
 import { Container } from '@/components/Container'
 import { ChevronLeftIcon } from '@/components/icons'
 import {
@@ -114,11 +118,13 @@ export default function CheckoutPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     setValue,
-    trigger,
+    watch,
     getValues,
+    trigger,
   } = useForm<CheckoutInformationFormData>({
     resolver: yupResolver(checkoutInformationSchema) as Resolver<CheckoutInformationFormData>,
     mode: 'onBlur',
@@ -128,6 +134,8 @@ export default function CheckoutPage() {
       email: information?.email ?? '',
       recipient_name: information?.recipient_name ?? information?.name ?? '',
       recipient_phone: information?.recipient_phone ?? information?.phone ?? '',
+      city_id: information?.city_id != null ? String(information.city_id) : '',
+      commune_id: information?.commune_id != null ? String(information.commune_id) : '',
       province: information?.province ?? '',
       district: information?.district ?? '',
       ward: information?.ward ?? '',
@@ -156,6 +164,8 @@ export default function CheckoutPage() {
       setValue('email', information.email)
       setValue('recipient_name', information.recipient_name ?? information.name)
       setValue('recipient_phone', information.recipient_phone ?? information.phone)
+      setValue('city_id', information.city_id != null ? String(information.city_id) : '')
+      setValue('commune_id', information.commune_id != null ? String(information.commune_id) : '')
       setValue('province', information.province ?? '')
       setValue('district', information.district ?? '')
       setValue('ward', information.ward ?? '')
@@ -189,6 +199,8 @@ export default function CheckoutPage() {
       address: data.address,
       recipient_name: data.recipient_name,
       recipient_phone: data.recipient_phone,
+      city_id: data.city_id ? Number(data.city_id) : undefined,
+      commune_id: data.commune_id ? Number(data.commune_id) : undefined,
       province: data.province ?? '',
       district: data.district ?? '',
       ward: data.ward ?? '',
@@ -224,6 +236,8 @@ export default function CheckoutPage() {
         address: formValues.address,
         recipient_name: formValues.recipient_name,
         recipient_phone: formValues.recipient_phone,
+        city_id: formValues.city_id ? Number(formValues.city_id) : undefined,
+        commune_id: formValues.commune_id ? Number(formValues.commune_id) : undefined,
         province: formValues.province ?? '',
         district: formValues.district ?? '',
         ward: formValues.ward ?? '',
@@ -235,7 +249,7 @@ export default function CheckoutPage() {
           : undefined
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
-        shipping_address: composeShippingAddressPayload(formValues),
+        delivery: buildCheckoutDeliveryPayload(formValues),
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
         ...(scope ? { cart_item_ids: scope } : {}),
@@ -313,6 +327,11 @@ export default function CheckoutPage() {
 
             <CheckoutInfoSection
               register={register}
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              getValues={getValues}
+              savedInfo={information}
               errors={errors}
               handleSubmit={handleSubmit}
               onSubmit={onInfoSubmit}
@@ -349,7 +368,7 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5.25rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
+          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-36 lg:max-h-[calc(100dvh-10rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
             <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
               <div className="p-5 pb-4">
                 <CheckoutVoucherSection

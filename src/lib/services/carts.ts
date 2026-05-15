@@ -72,9 +72,16 @@ export interface RemoveVoucherPayload extends CartMutationBase {
   target?: 'order' | 'shipping' | 'all'
 }
 
+import type { CheckoutDeliveryPayload } from '../validations/checkout'
+
 export interface CheckoutCartPayload extends CartMutationBase {
   payment_method_id: number
-  shipping_address: string
+  /**
+   * Legacy: one pre-formatted string. Prefer `delivery` so the backend validates and formats storage.
+   * Send at least one of `shipping_address` or `delivery`.
+   */
+  shipping_address?: string
+  delivery?: CheckoutDeliveryPayload
   notes?: string
   /** When set, only these server cart line ids are purchased; cart stays active if lines remain. */
   cart_item_ids?: number[]
