@@ -1,103 +1,80 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
+import { toastError } from '@/lib/utils/toast'
+import { ChevronRightIcon } from '@/components/icons'
+import { OfferSheet, SingleVoucherSheetBody } from '@/components/sheets'
 
 interface CheckoutVoucherSectionProps {
   onApplyVoucher: (payload: { order_voucher_code?: string; shipping_voucher_code?: string }) => Promise<void>
-  onRemoveVoucher: (target: 'order' | 'shipping' | 'all') => Promise<void>
   isApplying: boolean
-  orderVoucherCode?: string
-  shippingVoucherCode?: string
 }
 
-export function CheckoutVoucherSection({
-  onApplyVoucher,
-  onRemoveVoucher,
-  isApplying,
-  orderVoucherCode,
-  shippingVoucherCode,
-}: CheckoutVoucherSectionProps) {
-  const [orderCode, setOrderCode] = useState('')
-  const [shippingCode, setShippingCode] = useState('')
+export function CheckoutVoucherSection({ onApplyVoucher, isApplying }: CheckoutVoucherSectionProps) {
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [code, setCode] = useState('')
+  const titleId = useId()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!sheetOpen) return
+    const t = window.setTimeout(() => inputRef.current?.focus(), 50)
+    return () => window.clearTimeout(t)
+  }, [sheetOpen])
+
+  const submit = async () => {
+    const trimmed = code.trim()
+    if (!trimmed) {
+      toastError('Vui lòng nhập mã giảm giá.')
+      return
+    }
+    try {
+      await onApplyVoucher({ order_voucher_code: trimmed })
+      setSheetOpen(false)
+      setCode('')
+    } catch {
+      /* parent shows toast */
+    }
+  }
 
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-6">
-      <h2 className="font-semibold text-gray-900 mb-4">Mã giảm giá</h2>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="order-voucher" className="block text-sm font-medium text-gray-700 mb-1">
-            Mã giảm giá đơn hàng
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="order-voucher"
-              type="text"
-              value={orderCode}
-              onChange={(e) => setOrderCode(e.target.value)}
-              placeholder="Nhập mã giảm giá đơn"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <button
-              type="button"
-              disabled={isApplying}
-              onClick={() => onApplyVoucher({ order_voucher_code: orderCode.trim() })}
-              className="inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Áp dụng
-            </button>
-          </div>
-          {orderVoucherCode && (
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-green-700">Đang áp dụng: {orderVoucherCode}</span>
-              <button
-                type="button"
-                disabled={isApplying}
-                onClick={() => onRemoveVoucher('order')}
-                className="text-red-600 hover:text-red-700 disabled:opacity-50"
-              >
-                Xóa
-              </button>
-            </div>
-          )}
-        </div>
+    <>
+      <button
+        type="button"
+        title="Áp dụng ưu đãi để được giảm giá"
+        onClick={() => setSheetOpen(true)}
+        className="flex w-full min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border border-primary-100 bg-primary-50 px-2.5 py-2 text-left text-xs font-medium leading-none tracking-tight text-primary-800 transition-colors hover:bg-primary-100/80 xl:gap-2 xl:px-4 xl:py-3 xl:text-sm xl:leading-normal xl:tracking-normal"
+      >
+        <span className="min-w-0 flex-1 truncate">Áp dụng ưu đãi để được giảm giá</span>
+        <ChevronRightIcon className="h-4 w-4 shrink-0 text-primary-600 xl:h-5 xl:w-5" />
+      </button>
 
-        <div>
-          <label htmlFor="shipping-voucher" className="block text-sm font-medium text-gray-700 mb-1">
-            Mã giảm phí vận chuyển
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="shipping-voucher"
-              type="text"
-              value={shippingCode}
-              onChange={(e) => setShippingCode(e.target.value)}
-              placeholder="Nhập mã giảm ship"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+      <OfferSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        titleId={titleId}
+        title="Ưu đãi dành cho bạn"
+        footer={
+          <div className="border-t border-slate-100 p-4">
             <button
               type="button"
+              onClick={() => void submit()}
               disabled={isApplying}
-              onClick={() => onApplyVoucher({ shipping_voucher_code: shippingCode.trim() })}
-              className="inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl bg-primary-600 py-3.5 text-center text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 disabled:opacity-60"
             >
-              Áp dụng
+              {isApplying ? 'Đang áp dụng…' : 'Áp dụng'}
             </button>
           </div>
-          {shippingVoucherCode && (
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-green-700">Đang áp dụng: {shippingVoucherCode}</span>
-              <button
-                type="button"
-                disabled={isApplying}
-                onClick={() => onRemoveVoucher('shipping')}
-                className="text-red-600 hover:text-red-700 disabled:opacity-50"
-              >
-                Xóa
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
+        }
+      >
+        <SingleVoucherSheetBody
+          code={code}
+          onCodeChange={setCode}
+          inputRef={inputRef}
+          isApplying={isApplying}
+          onSubmit={() => void submit()}
+        />
+      </OfferSheet>
+    </>
   )
 }
