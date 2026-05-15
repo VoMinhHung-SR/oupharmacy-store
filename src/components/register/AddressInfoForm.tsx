@@ -1,9 +1,10 @@
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import { Controller, Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import { useCommonCities } from '@/contexts/CommonCitiesContext'
-import { getCities, getDistrictsByCity, type City } from '@/lib/services/location'
-import { toastError } from '@/lib/utils/toast'
+import { getDistrictsByCity } from '@/lib/services/location'
+import { SelectField, TextField } from '@/components/TextField'
 
 interface AddressFormData {
   location: {
@@ -19,7 +20,6 @@ interface AddressInfoFormProps {
   setValue: UseFormSetValue<AddressFormData>
   watch: UseFormWatch<AddressFormData>
   isLoading: boolean
-  cities?: City[]
   onCityChange?: (cityId: number) => void
   onAddressInputChange?: (value: string) => void
 }
@@ -30,52 +30,19 @@ export default function AddressInfoForm({
   setValue,
   watch,
   isLoading,
-  cities: citiesProp,
   onCityChange,
   onAddressInputChange,
 }: AddressInfoFormProps) {
-  const { cities: ssrCities, citiesError } = useCommonCities()
-  const [cities, setCities] = useState<City[]>(() => citiesProp ?? ssrCities)
-  const [citiesReady, setCitiesReady] = useState(() => (citiesProp ?? ssrCities).length > 0)
-
-  useEffect(() => {
-    const base = citiesProp ?? ssrCities
-    setCities(base)
-    if (base.length > 0) setCitiesReady(true)
-  }, [citiesProp, ssrCities])
-
-  useEffect(() => {
-    if (citiesProp !== undefined || ssrCities.length > 0 || citiesReady) return
-    let cancelled = false
-    ;(async () => {
-      const r = await getCities()
-      if (cancelled) return
-      if (r.data?.length) setCities(r.data)
-      else {
-        if (r.error) toastError(r.error)
-        else if (citiesError) toastError(citiesError)
-      }
-      setCitiesReady(true)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [citiesProp, ssrCities.length, citiesReady, citiesError])
-
+  const { cities } = useCommonCities()
   const selectedCity = watch('location.city')
-  const [districts, setDistricts] = React.useState<Array<{ id: number; name: string }>>([])
+  const [districts, setDistricts] = useState<Array<{ id: number; name: string }>>([])
 
-  // Load districts when city changes
   useEffect(() => {
     const loadDistricts = async () => {
       if (selectedCity && selectedCity > 0) {
-        if (onCityChange) {
-          onCityChange(selectedCity)
-        }
+        onCityChange?.(selectedCity)
         const result = await getDistrictsByCity(selectedCity)
-        if (result.data) {
-          setDistricts(result.data)
-        }
+        setDistricts(result.data ?? [])
       } else {
         setDistricts([])
         setValue('location.district', -1)
@@ -85,110 +52,84 @@ export default function AddressInfoForm({
   }, [selectedCity, setValue, onCityChange])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Thông tin địa chỉ</h2>
-        <p className="text-sm text-gray-600 mb-4">(Vui lòng nhập địa chỉ chính xác)</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-1">Thông tin địa chỉ</h2>
+        <p className="text-sm text-gray-600 mb-4">Vui lòng nhập địa chỉ chính xác (sau sáp nhập).</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-            Thành phố <span className="text-red-500">*</span>
-          </label>
-          <Controller
-            name="location.city"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                id="city"
-                onChange={(e) => {
-                  const value = Number(e.target.value)
-                  field.onChange(value)
-                  setValue('location.district', -1)
-                }}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.city ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
-                disabled={isLoading || !citiesReady}
-              >
-                <option value={-1}>Chọn thành phố</option>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          />
-          {errors.location?.city && (
-            <p className="mt-1 text-xs text-red-600">{errors.location.city.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
-            Quận/Huyện <span className="text-red-500">*</span>
-          </label>
-          <Controller
-            name="location.district"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                id="district"
-                onChange={(e) => {
-                  field.onChange(Number(e.target.value))
-                }}
-                disabled={!selectedCity || selectedCity <= 0 || isLoading}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.district ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                  }`}
-              >
-                <option value={-1}>Chọn quận/huyện</option>
-                {districts.map((district) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          />
-          {errors.location?.district && (
-            <p className="mt-1 text-xs text-red-600">{errors.location.district.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-          Địa chỉ chi tiết <span className="text-red-500">*</span>
-        </label>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Controller
-          name="location.address"
+          name="location.city"
           control={control}
           render={({ field }) => (
-            <input
+            <SelectField
               {...field}
-              id="address"
-              type="text"
-              placeholder="Nhập địa chỉ chi tiết"
-              onChange={(e) => {
-                field.onChange(e.target.value)
-                if (onAddressInputChange) {
-                  onAddressInputChange(e.target.value)
-                }
-              }}
-              className={`w-full rounded-lg border bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${errors.location?.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                }`}
+              variant="outline"
+              id="register-city"
               disabled={isLoading}
-            />
+              value={field.value > 0 ? field.value : ''}
+              error={!!errors.location?.city}
+              helperText={errors.location?.city?.message}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                field.onChange(value > 0 ? value : -1)
+                setValue('location.district', -1)
+              }}
+            >
+              <option value="">Chọn Tỉnh/Thành phố</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
+            </SelectField>
           )}
         />
-        {errors.location?.address && (
-          <p className="mt-1 text-xs text-red-600">{errors.location.address.message}</p>
-        )}
+        <Controller
+          name="location.district"
+          control={control}
+          render={({ field }) => (
+            <SelectField
+              {...field}
+              variant="outline"
+              id="register-commune"
+              disabled={!selectedCity || selectedCity <= 0 || isLoading}
+              value={field.value > 0 ? field.value : ''}
+              error={!!errors.location?.district}
+              helperText={errors.location?.district?.message}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            >
+              <option value="">{!selectedCity || selectedCity <= 0 ? 'Chọn tỉnh/thành trước' : 'Chọn Phường/Xã'}</option>
+              {districts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
+        />
       </div>
+
+      <Controller
+        name="location.address"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            variant="outline"
+            id="register-address"
+            placeholder="Nhập địa chỉ cụ thể"
+            disabled={isLoading}
+            error={!!errors.location?.address}
+            helperText={errors.location?.address?.message}
+            onChange={(e) => {
+              field.onChange(e.target.value)
+              onAddressInputChange?.(e.target.value)
+            }}
+          />
+        )}
+      />
     </div>
   )
 }
-
