@@ -4,6 +4,7 @@ import { toastError, toastSuccess, toastWarning } from "@/lib/utils/toast"
 import { useAuth } from "./AuthContext"
 import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, CART_QUERY_KEY } from "@/lib/hooks/useCarts"
 import { getCurrentCart } from "@/lib/services/carts"
+import type { CartLineUnitOption } from "@/lib/services/products"
 import { useQueryClient } from "@tanstack/react-query"
 
 const LINE_SELECT_SESSION_KEY = "oupharmacy_cart_line_select_v1"
@@ -17,7 +18,7 @@ export interface CartItem {
   variant_unit_id: number
   /** Selected server unit id for this cart line. */
   product_variant_unit_id?: number | null
-  unit_options?: { id: number; unit_name: string; is_default?: boolean; price_value?: number }[]
+  unit_options?: CartLineUnitOption[]
   name: string
   price: number
   image_url?: string
@@ -71,6 +72,27 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
     (item.variant_unit_id as number | undefined) ??
     (item.medicine_unit_id as number | undefined) ??
     (Number.isNaN(parsedId) ? 0 : parsedId)
+  const rawUnitOptions = item.unit_options
+  let unit_options: CartLineUnitOption[] | undefined
+  if (Array.isArray(rawUnitOptions) && rawUnitOptions.length > 0) {
+    unit_options = rawUnitOptions
+      .map((u) => {
+        const row = u as Record<string, unknown>
+        const id = Number(row.id ?? row.unit_id)
+        if (!Number.isFinite(id) || id <= 0) return null
+        return {
+          id,
+          unit_name: String(row.unit_name ?? ""),
+          is_default: row.is_default === true,
+          price_value:
+            row.price_value != null && Number.isFinite(Number(row.price_value))
+              ? Number(row.price_value)
+              : undefined,
+        }
+      })
+      .filter((u): u is CartLineUnitOption => u != null && Boolean(u.unit_name))
+  }
+
   return {
     id: String(item.id ?? variant_unit_id),
     variant_unit_id,
@@ -82,6 +104,7 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
     packaging: item.packaging as string | undefined,
     qty: Number(item.qty ?? 1) || 1,
     selected: item.selected === false ? false : true,
+    ...(unit_options?.length ? { unit_options } : {}),
   }
 }
 

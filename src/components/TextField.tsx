@@ -177,7 +177,6 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     const borderLabel =
       isOutline && !showAboveLabel ? (label || placeholder || undefined) : label || undefined
     const hasLabelAndPlaceholder = Boolean(isOutline && label && placeholder)
-    const labelAlwaysOnBorder = Boolean(isOutline && label)
     const outlineLabelOnBorder = Boolean(isOutline && borderLabel && !showAboveLabel)
 
     const inputClasses = isOutline
@@ -236,7 +235,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
               error={error}
               disabled={disabled}
               labelClassName={labelClassName}
-              alwaysShrink={labelAlwaysOnBorder || hasLabelAndPlaceholder}
+              alwaysShrink={outlineLabelOnBorder}
             />
           )}
           {!isOutline && label && (

@@ -6,6 +6,7 @@ import React from 'react'
 import { useOrder } from '@/lib/hooks/useOrders'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
+import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams()
@@ -212,10 +213,10 @@ export default function OrderConfirmationPage() {
             </div>
           </div>
           {order.shipping_address && (
-            <div className="pt-4 border-t border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Địa chỉ giao hàng</h3>
-              <p className="text-gray-600 text-sm">{order.shipping_address}</p>
-            </div>
+            <ShippingAddressDisplay
+              shippingAddress={order.shipping_address}
+              className="pt-4 border-t border-gray-200"
+            />
           )}
         </div>
 

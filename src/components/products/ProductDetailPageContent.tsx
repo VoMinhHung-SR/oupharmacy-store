@@ -15,7 +15,13 @@ import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
-import { Product, getProductEntity, getProductName, getProductPackaging } from '@/lib/services/products'
+import {
+  Product,
+  getProductEntity,
+  getProductName,
+  getProductPackaging,
+  mapProductUnitOptionsForCart,
+} from '@/lib/services/products'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -64,6 +70,7 @@ export function ProductDetailPageContent({
       id: product.id.toString(),
       variant_unit_id: product.id,
       product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
+      unit_options: mapProductUnitOptionsForCart(unitOptions),
       name: productName,
       price: effectivePriceValue,
       image_url: productImageUrl || product.image_url,

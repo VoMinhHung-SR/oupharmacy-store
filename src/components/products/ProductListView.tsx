@@ -3,7 +3,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { Product, getProductEntity, getProductName, getProductSlug, getProductPackaging } from '@/lib/services/products'
+import {
+  Product,
+  getProductEntity,
+  getProductName,
+  getProductSlug,
+  getProductPackaging,
+  mapProductUnitOptionsForCart,
+} from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
@@ -108,6 +115,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
         id: product.id.toString(),
         variant_unit_id: product.id,
         product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
+        unit_options: mapProductUnitOptionsForCart(product.unit_options),
         name: getProductName(product),
         price: selectedUnit?.price_value ?? product.price_value,
         image_url: getProductImageUrl(product),

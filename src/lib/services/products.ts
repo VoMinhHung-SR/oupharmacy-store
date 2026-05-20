@@ -10,6 +10,26 @@ export interface ProductUnitOption {
   is_default?: boolean
 }
 
+/** Cart line unit picker (guest localStorage uses `id`; API cart uses same shape). */
+export interface CartLineUnitOption {
+  id: number
+  unit_name: string
+  is_default?: boolean
+  price_value?: number
+}
+
+export function mapProductUnitOptionsForCart(unitOptions?: ProductUnitOption[]): CartLineUnitOption[] {
+  if (!Array.isArray(unitOptions)) return []
+  return unitOptions
+    .filter((u) => Number.isFinite(u.unit_id) && u.unit_id > 0)
+    .map((u) => ({
+      id: u.unit_id,
+      unit_name: u.unit_name,
+      is_default: u.is_default,
+      price_value: u.price_value,
+    }))
+}
+
 export interface Product {
   id: number
   price_value: number
