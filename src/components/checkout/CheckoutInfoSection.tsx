@@ -133,7 +133,7 @@ export function CheckoutInfoSection({
   }, [savedInfo?.city_id])
 
   return (
-    <section className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
+    <section className="relative isolate z-0 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
       <form
         onSubmit={handleSubmit(onSubmit, (errs) => {
           const first = Object.values(errs)[0]

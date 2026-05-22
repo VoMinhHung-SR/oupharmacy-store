@@ -5,7 +5,7 @@ import React from 'react'
 import { InfoIcon, SpinnerIcon } from '@/components/icons'
 
 function formatVnd(n: number) {
-  return `${n.toLocaleString('vi-VN')}đ`
+  return `${Math.round(n).toLocaleString('vi-VN')}₫`
 }
 
 interface CheckoutOrderSummaryProps {
@@ -13,6 +13,7 @@ interface CheckoutOrderSummaryProps {
   shippingFee: number
   total: number
   hasShippingSelected: boolean
+  qualifiesFreeShipping?: boolean
   discountAmount?: number
   shippingDiscountAmount?: number
   directDiscount?: number
@@ -27,6 +28,7 @@ export function CheckoutOrderSummary({
   shippingFee,
   total,
   hasShippingSelected,
+  qualifiesFreeShipping = false,
   discountAmount = 0,
   shippingDiscountAmount = 0,
   directDiscount = 0,
@@ -35,13 +37,18 @@ export function CheckoutOrderSummary({
   canSubmit,
   embedded = false,
 }: CheckoutOrderSummaryProps) {
-  const voucherFromCodes = discountAmount + shippingDiscountAmount
-  const savingsTotal = directDiscount + voucherFromCodes
-  const preDiscountApprox = total + voucherFromCodes + directDiscount
-  const showStrikethrough = savingsTotal > 0 && preDiscountApprox > total
+  const voucherDiscount = discountAmount + shippingDiscountAmount
+  const savingsTotal = directDiscount + voucherDiscount
+  const hasSavings = savingsTotal > 0
+  const preDiscountApprox = total + voucherDiscount + directDiscount
+  const showStrikethrough = hasSavings && preDiscountApprox > total
 
-  const shippingLabel =
-    !hasShippingSelected ? 'Chọn phương thức' : shippingFee <= 0 ? 'Miễn phí' : formatVnd(shippingFee)
+  const shippingIsFree = qualifiesFreeShipping || (hasShippingSelected && shippingFee <= 0)
+  const shippingLabel = !hasShippingSelected
+    ? 'Chọn phương thức'
+    : shippingIsFree
+      ? 'Miễn phí'
+      : formatVnd(shippingFee)
 
   const shell = embedded
     ? 'flex min-h-0 flex-col border-0 bg-transparent shadow-none'
@@ -49,52 +56,58 @@ export function CheckoutOrderSummary({
 
   return (
     <div className={shell}>
-      <div className={`space-y-2 px-4 py-3 text-sm ${embedded ? 'border-t border-slate-100' : 'border-b border-slate-100'}`}>
+      <div className={`px-4 py-3 ${embedded ? 'border-t border-slate-100' : 'border-b border-slate-100'}`}>
         <h2 className="sr-only">Chi tiết thanh toán</h2>
-        <div className="flex justify-between gap-2">
-          <span className="text-slate-600">Tổng tiền</span>
-          <span className="font-medium text-slate-900">{formatVnd(subtotal)}</span>
-        </div>
-        {directDiscount > 0 && (
-          <div className="flex justify-between gap-2">
-            <span className="text-slate-600">Giảm giá trực tiếp</span>
-            <span className="font-medium text-orange-600">-{formatVnd(directDiscount)}</span>
+        <dl className="space-y-2.5 text-sm">
+          <div className="flex justify-between gap-3">
+            <dt className="text-slate-600">Tổng tiền</dt>
+            <dd className="font-semibold text-slate-900">{formatVnd(subtotal)}</dd>
           </div>
-        )}
-        <div className="flex justify-between gap-2">
-          <span className="inline-flex items-center gap-1 text-slate-600">
-            Giảm giá voucher
-            <span
-              className="inline-flex text-slate-400"
-              title="Bao gồm mã giảm đơn hàng và mã giảm phí vận chuyển (nếu có)."
+          <div className="flex justify-between gap-3">
+            <dt className="text-slate-600">Giảm giá trực tiếp</dt>
+            <dd className="font-medium text-orange-600">
+              {directDiscount > 0 ? `-${formatVnd(directDiscount)}` : formatVnd(0)}
+            </dd>
+          </div>
+          <div className="flex items-start justify-between gap-3">
+            <dt className="flex items-center gap-1 text-slate-600">
+              Giảm giá voucher
+              <span
+                className="inline-flex text-slate-400"
+                title="Bao gồm mã giảm đơn hàng và mã giảm phí vận chuyển (nếu có)."
+              >
+                <InfoIcon className="h-4 w-4" />
+              </span>
+            </dt>
+            <dd className="font-medium text-orange-600">
+              {voucherDiscount > 0 ? `-${formatVnd(voucherDiscount)}` : formatVnd(0)}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3 border-t border-dashed border-slate-200 pt-3">
+            <dt className="font-medium text-slate-700">Tiết kiệm được</dt>
+            <dd className="font-semibold text-orange-600">{hasSavings ? formatVnd(savingsTotal) : formatVnd(0)}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-slate-600">Phí vận chuyển</dt>
+            <dd
+              className={
+                shippingIsFree ? 'text-xs font-semibold text-primary-600' : 'font-medium text-slate-900'
+              }
             >
-              <InfoIcon className="h-3.5 w-3.5" />
-            </span>
-          </span>
-          <span className={voucherFromCodes > 0 ? 'font-medium text-orange-600' : 'text-slate-900'}>
-            {voucherFromCodes > 0 ? `-${formatVnd(voucherFromCodes)}` : formatVnd(0)}
-          </span>
-        </div>
-        {savingsTotal > 0 && (
-          <div className="flex justify-between gap-2">
-            <span className="text-slate-600">Tiết kiệm được</span>
-            <span className="font-semibold text-orange-600">{formatVnd(savingsTotal)}</span>
+              {shippingLabel}
+            </dd>
           </div>
-        )}
-        <div className="flex justify-between gap-2">
-          <span className="text-slate-600">Phí vận chuyển</span>
-          <span className="font-medium text-slate-900">{shippingLabel}</span>
-        </div>
+        </dl>
       </div>
 
-      <div className="border-t border-slate-100 px-4 py-3">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <span className="text-sm font-semibold text-slate-900">Thành tiền</span>
+      <div className="border-t border-slate-200 px-4 py-4">
+        <div className="flex items-end justify-between gap-3">
+          <span className="text-base font-bold text-slate-900">Thành tiền</span>
           <div className="text-right">
             {showStrikethrough && (
-              <div className="text-xs text-slate-400 line-through">{formatVnd(preDiscountApprox)}</div>
+              <p className="text-sm text-slate-400 line-through">{formatVnd(preDiscountApprox)}</p>
             )}
-            <div className="text-xl font-bold text-primary-700">{formatVnd(total)}</div>
+            <p className="text-2xl font-bold leading-tight text-primary-700">{formatVnd(total)}</p>
           </div>
         </div>
       </div>

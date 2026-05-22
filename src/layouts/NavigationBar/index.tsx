@@ -193,7 +193,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
   return (
     <>
       <nav
-        className="bg-white border-b border-gray-200 shadow-sm relative z-20"
+        className="relative z-30 bg-white border-b border-gray-200 shadow-sm"
         style={{ overflow: 'visible' }}
       >
         <Container className="relative" style={{ overflow: 'visible' }}>

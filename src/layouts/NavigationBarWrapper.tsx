@@ -1,5 +1,5 @@
 import React from 'react'
-import { getCategoriesSSG, CategoryLevel0 } from '@/lib/services/categories'
+import { getCategoriesSSG, CategoryLevel0, hrefFromWebSlug } from '@/lib/services/categories'
 import NavigationBar from './NavigationBar'
 
 /**
@@ -38,10 +38,10 @@ export default async function NavigationBarWrapper() {
           name: level2.name,
           href: `/${level2.path_slug || level2.slug}`
         })) || [],
-        topProducts: level1.top_products?.map((p) => ({
+        topProducts: (level1.top_products ?? []).map((p) => ({
           ...p,
-          web_slug: p.web_slug ? (p.web_slug.startsWith('/') ? p.web_slug : `/${p.web_slug}`) : `/${level0.path_slug || level0.slug}/${level1.path_slug || level1.slug}/${p.slug}`
-        })) || [],
+          web_slug: hrefFromWebSlug(p.web_slug),
+        })),
       }
     }) || [],
   }))

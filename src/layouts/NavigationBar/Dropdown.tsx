@@ -104,7 +104,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
       <div
         ref={bridgeRef}
         data-bridge-area
-        className="fixed bg-transparent z-[29]"
+        className="fixed z-[39] bg-transparent"
         style={{
           position: 'fixed',
           top: `${position.top - DROPDOWN_GAP}px`,
@@ -118,7 +118,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
       />
       <div
         ref={dropdownRef}
-        className={`fixed bg-white border border-gray-200 rounded-lg shadow-xl z-[30] flex flex-col ${
+        className={`fixed z-50 flex flex-col rounded-lg border border-gray-200 bg-white shadow-xl ${
           hasAnyLevel2 ? 'min-w-[800px] max-w-[1000px]' : 'w-[280px]'
         }`}
         style={{

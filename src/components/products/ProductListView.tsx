@@ -9,6 +9,8 @@ import {
   getProductName,
   getProductSlug,
   getProductPackaging,
+  getProductCategorySlug,
+  buildProductHref,
   mapProductUnitOptionsForCart,
 } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
@@ -49,16 +51,9 @@ interface ProductListViewProps {
 }
 
 const getProductLink = (product: Product): string | null => {
-  const slug = getProductSlug(product)
-  if (slug) {
-    // Ưu tiên sử dụng categorySlug từ category_info, sau đó build từ category array
-    const categorySlug = product.category_info?.categorySlug ||
-      (product.category_info?.category && product.category_info.category.length > 0
-        ? product.category_info.category.map(cat => cat.slug).join('/')
-        : null)
-    return categorySlug ? `/${categorySlug}/${slug}` : null
-  }
-  return null
+  const productSlug = getProductSlug(product)
+  if (!productSlug) return null
+  return buildProductHref(getProductCategorySlug(product), productSlug)
 }
 
 const getProductImageUrl = (product: Product): string | undefined => {

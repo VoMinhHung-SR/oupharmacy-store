@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation"
 import { useCart } from "@/contexts/CartContext"
 import { useAuth } from "@/contexts/AuthContext"
 import { useCheckout } from "@/contexts/CheckoutContext"
-import { useLoginModal } from "@/contexts/LoginModalContext"
-import { Button } from "@/components/Button"
 import Link from "next/link"
 import Image from "next/image"
 import { Container } from "@/components/Container"
@@ -33,7 +31,6 @@ function formatMoney(n: number) {
 export default function CartPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
-  const { openModal: openLoginModal } = useLoginModal()
   const { setCheckoutScopedLineIds } = useCheckout()
   const applyVoucherMutation = useApplyVoucher()
   const {
@@ -75,13 +72,19 @@ export default function CartPage() {
   const voucherDiscount = hasVoucherApplied ? discount : 0
   const hasSavings = discount > 0
 
+  const freeshipSubtotal =
+    selectedCount > 0
+      ? selectionTotals.selectedSubtotal
+      : items.reduce((s, i) => s + i.price * i.qty, 0)
+  const qualifiesFreeShipBanner = freeshipSubtotal >= FREE_SHIPPING_THRESHOLD
+
   const goCheckout = () => {
     const chosen = items.filter((i) => i.selected)
     if (chosen.length === 0) {
       toastError("Vui lòng chọn ít nhất một sản phẩm để thanh toán.")
       return
     }
-    if (isAuthenticated && chosen.length < items.length) {
+    if (chosen.length < items.length) {
       setCheckoutScopedLineIds(chosen.map((i) => i.id))
     } else {
       setCheckoutScopedLineIds(null)
@@ -171,10 +174,10 @@ export default function CartPage() {
   }, [applyVoucherMutation, cartVersion, voucherCode])
 
   useEffect(() => {
-    if (!offerModalOpen || !isAuthenticated) return
+    if (!offerModalOpen || cartVersion == null) return
     const t = window.setTimeout(() => voucherInputRef.current?.focus(), 50)
     return () => window.clearTimeout(t)
-  }, [offerModalOpen, isAuthenticated])
+  }, [cartVersion, offerModalOpen])
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
@@ -215,13 +218,22 @@ export default function CartPage() {
               </div>
               {/* Left: single card — banner + toolbar + lines */}
               <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)] lg:col-start-1 lg:row-start-2">
-                <div className="border-b border-primary-100/80 bg-primary-50 px-4 py-3 md:px-5">
-                  <p className="text-center text-sm text-primary-900">
-                    <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng trên 
-                    {" " + formatMoney(FREE_SHIPPING_THRESHOLD)}
+                <div className="border-b border-primary-100/80 bg-gradient-to-r from-primary-50 to-sky-50 px-4 py-3 md:px-5">
+                  <p className="text-center text-xs font-medium text-slate-700 sm:text-sm">
+                    {qualifiesFreeShipBanner ? (
+                      <>
+                        Đơn đã chọn đạt mức{' '}
+                        <span className="font-semibold text-primary-600">miễn phí vận chuyển</span> (từ{' '}
+                        {formatMoney(FREE_SHIPPING_THRESHOLD)}).
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng
+                        trên {formatMoney(FREE_SHIPPING_THRESHOLD)}.
+                      </>
+                    )}
                   </p>
                 </div>
-
                 <div className="border-b border-slate-100 px-4 py-3 md:px-5 lg:grid lg:grid-cols-[2rem_5.5rem_minmax(0,1fr)_7.5rem_9.5rem_6.5rem_2.25rem] lg:items-center lg:gap-4">
                   <label className="flex cursor-pointer items-center gap-2 lg:col-span-3">
                     <input
@@ -405,10 +417,10 @@ export default function CartPage() {
                       <ChevronRightIcon className="h-4 w-4 shrink-0 text-primary-600 xl:h-5 xl:w-5" />
                     </button>
 
-                    {isAuthenticated && selectedCount > 0 && selectedCount < items.length && (
+                    {selectedCount > 0 && selectedCount < items.length && (
                       <p className="mb-4 text-xs text-slate-500">
-                        Bạn đang chọn {selectedCount}/{items.length} dòng. Giảm giá đơn hàng hiển thị theo tỷ
-                        lệ tạm tính; số tiền cuối được xác nhận khi đặt hàng.
+                        Bạn đang chọn {selectedCount}/{items.length} dòng để thanh toán. Giảm giá hiển thị theo
+                        tỷ lệ tạm tính; số tiền cuối được xác nhận khi đặt hàng.
                       </p>
                     )}
 
@@ -521,7 +533,7 @@ export default function CartPage() {
         titleId={offerModalTitleId}
         title="Ưu đãi dành cho bạn"
         footer={
-          isAuthenticated ? (
+          cartVersion != null ? (
             <div className="border-t border-slate-100 p-4">
               <button
                 type="button"
@@ -535,31 +547,9 @@ export default function CartPage() {
           ) : undefined
         }
       >
-        {!isAuthenticated ? (
+        {cartVersion == null ? (
           <div className="space-y-4 px-5 py-6 text-center text-sm text-slate-600">
-            <p>
-              Mã giảm giá áp dụng cho giỏ hàng đồng bộ trên tài khoản. Vui lòng đăng nhập, hoặc tiếp tục thanh
-              toán để nhập mã ở bước đặt hàng.
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <Button
-                type="button"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  setOfferModalOpen(false)
-                  openLoginModal("/gio-hang")
-                }}
-              >
-                Đăng nhập
-              </Button>
-              <Link
-                href="/don-hang"
-                onClick={() => setOfferModalOpen(false)}
-                className="inline-flex w-full items-center justify-center rounded-lg border border-primary-600 px-4 py-2 text-base font-semibold text-primary-600 transition-colors hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
-              >
-                Thanh toán
-              </Link>
-            </div>
+            <p>Đang tải giỏ hàng… Vui lòng thử lại sau giây lát.</p>
           </div>
         ) : (
           <SingleVoucherSheetBody

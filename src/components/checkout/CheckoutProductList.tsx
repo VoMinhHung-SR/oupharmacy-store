@@ -21,18 +21,18 @@ function formatVnd(n: number) {
 interface CheckoutProductListProps {
   items: CheckoutProductLine[]
   lineSubtotal: number
-  /** Blur product names (privacy). */
   hideProductNames?: boolean
 }
 
 export function CheckoutProductList({ items, lineSubtotal, hideProductNames = false }: CheckoutProductListProps) {
-  const qualifiesFreeShipHint = lineSubtotal >= FREE_SHIPPING_THRESHOLD
+  const qualifiesFreeShip = lineSubtotal >= FREE_SHIPPING_THRESHOLD
+  const amountToFreeShip = Math.max(0, FREE_SHIPPING_THRESHOLD - lineSubtotal)
 
   return (
     <section className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
       <div className="border-b border-primary-100/80 bg-gradient-to-r from-primary-50 to-sky-50 px-4 py-3 sm:px-5">
         <p className="text-center text-xs font-medium text-slate-700 sm:text-sm">
-          {qualifiesFreeShipHint ? (
+          {qualifiesFreeShip ? (
             <>
               Đơn của bạn đạt mức{' '}
               <span className="font-semibold text-primary-600">miễn phí vận chuyển</span> (từ{' '}
@@ -83,6 +83,12 @@ export function CheckoutProductList({ items, lineSubtotal, hideProductNames = fa
             </li>
           ))}
         </ul>
+        {!qualifiesFreeShip && amountToFreeShip > 0 ? (
+          <p className="mt-3 text-xs text-slate-500">
+            Mua thêm <span className="font-medium text-slate-700">{formatVnd(amountToFreeShip)}</span> để được miễn phí
+            vận chuyển.
+          </p>
+        ) : null}
       </div>
     </section>
   )

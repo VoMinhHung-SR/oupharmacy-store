@@ -2,19 +2,31 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { useMemo } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import { useOrder } from '@/lib/hooks/useOrders'
+import { loadGuestOrderConfirmation } from '@/lib/utils/guestOrderConfirmation'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
 import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
 
 export default function OrderConfirmationPage() {
+  const { isAuthenticated } = useAuth()
   const searchParams = useSearchParams()
   const orderNumberParam = searchParams.get('order_number')
   const orderIdParam = searchParams.get('order_id')
   const orderIdNum = orderIdParam != null && orderIdParam !== '' ? parseInt(orderIdParam, 10) : NaN
   const orderIdentifier = orderNumberParam ?? (Number.isNaN(orderIdNum) ? '' : String(orderIdParam))
-  const { data: order, isLoading, error } = useOrder(orderIdentifier)
+  const guestOrder = useMemo(
+    () => (!isAuthenticated && orderIdentifier ? loadGuestOrderConfirmation(orderIdentifier) : null),
+    [isAuthenticated, orderIdentifier]
+  )
+  const { data: apiOrder, isLoading: apiLoading, error: apiError } = useOrder(orderIdentifier, {
+    enabled: isAuthenticated,
+  })
+  const order = isAuthenticated ? apiOrder : guestOrder
+  const isLoading = isAuthenticated ? apiLoading : false
+  const error = isAuthenticated ? apiError : guestOrder ? undefined : new Error('guest_order_not_found')
 
   if (!orderIdentifier) {
     return (
@@ -59,15 +71,19 @@ export default function OrderConfirmationPage() {
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
           <p className="text-gray-600 mb-6">
-            Đơn hàng không tồn tại hoặc bạn không có quyền xem.
+            {isAuthenticated
+              ? 'Đơn hàng không tồn tại hoặc bạn không có quyền xem.'
+              : 'Không tìm thấy thông tin xác nhận trong phiên này. Vui lòng kiểm tra email/SMS hoặc đăng nhập để xem đơn sau khi có tài khoản.'}
           </p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-            <Link
-              href="/tai-khoan/don-hang"
-              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Xem đơn hàng
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/tai-khoan/don-hang"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Xem đơn hàng
+              </Link>
+            ) : null}
             <Link
               href="/"
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -81,10 +97,11 @@ export default function OrderConfirmationPage() {
   }
 
   const items = order.items ?? []
-  const trackingHref =
-    order.order_number || order.id != null
+  const trackingHref = isAuthenticated
+    ? order.order_number || order.id != null
       ? `/tai-khoan/don-hang/${order.order_number ?? order.id}`
       : '/tai-khoan/don-hang'
+    : null
   const statusText: Record<string, string> = {
     PENDING: 'Đang chờ xử lý',
     CONFIRMED: 'Đã xác nhận',
@@ -137,14 +154,23 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
-          <p className="text-sm text-blue-900 break-words">
-            Bạn có thể theo dõi đơn hàng của mình tại đây:{' '}
-            <Link href={trackingHref} className="font-semibold underline hover:text-blue-700">
-              Theo dõi đơn hàng của bạn
-            </Link>
-          </p>
-        </div>
+        {trackingHref ? (
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
+            <p className="text-sm text-blue-900 break-words">
+              Bạn có thể theo dõi đơn hàng của mình tại đây:{' '}
+              <Link href={trackingHref} className="font-semibold underline hover:text-blue-700">
+                Theo dõi đơn hàng của bạn
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
+            <p className="text-sm text-blue-900 break-words">
+              Lưu mã đơn <span className="font-semibold">{order.order_number ?? order.id}</span> để tra cứu. Đăng nhập sau
+              này để xem lịch sử đơn trong tài khoản.
+            </p>
+          </div>
+        )}
 
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -205,7 +231,9 @@ export default function OrderConfirmationPage() {
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-gray-700">Phí vận chuyển</span>
-              <span className="shrink-0 font-medium text-gray-900">{formatVnd(order.shipping_fee)}</span>
+              <span className="shrink-0 font-medium text-gray-900">
+                {Number(order.shipping_fee ?? 0) <= 0 ? 'Miễn phí' : formatVnd(order.shipping_fee)}
+              </span>
             </div>
             <div className="flex justify-between gap-4 pt-2 text-base font-semibold text-gray-900">
               <span>Tổng cộng</span>
@@ -227,12 +255,14 @@ export default function OrderConfirmationPage() {
           >
             Tiếp tục mua sắm
           </Link>
-          <Link
-            href={trackingHref}
-            className="px-6 py-2 text-center bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-left"
-          >
-            Theo dõi đơn hàng
-          </Link>
+          {trackingHref ? (
+            <Link
+              href={trackingHref}
+              className="px-6 py-2 text-center bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-left"
+            >
+              Theo dõi đơn hàng
+            </Link>
+          ) : null}
         </div>
         </div>
       </div>

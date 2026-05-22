@@ -77,7 +77,7 @@ function OutlineBorderLabel({
     <label
       htmlFor={inputId}
       className={cn(
-        'pointer-events-none absolute left-3 z-20 max-w-[calc(100%-1.25rem)] origin-left cursor-text whitespace-nowrap bg-white px-1 text-sm leading-tight duration-200',
+        'pointer-events-none absolute left-3 z-[1] max-w-[calc(100%-1.25rem)] origin-left cursor-text whitespace-nowrap bg-white px-1 text-sm leading-tight duration-200',
         alwaysShrink
           ? 'top-0 -translate-y-1/2 scale-[0.85] text-slate-500'
           : cn(
@@ -178,9 +178,13 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
       isOutline && !showAboveLabel ? (label || placeholder || undefined) : label || undefined
     const hasLabelAndPlaceholder = Boolean(isOutline && label && placeholder)
     const outlineLabelOnBorder = Boolean(isOutline && borderLabel && !showAboveLabel)
+    const shrinkBorderLabel = hasLabelAndPlaceholder
+    const showInteriorPlaceholder = Boolean(
+      isOutline && (hasLabelAndPlaceholder || (showAboveLabel && placeholder))
+    )
 
     const inputClasses = isOutline
-      ? outlineInputClasses(error, disabled, multiline, hasLabelAndPlaceholder, className)
+      ? outlineInputClasses(error, disabled, multiline, showInteriorPlaceholder, className)
       : floatingInputClasses(error, disabled, multiline, className)
 
     const inputPlaceholder = hasLabelAndPlaceholder
@@ -230,19 +234,19 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           {outlineLabelOnBorder && (
             <OutlineBorderLabel
               inputId={inputId}
-              label={label || borderLabel}
+              label={label || borderLabel || ''}
               required={required}
               error={error}
               disabled={disabled}
               labelClassName={labelClassName}
-              alwaysShrink={outlineLabelOnBorder}
+              alwaysShrink={shrinkBorderLabel}
             />
           )}
           {!isOutline && label && (
             <label
               htmlFor={inputId}
               className={cn(
-                'absolute left-2.5 top-0 z-20 w-auto max-w-[calc(100%-24px)] origin-left -translate-y-1/2 truncate scale-75 transform cursor-text px-1 text-sm leading-none duration-200',
+                'absolute left-2.5 top-0 z-[1] w-auto max-w-[calc(100%-24px)] origin-left -translate-y-1/2 truncate scale-75 transform cursor-text px-1 text-sm leading-none duration-200',
                 'peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100',
                 'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-75',
                 disabled ? 'bg-slate-50 text-slate-400' : 'bg-white',

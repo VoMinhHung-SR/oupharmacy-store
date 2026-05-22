@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
+import { saveGuestOrderConfirmation } from '@/lib/utils/guestOrderConfirmation'
 import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
@@ -27,10 +28,15 @@ import {
   CheckoutVoucherSection,
   CheckoutProductList,
 } from '@/components/checkout'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
+import {
+  pickPreferredShippingMethod,
+  shouldShowShippingMethodChoice,
+} from '@/lib/utils/shippingCheckout'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const {
     information,
     setInformation,
@@ -47,6 +53,9 @@ export default function CheckoutPage() {
     total,
     subtotal,
     shippingFee: cartShippingFee,
+    freeShippingApplied: cartFreeShippingApplied,
+    orderVoucherCode,
+    shippingVoucherCode,
     discountAmount = 0,
     shippingDiscountAmount = 0,
     version: cartVersion,
@@ -64,7 +73,7 @@ export default function CheckoutPage() {
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
   const selectedShippingId = serverShippingMethodId ?? null
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
-  const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
+  const rawShippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
 
   const scopedIdSet = useMemo(() => {
@@ -109,11 +118,28 @@ export default function CheckoutPage() {
     return Math.min(1, scopedLineSubtotal / orderSubtotal)
   }, [hasScopedSubset, scopedLineSubtotal, orderSubtotal])
 
+  /** Full cart: BE `free_shipping_applied`. Partial checkout: local subtotal vs FE constant (BE applies on checkout). */
+  const qualifiesFreeShipping = hasScopedSubset
+    ? scopedLineSubtotal >= FREE_SHIPPING_THRESHOLD
+    : Boolean(cartFreeShippingApplied)
+  const displayShippingFee = hasScopedSubset
+    ? qualifiesFreeShipping
+      ? 0
+      : rawShippingFee
+    : Number(cartShippingFee) || (cartFreeShippingApplied ? 0 : rawShippingFee)
+
+  const showShippingMethodChoice = useMemo(
+    () => shouldShowShippingMethodChoice(shippingMethods, qualifiesFreeShipping),
+    [shippingMethods, qualifiesFreeShipping]
+  )
+
   const displayOrderDiscount = discountAmount * scopeRatio
   const displayShippingDiscount = shippingDiscountAmount * scopeRatio
+  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
+  const displayDirectDiscount = hasVoucherApplied ? 0 : Math.max(0, discountAmount) * scopeRatio
   const orderTotal = Math.max(
     0,
-    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + shippingFee
+    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + displayShippingFee
   )
 
   const {
@@ -174,7 +200,7 @@ export default function CheckoutPage() {
   }, [information, setValue])
 
   useEffect(() => {
-    if (information || !user) return
+    if (!isAuthenticated || information || !user) return
     const name =
       user?.name ||
       [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() ||
@@ -189,7 +215,33 @@ export default function CheckoutPage() {
       setValue('phone', user.phone_number)
       setValue('recipient_phone', user.phone_number)
     }
-  }, [user, information, setValue])
+  }, [isAuthenticated, user, information, setValue])
+
+  useEffect(() => {
+    if (methodsLoadingShipping || shippingMethods.length === 0 || cartVersion == null) return
+    const preferred = pickPreferredShippingMethod(shippingMethods)
+    if (!preferred) return
+
+    const shouldAutoSelect =
+      qualifiesFreeShipping && !showShippingMethodChoice && selectedShippingId !== preferred.id
+
+    if (shouldAutoSelect) {
+      selectShippingMutation
+        .mutateAsync({
+          shipping_method_id: preferred.id,
+          expected_version: cartVersion,
+        })
+        .catch(() => {})
+    }
+  }, [
+    cartVersion,
+    methodsLoadingShipping,
+    qualifiesFreeShipping,
+    selectedShippingId,
+    selectShippingMutation,
+    shippingMethods,
+    showShippingMethodChoice,
+  ])
 
   const onInfoSubmit = (data: CheckoutInformationFormData) => {
     setInformation({
@@ -255,6 +307,9 @@ export default function CheckoutPage() {
         ...(scope ? { cart_item_ids: scope } : {}),
       })
       toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
+      if (!isAuthenticated && created && typeof created === 'object') {
+        saveGuestOrderConfirmation(created as Record<string, unknown>)
+      }
       clearCheckout()
       const orderNumber = String(created?.order_number || '')
       const orderId = Number(created?.id)
@@ -318,7 +373,7 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
-          <div className="min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
+          <div className="relative z-0 isolate min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
             <CheckoutProductList
               items={productLines}
               lineSubtotal={scopedLineSubtotal}
@@ -341,6 +396,7 @@ export default function CheckoutPage() {
             <CheckoutShippingSection
               methods={shippingMethods}
               selectedId={selectedShippingId}
+              qualifiesFreeShipping={qualifiesFreeShipping}
               onSelect={(id) => {
                 if (cartVersion == null) {
                   toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
@@ -388,11 +444,16 @@ export default function CheckoutPage() {
               <CheckoutOrderSummary
                 embedded
                 subtotal={scopedLineSubtotal}
-                shippingFee={shippingFee}
+                shippingFee={displayShippingFee}
                 total={orderTotal}
-                hasShippingSelected={Boolean(selectedShippingMethodFromList)}
+                hasShippingSelected={
+                  Boolean(selectedShippingMethodFromList) ||
+                  (qualifiesFreeShipping && shippingMethods.length > 0 && !showShippingMethodChoice)
+                }
+                qualifiesFreeShipping={qualifiesFreeShipping}
                 discountAmount={displayOrderDiscount}
                 shippingDiscountAmount={displayShippingDiscount}
+                directDiscount={displayDirectDiscount}
                 onPlaceOrder={handlePlaceOrder}
                 isSubmitting={isSubmitting}
                 canSubmit={canSubmit}

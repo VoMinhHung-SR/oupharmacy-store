@@ -12,11 +12,6 @@ interface Props {
   params: { 'category-slug': string }
 }
 
-/**
- * Category Listing Page
- * Route: /{category-slug}
- * Ví dụ: /thuc-pham-chuc-nang, /duoc-my-pham/cham-soc-co-the
- */
 export default function CategoryListingPage({ params }: Props) {
   const categorySlug = params['category-slug']
   
@@ -25,13 +20,11 @@ export default function CategoryListingPage({ params }: Props) {
     page_size: PAGINATION.DEFAULT_PAGE_SIZE 
   })
   
-  // Prepare filters without category field
   const filtersWithoutCategory = useMemo(() => {
     const { category: _, ...rest } = filters
     return rest
   }, [filters])
   
-  // Lấy danh sách sản phẩm theo category slug
   const { 
     data: productsData, 
     isLoading: listingLoading, 

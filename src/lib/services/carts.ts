@@ -22,7 +22,8 @@ export interface CartItem {
 
 export interface Cart {
   id: number
-  user_id: number
+  user_id: number | null
+  guest_session_id?: string | null
   status: 'ACTIVE' | 'CHECKED_OUT' | 'ABANDONED'
   items: CartItem[]
   shipping_method?: ShippingMethod | null
@@ -34,6 +35,8 @@ export interface Cart {
   version: number
   order_voucher_code?: string | null
   shipping_voucher_code?: string | null
+  /** BE: line subtotal meets free-shipping promo (≥ threshold in store_constants) */
+  free_shipping_applied?: boolean
   checkout_order?: number | null
   created_date?: string
   updated_date?: string
@@ -125,4 +128,8 @@ export async function recalculateCart(payload: CartMutationBase) {
 
 export async function checkoutCart(payload: CheckoutCartPayload) {
   return apiPost<Record<string, unknown>>('/carts/checkout/', payload)
+}
+
+export async function mergeGuestCart() {
+  return apiPost<Cart>('/carts/merge-guest/', {})
 }
