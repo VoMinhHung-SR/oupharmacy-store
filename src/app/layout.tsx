@@ -49,7 +49,7 @@ export default async function RootLayout({
                   <CheckoutProvider>
                     <Header />
                     <NavigationBarWrapper />
-                    <main className="bg-[#ededed] border-0">
+                    <main className="relative z-0 bg-[#ededed] border-0">
                       {children}
                     </main>
                     <Footer />

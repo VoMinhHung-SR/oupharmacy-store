@@ -19,6 +19,7 @@ import {
   type CheckoutInformationFormData,
 } from '@/lib/validations/checkout'
 import { Container } from '@/components/Container'
+import { LoadingBackdrop } from '@/components/LoadingBackdrop'
 import { ChevronLeftIcon } from '@/components/icons'
 import {
   CheckoutInfoSection,
@@ -68,6 +69,7 @@ export default function CheckoutPage() {
   const applyVoucherMutation = useApplyVoucher()
   const hasCompletedOrderRef = useRef(false)
   const [hideLineDetail, setHideLineDetail] = useState(false)
+  const [redirectingToConfirmation, setRedirectingToConfirmation] = useState(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
@@ -306,7 +308,6 @@ export default function CheckoutPage() {
         expected_version: cartVersion,
         ...(scope ? { cart_item_ids: scope } : {}),
       })
-      toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
       if (!isAuthenticated && created && typeof created === 'object') {
         saveGuestOrderConfirmation(created as Record<string, unknown>)
       }
@@ -318,15 +319,21 @@ export default function CheckoutPage() {
         : Number.isFinite(orderId)
           ? `order_id=${orderId}`
           : ''
+      setRedirectingToConfirmation(true)
       router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
       hasCompletedOrderRef.current = false
+      setRedirectingToConfirmation(false)
       const message = err instanceof Error ? err.message : 'Đặt hàng thất bại. Vui lòng thử lại.'
       toastError(message)
     }
   }
 
   const isSubmitting = checkoutCartMutation.isPending
+  const showCheckoutBackdrop = isSubmitting || redirectingToConfirmation
+  const checkoutBackdropText = redirectingToConfirmation
+    ? 'Đang chuyển đến trang xác nhận đơn hàng…'
+    : 'Đang xử lý đặt hàng, vui lòng đợi…'
   const canSubmit =
     !methodsLoadingPayment &&
     !methodsLoadingShipping &&
@@ -361,6 +368,12 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
+      <LoadingBackdrop
+        isOpen={showCheckoutBackdrop}
+        loadingText={checkoutBackdropText}
+        size="lg"
+        zIndex={10000}
+      />
       <Container className="py-4">
         <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
           <div className="lg:col-start-1 lg:row-start-1">
@@ -373,7 +386,7 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
-          <div className="relative z-0 isolate min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
+          <div className="relative z-0 min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
             <CheckoutProductList
               items={productLines}
               lineSubtotal={scopedLineSubtotal}

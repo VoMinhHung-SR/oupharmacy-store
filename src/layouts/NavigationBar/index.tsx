@@ -125,11 +125,11 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
         const dropdownWidthPx = hasAnyLevel2
           ? NAVBAR_DROPDOWN.WIDTH_LARGE
           : NAVBAR_DROPDOWN.WIDTH_SMALL
-        const preferredTop = rect.bottom + NAVBAR_DROPDOWN.GAP
         const viewportH =
           typeof window !== 'undefined' ? window.innerHeight : 600
         const viewportW =
           typeof window !== 'undefined' ? window.innerWidth : 1024
+        const preferredTop = rect.bottom + NAVBAR_DROPDOWN.GAP
         const maxHeight = Math.max(
           NAVBAR_DROPDOWN.MIN_HEIGHT,
           viewportH - preferredTop - NAVBAR_DROPDOWN.VIEWPORT_MARGIN,

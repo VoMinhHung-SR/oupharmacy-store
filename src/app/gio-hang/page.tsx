@@ -72,12 +72,6 @@ export default function CartPage() {
   const voucherDiscount = hasVoucherApplied ? discount : 0
   const hasSavings = discount > 0
 
-  const freeshipSubtotal =
-    selectedCount > 0
-      ? selectionTotals.selectedSubtotal
-      : items.reduce((s, i) => s + i.price * i.qty, 0)
-  const qualifiesFreeShipBanner = freeshipSubtotal >= FREE_SHIPPING_THRESHOLD
-
   const goCheckout = () => {
     const chosen = items.filter((i) => i.selected)
     if (chosen.length === 0) {
@@ -220,18 +214,8 @@ export default function CartPage() {
               <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)] lg:col-start-1 lg:row-start-2">
                 <div className="border-b border-primary-100/80 bg-gradient-to-r from-primary-50 to-sky-50 px-4 py-3 md:px-5">
                   <p className="text-center text-xs font-medium text-slate-700 sm:text-sm">
-                    {qualifiesFreeShipBanner ? (
-                      <>
-                        Đơn đã chọn đạt mức{' '}
-                        <span className="font-semibold text-primary-600">miễn phí vận chuyển</span> (từ{' '}
-                        {formatMoney(FREE_SHIPPING_THRESHOLD)}).
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng
-                        trên {formatMoney(FREE_SHIPPING_THRESHOLD)}.
-                      </>
-                    )}
+                    <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng từ{' '}
+                    {formatMoney(FREE_SHIPPING_THRESHOLD)}.
                   </p>
                 </div>
                 <div className="border-b border-slate-100 px-4 py-3 md:px-5 lg:grid lg:grid-cols-[2rem_5.5rem_minmax(0,1fr)_7.5rem_9.5rem_6.5rem_2.25rem] lg:items-center lg:gap-4">

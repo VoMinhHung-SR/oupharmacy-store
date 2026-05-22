@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
   const compactTerms = displayTerms.slice(0, 6)
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-30 w-full bg-primary-600 text-white shadow-lg">
+    <header className="sticky top-0 left-0 right-0 z-40 w-full bg-primary-600 text-white shadow-lg">
       {/* Top bar - Tải ứng dụng | Tư vấn ngay */}
       <div className="border-b border-white/10 bg-primary-700/80 py-1.5 text-xs text-white">
         <Container>

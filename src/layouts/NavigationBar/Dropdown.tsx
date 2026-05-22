@@ -104,9 +104,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
       <div
         ref={bridgeRef}
         data-bridge-area
-        className="fixed z-[39] bg-transparent"
+        className="fixed z-[24] bg-transparent"
         style={{
-          position: 'fixed',
           top: `${position.top - DROPDOWN_GAP}px`,
           left: `${position.left}px`,
           width: bridgeWidth,
@@ -118,11 +117,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
       />
       <div
         ref={dropdownRef}
-        className={`fixed z-50 flex flex-col rounded-lg border border-gray-200 bg-white shadow-xl ${
+        data-dropdown
+        className={`fixed z-[25] flex flex-col rounded-lg border border-gray-200 bg-white shadow-xl ${
           hasAnyLevel2 ? 'min-w-[800px] max-w-[1000px]' : 'w-[280px]'
         }`}
         style={{
-          position: 'fixed',
           top: `${position.top}px`,
           left: `${position.left}px`,
           maxHeight: `${position.maxHeight}px`,
@@ -131,10 +130,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
         onMouseLeave={handleMouseLeave}
       >
         {hasAnyLevel2 ? (
-          <div className="flex flex-col min-h-0 flex-1 overflow-y-auto py-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto py-4">
             <div className="px-6 py-2">
               <div className="grid grid-cols-[30%_70%] gap-4">
-                <div className="relative z-10 border-r border-gray-100 pr-8 bg-white">
+                <div className="relative z-10 border-r border-gray-100 bg-white pr-8">
                   <Level1Items
                     items={category.children}
                     activeLevel1Id={activeLevel1?.id ?? null}
@@ -165,7 +164,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             </div>
           </div>
         ) : (
-          <div className="overflow-y-auto py-4 min-h-0 flex-1">
+          <div className="flex min-h-0 flex-1 overflow-y-auto py-4">
             <div className="px-2">
               <Level1Items
                 items={category.children}

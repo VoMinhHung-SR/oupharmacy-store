@@ -32,18 +32,8 @@ export function CheckoutProductList({ items, lineSubtotal, hideProductNames = fa
     <section className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
       <div className="border-b border-primary-100/80 bg-gradient-to-r from-primary-50 to-sky-50 px-4 py-3 sm:px-5">
         <p className="text-center text-xs font-medium text-slate-700 sm:text-sm">
-          {qualifiesFreeShip ? (
-            <>
-              Đơn của bạn đạt mức{' '}
-              <span className="font-semibold text-primary-600">miễn phí vận chuyển</span> (từ{' '}
-              {formatVnd(FREE_SHIPPING_THRESHOLD)}).
-            </>
-          ) : (
-            <>
-              <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng trên{' '}
-              <span className="text-slate-900">{formatVnd(FREE_SHIPPING_THRESHOLD)}</span>.
-            </>
-          )}
+          <span className="font-semibold text-primary-600">Miễn phí vận chuyển</span> đối với đơn hàng từ{' '}
+          {formatVnd(FREE_SHIPPING_THRESHOLD)}.
         </p>
       </div>
       <div className="px-4 py-4 sm:px-5 sm:py-5">

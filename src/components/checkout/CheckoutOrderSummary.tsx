@@ -64,6 +64,16 @@ export function CheckoutOrderSummary({
             <dd className="font-semibold text-slate-900">{formatVnd(subtotal)}</dd>
           </div>
           <div className="flex justify-between gap-3">
+            <dt className="text-slate-600">Phí vận chuyển</dt>
+            <dd
+              className={
+                shippingIsFree ? 'text-xs font-semibold text-primary-600' : 'font-medium text-slate-900'
+              }
+            >
+              {shippingLabel}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
             <dt className="text-slate-600">Giảm giá trực tiếp</dt>
             <dd className="font-medium text-orange-600">
               {directDiscount > 0 ? `-${formatVnd(directDiscount)}` : formatVnd(0)}
@@ -86,16 +96,6 @@ export function CheckoutOrderSummary({
           <div className="flex justify-between gap-3 border-t border-dashed border-slate-200 pt-3">
             <dt className="font-medium text-slate-700">Tiết kiệm được</dt>
             <dd className="font-semibold text-orange-600">{hasSavings ? formatVnd(savingsTotal) : formatVnd(0)}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-slate-600">Phí vận chuyển</dt>
-            <dd
-              className={
-                shippingIsFree ? 'text-xs font-semibold text-primary-600' : 'font-medium text-slate-900'
-              }
-            >
-              {shippingLabel}
-            </dd>
           </div>
         </dl>
       </div>
