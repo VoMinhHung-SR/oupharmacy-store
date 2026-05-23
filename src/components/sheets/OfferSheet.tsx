@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CloseIcon } from '@/components/icons'
 
 export interface OfferSheetProps {
@@ -17,6 +18,12 @@ export interface OfferSheetProps {
  * Bottom sheet / centered dialog — shell chung (nội dung qua `children`).
  */
 export function OfferSheet({ open, onClose, titleId, title, children, footer }: OfferSheetProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -35,11 +42,11 @@ export function OfferSheet({ open, onClose, titleId, title, children, footer }: 
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4"
       role="presentation"
     >
       <button
@@ -70,6 +77,7 @@ export function OfferSheet({ open, onClose, titleId, title, children, footer }: 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
         {footer != null ? <div className="shrink-0">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

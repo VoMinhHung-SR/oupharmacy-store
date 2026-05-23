@@ -24,7 +24,8 @@ export function useOrders(userId?: number, filters?: OrderListFilters) {
   })
 }
 
-export function useOrder(orderNumber: string) {
+export function useOrder(orderNumber: string, options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? !!orderNumber
   return useQuery<Order | undefined, Error>({
     queryKey: ['order', orderNumber],
     queryFn: async () => {
@@ -34,7 +35,7 @@ export function useOrder(orderNumber: string) {
       }
       return response.data
     },
-    enabled: !!orderNumber,
+    enabled: enabled && !!orderNumber,
   })
 }
 

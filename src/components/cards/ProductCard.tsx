@@ -7,7 +7,7 @@ import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
-import type { ProductUnitOption } from '@/lib/services/products'
+import { buildProductHref, mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
 
 interface ProductCardProps {
   product: {
@@ -29,12 +29,8 @@ interface ProductCardProps {
   }
 }
 
-const getProductLink = (product: ProductCardProps['product']): string | null => {
-  if (product.category_slug && product.product_slug) {
-    return `/${product.category_slug}/${product.product_slug}`
-  }
-  return null
-}
+const getProductLink = (product: ProductCardProps['product']): string | null =>
+  buildProductHref(product.category_slug, product.product_slug)
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
@@ -108,6 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         id: product.id,
         variant_unit_id: product.variant_unit_id,
         product_variant_unit_id: selectedUnit?.unit_id ?? product.product_variant_unit_id,
+        unit_options: mapProductUnitOptionsForCart(unitOptions),
         name: product.name,
         price: selectedUnit?.price_value ?? product.price,
         image_url: product.image_url,

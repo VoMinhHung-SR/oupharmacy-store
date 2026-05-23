@@ -3,7 +3,13 @@ import React, { useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet } from '@/lib/api'
-import { Product, ProductListResponse, CategoryProductsResponse, normalizeProduct } from '@/lib/services/products'
+import {
+  Product,
+  ProductListResponse,
+  CategoryProductsResponse,
+  normalizeProduct,
+  parseStorePath,
+} from '@/lib/services/products'
 import { ProductDetailPageContent } from '@/components/products'
 import { CategoryListingPageContent } from '@/components/products'
 import { useDynamicFilters } from '@/lib/hooks/useDynamicFilters'
@@ -39,10 +45,8 @@ export default function NestedPathPage({ params }: Props) {
   const pathname = usePathname()
   
   const fullPath = pathname.startsWith('/') ? pathname.slice(1) : pathname
-  
-  const parts = fullPath.split('/')
-  
-  const isValidPath = parts.length >= 2
+  const parsedPath = parseStorePath(fullPath)
+  const isValidPath = parsedPath.segments.length >= 2
   const [filters, setFilters] = useState<ProductFilters>({ 
     page: PAGINATION.DEFAULT_PAGE, 
     page_size: PAGINATION.DEFAULT_PAGE_SIZE 
@@ -99,29 +103,25 @@ export default function NestedPathPage({ params }: Props) {
   
   const shouldRenderProductDetailSkeleton = useMemo(() => {
     if (!isLoading || apiResponse) return false
-    
+
     const cachedData = queryClient.getQueryData<Product | ProductListResponse>(['nested-path', fullPath, filters])
     if (cachedData) {
       return !('results' in cachedData)
     }
-    
-    if (parts.length > 3) {
-      return true
-    }
-    
-    return false
-  }, [isLoading, apiResponse, fullPath, filters, queryClient, parts.length])
-  
-  // Fetch dynamic filters chỉ khi là category listing (không phải product detail)
-  // Logic: đối với tất cả /domain../{categorySlug}/ đều trả về filter
-  // except: /{categorySlug}/productDetail là không có bộ lọc
-  // Fetch khi: đã xác định là category listing HOẶC đang loading (trừ khi heuristic cho thấy là product detail)
-  const shouldFetchFilters = isProductList === true || (isLoading && !shouldRenderProductDetailSkeleton)
+
+    return parsedPath.mode === 'product'
+  }, [isLoading, apiResponse, fullPath, filters, queryClient, parsedPath.mode])
+
+  const categoryPathForFilters = parsedPath.mode === 'category' ? parsedPath.categoryPath : undefined
+
+  const shouldFetchFilters =
+    isProductList === true || (isLoading && parsedPath.mode === 'category' && !shouldRenderProductDetailSkeleton)
+
   const { 
     data: filtersData,
     isLoading: filtersLoading 
   } = useDynamicFilters(
-    shouldFetchFilters ? fullPath : undefined,
+    shouldFetchFilters ? categoryPathForFilters : undefined,
     { 
       include_variants: true, 
       include_counts: true
@@ -129,8 +129,8 @@ export default function NestedPathPage({ params }: Props) {
     shouldFetchFilters // Chỉ fetch khi là category listing
   )
   
-  const parsedCategoryPath = isValidPath ? parts.slice(0, -1).join('/') : undefined
-  const parsedProductSlug = isValidPath ? parts[parts.length - 1] : undefined
+  const parsedCategoryPath = parsedPath.categoryPath
+  const parsedProductSlug = parsedPath.productSlug ?? undefined
   
   const categoryName = useMemo(() => {
     // Priority 1: From productList API response (check if it's CategoryProductsResponse)

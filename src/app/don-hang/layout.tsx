@@ -1,11 +1,13 @@
 'use client'
 
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-
+/**
+ * Checkout allows guest (cart-first) and authenticated users.
+ * Do not wrap with ProtectedRoute — guest uses X-Guest-Session + server cart.
+ */
 export default function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <ProtectedRoute>{children}</ProtectedRoute>
+  return <>{children}</>
 }

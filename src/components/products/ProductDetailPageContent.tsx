@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
@@ -9,13 +9,21 @@ import { ProductDescriptionSection } from '@/components/products/ProductDescript
 import { ShareButton } from '@/components/products/ShareButton'
 import { RelatedProducts } from '@/components/products/RelatedProducts'
 import { RecentlyViewed, saveToRecentlyViewed } from '@/components/products/RecentlyViewed'
-import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { toastWarning } from '@/lib/utils/toast'
 import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
-import { Product, getProductEntity, getProductName, getProductPackaging } from '@/lib/services/products'
+import {
+  Product,
+  buildProductHref,
+  getProductCategorySlug,
+  getProductEntity,
+  getProductName,
+  getProductPackaging,
+  getProductSlug,
+  mapProductUnitOptionsForCart,
+} from '@/lib/services/products'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -33,12 +41,10 @@ export function ProductDetailPageContent({
   error = null,
 }: ProductDetailPageContentProps) {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
   const { add, items } = useCart()
   const { toggle: toggleWishlist, isInWishlist } = useWishlist()
   const [quantity, setQuantity] = useState(1)
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null)
-  const pendingBuyNowRef = useRef<{ productId: number; expectedQty: number } | null>(null)
 
   const productImages = product?.images || []
   const productImageUrl = product 
@@ -64,6 +70,7 @@ export function ProductDetailPageContent({
       id: product.id.toString(),
       variant_unit_id: product.id,
       product_variant_unit_id: selectedUnit?.unit_id ?? product.default_unit_id ?? undefined,
+      unit_options: mapProductUnitOptionsForCart(unitOptions),
       name: productName,
       price: effectivePriceValue,
       image_url: productImageUrl || product.image_url,
@@ -102,23 +109,20 @@ export function ProductDetailPageContent({
     void add(getCartItem(), quantity)
   }
 
-  // Anonymous cart updates synchronously in parent state; wait for items before navigating.
-  useEffect(() => {
-    if (isAuthenticated || !pendingBuyNowRef.current) return
-    const { productId, expectedQty } = pendingBuyNowRef.current
-    const itemInCart = items.find((i) => i.variant_unit_id === productId)
-
-    if (itemInCart && itemInCart.qty >= expectedQty) {
-      pendingBuyNowRef.current = null
-      router.push('/don-hang')
-    }
-  }, [items, router, isAuthenticated])
-
   useEffect(() => {
     if (product) {
       saveToRecentlyViewed(product)
     }
   }, [product])
+
+  useEffect(() => {
+    if (!product || loading) return
+    const canonical = buildProductHref(getProductCategorySlug(product), getProductSlug(product))
+    if (!canonical || typeof window === 'undefined') return
+    if (window.location.pathname !== canonical) {
+      router.replace(canonical)
+    }
+  }, [product, loading, router])
 
   useEffect(() => {
     if (!unitOptions.length) {
@@ -137,18 +141,12 @@ export function ProductDetailPageContent({
     const validation = validateStock()
     if (!validation) return
 
-    if (isAuthenticated) {
-      try {
-        await add(getCartItem(), quantity)
-        router.push('/don-hang')
-      } catch {
-        // Errors are toasted in CartContext.add
-      }
-      return
+    try {
+      await add(getCartItem(), quantity)
+      router.push('/don-hang')
+    } catch {
+      // Errors are toasted in CartContext.add
     }
-
-    pendingBuyNowRef.current = { productId: product.id, expectedQty: validation.totalQty }
-    void add(getCartItem(), quantity)
   }
 
   if (loading && !product) {

@@ -67,14 +67,16 @@ export const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
             aria-modal="true"
             aria-label="Loading"
         >
-            <div className="flex flex-col items-center gap-4">
-                {/* Spinner Xanh Primary */}
+            <div className="flex flex-col items-center gap-4 px-6 text-center">
                 <div
                     className={`${spinnerSize} border-gray-100 border-t-primary-500 rounded-full animate-spin shadow-sm`}
-                    style={{ borderTopColor: '#0284c7' }} // Ensure primary color is used
+                    style={{ borderTopColor: '#0284c7' }}
                     role="status"
                     aria-live="polite"
                 />
+                {loadingText ? (
+                    <p className="max-w-xs text-sm font-medium text-slate-700">{loadingText}</p>
+                ) : null}
             </div>
         </div>,
         document.body

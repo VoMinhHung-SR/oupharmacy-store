@@ -6,14 +6,20 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
+import { saveGuestOrderConfirmation } from '@/lib/utils/guestOrderConfirmation'
 import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
-import { checkoutInformationSchema, composeShippingAddressPayload, type CheckoutInformationFormData } from '@/lib/validations/checkout'
+import {
+  buildCheckoutDeliveryPayload,
+  checkoutInformationSchema,
+  type CheckoutInformationFormData,
+} from '@/lib/validations/checkout'
 import { Container } from '@/components/Container'
+import { LoadingBackdrop } from '@/components/LoadingBackdrop'
 import { ChevronLeftIcon } from '@/components/icons'
 import {
   CheckoutInfoSection,
@@ -23,10 +29,15 @@ import {
   CheckoutVoucherSection,
   CheckoutProductList,
 } from '@/components/checkout'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
+import {
+  pickPreferredShippingMethod,
+  shouldShowShippingMethodChoice,
+} from '@/lib/utils/shippingCheckout'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const {
     information,
     setInformation,
@@ -43,6 +54,9 @@ export default function CheckoutPage() {
     total,
     subtotal,
     shippingFee: cartShippingFee,
+    freeShippingApplied: cartFreeShippingApplied,
+    orderVoucherCode,
+    shippingVoucherCode,
     discountAmount = 0,
     shippingDiscountAmount = 0,
     version: cartVersion,
@@ -55,12 +69,13 @@ export default function CheckoutPage() {
   const applyVoucherMutation = useApplyVoucher()
   const hasCompletedOrderRef = useRef(false)
   const [hideLineDetail, setHideLineDetail] = useState(false)
+  const [redirectingToConfirmation, setRedirectingToConfirmation] = useState(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
   const selectedShippingId = serverShippingMethodId ?? null
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
-  const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
+  const rawShippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
 
   const scopedIdSet = useMemo(() => {
@@ -105,20 +120,39 @@ export default function CheckoutPage() {
     return Math.min(1, scopedLineSubtotal / orderSubtotal)
   }, [hasScopedSubset, scopedLineSubtotal, orderSubtotal])
 
+  /** Full cart: BE `free_shipping_applied`. Partial checkout: local subtotal vs FE constant (BE applies on checkout). */
+  const qualifiesFreeShipping = hasScopedSubset
+    ? scopedLineSubtotal >= FREE_SHIPPING_THRESHOLD
+    : Boolean(cartFreeShippingApplied)
+  const displayShippingFee = hasScopedSubset
+    ? qualifiesFreeShipping
+      ? 0
+      : rawShippingFee
+    : Number(cartShippingFee) || (cartFreeShippingApplied ? 0 : rawShippingFee)
+
+  const showShippingMethodChoice = useMemo(
+    () => shouldShowShippingMethodChoice(shippingMethods, qualifiesFreeShipping),
+    [shippingMethods, qualifiesFreeShipping]
+  )
+
   const displayOrderDiscount = discountAmount * scopeRatio
   const displayShippingDiscount = shippingDiscountAmount * scopeRatio
+  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
+  const displayDirectDiscount = hasVoucherApplied ? 0 : Math.max(0, discountAmount) * scopeRatio
   const orderTotal = Math.max(
     0,
-    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + shippingFee
+    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + displayShippingFee
   )
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     setValue,
-    trigger,
+    watch,
     getValues,
+    trigger,
   } = useForm<CheckoutInformationFormData>({
     resolver: yupResolver(checkoutInformationSchema) as Resolver<CheckoutInformationFormData>,
     mode: 'onBlur',
@@ -128,6 +162,8 @@ export default function CheckoutPage() {
       email: information?.email ?? '',
       recipient_name: information?.recipient_name ?? information?.name ?? '',
       recipient_phone: information?.recipient_phone ?? information?.phone ?? '',
+      city_id: information?.city_id != null ? String(information.city_id) : '',
+      commune_id: information?.commune_id != null ? String(information.commune_id) : '',
       province: information?.province ?? '',
       district: information?.district ?? '',
       ward: information?.ward ?? '',
@@ -156,6 +192,8 @@ export default function CheckoutPage() {
       setValue('email', information.email)
       setValue('recipient_name', information.recipient_name ?? information.name)
       setValue('recipient_phone', information.recipient_phone ?? information.phone)
+      setValue('city_id', information.city_id != null ? String(information.city_id) : '')
+      setValue('commune_id', information.commune_id != null ? String(information.commune_id) : '')
       setValue('province', information.province ?? '')
       setValue('district', information.district ?? '')
       setValue('ward', information.ward ?? '')
@@ -164,7 +202,7 @@ export default function CheckoutPage() {
   }, [information, setValue])
 
   useEffect(() => {
-    if (information || !user) return
+    if (!isAuthenticated || information || !user) return
     const name =
       user?.name ||
       [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() ||
@@ -179,7 +217,33 @@ export default function CheckoutPage() {
       setValue('phone', user.phone_number)
       setValue('recipient_phone', user.phone_number)
     }
-  }, [user, information, setValue])
+  }, [isAuthenticated, user, information, setValue])
+
+  useEffect(() => {
+    if (methodsLoadingShipping || shippingMethods.length === 0 || cartVersion == null) return
+    const preferred = pickPreferredShippingMethod(shippingMethods)
+    if (!preferred) return
+
+    const shouldAutoSelect =
+      qualifiesFreeShipping && !showShippingMethodChoice && selectedShippingId !== preferred.id
+
+    if (shouldAutoSelect) {
+      selectShippingMutation
+        .mutateAsync({
+          shipping_method_id: preferred.id,
+          expected_version: cartVersion,
+        })
+        .catch(() => {})
+    }
+  }, [
+    cartVersion,
+    methodsLoadingShipping,
+    qualifiesFreeShipping,
+    selectedShippingId,
+    selectShippingMutation,
+    shippingMethods,
+    showShippingMethodChoice,
+  ])
 
   const onInfoSubmit = (data: CheckoutInformationFormData) => {
     setInformation({
@@ -189,6 +253,8 @@ export default function CheckoutPage() {
       address: data.address,
       recipient_name: data.recipient_name,
       recipient_phone: data.recipient_phone,
+      city_id: data.city_id ? Number(data.city_id) : undefined,
+      commune_id: data.commune_id ? Number(data.commune_id) : undefined,
       province: data.province ?? '',
       district: data.district ?? '',
       ward: data.ward ?? '',
@@ -224,6 +290,8 @@ export default function CheckoutPage() {
         address: formValues.address,
         recipient_name: formValues.recipient_name,
         recipient_phone: formValues.recipient_phone,
+        city_id: formValues.city_id ? Number(formValues.city_id) : undefined,
+        commune_id: formValues.commune_id ? Number(formValues.commune_id) : undefined,
         province: formValues.province ?? '',
         district: formValues.district ?? '',
         ward: formValues.ward ?? '',
@@ -235,12 +303,14 @@ export default function CheckoutPage() {
           : undefined
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
-        shipping_address: composeShippingAddressPayload(formValues),
+        delivery: buildCheckoutDeliveryPayload(formValues),
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
         ...(scope ? { cart_item_ids: scope } : {}),
       })
-      toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
+      if (!isAuthenticated && created && typeof created === 'object') {
+        saveGuestOrderConfirmation(created as Record<string, unknown>)
+      }
       clearCheckout()
       const orderNumber = String(created?.order_number || '')
       const orderId = Number(created?.id)
@@ -249,15 +319,21 @@ export default function CheckoutPage() {
         : Number.isFinite(orderId)
           ? `order_id=${orderId}`
           : ''
+      setRedirectingToConfirmation(true)
       router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
       hasCompletedOrderRef.current = false
+      setRedirectingToConfirmation(false)
       const message = err instanceof Error ? err.message : 'Đặt hàng thất bại. Vui lòng thử lại.'
       toastError(message)
     }
   }
 
   const isSubmitting = checkoutCartMutation.isPending
+  const showCheckoutBackdrop = isSubmitting || redirectingToConfirmation
+  const checkoutBackdropText = redirectingToConfirmation
+    ? 'Đang chuyển đến trang xác nhận đơn hàng…'
+    : 'Đang xử lý đặt hàng, vui lòng đợi…'
   const canSubmit =
     !methodsLoadingPayment &&
     !methodsLoadingShipping &&
@@ -292,6 +368,12 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-[60vh] bg-slate-50/80">
+      <LoadingBackdrop
+        isOpen={showCheckoutBackdrop}
+        loadingText={checkoutBackdropText}
+        size="lg"
+        zIndex={10000}
+      />
       <Container className="py-4">
         <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
           <div className="lg:col-start-1 lg:row-start-1">
@@ -304,7 +386,7 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
-          <div className="min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
+          <div className="relative z-0 min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
             <CheckoutProductList
               items={productLines}
               lineSubtotal={scopedLineSubtotal}
@@ -313,6 +395,11 @@ export default function CheckoutPage() {
 
             <CheckoutInfoSection
               register={register}
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              getValues={getValues}
+              savedInfo={information}
               errors={errors}
               handleSubmit={handleSubmit}
               onSubmit={onInfoSubmit}
@@ -322,6 +409,7 @@ export default function CheckoutPage() {
             <CheckoutShippingSection
               methods={shippingMethods}
               selectedId={selectedShippingId}
+              qualifiesFreeShipping={qualifiesFreeShipping}
               onSelect={(id) => {
                 if (cartVersion == null) {
                   toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
@@ -349,7 +437,7 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5.25rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
+          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-36 lg:max-h-[calc(100dvh-10rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
             <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
               <div className="p-5 pb-4">
                 <CheckoutVoucherSection
@@ -369,11 +457,16 @@ export default function CheckoutPage() {
               <CheckoutOrderSummary
                 embedded
                 subtotal={scopedLineSubtotal}
-                shippingFee={shippingFee}
+                shippingFee={displayShippingFee}
                 total={orderTotal}
-                hasShippingSelected={Boolean(selectedShippingMethodFromList)}
+                hasShippingSelected={
+                  Boolean(selectedShippingMethodFromList) ||
+                  (qualifiesFreeShipping && shippingMethods.length > 0 && !showShippingMethodChoice)
+                }
+                qualifiesFreeShipping={qualifiesFreeShipping}
                 discountAmount={displayOrderDiscount}
                 shippingDiscountAmount={displayShippingDiscount}
+                directDiscount={displayDirectDiscount}
                 onPlaceOrder={handlePlaceOrder}
                 isSubmitting={isSubmitting}
                 canSubmit={canSubmit}

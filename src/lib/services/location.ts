@@ -1,16 +1,25 @@
 import axios from 'axios'
+import { STORAGE_KEY } from '../constant'
 
 const MAIN_API_URL = process.env.NEXT_PUBLIC_MAIN_API_URL || 'http://localhost:8000'
+
+function mainApiAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  const token = localStorage.getItem(STORAGE_KEY.TOKEN)
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export interface City {
   id: number
   name: string
+  id_province?: string | null
 }
 
 export interface District {
   id: number
   name: string
-  city: number
+  city_id: number
+  id_commune?: string | null
 }
 
 export interface Location {
@@ -32,32 +41,41 @@ export interface CreateLocationData {
   address: string
 }
 
+/** GET /common-cities/ */
 export async function getCities(): Promise<{ data?: City[]; error?: string }> {
   try {
-    const response = await axios.get<{ cityOptions: City[] }>(`${MAIN_API_URL}/common-configs/`)
-    if (response.data?.cityOptions) {
-      return { data: response.data.cityOptions }
+    const response = await axios.get<City[]>(`${MAIN_API_URL}/common-cities/`, {
+      headers: { ...mainApiAuthHeaders() },
+    })
+    if (Array.isArray(response.data)) {
+      return { data: response.data }
     }
-    return { error: 'Không thể lấy danh sách thành phố' }
-  } catch (error: any) {
+    return { error: 'Không thể lấy danh sách tỉnh/thành phố' }
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string }
     return {
-      error: error.response?.data?.detail || error.message || 'Không thể lấy danh sách thành phố',
+      error: err.response?.data?.detail || err.message || 'Không thể lấy danh sách tỉnh/thành phố',
     }
   }
 }
 
+/** GET /common-cities/{cityId}/get-districts/ */
 export async function getDistrictsByCity(
   cityId: number
 ): Promise<{ data?: District[]; error?: string }> {
   try {
-    const response = await axios.post<District[]>(
-      `${MAIN_API_URL}/common-districts/get-by-city/`,
-      { city: cityId }
+    const response = await axios.get<District[]>(
+      `${MAIN_API_URL}/common-cities/${cityId}/get-districts/`,
+      { headers: { ...mainApiAuthHeaders() } }
     )
-    return { data: response.data }
-  } catch (error: any) {
+    if (Array.isArray(response.data)) {
+      return { data: response.data }
+    }
+    return { error: 'Không thể lấy danh sách phường/xã' }
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string }
     return {
-      error: error.response?.data?.detail || error.message || 'Không thể lấy danh sách quận/huyện',
+      error: err.response?.data?.detail || err.message || 'Không thể lấy danh sách phường/xã',
     }
   }
 }
@@ -66,16 +84,19 @@ export async function createLocation(
   data: CreateLocationData
 ): Promise<{ data?: Location; error?: string }> {
   try {
-    const response = await axios.post<Location>(`${MAIN_API_URL}/common-locations/`, data)
+    const response = await axios.post<Location>(`${MAIN_API_URL}/common-locations/`, data, {
+      headers: { ...mainApiAuthHeaders() },
+    })
     if (response.status === 201 && response.data) {
       return { data: response.data }
     }
     return { error: 'Không thể tạo địa chỉ' }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
     const errorMessage =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error.message ||
+      err.response?.data?.detail ||
+      err.response?.data?.message ||
+      err.message ||
       'Không thể tạo địa chỉ'
     return { error: errorMessage }
   }

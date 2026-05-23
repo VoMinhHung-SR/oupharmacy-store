@@ -10,6 +10,26 @@ export interface ProductUnitOption {
   is_default?: boolean
 }
 
+/** Cart line unit picker (guest localStorage uses `id`; API cart uses same shape). */
+export interface CartLineUnitOption {
+  id: number
+  unit_name: string
+  is_default?: boolean
+  price_value?: number
+}
+
+export function mapProductUnitOptionsForCart(unitOptions?: ProductUnitOption[]): CartLineUnitOption[] {
+  if (!Array.isArray(unitOptions)) return []
+  return unitOptions
+    .filter((u) => Number.isFinite(u.unit_id) && u.unit_id > 0)
+    .map((u) => ({
+      id: u.unit_id,
+      unit_name: u.unit_name,
+      is_default: u.is_default,
+      price_value: u.price_value,
+    }))
+}
+
 export interface Product {
   id: number
   price_value: number
@@ -199,13 +219,93 @@ export function getProductImageUrl(product: Product) {
   return product.image_url || product.images?.[0]
 }
 
-export function getProductCategorySlug(product: Product, fallbackCategorySlug?: string) {
-  return (
-    product.category_info?.categorySlug ||
-    (product.category_info?.category?.length
-      ? product.category_info.category.map((cat) => cat.slug).join('/')
-      : fallbackCategorySlug || product.category?.path_slug || product.category?.slug || '')
-  )
+/** Strip leading/trailing slashes and collapse repeated path segments (e.g. a/a/b → a/b). */
+export function normalizeCategoryPathSlug(path: string): string {
+  const trimmed = path.replace(/^\/+|\/+$/g, '').trim()
+  if (!trimmed) return ''
+  const parts = trimmed.split('/').filter(Boolean)
+  const deduped: string[] = []
+  for (const part of parts) {
+    if (deduped[deduped.length - 1] !== part) {
+      deduped.push(part)
+    }
+  }
+  return deduped.join('/')
+}
+
+export function getProductCategorySlug(product: Product, fallbackCategorySlug?: string): string {
+  const fromInfo = product.category_info?.categorySlug?.trim()
+  if (fromInfo) {
+    return normalizeCategoryPathSlug(fromInfo)
+  }
+
+  const fromCategory = product.category?.path_slug?.trim()
+  if (fromCategory) {
+    return normalizeCategoryPathSlug(fromCategory)
+  }
+
+  if (product.category_info?.category?.length) {
+    const joined = product.category_info.category
+      .map((cat) => cat.slug?.trim())
+      .filter(Boolean)
+      .join('/')
+    if (joined) {
+      return normalizeCategoryPathSlug(joined)
+    }
+  }
+
+  if (fallbackCategorySlug?.trim()) {
+    return normalizeCategoryPathSlug(fallbackCategorySlug)
+  }
+
+  const leafSlug = product.category?.slug?.trim()
+  return leafSlug ? normalizeCategoryPathSlug(leafSlug) : ''
+}
+
+export function buildProductHref(categorySlug: string | undefined, productSlug: string | undefined): string | null {
+  const cat = categorySlug ? normalizeCategoryPathSlug(categorySlug) : ''
+  const slug = productSlug?.trim()
+  if (!cat || !slug) return null
+  return `/${cat}/${slug}`
+}
+
+/** Heuristic: store product slugs usually end with a numeric id (e.g. ...-32562). */
+export function isLikelyProductSlug(segment: string): boolean {
+  const slug = segment.trim()
+  if (!slug) return false
+  return /-\d{3,}$/.test(slug)
+}
+
+export type StorePathMode = 'category' | 'product'
+
+export function parseStorePath(fullPath: string): {
+  mode: StorePathMode
+  categoryPath: string
+  productSlug: string | null
+  segments: string[]
+} {
+  const normalized = normalizeCategoryPathSlug(fullPath)
+  const segments = normalized ? normalized.split('/') : []
+  if (segments.length < 2) {
+    return { mode: 'category', categoryPath: normalized, productSlug: null, segments }
+  }
+  const last = segments[segments.length - 1]
+  if (isLikelyProductSlug(last)) {
+    return {
+      mode: 'product',
+      categoryPath: segments.slice(0, -1).join('/'),
+      productSlug: last,
+      segments,
+    }
+  }
+  return { mode: 'category', categoryPath: normalized, productSlug: null, segments }
+}
+
+/** Store route href from BE `web_slug` (full category path + product slug). */
+export function toStoreProductHref(webSlug?: string | null): string | null {
+  if (!webSlug?.trim()) return null
+  const path = normalizeCategoryPathSlug(webSlug)
+  return path ? `/${path}` : null
 }
 
 export function buildProductCardPayload(product: Product, fallbackCategorySlug?: string): ProductCardPayload {

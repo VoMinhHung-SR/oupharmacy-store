@@ -8,6 +8,7 @@ import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue'
 import { useProducts } from '@/lib/hooks/useProducts'
 import {
   buildProductCardPayload,
+  buildProductHref,
   type Product,
   type ProductCardPayload,
 } from '@/lib/services/products'
@@ -21,10 +22,7 @@ export type HeaderSearchSuggestionItem = {
 
 /** Used by browse panel when mapping products to links */
 export function headerSearchProductHref(card: ProductCardPayload): string | null {
-  if (card.category_slug && card.product_slug) {
-    return `/${card.category_slug}/${card.product_slug}`
-  }
-  return null
+  return buildProductHref(card.category_slug, card.product_slug)
 }
 
 function headerSearchPickTopDeals(products: Product[], limit: number): Product[] {

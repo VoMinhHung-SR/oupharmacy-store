@@ -12,6 +12,7 @@ import { Button } from '@/components/Button'
 import { toastSuccess } from '@/lib/utils/toast'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { PRICE_CONSULT } from '@/lib/constant'
+import { buildProductHref } from '@/lib/services/products'
 
 export default function WishlistPage() {
   const { isAuthenticated, loading } = useAuth()
@@ -125,12 +126,7 @@ export default function WishlistPage() {
     }
   }
 
-  const getProductLink = (item: typeof items[0]) => {
-    if (item.category_slug && item.product_slug) {
-      return `/${item.category_slug}/${item.product_slug}`
-    }
-    return '#'
-  }
+  const getProductLink = (item: typeof items[0]) => buildProductHref(item.category_slug, item.product_slug) ?? '#'
 
   if (!isAuthenticated) {
     return null

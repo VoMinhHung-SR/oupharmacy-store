@@ -80,6 +80,11 @@ function normalizeOrderItem(raw: Record<string, unknown>): OrderItem {
   }
 }
 
+/** Map checkout / order API payload to FE `Order` shape. */
+export function normalizeOrderFromCheckout(raw: Record<string, unknown>): Order {
+  return normalizeOrder(raw)
+}
+
 function normalizeOrder(raw: Record<string, unknown>): Order {
   const items = Array.isArray(raw.items)
     ? (raw.items as Record<string, unknown>[]).map((i) => normalizeOrderItem(i))
