@@ -22,7 +22,8 @@ export interface CartItem {
 
 export interface Cart {
   id: number
-  user_id: number
+  user_id: number | null
+  guest_session_id?: string | null
   status: 'ACTIVE' | 'CHECKED_OUT' | 'ABANDONED'
   items: CartItem[]
   shipping_method?: ShippingMethod | null
@@ -34,6 +35,8 @@ export interface Cart {
   version: number
   order_voucher_code?: string | null
   shipping_voucher_code?: string | null
+  /** BE: line subtotal meets free-shipping promo (≥ threshold in store_constants) */
+  free_shipping_applied?: boolean
   checkout_order?: number | null
   created_date?: string
   updated_date?: string
@@ -72,9 +75,16 @@ export interface RemoveVoucherPayload extends CartMutationBase {
   target?: 'order' | 'shipping' | 'all'
 }
 
+import type { CheckoutDeliveryPayload } from '../validations/checkout'
+
 export interface CheckoutCartPayload extends CartMutationBase {
   payment_method_id: number
-  shipping_address: string
+  /**
+   * Legacy: one pre-formatted string. Prefer `delivery` so the backend validates and formats storage.
+   * Send at least one of `shipping_address` or `delivery`.
+   */
+  shipping_address?: string
+  delivery?: CheckoutDeliveryPayload
   notes?: string
   /** When set, only these server cart line ids are purchased; cart stays active if lines remain. */
   cart_item_ids?: number[]
@@ -118,4 +128,8 @@ export async function recalculateCart(payload: CartMutationBase) {
 
 export async function checkoutCart(payload: CheckoutCartPayload) {
   return apiPost<Record<string, unknown>>('/carts/checkout/', payload)
+}
+
+export async function mergeGuestCart() {
+  return apiPost<Cart>('/carts/merge-guest/', {})
 }

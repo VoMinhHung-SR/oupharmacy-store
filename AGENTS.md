@@ -17,8 +17,8 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | `src/app/` | Routes & pages (App Router). Đặt tên theo URL (vd. `don-hang`, `gio-hang`, `tai-khoan`). |
 | `src/components/` | UI tái sử dụng; nhóm theo domain (`checkout/`, `products/`, …). |
 | `src/layouts/` | Header, navigation, footer wrappers. |
-| `src/contexts/` | Cart, Auth, Checkout, Wishlist, Login modal. |
-| `src/lib/services/` | Gọi API (axios/fetch) tới backend store / main API. |
+| `src/contexts/` | Cart, Auth, Checkout, Wishlist, Login modal, **CommonCities** (danh sách tỉnh/TP từ SSR root layout). |
+| `src/lib/services/` | Gọi API (axios/fetch) tới backend store / main API; **`location.server.ts`** fetch `common-cities` trên server. |
 | `src/lib/api.ts` | Axios instance store API (`NEXT_PUBLIC_API_URL`). |
 | `src/lib/hooks/` | Hooks dùng chung. |
 | `src/lib/validations/` | Yup / form validation. |

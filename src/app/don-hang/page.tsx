@@ -1,31 +1,43 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useMemo, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuth } from '@/contexts/AuthContext'
+import { saveGuestOrderConfirmation } from '@/lib/utils/guestOrderConfirmation'
 import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
-import { useApplyVoucher, useCheckoutCart, useRemoveVoucher, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
-import { checkoutInformationSchema, type CheckoutInformationFormData } from '@/lib/validations/checkout'
-import Breadcrumb from '@/components/Breadcrumb'
+import {
+  buildCheckoutDeliveryPayload,
+  checkoutInformationSchema,
+  type CheckoutInformationFormData,
+} from '@/lib/validations/checkout'
 import { Container } from '@/components/Container'
+import { LoadingBackdrop } from '@/components/LoadingBackdrop'
+import { ChevronLeftIcon } from '@/components/icons'
 import {
   CheckoutInfoSection,
   CheckoutShippingSection,
   CheckoutPaymentSection,
   CheckoutOrderSummary,
   CheckoutVoucherSection,
-  CheckoutNotesSection,
+  CheckoutProductList,
 } from '@/components/checkout'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
+import {
+  pickPreferredShippingMethod,
+  shouldShowShippingMethodChoice,
+} from '@/lib/utils/shippingCheckout'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const {
     information,
     setInformation,
@@ -42,10 +54,11 @@ export default function CheckoutPage() {
     total,
     subtotal,
     shippingFee: cartShippingFee,
-    discountAmount = 0,
-    shippingDiscountAmount = 0,
+    freeShippingApplied: cartFreeShippingApplied,
     orderVoucherCode,
     shippingVoucherCode,
+    discountAmount = 0,
+    shippingDiscountAmount = 0,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
   } = useCart()
@@ -54,14 +67,15 @@ export default function CheckoutPage() {
   const checkoutCartMutation = useCheckoutCart()
   const selectShippingMutation = useSelectShippingMethod()
   const applyVoucherMutation = useApplyVoucher()
-  const removeVoucherMutation = useRemoveVoucher()
   const hasCompletedOrderRef = useRef(false)
+  const [hideLineDetail, setHideLineDetail] = useState(false)
+  const [redirectingToConfirmation, setRedirectingToConfirmation] = useState(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
   const shippingMethods = Array.isArray(shippingMethodsData) ? shippingMethodsData.filter((m) => m.active) : []
   const selectedShippingId = serverShippingMethodId ?? null
   const selectedShippingMethodFromList = shippingMethods.find((m) => m.id === selectedShippingId)
-  const shippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
+  const rawShippingFee = Number(cartShippingFee) || selectedShippingMethodFromList?.price || 0
   const orderSubtotal = subtotal ?? total
 
   const scopedIdSet = useMemo(() => {
@@ -83,6 +97,19 @@ export default function CheckoutPage() {
     return items.filter((i) => scopedIdSet.has(i.id))
   }, [hasScopedSubset, items, scopedIdSet])
 
+  const productLines = useMemo(
+    () =>
+      summaryItems.map((i) => ({
+        id: i.id,
+        name: i.name,
+        qty: i.qty,
+        price: i.price,
+        packaging: i.packaging,
+        image_url: i.image_url,
+      })),
+    [summaryItems]
+  )
+
   const scopedLineSubtotal = useMemo(
     () => summaryItems.reduce((s, i) => s + i.price * i.qty, 0),
     [summaryItems]
@@ -93,27 +120,53 @@ export default function CheckoutPage() {
     return Math.min(1, scopedLineSubtotal / orderSubtotal)
   }, [hasScopedSubset, scopedLineSubtotal, orderSubtotal])
 
+  /** Full cart: BE `free_shipping_applied`. Partial checkout: local subtotal vs FE constant (BE applies on checkout). */
+  const qualifiesFreeShipping = hasScopedSubset
+    ? scopedLineSubtotal >= FREE_SHIPPING_THRESHOLD
+    : Boolean(cartFreeShippingApplied)
+  const displayShippingFee = hasScopedSubset
+    ? qualifiesFreeShipping
+      ? 0
+      : rawShippingFee
+    : Number(cartShippingFee) || (cartFreeShippingApplied ? 0 : rawShippingFee)
+
+  const showShippingMethodChoice = useMemo(
+    () => shouldShowShippingMethodChoice(shippingMethods, qualifiesFreeShipping),
+    [shippingMethods, qualifiesFreeShipping]
+  )
+
   const displayOrderDiscount = discountAmount * scopeRatio
   const displayShippingDiscount = shippingDiscountAmount * scopeRatio
+  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
+  const displayDirectDiscount = hasVoucherApplied ? 0 : Math.max(0, discountAmount) * scopeRatio
   const orderTotal = Math.max(
     0,
-    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + shippingFee
+    scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + displayShippingFee
   )
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     setValue,
-    trigger,
+    watch,
     getValues,
+    trigger,
   } = useForm<CheckoutInformationFormData>({
-    resolver: yupResolver(checkoutInformationSchema),
+    resolver: yupResolver(checkoutInformationSchema) as Resolver<CheckoutInformationFormData>,
     mode: 'onBlur',
     defaultValues: {
       name: information?.name ?? '',
       phone: information?.phone ?? '',
       email: information?.email ?? '',
+      recipient_name: information?.recipient_name ?? information?.name ?? '',
+      recipient_phone: information?.recipient_phone ?? information?.phone ?? '',
+      city_id: information?.city_id != null ? String(information.city_id) : '',
+      commune_id: information?.commune_id != null ? String(information.commune_id) : '',
+      province: information?.province ?? '',
+      district: information?.district ?? '',
+      ward: information?.ward ?? '',
       address: information?.address ?? '',
     },
   })
@@ -137,28 +190,74 @@ export default function CheckoutPage() {
       setValue('name', information.name)
       setValue('phone', information.phone)
       setValue('email', information.email)
+      setValue('recipient_name', information.recipient_name ?? information.name)
+      setValue('recipient_phone', information.recipient_phone ?? information.phone)
+      setValue('city_id', information.city_id != null ? String(information.city_id) : '')
+      setValue('commune_id', information.commune_id != null ? String(information.commune_id) : '')
+      setValue('province', information.province ?? '')
+      setValue('district', information.district ?? '')
+      setValue('ward', information.ward ?? '')
       setValue('address', information.address)
     }
   }, [information, setValue])
 
   useEffect(() => {
-    if (information || !user) return
+    if (!isAuthenticated || information || !user) return
     const name =
       user?.name ||
       [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() ||
       user?.username ||
       ''
-    if (name) setValue('name', name)
+    if (name) {
+      setValue('name', name)
+      setValue('recipient_name', name)
+    }
     if (user?.email) setValue('email', user.email)
-    if (user?.phone_number) setValue('phone', user.phone_number)
-  }, [user, information, setValue])
+    if (user?.phone_number) {
+      setValue('phone', user.phone_number)
+      setValue('recipient_phone', user.phone_number)
+    }
+  }, [isAuthenticated, user, information, setValue])
+
+  useEffect(() => {
+    if (methodsLoadingShipping || shippingMethods.length === 0 || cartVersion == null) return
+    const preferred = pickPreferredShippingMethod(shippingMethods)
+    if (!preferred) return
+
+    const shouldAutoSelect =
+      qualifiesFreeShipping && !showShippingMethodChoice && selectedShippingId !== preferred.id
+
+    if (shouldAutoSelect) {
+      selectShippingMutation
+        .mutateAsync({
+          shipping_method_id: preferred.id,
+          expected_version: cartVersion,
+        })
+        .catch(() => {})
+    }
+  }, [
+    cartVersion,
+    methodsLoadingShipping,
+    qualifiesFreeShipping,
+    selectedShippingId,
+    selectShippingMutation,
+    shippingMethods,
+    showShippingMethodChoice,
+  ])
 
   const onInfoSubmit = (data: CheckoutInformationFormData) => {
     setInformation({
       name: data.name,
       phone: data.phone,
-      email: data.email,
+      email: data.email ?? '',
       address: data.address,
+      recipient_name: data.recipient_name,
+      recipient_phone: data.recipient_phone,
+      city_id: data.city_id ? Number(data.city_id) : undefined,
+      commune_id: data.commune_id ? Number(data.commune_id) : undefined,
+      province: data.province ?? '',
+      district: data.district ?? '',
+      ward: data.ward ?? '',
     })
   }
 
@@ -187,8 +286,15 @@ export default function CheckoutPage() {
       setInformation({
         name: formValues.name,
         phone: formValues.phone,
-        email: formValues.email,
+        email: formValues.email ?? '',
         address: formValues.address,
+        recipient_name: formValues.recipient_name,
+        recipient_phone: formValues.recipient_phone,
+        city_id: formValues.city_id ? Number(formValues.city_id) : undefined,
+        commune_id: formValues.commune_id ? Number(formValues.commune_id) : undefined,
+        province: formValues.province ?? '',
+        district: formValues.district ?? '',
+        ward: formValues.ward ?? '',
       })
       const trimmedNotes = notes.trim()
       const scope =
@@ -197,12 +303,14 @@ export default function CheckoutPage() {
           : undefined
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
-        shipping_address: formValues.address,
+        delivery: buildCheckoutDeliveryPayload(formValues),
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
         ...(scope ? { cart_item_ids: scope } : {}),
       })
-      toastSuccess('Đặt hàng thành công! Đang chuyển đến trang xác nhận đơn hàng.')
+      if (!isAuthenticated && created && typeof created === 'object') {
+        saveGuestOrderConfirmation(created as Record<string, unknown>)
+      }
       clearCheckout()
       const orderNumber = String(created?.order_number || '')
       const orderId = Number(created?.id)
@@ -211,15 +319,21 @@ export default function CheckoutPage() {
         : Number.isFinite(orderId)
           ? `order_id=${orderId}`
           : ''
+      setRedirectingToConfirmation(true)
       router.push(query ? `/don-hang/xac-nhan-don-hang?${query}` : '/don-hang/xac-nhan-don-hang')
     } catch (err: unknown) {
       hasCompletedOrderRef.current = false
+      setRedirectingToConfirmation(false)
       const message = err instanceof Error ? err.message : 'Đặt hàng thất bại. Vui lòng thử lại.'
       toastError(message)
     }
   }
 
   const isSubmitting = checkoutCartMutation.isPending
+  const showCheckoutBackdrop = isSubmitting || redirectingToConfirmation
+  const checkoutBackdropText = redirectingToConfirmation
+    ? 'Đang chuyển đến trang xác nhận đơn hàng…'
+    : 'Đang xử lý đặt hàng, vui lòng đợi…'
   const canSubmit =
     !methodsLoadingPayment &&
     !methodsLoadingShipping &&
@@ -230,11 +344,11 @@ export default function CheckoutPage() {
   const handleApplyVoucher = async (payload: { order_voucher_code?: string; shipping_voucher_code?: string }) => {
     if (cartVersion == null) {
       toastError('Không thể áp dụng mã giảm giá. Vui lòng thử lại.')
-      return
+      throw new Error('Cart version missing')
     }
     if (!payload.order_voucher_code && !payload.shipping_voucher_code) {
       toastError('Vui lòng nhập ít nhất 1 mã giảm giá.')
-      return
+      throw new Error('No voucher code')
     }
     try {
       await applyVoucherMutation.mutateAsync({
@@ -244,22 +358,7 @@ export default function CheckoutPage() {
       toastSuccess('Áp dụng mã giảm giá thành công.')
     } catch (error: unknown) {
       toastError(error instanceof Error ? error.message : 'Áp dụng mã giảm giá thất bại.')
-    }
-  }
-
-  const handleRemoveVoucher = async (target: 'order' | 'shipping' | 'all') => {
-    if (cartVersion == null) {
-      toastError('Không thể gỡ mã giảm giá. Vui lòng thử lại.')
-      return
-    }
-    try {
-      await removeVoucherMutation.mutateAsync({
-        target,
-        expected_version: cartVersion,
-      })
-      toastSuccess('Đã gỡ mã giảm giá.')
-    } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : 'Gỡ mã giảm giá thất bại.')
+      throw error
     }
   }
 
@@ -268,76 +367,125 @@ export default function CheckoutPage() {
   }
 
   return (
-    <Container className="space-y-6 py-8">
-      <Breadcrumb
-        items={[
-          { label: 'Trang chủ', href: '/' },
-          { label: 'Giỏ hàng', href: '/gio-hang' },
-          { label: 'Thanh toán' },
-        ]}
+    <div className="min-h-[60vh] bg-slate-50/80">
+      <LoadingBackdrop
+        isOpen={showCheckoutBackdrop}
+        loadingText={checkoutBackdropText}
+        size="lg"
+        zIndex={10000}
       />
+      <Container className="py-4">
+        <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
+          <div className="lg:col-start-1 lg:row-start-1">
+            <Link
+              href="/gio-hang"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
+            >
+              <ChevronLeftIcon className="h-5 w-5 shrink-0" />
+              Quay lại giỏ hàng
+            </Link>
+          </div>
 
-      <div className="grid gap-6 md:grid-cols-[1fr_minmax(320px,360px)]">
-        <div className="space-y-6 min-w-0">
-          <CheckoutInfoSection
-            register={register}
-            errors={errors}
-            handleSubmit={handleSubmit}
-            onSubmit={onInfoSubmit}
-          />
-          <CheckoutNotesSection value={notes} onChange={setNotes} />
-          <CheckoutShippingSection
-            methods={shippingMethods}
-            selectedId={selectedShippingId}
-            onSelect={(id) => {
-              if (cartVersion == null) {
-                toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
-                return
-              }
-              selectShippingMutation
-                .mutateAsync({
-                  shipping_method_id: id,
-                  expected_version: cartVersion,
-                })
-                .then(() => {})
-                .catch((error: Error) => {
-                  toastError(error.message || 'Chọn phương thức vận chuyển thất bại')
-                })
-            }}
-            isLoading={methodsLoadingShipping}
-            error={methodsErrorShipping}
-          />
-          <CheckoutPaymentSection
-            methods={paymentMethods}
-            selectedId={paymentMethodId}
-            onSelect={setPaymentMethodId}
-            isLoading={methodsLoadingPayment}
-            error={methodsErrorPayment}
-            isSubmitting={isSubmitting}
-            canSubmit={canSubmit}
-            onPlaceOrder={handlePlaceOrder}
-          />
-          <CheckoutVoucherSection
-            onApplyVoucher={handleApplyVoucher}
-            onRemoveVoucher={handleRemoveVoucher}
-            isApplying={applyVoucherMutation.isPending || removeVoucherMutation.isPending}
-            orderVoucherCode={orderVoucherCode ?? undefined}
-            shippingVoucherCode={shippingVoucherCode ?? undefined}
-          />
-        </div>
+          <div className="relative z-0 min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
+            <CheckoutProductList
+              items={productLines}
+              lineSubtotal={scopedLineSubtotal}
+              hideProductNames={hideLineDetail}
+            />
 
-        <div className="w-full min-w-0">
-          <CheckoutOrderSummary
-            items={summaryItems}
-            subtotal={scopedLineSubtotal}
-            shippingFee={shippingFee}
-            total={orderTotal}
-            hasShippingSelected={Boolean(selectedShippingMethodFromList)}
-            discountAmount={displayOrderDiscount}
-            shippingDiscountAmount={displayShippingDiscount}
-          />
+            <CheckoutInfoSection
+              register={register}
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              getValues={getValues}
+              savedInfo={information}
+              errors={errors}
+              handleSubmit={handleSubmit}
+              onSubmit={onInfoSubmit}
+              notes={notes}
+              onNotesChange={setNotes}
+            />
+            <CheckoutShippingSection
+              methods={shippingMethods}
+              selectedId={selectedShippingId}
+              qualifiesFreeShipping={qualifiesFreeShipping}
+              onSelect={(id) => {
+                if (cartVersion == null) {
+                  toastError('Không thể cập nhật phương thức vận chuyển. Vui lòng thử lại.')
+                  return
+                }
+                selectShippingMutation
+                  .mutateAsync({
+                    shipping_method_id: id,
+                    expected_version: cartVersion,
+                  })
+                  .then(() => {})
+                  .catch((error: Error) => {
+                    toastError(error.message || 'Chọn phương thức vận chuyển thất bại')
+                  })
+              }}
+              isLoading={methodsLoadingShipping}
+              error={methodsErrorShipping}
+            />
+            <CheckoutPaymentSection
+              methods={paymentMethods}
+              selectedId={paymentMethodId}
+              onSelect={setPaymentMethodId}
+              isLoading={methodsLoadingPayment}
+              error={methodsErrorPayment}
+            />
+          </div>
+
+          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-36 lg:max-h-[calc(100dvh-10rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
+            <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
+              <div className="p-5 pb-4">
+                <CheckoutVoucherSection
+                  onApplyVoucher={handleApplyVoucher}
+                  isApplying={applyVoucherMutation.isPending}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
+                <span className="text-sm text-slate-700">Ẩn thông tin sản phẩm khi giao hàng</span>
+                <input
+                  type="checkbox"
+                  checked={hideLineDetail}
+                  onChange={(e) => setHideLineDetail(e.target.checked)}
+                  className="h-4 w-4 shrink-0 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                />
+              </div>
+              <CheckoutOrderSummary
+                embedded
+                subtotal={scopedLineSubtotal}
+                shippingFee={displayShippingFee}
+                total={orderTotal}
+                hasShippingSelected={
+                  Boolean(selectedShippingMethodFromList) ||
+                  (qualifiesFreeShipping && shippingMethods.length > 0 && !showShippingMethodChoice)
+                }
+                qualifiesFreeShipping={qualifiesFreeShipping}
+                discountAmount={displayOrderDiscount}
+                shippingDiscountAmount={displayShippingDiscount}
+                directDiscount={displayDirectDiscount}
+                onPlaceOrder={handlePlaceOrder}
+                isSubmitting={isSubmitting}
+                canSubmit={canSubmit}
+              />
+              <div
+                className="pointer-events-none h-3 w-full bg-slate-50/80"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 9px 0, transparent 7px, rgb(255 255 255) 7.5px)',
+                  backgroundSize: '18px 12px',
+                  backgroundRepeat: 'repeat-x',
+                  backgroundPosition: 'center top',
+                }}
+                aria-hidden
+              />
+            </div>
+          </aside>
         </div>
-      </div>
-    </Container>
+      </Container>
+    </div>
   )
 }

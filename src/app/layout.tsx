@@ -13,6 +13,7 @@ import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { LoginModal } from '@/components/modals/LoginModal'
 import { Providers } from './providers'
+import { fetchCommonCitiesServer } from '@/lib/services/location.server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,12 +35,13 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const messages = await getMessages()
+  const { cities: initialCities, error: initialCitiesError } = await fetchCommonCitiesServer()
 
   return (
     <html lang="vi">
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          <Providers>
+          <Providers initialCities={initialCities} initialCitiesError={initialCitiesError}>
             <AuthProvider>
               <LoginModalProvider>
               <CartProvider>
@@ -47,7 +49,7 @@ export default async function RootLayout({
                   <CheckoutProvider>
                     <Header />
                     <NavigationBarWrapper />
-                    <main className="bg-[#ededed] border-0">
+                    <main className="relative z-0 bg-[#ededed] border-0">
                       {children}
                     </main>
                     <Footer />

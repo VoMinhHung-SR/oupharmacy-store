@@ -26,6 +26,11 @@ export interface ProductMinimal {
   web_slug: string
 }
 
+export function hrefFromWebSlug(webSlug?: string | null): string {
+  const path = (webSlug ?? '').trim().replace(/^\/+/, '')
+  return path ? `/${path}` : '#'
+}
+
 export interface CategoryLevel1 {
   id: number
   name: string

@@ -10,6 +10,7 @@ import { ImagePlaceholderIcon } from '@/components/icons'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
+import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
 
 interface Props {
   params: { orderNumber: string }
@@ -237,8 +238,14 @@ export default function OrderDetailPage({ params }: Props) {
 
             {/* Shipping Address */}
             <div className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Địa chỉ giao hàng</h2>
-              <p className="text-gray-700">{order.shipping_address || 'Chưa có thông tin'}</p>
+              {order.shipping_address ? (
+                <ShippingAddressDisplay shippingAddress={order.shipping_address} />
+              ) : (
+                <>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Địa chỉ giao hàng</h2>
+                  <p className="text-gray-700">Chưa có thông tin</p>
+                </>
+              )}
             </div>
 
             {/* Order Items */}

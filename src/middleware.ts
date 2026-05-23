@@ -16,21 +16,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Protected routes - authentication
-  // Note: We don't redirect to /login anymore, the client-side will open login modal
-  // The protected routes will handle authentication check on client-side
-  const protectedPaths = ['/don-hang', '/tai-khoan']
-  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
-  
-  // We still check token in middleware for server-side protection
-  // but don't redirect to /login - let client handle it
-  if (isProtectedPath) {
-    const token = request.cookies.get('token')?.value
-    
-    // If no token, we still allow the request to proceed
-    // The client-side components will handle showing login modal
-    // This allows for better UX with modal instead of redirect
-  }
+  // Account routes: client ProtectedRoute opens login modal when unauthenticated.
+  // /don-hang supports guest checkout (no auth required).
   
   return NextResponse.next()
 }
@@ -38,8 +25,8 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/(vi|en)/:path*',
-    '/don-hang/:path*', // Protected checkout routes
-    '/tai-khoan/:path*',  // Protected account routes
+    '/don-hang/:path*',
+    '/tai-khoan/:path*',
   ]
 }
 

@@ -6,6 +6,7 @@ import axios, {
 } from 'axios'
 import { STORAGE_KEY } from './constant'
 import { refreshSessionWithStoredRefresh } from '@/lib/auth'
+import { getGuestSessionId } from '@/lib/utils/guestSession'
 
 type InternalRequestConfigRetry = InternalAxiosRequestConfig & { _retry?: boolean }
 
@@ -32,6 +33,10 @@ axiosInstance.interceptors.request.use(
       const token = localStorage.getItem(STORAGE_KEY.TOKEN)
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+      }
+      const guestSessionId = getGuestSessionId()
+      if (guestSessionId) {
+        config.headers['X-Guest-Session'] = guestSessionId
       }
     }
     
