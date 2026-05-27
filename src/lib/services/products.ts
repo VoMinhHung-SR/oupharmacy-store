@@ -67,7 +67,12 @@ export interface Product {
   category_info?: {
     category: Array<{ name: string; slug: string }>
     categoryPath: string
+    /** Primary category path (canonical SEO); backward compat with legacy API. */
     categorySlug: string
+    primary_category_slug?: string
+    category_slugs?: string[]
+    /** List/category context path from API when product is shown under a specific tree. */
+    listed_under_slug?: string
   }
   brand?: {
     id: number
@@ -233,7 +238,15 @@ export function normalizeCategoryPathSlug(path: string): string {
   return deduped.join('/')
 }
 
-export function getProductCategorySlug(product: Product, fallbackCategorySlug?: string): string {
+/**
+ * Primary category path for canonical URLs and default links (search, wishlist fallback).
+ */
+export function getPrimaryCategorySlug(product: Product): string {
+  const primary = product.category_info?.primary_category_slug?.trim()
+  if (primary) {
+    return normalizeCategoryPathSlug(primary)
+  }
+
   const fromInfo = product.category_info?.categorySlug?.trim()
   if (fromInfo) {
     return normalizeCategoryPathSlug(fromInfo)
@@ -254,12 +267,53 @@ export function getProductCategorySlug(product: Product, fallbackCategorySlug?: 
     }
   }
 
+  const leafSlug = product.category?.slug?.trim()
+  return leafSlug ? normalizeCategoryPathSlug(leafSlug) : ''
+}
+
+/**
+ * Href category segment: list context (listed_under / route) before primary.
+ */
+export function getProductCategorySlug(product: Product, fallbackCategorySlug?: string): string {
+  const listed = product.category_info?.listed_under_slug?.trim()
+  if (listed) {
+    return normalizeCategoryPathSlug(listed)
+  }
+
   if (fallbackCategorySlug?.trim()) {
     return normalizeCategoryPathSlug(fallbackCategorySlug)
   }
 
-  const leafSlug = product.category?.slug?.trim()
-  return leafSlug ? normalizeCategoryPathSlug(leafSlug) : ''
+  return getPrimaryCategorySlug(product)
+}
+
+/** Breadcrumb segments from URL category path (multi-category context). */
+export function buildCategoryBreadcrumbFromPath(
+  categoryPath: string,
+  product?: Product
+): Array<{ name: string; href: string }> {
+  const normalized = normalizeCategoryPathSlug(categoryPath)
+  if (!normalized) return []
+
+  const parts = normalized.split('/').filter(Boolean)
+  const primaryTrail = product?.category_info?.category ?? []
+  let acc = ''
+
+  return parts.map((part, index) => {
+    acc = index === 0 ? part : `${acc}/${part}`
+    const matched = primaryTrail[index]?.slug === part ? primaryTrail[index] : null
+    const name =
+      matched?.name ||
+      part
+        .split('-')
+        .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+        .join(' ')
+    return { name, href: `/${acc}` }
+  })
+}
+
+export function buildProductCanonicalHref(product: Product): string | null {
+  return buildProductHref(getPrimaryCategorySlug(product), getProductSlug(product))
 }
 
 export function buildProductHref(categorySlug: string | undefined, productSlug: string | undefined): string | null {

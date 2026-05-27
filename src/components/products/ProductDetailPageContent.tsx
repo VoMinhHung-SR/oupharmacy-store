@@ -16,8 +16,9 @@ import Link from 'next/link'
 import { PRICE_CONSULT } from '@/lib/constant'
 import {
   Product,
+  buildCategoryBreadcrumbFromPath,
+  buildProductCanonicalHref,
   buildProductHref,
-  getProductCategorySlug,
   getProductEntity,
   getProductName,
   getProductPackaging,
@@ -111,18 +112,24 @@ export function ProductDetailPageContent({
 
   useEffect(() => {
     if (product) {
-      saveToRecentlyViewed(product)
+      saveToRecentlyViewed(product, categorySlug)
     }
-  }, [product])
+  }, [product, categorySlug])
 
   useEffect(() => {
-    if (!product || loading) return
-    const canonical = buildProductHref(getProductCategorySlug(product), getProductSlug(product))
-    if (!canonical || typeof window === 'undefined') return
-    if (window.location.pathname !== canonical) {
-      router.replace(canonical)
+    if (!product || loading || typeof document === 'undefined') return
+    const canonical = buildProductCanonicalHref(product)
+    if (!canonical) return
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null
+    if (!link) {
+      link = document.createElement('link')
+      link.setAttribute('rel', 'canonical')
+      document.head.appendChild(link)
     }
-  }, [product, loading, router])
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    link.href = `${origin}${canonical}`
+  }, [product, loading])
 
   useEffect(() => {
     if (!unitOptions.length) {
@@ -232,7 +239,8 @@ export function ProductDetailPageContent({
               {error ? 'Không thể tải thông tin sản phẩm' : 'Không tìm thấy sản phẩm'}
             </p>
             <p className="text-sm text-amber-700 mb-4">
-              {error?.message || 'Sản phẩm bạn đang tìm có thể không tồn tại hoặc đã bị xóa.'}
+              {error?.message ||
+                'Sản phẩm không tồn tại hoặc không thuộc danh mục trong đường dẫn URL này.'}
             </p>
             <div className="flex gap-3 justify-center">
               <a
@@ -256,46 +264,16 @@ export function ProductDetailPageContent({
 
   const breadcrumbItems: CrumbItem[] = [{ label: 'Trang chủ', href: '/' }]
 
-  if (product.category_info?.category?.length) {
-    let accumulatedSlug = ''
-
-    product.category_info.category.forEach((cat, index) => {
-      accumulatedSlug += index === 0 ? cat.slug : `/${cat.slug}`
-
-      breadcrumbItems.push({
-        label: cat.name,
-        href: `/${accumulatedSlug}`,
-      })
+  buildCategoryBreadcrumbFromPath(categorySlug, product).forEach((segment) => {
+    breadcrumbItems.push({
+      label: segment.name,
+      href: segment.href,
     })
-  } else if (product.category) {
-    const categoryArray =
-      product.category.category_array && product.category.category_array.length
-        ? product.category.category_array
-        : [
-            {
-              name: product.category.name,
-              slug:
-                product.category.path_slug ||
-                product.category.slug ||
-                product.category.name.toLowerCase().replace(/\s+/g, '-'),
-            },
-          ]
-
-    let accumulatedSlug = ''
-
-    categoryArray.forEach((cat, index) => {
-      accumulatedSlug += index === 0 ? cat.slug : `/${cat.slug}`
-
-      breadcrumbItems.push({
-        label: cat.name,
-        href: `/${accumulatedSlug}`,
-      })
-    })
-  }
+  })
 
   breadcrumbItems.push({
     label: productName,
-    href: `/${categorySlug}/${productSlug}`,
+    href: buildProductHref(categorySlug, productSlug) ?? `/${categorySlug}/${productSlug}`,
   })
 
   const isConsultPrice = effectivePriceDisplay === PRICE_CONSULT || String(effectivePriceValue) === PRICE_CONSULT

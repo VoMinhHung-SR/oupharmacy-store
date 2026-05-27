@@ -48,19 +48,21 @@ export const ProductListViewSkeleton: React.FC<{ count?: number }> = ({ count = 
 
 interface ProductListViewProps {
   products: Product[]
+  /** Current category list path — card links use this context before primary. */
+  currentCategorySlug?: string
 }
 
-const getProductLink = (product: Product): string | null => {
+const getProductLink = (product: Product, currentCategorySlug?: string): string | null => {
   const productSlug = getProductSlug(product)
   if (!productSlug) return null
-  return buildProductHref(getProductCategorySlug(product), productSlug)
+  return buildProductHref(getProductCategorySlug(product, currentCategorySlug), productSlug)
 }
 
 const getProductImageUrl = (product: Product): string | undefined => {
   return product.image_url || (product.images?.[0])
 }
 
-export const ProductListView: React.FC<ProductListViewProps> = ({ products }) => {
+export const ProductListView: React.FC<ProductListViewProps> = ({ products, currentCategorySlug }) => {
   const { add, items } = useCart()
   const [selectedUnitByVariant, setSelectedUnitByVariant] = useState<Record<number, number>>({})
 
@@ -128,7 +130,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products }) =>
   return (
     <div className="space-y-4">
       {products.map((product) => {
-        const productLink = getProductLink(product)
+        const productLink = getProductLink(product, currentCategorySlug)
         
         if (!productLink) {
           return null

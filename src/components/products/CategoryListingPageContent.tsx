@@ -390,7 +390,7 @@ export function CategoryListingPageContent({
               })}
             </div>
           ) : (
-            <ProductListView products={sortedProducts} />
+            <ProductListView products={sortedProducts} currentCategorySlug={categorySlug} />
           )}
 
           {/* Pagination */}

@@ -40,14 +40,14 @@ function migrateStoredItem(raw: Record<string, unknown>): RecentlyViewedItem {
   }
 }
 
-export const saveToRecentlyViewed = (product: Product) => {
+export const saveToRecentlyViewed = (product: Product, contextCategorySlug?: string) => {
   if (typeof window === 'undefined') return
 
   try {
     const existing = localStorage.getItem(STORAGE_KEY)
     const items: RecentlyViewedItem[] = existing ? JSON.parse(existing).map(migrateStoredItem) : []
 
-    const cardPayload = buildProductCardPayload(product)
+    const cardPayload = buildProductCardPayload(product, contextCategorySlug)
     const newItem: RecentlyViewedItem = {
       id: product.id,
       name: cardPayload.name,

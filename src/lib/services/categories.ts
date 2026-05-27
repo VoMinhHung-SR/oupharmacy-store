@@ -67,7 +67,7 @@ export async function getCategories() {
 export async function getCategory(id: number) {
   return apiGet<Category>(`/categories/${id}/`)
 }
-
+ 
 /**
  * Server-side function để fetch categories cho SSG
  * Sử dụng fetch trực tiếp thay vì axios để tránh interceptors
