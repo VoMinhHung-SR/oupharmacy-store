@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export interface WishlistItem {
   id: string
   variant_unit_id: number
+  product_variant_unit_id?: number
   name: string
   price: number
   price_display?: string
@@ -37,9 +38,15 @@ function migrateWishlistItem(raw: Record<string, unknown>): WishlistItem {
     0
   const product_slug =
     (raw.product_slug as string | undefined) ?? (raw.medicine_slug as string | undefined)
+  const product_variant_unit_id =
+    raw.product_variant_unit_id == null ? undefined : Number(raw.product_variant_unit_id)
+
   return {
     id: String(raw.id ?? variant_unit_id),
     variant_unit_id,
+    ...(product_variant_unit_id != null && Number.isFinite(product_variant_unit_id)
+      ? { product_variant_unit_id }
+      : {}),
     name: String(raw.name ?? ''),
     price: Number(raw.price ?? 0) || 0,
     price_display: raw.price_display as string | undefined,

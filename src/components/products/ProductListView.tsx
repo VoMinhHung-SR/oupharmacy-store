@@ -7,10 +7,9 @@ import {
   Product,
   getProductEntity,
   getProductName,
-  getProductSlug,
   getProductPackaging,
-  getProductCategorySlug,
-  buildProductHref,
+  getListProductKey,
+  getProductDetailHref,
   mapProductUnitOptionsForCart,
 } from '@/lib/services/products'
 import { ImagePlaceholderIcon } from '@/components/icons'
@@ -53,9 +52,7 @@ interface ProductListViewProps {
 }
 
 const getProductLink = (product: Product, currentCategorySlug?: string): string | null => {
-  const productSlug = getProductSlug(product)
-  if (!productSlug) return null
-  return buildProductHref(getProductCategorySlug(product, currentCategorySlug), productSlug)
+  return getProductDetailHref(product, currentCategorySlug)
 }
 
 const getProductImageUrl = (product: Product): string | undefined => {
@@ -140,7 +137,7 @@ export const ProductListView: React.FC<ProductListViewProps> = ({ products, curr
         
         return (
           <Link
-            key={product.id}
+            key={getListProductKey(product)}
             href={productLink}
             className="group flex gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
           >

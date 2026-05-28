@@ -77,22 +77,23 @@ function migrateCartItem(item: Record<string, unknown>): CartItem {
   const rawUnitOptions = item.unit_options
   let unit_options: CartLineUnitOption[] | undefined
   if (Array.isArray(rawUnitOptions) && rawUnitOptions.length > 0) {
-    unit_options = rawUnitOptions
-      .map((u) => {
-        const row = u as Record<string, unknown>
-        const id = Number(row.id ?? row.unit_id)
-        if (!Number.isFinite(id) || id <= 0) return null
-        return {
-          id,
-          unit_name: String(row.unit_name ?? ""),
-          is_default: row.is_default === true,
-          price_value:
-            row.price_value != null && Number.isFinite(Number(row.price_value))
-              ? Number(row.price_value)
-              : undefined,
-        }
+    const parsed: CartLineUnitOption[] = []
+    for (const u of rawUnitOptions) {
+      const row = u as Record<string, unknown>
+      const id = Number(row.id ?? row.unit_id)
+      const unit_name = String(row.unit_name ?? "").trim()
+      if (!Number.isFinite(id) || id <= 0 || !unit_name) continue
+      parsed.push({
+        id,
+        unit_name,
+        is_default: row.is_default === true ? true : undefined,
+        price_value:
+          row.price_value != null && Number.isFinite(Number(row.price_value))
+            ? Number(row.price_value)
+            : undefined,
       })
-      .filter((u): u is CartLineUnitOption => u != null && Boolean(u.unit_name))
+    }
+    if (parsed.length > 0) unit_options = parsed
   }
 
   return {

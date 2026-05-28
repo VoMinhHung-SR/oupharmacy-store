@@ -6,9 +6,9 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { HEADER_SEARCH, STORAGE_KEY } from '@/lib/constant'
 import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue'
 import { useProducts } from '@/lib/hooks/useProducts'
+import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
 import {
   buildProductCardPayload,
-  buildProductHref,
   type Product,
   type ProductCardPayload,
 } from '@/lib/services/products'
@@ -22,7 +22,7 @@ export type HeaderSearchSuggestionItem = {
 
 /** Used by browse panel when mapping products to links */
 export function headerSearchProductHref(card: ProductCardPayload): string | null {
-  return buildProductHref(card.category_slug, card.product_slug)
+  return card.href ?? null
 }
 
 function headerSearchPickTopDeals(products: Product[], limit: number): Product[] {
@@ -87,12 +87,13 @@ export function useHeaderSearchDropdown() {
   const debouncedTrimmed = debouncedQuery.trim()
   const isSearchMode = debouncedTrimmed.length >= HEADER_SEARCH.MIN_QUERY_LEN
 
-  const suggestFilters = useMemo(
+  const suggestSearchParams = useMemo(
     () => ({
-      search: debouncedTrimmed,
+      q: debouncedTrimmed,
       page_size: HEADER_SEARCH.SUGGEST_PAGE_SIZE,
       page: 1,
       in_stock: true,
+      sort: 'relevance' as const,
     }),
     [debouncedTrimmed]
   )
@@ -121,9 +122,8 @@ export function useHeaderSearchDropdown() {
     data: suggestData,
     isPending: suggestPending,
     isFetching: suggestFetching,
-  } = useProducts(suggestFilters, {
+  } = useStoreSearch(suggestSearchParams, {
     enabled: open && isSearchMode,
-    staleTime: HEADER_SEARCH.SUGGEST_STALE_MS,
   })
 
   const { data: hotData, isPending: hotPending } = useProducts(hotFilters, {
@@ -136,7 +136,7 @@ export function useHeaderSearchDropdown() {
     staleTime: HEADER_SEARCH.PANEL_STALE_MS,
   })
 
-  const suggestionResults = suggestData?.results
+  const suggestionResults = suggestData?.items
   const hotResults = hotData?.results
   const dealsResults = dealsSourceData?.results
 

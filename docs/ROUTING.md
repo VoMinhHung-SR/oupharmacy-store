@@ -1,36 +1,52 @@
-# Routing Structure
+# Store routing (category + product)
 
-## Product & Category Routes
+## URL model
 
-- `/{category-slug}` - Category listing page (danh sách sản phẩm theo danh mục)
-- `/{category-slug}/{medicine-slug}` - Product detail page (chi tiết sản phẩm)
+| URL | Page |
+|-----|------|
+| `/{category-path}` | Category listing (1 card = 1 **Product**) |
+| `/{category-path}/{product-slug}` | Product detail (chọn **Variant** quy cách, rồi **Unit** đơn vị) |
+| `/{category-path}/{product-slug}?v={variantId}` | Deep link tới variant (Túi / Chai) |
 
-## Backward Compatibility
+- **Product**: một mặt hàng logic (`store_product`), một `slug`, một canonical URL.
+- **ProductVariant**: quy cách đóng gói (Túi 400ml, Chai 400ml).
+- **ProductVariantUnit**: đơn vị bán trong variant (nếu có nhiều).
 
-- `/products/[id]` - Redirects to `/{category-slug}/{medicine-slug}` format
+## FE flow
 
-## Components
+1. `pathname` → `GET /api/store/resolve-path/{path}/` → `category` | `product` | `not_found`
+2. Category → list + `dynamic-filters` chỉ với `category_path`
+3. Product → detail API + `?v=` (optional); PDP có selector quy cách nếu `variants.length > 1`
 
-- `ProductDetailPageContent` - Component cho product detail
-- `CategoryListingPageContent` - Component cho category listing
+Code:
 
-## Trang tiếp thị / placeholder (Sắp ra mắt)
+- `src/lib/store-path/` — resolve + href helpers
+- `src/lib/hooks/useStorePage.ts` — orchestration
+- `src/components/products/StorePage.tsx` — UI switch
 
-- `/tu-van-duoc-si` — Tư vấn dược sĩ
-- `/tim-nha-thuoc` — Tìm nhà thuốc
-- `/tiem-vac-xin` — Tiêm vắc xin
-- `/tra-cuu-thuoc-chinh-hang` — Tra cứu thuốc chính hãng
-- `/tro-giup` — Trung tâm trợ giúp
-- `/chinh-sach-doi-tra` — Chính sách đổi trả
+## BE
 
-## Checkout Routes
+- `storeApp/services/store_path_resolver.py` — resolve path
+- `storeApp/services/variant_listing.py` — `one_variant_per_product()` cho search, category list, search suggest
+- Search `meta.total` = số **product** distinct, không phải số variant
+- List card key (FE): `getListProductKey()` = `product_entity_id ?? product.id`
 
-- `/don-hang` - Trang thanh toán
-- `/don-hang/xac-nhan-don-hang` - Xác nhận đơn hàng (query: `order_number` ưu tiên, `order_id` fallback)
-- `/tai-khoan/don-hang` - Danh sách đơn hàng (lọc trạng thái, sort ngày, phân trang; query: `page`, `page_size`, `status`, `ordering`)
-- `/tai-khoan/don-hang/[orderNumber]` - Chi tiết đơn hàng (dùng `order_number` hoặc `id`). Roadmap (plan `order-workflow-advanced` trong `.cursor/plans/`): tìm mã đơn trên list, tracking, in/PDF.
+## Commands (refactor / verify)
 
-## Examples
+```bash
+# Backend tests (Docker, từ repo BE)
+cd Clinic-Oupharmacy-BE
+docker compose exec -T backend python manage.py test storeApp.tests.test_search storeApp.tests.test_category_m2m_api -v1
 
-- `/thuc-pham-chuc-nang` → Danh sách sản phẩm thực phẩm chức năng
-- `/thuc-pham-chuc-nang/vitamin-c-1000mg` → Chi tiết sản phẩm Vitamin C
+# Rebuild backend sau khi đổi views/urls
+docker compose build backend && docker compose up -d backend
+
+# FE typecheck
+cd oupharmacy-store && npx tsc --noEmit
+```
+
+## Ví dụ
+
+- `/duoc-my-pham/cham-soc-da-mat/sua-rua-mat-kem-gel-sua` → danh mục
+- `/duoc-my-pham/.../gel-rua-mat-svr-...-400-ml` → chi tiết (2 variant chọn trên PDP)
+- `/duoc-my-pham/.../gel-rua-mat-svr-...-400-ml?v=14253` → mở đúng variant Chai

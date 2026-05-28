@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
+import { ProductBrandMeta } from '@/components/products/ProductBrandMeta'
 import { ProductImageGallery } from '@/components/products/ProductImageGallery'
 import { ProductDescriptionSection } from '@/components/products/ProductDescriptionSection'
 import { ShareButton } from '@/components/products/ShareButton'
@@ -25,6 +26,7 @@ import {
   getProductSlug,
   mapProductUnitOptionsForCart,
 } from '@/lib/services/products'
+import { buildProductPathWithVariant } from '@/lib/store-path'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -54,6 +56,7 @@ export function ProductDetailPageContent({
   const productEntity = product ? getProductEntity(product) : null
   const productName = product ? getProductName(product) : ''
   const productPackaging = product ? getProductPackaging(product) : ''
+  const packagingVariants = useMemo(() => product?.variants ?? [], [product?.variants])
   const unitOptions = useMemo(() => product?.unit_options || [], [product?.unit_options])
   const selectedUnit =
     unitOptions.find((unit) => unit.unit_id === selectedUnitId) ||
@@ -314,11 +317,13 @@ export function ProductDetailPageContent({
 
           <div className="space-y-6">
             {product.brand && (
-              <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                Thương hiệu: <span className="font-medium text-gray-900">{product.brand.name}</span>
-              </div>
-                <div className="flex items-center gap-1.5">
+              <div className="flex items-center justify-between gap-3">
+                <ProductBrandMeta
+                  brandName={product.brand.name}
+                  brandCountry={product.brand.country}
+                  variant="pdp"
+                />
+                <div className="flex shrink-0 items-center gap-1.5">
                 <button
                   onClick={handleWishlistToggle}
                     className={`p-1.5 rounded-lg border transition-colors ${
@@ -367,13 +372,54 @@ export function ProductDetailPageContent({
             </div>
 
             {isConsultPrice ? (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm text-amber-800">
-                  <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
-                </p>
-              </div>
+              <>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button onClick={() => {}} className="w-full" size="lg">
+                    Tư vấn ngay
+                  </Button>
+                  <Button variant="outline" onClick={() => {}} className="w-full" size="lg">
+                    Tìm nhà thuốc
+                  </Button>
+                </div>
+              </>
             ) : (
               <>
+                {packagingVariants.length > 1 && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Chọn quy cách
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {packagingVariants.map((variant) => (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          onClick={() => {
+                            const href = buildProductPathWithVariant(
+                              categorySlug,
+                              productSlug,
+                              variant.id
+                            )
+                            router.replace(href)
+                          }}
+                          className={`rounded-lg border-2 px-4 py-2 text-sm font-medium ${
+                            product.id === variant.id
+                              ? 'border-primary-600 bg-primary-50 text-primary-700'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                          }`}
+                        >
+                          {variant.packing || `Variant ${variant.id}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <div className="text-3xl font-bold text-primary-700">
                     {effectivePriceValue.toLocaleString('vi-VN')}₫
@@ -404,6 +450,67 @@ export function ProductDetailPageContent({
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="text-sm font-medium text-gray-700">
+                    Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
+                  </div>
+                </div>
+
+                {product.in_stock > 0 && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Chọn số lượng
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={quantity <= 1}
+                      >
+                        <span className="text-lg text-gray-900">−</span>
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        max={product.in_stock}
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1
+                          setQuantity(Math.max(1, Math.min(product.in_stock, val)))
+                        }}
+                        className="h-10 w-20 rounded-lg border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                      <button
+                        onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}
+                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={quantity >= product.in_stock}
+                      >
+                        <span className="text-lg text-gray-900">+</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={product.in_stock === 0}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    Thêm vào giỏ
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleBuyNow}
+                    disabled={product.in_stock === 0}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    Mua ngay
+                  </Button>
                 </div>
               </>
             )}
@@ -476,87 +583,6 @@ export function ProductDetailPageContent({
                 </div>
               )}
             </div>
-
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <div className="text-sm font-medium text-gray-700">
-                Tồn kho: {product.in_stock > 0 ? `${product.in_stock} sản phẩm` : 'Hết hàng'}
-              </div>
-            </div>
-
-            {!isConsultPrice && product.in_stock > 0 && (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Chọn số lượng
-                </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={quantity <= 1}
-                  >
-                    <span className="text-lg text-gray-900">−</span>
-                  </button>
-                  <input
-                    type="number"
-                    min="1"
-                    max={product.in_stock}
-                    value={quantity}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 1
-                      setQuantity(Math.max(1, Math.min(product.in_stock, val)))
-                    }}
-                    className="h-10 w-20 rounded-lg border border-gray-300 bg-white text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                  <button
-                    onClick={() => setQuantity(Math.min(product.in_stock, quantity + 1))}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={quantity >= product.in_stock}
-                  >
-                    <span className="text-lg text-gray-900">+</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isConsultPrice ? (
-              <div className="flex flex-col gap-3 pt-2">
-                <Button
-                  onClick={() => {}}
-                  className="w-full"
-                  size="lg"
-                >
-                  Tư vấn ngay
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {}}
-                  className="w-full"
-                  size="lg"
-                >
-                  Tìm nhà thuốc
-                </Button>
-              </div>
-            ) : (
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={handleAddToCart}
-                  disabled={product.in_stock === 0}
-                  className="flex-1"
-                  size="lg"
-                >
-                  Thêm vào giỏ
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleBuyNow}
-                  disabled={product.in_stock === 0}
-                  className="flex-1"
-                  size="lg"
-                >
-                  Mua ngay
-                </Button>
-              </div>
-            )}
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-2">
               <div className="text-sm text-gray-700">

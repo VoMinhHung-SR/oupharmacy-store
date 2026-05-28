@@ -7,7 +7,8 @@ import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
-import { buildProductHref, mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
+import { ProductBrandMeta } from '@/components/products/ProductBrandMeta'
+import { mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
 
 interface ProductCardProps {
   product: {
@@ -25,12 +26,16 @@ interface ProductCardProps {
     default_unit_name?: string
     category_slug?: string
     product_slug?: string
+    href?: string
     in_stock?: number
+    variant_count?: number
+    brand_name?: string
+    brand_country?: string | null
   }
 }
 
 const getProductLink = (product: ProductCardProps['product']): string | null =>
-  buildProductHref(product.category_slug, product.product_slug)
+  product.href ?? null
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
@@ -167,6 +172,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700 min-h-[2.5rem]">
             {product.name}
           </div>
+          {product.brand_name ? (
+            <ProductBrandMeta
+              brandName={product.brand_name}
+              brandCountry={product.brand_country}
+              variant="card"
+            />
+          ) : null}
           {isConsultPrice ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
               <p className="text-xs text-amber-800">
@@ -175,8 +187,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {product.variant_count && product.variant_count > 1 && (
+                  <span className="text-xs text-gray-500">{product.variant_count} quy cách</span>
+                )}
                 <div className="text-primary-700 font-bold text-base">
+                  {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
                   {(selectedUnit?.price_value ?? product.price).toLocaleString('vi-VN')}₫
                 </div>
                 {selectedUnit?.unit_name && (

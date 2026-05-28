@@ -1,5 +1,7 @@
 export * from './useDebouncedValue'
 export * from './useProducts'
+export * from './useStorePage'
+export * from './useCategoryPageMeta'
 export * from './useCategories'
 export * from './useOrders'
 export * from './useShipping'

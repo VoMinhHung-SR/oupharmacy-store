@@ -2,7 +2,13 @@
 
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, Product, ProductFilters, buildProductCardPayload } from '@/lib/services/products'
+import {
+  getProducts,
+  Product,
+  ProductFilters,
+  buildProductCardPayload,
+  getListProductKey,
+} from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Container } from '@/components/Container'
 
@@ -34,9 +40,12 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
     enabled: !!categoryId,
   })
 
-  const relatedProducts = data?.results?.filter(
-    (p) => p.id !== currentProduct.id
-  ).slice(0, limit) || []
+  const currentEntityId =
+    currentProduct.product_entity_id ?? currentProduct.product?.id ?? currentProduct.id
+  const relatedProducts =
+    data?.results
+      ?.filter((p) => (p.product_entity_id ?? p.product?.id ?? p.id) !== currentEntityId)
+      .slice(0, limit) || []
 
   if (!categoryId || relatedProducts.length === 0) {
     return null
@@ -66,7 +75,7 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
         {relatedProducts.map((product) => {
           return (
             <ProductCard
-              key={product.id}
+              key={getListProductKey(product)}
               product={buildProductCardPayload(product)}
             />
           )

@@ -13,5 +13,6 @@ export { ShareButton } from './ShareButton'
 export { RelatedProducts } from './RelatedProducts'
 export { RecentlyViewed, saveToRecentlyViewed } from './RecentlyViewed'
 export { CategoryListingPageContent } from './CategoryListingPageContent'
+export { StorePage } from './StorePage'
 export { SearchResultsContent } from './SearchResultsContent'
 

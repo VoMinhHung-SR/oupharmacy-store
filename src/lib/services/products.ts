@@ -77,6 +77,7 @@ export interface Product {
   brand?: {
     id: number
     name: string
+    country?: string | null
   } | null
   registration_number?: string
   /** External link (e.g. product disclosure). */
@@ -99,6 +100,20 @@ export interface Product {
   active: boolean
   created_date: string
   updated_date: string
+  /** Full store path `{category_path}/{product_slug}` from API when available. */
+  web_slug?: string | null
+  /** Distinct published variants for this product (list/search cards). */
+  variant_count?: number
+  product_entity_id?: number
+  /** All packaging variants (product detail API). */
+  variants?: Array<{
+    id: number
+    packing?: string | null
+    in_stock: number
+    price_value: number
+    price_display?: string | null
+    image_url?: string | null
+  }>
 }
 
 export interface ProductListResponse {
@@ -197,7 +212,11 @@ export interface ProductCardPayload {
   default_unit_name?: string
   category_slug?: string
   product_slug?: string
+  href?: string
   in_stock?: number
+  variant_count?: number
+  brand_name?: string
+  brand_country?: string | null
 }
 
 export function getProductEntity(product: Product) {
@@ -313,7 +332,14 @@ export function buildCategoryBreadcrumbFromPath(
 }
 
 export function buildProductCanonicalHref(product: Product): string | null {
-  return buildProductHref(getPrimaryCategorySlug(product), getProductSlug(product))
+  return getProductDetailHref(product)
+}
+
+/** Canonical product URL (one per Product; variant selected on detail page). */
+export function getProductDetailHref(product: Product, fallbackCategorySlug?: string): string | null {
+  const fromWebSlug = toStoreProductHref(product.web_slug)
+  if (fromWebSlug) return fromWebSlug
+  return buildProductHref(getProductCategorySlug(product, fallbackCategorySlug), getProductSlug(product))
 }
 
 export function buildProductHref(categorySlug: string | undefined, productSlug: string | undefined): string | null {
@@ -323,36 +349,9 @@ export function buildProductHref(categorySlug: string | undefined, productSlug: 
   return `/${cat}/${slug}`
 }
 
-/** Heuristic: store product slugs usually end with a numeric id (e.g. ...-32562). */
-export function isLikelyProductSlug(segment: string): boolean {
-  const slug = segment.trim()
-  if (!slug) return false
-  return /-\d{3,}$/.test(slug)
-}
-
-export type StorePathMode = 'category' | 'product'
-
-export function parseStorePath(fullPath: string): {
-  mode: StorePathMode
-  categoryPath: string
-  productSlug: string | null
-  segments: string[]
-} {
-  const normalized = normalizeCategoryPathSlug(fullPath)
-  const segments = normalized ? normalized.split('/') : []
-  if (segments.length < 2) {
-    return { mode: 'category', categoryPath: normalized, productSlug: null, segments }
-  }
-  const last = segments[segments.length - 1]
-  if (isLikelyProductSlug(last)) {
-    return {
-      mode: 'product',
-      categoryPath: segments.slice(0, -1).join('/'),
-      productSlug: last,
-      segments,
-    }
-  }
-  return { mode: 'category', categoryPath: normalized, productSlug: null, segments }
+/** Stable React key / identity for list cards (one row per Product). */
+export function getListProductKey(product: Product): string {
+  return String(product.product_entity_id ?? product.product?.id ?? product.id)
 }
 
 /** Store route href from BE `web_slug` (full category path + product slug). */
@@ -365,6 +364,8 @@ export function toStoreProductHref(webSlug?: string | null): string | null {
 export function buildProductCardPayload(product: Product, fallbackCategorySlug?: string): ProductCardPayload {
   const categorySlug = getProductCategorySlug(product, fallbackCategorySlug)
   const productSlug = getProductSlug(product)
+  const detailHref = getProductDetailHref(product, fallbackCategorySlug)
+  const variantCount = product.variant_count ?? 1
   const compare = product.compare_at_price
   const hasCompare = typeof compare === 'number' && compare > (product.price_value || 0)
   const discountPct =
@@ -387,7 +388,7 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
         }
       : undefined)
   return {
-    id: product.id.toString(),
+    id: String(product.product_entity_id ?? product.product?.id ?? product.id),
     name: getProductName(product),
     price_display: (defaultUnit?.price_display || product.price_display) || undefined,
     price: defaultUnit?.price_value ?? product.price_value ?? 0,
@@ -401,7 +402,11 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
     default_unit_name: defaultUnit?.unit_name || product.default_unit_name || undefined,
     category_slug: categorySlug || undefined,
     product_slug: productSlug,
+    href: detailHref ?? undefined,
     in_stock: product.in_stock,
+    variant_count: variantCount > 1 ? variantCount : undefined,
+    brand_name: product.brand?.name,
+    brand_country: product.brand?.country ?? undefined,
   }
 }
 
@@ -444,12 +449,30 @@ export function normalizeProduct(raw: RawProduct): Product {
         }))
       : [],
     is_hot: Boolean(raw.is_hot),
+    product_entity_id:
+      raw.product_entity_id == null
+        ? entity?.id
+        : Number(raw.product_entity_id) || entity?.id,
+    variant_count:
+      raw.variant_count == null ? undefined : Number(raw.variant_count) || undefined,
+    variants: Array.isArray(raw.variants)
+      ? (raw.variants as Product['variants'])
+      : undefined,
   }
   return normalized
 }
 
+function isProductDetailPayload(payload: unknown): payload is RawProduct {
+  if (!payload || typeof payload !== 'object') return false
+  const record = payload as Record<string, unknown>
+  return 'product' in record && !Array.isArray(record.results)
+}
+
 function normalizeProductListPayload(payload: ProductListResponse | CategoryProductsResponse | undefined) {
   if (!payload) return payload
+  if (isProductDetailPayload(payload)) {
+    return undefined
+  }
   if (Array.isArray((payload as ProductListResponse).results)) {
     return {
       ...payload,
@@ -526,9 +549,15 @@ export async function getProductsByCategorySlug(
  */
 export async function getProductByCategoryAndProductSlug(
   categorySlug: string,
-  productSlug: string
+  productSlug: string,
+  variantId?: number
 ): Promise<ApiResponse<Product>> {
-  const path = `/${categorySlug}/${productSlug}`
+  const params = new URLSearchParams()
+  if (variantId != null && variantId > 0) {
+    params.set('v', String(variantId))
+  }
+  const qs = params.toString()
+  const path = `/${categorySlug}/${productSlug}${qs ? `?${qs}` : ''}`
   const res = await apiGet<Product>(path)
   return {
     ...res,

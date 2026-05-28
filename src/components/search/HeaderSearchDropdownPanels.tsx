@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
-import { buildProductCardPayload, type Product, type ProductCardPayload } from '@/lib/services/products'
 import {
-  type HeaderSearchSuggestionItem,
-  headerSearchProductHref,
-} from './useHeaderSearchDropdown'
+  buildProductCardPayload,
+  getListProductKey,
+  type Product,
+  type ProductCardPayload,
+} from '@/lib/services/products'
+import { type HeaderSearchSuggestionItem, headerSearchProductHref } from './useHeaderSearchDropdown'
 
 /* —— Thumbnail (list + mini) —— */
 
@@ -229,7 +231,7 @@ export function HeaderSearchSuggestionsPanel({
         <ul className="divide-y divide-gray-50">
           {suggestionItems.map(({ product, card, href }) => (
             <SuggestionRow
-              key={product.id}
+              key={getListProductKey(product)}
               product={product}
               card={card}
               href={href}

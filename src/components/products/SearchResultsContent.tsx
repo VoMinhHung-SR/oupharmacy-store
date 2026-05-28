@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { Product, ProductFilters, buildProductCardPayload } from '@/lib/services/products'
+import { Product, buildProductCardPayload, getListProductKey } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
 import { Pagination } from '@/components/Pagination'
-import { PAGINATION, PRODUCT_LISTING } from '@/lib/constant'
+import { PRODUCT_LISTING } from '@/lib/constant'
 import { SearchKeywordItem } from '@/lib/services/searchTerms'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
@@ -20,8 +20,11 @@ interface SearchResultsContentProps {
   totalCount: number
   loading: boolean
   error: Error | null
-  filters: ProductFilters
-  onFiltersChange: (filters: ProductFilters) => void
+  page: number
+  pageSize: number
+  sortOption: SortOption
+  onSortChange: (sort: SortOption) => void
+  onPageChange: (page: number) => void
   popularTerms?: SearchKeywordItem[]
 }
 
@@ -31,50 +34,15 @@ export function SearchResultsContent({
   totalCount,
   loading,
   error,
-  filters,
-  onFiltersChange,
+  page,
+  pageSize,
+  sortOption,
+  onSortChange,
+  onPageChange,
   popularTerms = [],
 }: SearchResultsContentProps) {
-  const [sortOption, setSortOption] = useState<SortOption>(PRODUCT_LISTING.DEFAULT_SORT)
   const [viewMode, setViewMode] = useState<ViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
 
-  const sortedProducts = useMemo(() => {
-    if (!products.length) return products
-    if (filters.ordering) return products
-    const sorted = [...products]
-    switch (sortOption) {
-      case 'price-low':
-        return sorted.sort((a, b) => (a.price_value || 0) - (b.price_value || 0))
-      case 'price-high':
-        return sorted.sort((a, b) => (b.price_value || 0) - (a.price_value || 0))
-      default:
-        return sorted
-    }
-  }, [products, sortOption, filters.ordering])
-
-  const handleSortChange = (sort: SortOption) => {
-    setSortOption(sort)
-    const newFilters = { ...filters }
-    if (sort === 'price-low') {
-      newFilters.price_sort = 'asc'
-      newFilters.ordering = 'price_value'
-    } else if (sort === 'price-high') {
-      newFilters.price_sort = 'desc'
-      newFilters.ordering = '-price_value'
-    } else {
-      delete newFilters.price_sort
-      delete newFilters.ordering
-    }
-    newFilters.page = PAGINATION.DEFAULT_PAGE
-    onFiltersChange(newFilters)
-  }
-
-  const handlePageChange = (page: number) => {
-    onFiltersChange({ ...filters, page })
-  }
-
-  const currentPage = filters.page ?? PAGINATION.DEFAULT_PAGE
-  const pageSize = filters.page_size ?? PAGINATION.DEFAULT_PAGE_SIZE
   const totalPages = Math.ceil(totalCount / pageSize) || 1
 
   const breadcrumbItems: CrumbItem[] = [
@@ -139,7 +107,7 @@ export function SearchResultsContent({
         <ProductSortAndView
           sortOption={sortOption}
           viewMode={viewMode}
-          onSortChange={handleSortChange}
+          onSortChange={onSortChange}
           onViewModeChange={setViewMode}
           productCount={totalCount}
         />
@@ -148,7 +116,7 @@ export function SearchResultsContent({
         </h2>
       </div>
 
-      {sortedProducts.length === 0 ? (
+      {products.length === 0 ? (
         <div className="py-12 text-center text-gray-600">
           Không tìm thấy sản phẩm nào cho &quot;{query}&quot;. Thử từ khóa khác hoặc xem gợi ý bên dưới.
           {popularTerms.length > 0 && (
@@ -167,25 +135,25 @@ export function SearchResultsContent({
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {sortedProducts.map((product) => {
+          {products.map((product) => {
             return (
               <ProductCard
-                key={product.id}
+                key={getListProductKey(product)}
                 product={buildProductCardPayload(product)}
               />
             )
           })}
         </div>
       ) : (
-        <ProductListView products={sortedProducts} />
+        <ProductListView products={products} />
       )}
 
-      {sortedProducts.length > 0 && totalPages > 1 && (
+      {products.length > 0 && totalPages > 1 && (
         <div className="mt-8 flex justify-center">
           <Pagination
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={onPageChange}
           />
         </div>
       )}

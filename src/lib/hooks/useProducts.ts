@@ -68,6 +68,9 @@ export function useProductsByCategorySlug(
       if (response.error) {
         throw new Error(response.error)
       }
+      if (!response.data) {
+        throw new Error('Category listing not found')
+      }
       return response.data
     },
     enabled: !!categorySlug,
@@ -79,15 +82,20 @@ export function useProductsByCategorySlug(
  */
 export function useProductByCategoryAndProductSlug(
   categorySlug: string | undefined,
-  productSlug: string | undefined
+  productSlug: string | undefined,
+  variantId?: number
 ) {
   return useQuery<Product | undefined, Error>({
-    queryKey: ['product-by-category-product-slug', categorySlug, productSlug],
+    queryKey: ['product-by-category-product-slug', categorySlug, productSlug, variantId],
     queryFn: async () => {
       if (!categorySlug || !productSlug) {
         throw new Error('Category slug and product slug are required')
       }
-      const response = await getProductByCategoryAndProductSlug(categorySlug, productSlug)
+      const response = await getProductByCategoryAndProductSlug(
+        categorySlug,
+        productSlug,
+        variantId
+      )
       if (response.error) {
         throw new Error(response.error)
       }

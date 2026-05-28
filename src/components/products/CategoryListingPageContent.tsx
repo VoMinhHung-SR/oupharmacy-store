@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { ProductFilters, Product, buildProductCardPayload } from '@/lib/services/products'
+import { ProductFilters, Product, buildProductCardPayload, getListProductKey } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView, ProductListView } from '@/components/products'
 import { DynamicFiltersSidebar } from './DynamicFiltersSidebar'
@@ -383,7 +383,7 @@ export function CategoryListingPageContent({
               {sortedProducts.map((product) => {
                 return (
                   <ProductCard
-                    key={product.id}
+                    key={getListProductKey(product)}
                     product={buildProductCardPayload(product, categorySlug)}
                   />
                 )
