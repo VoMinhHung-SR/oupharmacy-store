@@ -1,4 +1,4 @@
-import { CountryTag } from './CountryTag'
+import { CardBadge } from '@/components/badges/CardBadge'
 
 type ProductBrandMetaProps = {
   brandName: string
@@ -17,8 +17,8 @@ export function ProductBrandMeta({
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-2">
-      {country ? <CountryTag label={country} /> : null}
-      <p className="text-sm text-gray-600">
+      {country ? <CardBadge country={country} variant="pdp" /> : null}
+      <p className="text-sm leading-8 text-gray-600">
         Thương hiệu: <span className={brandClassName}>{brandName}</span>
       </p>
     </div>

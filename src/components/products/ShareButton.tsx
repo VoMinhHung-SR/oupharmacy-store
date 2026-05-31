@@ -44,7 +44,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ productName, productUr
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors text-xs"
+        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-600 transition-colors hover:bg-gray-50"
         aria-label="Share product"
       >
         <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

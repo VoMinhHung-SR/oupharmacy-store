@@ -326,7 +326,7 @@ export function ProductDetailPageContent({
                 <div className="flex shrink-0 items-center gap-1.5">
                 <button
                   onClick={handleWishlistToggle}
-                    className={`p-1.5 rounded-lg border transition-colors ${
+                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors ${
                     isInWishlist(product.id)
                       ? 'border-red-300 bg-red-50 text-red-600'
                       : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'

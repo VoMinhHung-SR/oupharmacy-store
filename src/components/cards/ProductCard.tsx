@@ -7,7 +7,12 @@ import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
-import { ProductBrandMeta } from '@/components/products/ProductBrandMeta'
+import { CardBadge } from '@/components/badges/CardBadge'
+import {
+  CARD_CORNER_TAB_IMAGE_CLEARANCE,
+  cardCornerTabLeftOverlayClass,
+  cardCornerTabRightPromoClass,
+} from '@/components/badges/cardCornerStyles'
 import { mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
 
 interface ProductCardProps {
@@ -64,6 +69,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
     return 0
   }, [product])
+
+  const hasCornerBadges = Boolean(product.brand_country?.trim()) || discount > 0
 
   const isConsultPrice = useMemo(
     () =>
@@ -142,28 +149,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       href={productLink}
       className="group relative flex flex-col h-full rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
     >
-      {/* Discount badge */}
-      {discount > 0 && (
-        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
-          -{discount}%
-        </div>
-      )}
-
-      {/* Product image */}
-      <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100 mb-3">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            width={300}
-            height={300}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+      {/* Badges overlay — offset -4 aligns with card border; image markup matches original */}
+      <div className="relative">
+        {product.brand_country ? (
+          <CardBadge
+            country={product.brand_country}
+            variant="corner"
+            className={cardCornerTabLeftOverlayClass}
           />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-gray-400">
-            <ImagePlaceholderIcon className="h-12 w-12" />
+        ) : null}
+        {discount > 0 ? (
+          <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
+        ) : null}
+
+        <div
+          className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${hasCornerBadges ? CARD_CORNER_TAB_IMAGE_CLEARANCE : ''}`.trim()}
+        >
+          <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
+            {product.image_url ? (
+              <Image
+                src={product.image_url}
+                alt={product.name}
+                width={300}
+                height={300}
+                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
+                <ImagePlaceholderIcon className="h-12 w-12" />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Product info */}
@@ -172,13 +189,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700 min-h-[2.5rem]">
             {product.name}
           </div>
-          {product.brand_name ? (
-            <ProductBrandMeta
-              brandName={product.brand_name}
-              brandCountry={product.brand_country}
-              variant="card"
-            />
-          ) : null}
           {isConsultPrice ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
               <p className="text-xs text-amber-800">
@@ -236,7 +246,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <div className="flex flex-col gap-1.5 mt-auto pt-2">
+        <div className={`mt-auto pt-2 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
           {isConsultPrice ? (
             <>
               <button
@@ -258,22 +268,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </button>
             </>
           ) : (
-            <>
-              <button
-                type="button"
-                className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-                onClick={handleAddToCart}
-              >
-                Thêm vào giỏ
-              </button>
-              <button
-                type="button"
-                className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-                onClick={handleNavigate}
-              >
-                Chi tiết
-              </button>
-            </>
+            <button
+              type="button"
+              className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+              onClick={handleAddToCart}
+            >
+              Thêm vào giỏ
+            </button>
           )}
         </div>
       </div>

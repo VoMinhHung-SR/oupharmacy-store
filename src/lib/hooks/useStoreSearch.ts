@@ -1,11 +1,12 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
   searchStoreProducts,
   type StoreSearchParams,
   type StoreSearchResponse,
 } from '@/lib/services/search'
+import { HEADER_SEARCH } from '@/lib/constant'
 
 export function useStoreSearch(
   params: StoreSearchParams | undefined,
@@ -26,5 +27,7 @@ export function useStoreSearch(
       return response.data
     },
     enabled,
+    staleTime: HEADER_SEARCH.SUGGEST_STALE_MS,
+    placeholderData: keepPreviousData,
   })
 }

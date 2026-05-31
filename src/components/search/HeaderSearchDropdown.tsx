@@ -108,6 +108,8 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
               suggestionItems={s.suggestionItems}
               showSkeleton={s.showSuggestSkeleton}
               suggestEmpty={s.suggestEmpty}
+              suggestError={s.suggestError}
+              suggestErrorLabel={s.t('headerSearch.suggestError')}
               consultLabel={s.consultLabel}
               onSelectProduct={s.onSelectProduct}
               onViewAll={() => s.navigateSearch(s.query)}

@@ -122,6 +122,7 @@ export function useHeaderSearchDropdown() {
     data: suggestData,
     isPending: suggestPending,
     isFetching: suggestFetching,
+    isError: suggestError,
   } = useStoreSearch(suggestSearchParams, {
     enabled: open && isSearchMode,
   })
@@ -244,7 +245,8 @@ export function useHeaderSearchDropdown() {
     return out
   }, [suggestionResults])
 
-  const suggestEmpty = isSearchMode && !showSuggestSkeleton && suggestionItems.length === 0
+  const suggestEmpty =
+    isSearchMode && !showSuggestSkeleton && !suggestError && suggestionItems.length === 0
 
   return {
     t,
@@ -262,6 +264,7 @@ export function useHeaderSearchDropdown() {
     suggestionItems,
     showSuggestSkeleton,
     suggestEmpty,
+    suggestError,
     hotPending,
     dealsPending,
     onSubmit,

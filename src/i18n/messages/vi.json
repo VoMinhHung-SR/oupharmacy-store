@@ -43,6 +43,7 @@
       "suggestions": "Gợi ý",
       "viewAll": "Xem tất cả kết quả",
       "noResults": "Không tìm thấy sản phẩm phù hợp",
+      "suggestError": "Không tải được gợi ý. Bạn vẫn có thể bấm tìm kiếm để xem kết quả đầy đủ.",
       "consultPrice": "Liên hệ tư vấn giá",
       "clearInput": "Xóa nội dung tìm kiếm"
     }

@@ -43,6 +43,7 @@
       "suggestions": "Suggestions",
       "viewAll": "View all results",
       "noResults": "No matching products",
+      "suggestError": "Could not load suggestions. You can still search to view full results.",
       "consultPrice": "Contact for pricing",
       "clearInput": "Clear search"
     }

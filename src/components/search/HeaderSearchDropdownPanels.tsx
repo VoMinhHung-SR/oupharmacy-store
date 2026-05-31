@@ -198,10 +198,12 @@ function MiniProductCard({
 export interface HeaderSearchSuggestionsPanelProps {
   suggestionsLabel: string
   noResultsLabel: string
+  suggestErrorLabel: string
   viewAllLabel: string
   suggestionItems: HeaderSearchSuggestionItem[]
   showSkeleton: boolean
   suggestEmpty: boolean
+  suggestError: boolean
   consultLabel: string
   onSelectProduct: (product: HeaderSearchSuggestionItem['product']) => void
   onViewAll: () => void
@@ -210,10 +212,12 @@ export interface HeaderSearchSuggestionsPanelProps {
 export function HeaderSearchSuggestionsPanel({
   suggestionsLabel,
   noResultsLabel,
+  suggestErrorLabel,
   viewAllLabel,
   suggestionItems,
   showSkeleton,
   suggestEmpty,
+  suggestError,
   consultLabel,
   onSelectProduct,
   onViewAll,
@@ -225,6 +229,8 @@ export function HeaderSearchSuggestionsPanel({
       </div>
       {showSkeleton ? (
         <SuggestionsSkeleton rows={6} />
+      ) : suggestError ? (
+        <div className="px-4 py-8 text-center text-sm text-amber-800">{suggestErrorLabel}</div>
       ) : suggestEmpty ? (
         <div className="px-4 py-8 text-center text-sm text-gray-500">{noResultsLabel}</div>
       ) : (
