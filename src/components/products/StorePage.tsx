@@ -2,9 +2,9 @@
 
 import React from 'react'
 import { useStorePage } from '@/lib/hooks/useStorePage'
-import { CategoryListingPageContent } from '@/components/products/CategoryListingPageContent'
-import { ProductDetailPageContent } from '@/components/products/ProductDetailPageContent'
-import { OverLimitMessage } from '@/components/products/OverLimitMessage'
+import { CategoryListingPageContent } from '@/components/products/category-listing/CategoryListingPageContent'
+import { ProductDetailPageContent } from '@/components/products/product-detail/ProductDetailPageContent'
+import { OverLimitMessage } from '@/components/products/shared/OverLimitMessage'
 import { NotFoundContent } from '@/components/NotFoundContent'
 
 type StorePageProps = {

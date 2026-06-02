@@ -37,8 +37,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : ''
 
-  // If className contains bg- or text-, it should override variant classes
-  const hasCustomStyles = className && (className.includes('bg-') || className.includes('text-'))
+  // Only skip variant when custom background or text *color* is set — not font-size (text-sm, text-base, …)
+  const hasCustomStyles =
+    className &&
+    (/\bbg-/.test(className) ||
+      /\btext-(?:white|black|gray|slate|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|primary|secondary)(?:-|$)/.test(
+        className
+      ))
   const finalClasses = hasCustomStyles
     ? `${baseClasses} ${sizeClasses[size]} ${disabledClasses} ${className}`
     : `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`
