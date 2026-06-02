@@ -18,7 +18,7 @@ export function useStorePage() {
 
   const {
     data: resolved,
-    isLoading: resolving,
+    isPending: resolvingPath,
     error: resolveError,
   } = useQuery({
     queryKey: ['resolve-store-path', storePath],
@@ -67,7 +67,7 @@ export function useStorePage() {
 
   return {
     storePath,
-    resolving,
+    resolvingPath,
     resolveError,
     page,
     isCategory,

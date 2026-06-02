@@ -15,7 +15,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Khu vực | Vai trò |
 |---------|---------|
 | `src/app/` | Routes & pages (App Router). Đặt tên theo URL (vd. `don-hang`, `gio-hang`, `tai-khoan`). |
-| `src/components/` | UI tái sử dụng; nhóm theo domain (`checkout/`, `products/`, …). |
+| `src/components/` | UI tái sử dụng; nhóm theo domain (`checkout/`, `catalog/`, …). |
 | `src/layouts/` | Header, navigation, footer wrappers. |
 | `src/contexts/` | Cart, Auth, Checkout, Wishlist, Login modal, **CommonCities** (danh sách tỉnh/TP từ SSR root layout). |
 | `src/lib/services/` | Gọi API (axios/fetch) tới backend store / main API; **`location.server.ts`** fetch `common-cities` trên server. |
@@ -36,9 +36,23 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Đặt hàng / checkout | `src/app/don-hang/`, `src/components/checkout/` |
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
-| Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/products/` |
+| Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
 | HTTP client & env | `src/lib/api.ts`, `src/lib/services/*.ts` |
+
+## Components: `common` vs `catalog/`
+
+| Layer | Path | Khi nào dùng |
+|-------|------|----------------|
+| App-wide UI | `src/components/common/` | Không biết domain Product (vd. `HtmlContent`, `ProductImageGallery`) |
+| Catalog shared | `src/components/catalog/_shared/` | Listing + search + category (filters, sort, subcategories) |
+| Category listing | `src/components/catalog/category-listing/` | Trang danh mục (`CategoryListingPageContent`) |
+| Product detail | `src/components/catalog/product-detail/` | PDP (`ProductDetailPageContent`, `parts/`, `useProductDetailPage`) |
+| Search | `src/components/catalog/search/` | `/tim-kiem` |
+
+Public barrel [`src/components/catalog/index.ts`](src/components/catalog/index.ts) chỉ export bốn entry: `StorePage`, `CategoryListingPageContent`, `ProductDetailPageContent`, `SearchResultsContent`. Import nội bộ dùng path đầy đủ tới `_shared/` hoặc `parts/`.
+
+Local-only tooling: `.agent/` (gitignored); `.cursor/` (gitignored). `.agents/skills/` vẫn có thể commit nếu team chia sẻ skill pack.
 
 ## Lệnh dự án
 

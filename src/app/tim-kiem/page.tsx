@@ -6,7 +6,7 @@ import { getPopularSearchTerms } from '@/lib/services/searchTerms'
 import { recordSearch } from '@/lib/services/searchTerms'
 import { sortOptionToStoreSearchSort } from '@/lib/services/search'
 import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
-import { SearchResultsContent } from '@/components/products'
+import { SearchResultsContent } from '@/components/catalog'
 import { PAGINATION } from '@/lib/constant'
 import type { SearchKeywordItem } from '@/lib/services/searchTerms'
 

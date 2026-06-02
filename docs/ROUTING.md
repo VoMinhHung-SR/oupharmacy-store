@@ -22,7 +22,24 @@ Code:
 
 - `src/lib/store-path/` — resolve + href helpers
 - `src/lib/hooks/useStorePage.ts` — orchestration
-- `src/components/products/StorePage.tsx` — UI switch
+- `src/components/catalog/StorePage.tsx` — UI switch (category | PDP | not_found)
+
+### `src/components/catalog/` layout
+
+```text
+catalog/
+├── StorePage.tsx
+├── index.ts                    # public: StorePage, *PageContent only
+├── _shared/
+│   ├── listing/                # sort, list view, category skeleton
+│   ├── filters/                # ActiveFilters, DynamicFiltersSidebar
+│   └── category/               # subcategories, OverLimitMessage
+├── category-listing/           # CategoryListingPageContent + parts/
+├── product-detail/             # ProductDetailPageContent + parts/ + useProductDetailPage
+└── search/                     # SearchResultsContent
+```
+
+Import rules: feature folders import `_shared/*` or `common/`; PDP parts stay under `product-detail/parts/`. Avoid importing `product-detail` from `category-listing`.
 
 ## BE
 
