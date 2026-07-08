@@ -181,10 +181,12 @@ export interface DynamicFiltersResponse {
 export interface ProductFilters {
   kw?: string
   category?: number
-  brand?: number
+  brand?: number | string
   min_price?: number
   max_price?: number
-  in_stock?: boolean
+  in_stock?: boolean | string
+  /** Search-first facet key from GET /search/ facets.price_ranges */
+  price_range?: string
   price_sort?: 'asc' | 'desc'
   search?: string
   ordering?: string
