@@ -94,6 +94,7 @@ export function useHeaderSearchDropdown() {
       page: 1,
       in_stock: true,
       sort: 'relevance' as const,
+      include_facets: false,
     }),
     [debouncedTrimmed]
   )

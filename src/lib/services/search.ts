@@ -13,6 +13,8 @@ export type StoreSearchParams = {
   brand?: string | number
   price_range?: string
   in_stock?: boolean
+  /** Skip facet SQL when only items are needed (header suggest). */
+  include_facets?: boolean
 }
 
 export type StoreSearchMeta = {
@@ -63,6 +65,7 @@ function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
   if (params.price_range) qs.set('price_range', params.price_range)
   if (params.in_stock === true) qs.set('in_stock', 'true')
   if (params.in_stock === false) qs.set('in_stock', 'false')
+  if (params.include_facets === false) qs.set('include_facets', 'false')
   return qs
 }
 

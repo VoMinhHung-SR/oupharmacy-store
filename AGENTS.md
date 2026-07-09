@@ -37,6 +37,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
 | Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
+| Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
 | HTTP client & env | `src/lib/api.ts`, `src/lib/services/*.ts` |
 
@@ -83,3 +84,13 @@ Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 - Kế hoạch feat: `.cursor/plans/` trong repo này.
 - Tên file plan: **`[UnDone] … .plan.md`** khi mở việc; đổi thành **`[Done] …`** khi đóng feat (chi tiết: `PersonalProject/.cursor/rules/planning-project-plans-folder.mdc`).
 - Template mới: [`.cursor/plans/_template.plan.md`](.cursor/plans/_template.plan.md).
+
+## API catalog (store backend)
+
+| UI | Endpoint |
+|----|----------|
+| Category browse + sidebar filters | `GET /resolve-path/{path}/` + `GET /search/?category=` |
+| Global search `/tim-kiem` | `GET /search/?q=` |
+| Header suggest | `GET /search/?q=&include_facets=false` |
+
+Migration 2026-07-10 (xóa `dynamic-filters`): `Clinic-Oupharmacy-BE/storeApp/guidelines/search-facets-migration-2026-07-10.md` · FE routing: [`docs/ROUTING.md`](docs/ROUTING.md).

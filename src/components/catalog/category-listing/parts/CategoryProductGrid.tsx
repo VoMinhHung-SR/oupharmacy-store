@@ -24,7 +24,7 @@ interface CategoryProductGridProps {
   viewMode: CategoryViewMode
   categoryFilters: Omit<ProductFilters, 'category'>
   filters: ProductFilters
-  dynamicFilters?: FilterGroup[]
+  facetFilters?: FilterGroup[]
   onSortChange: (sort: CategorySortOption) => void
   onViewModeChange: (mode: CategoryViewMode) => void
   onFiltersChange: (filters: ProductFilters) => void
@@ -40,7 +40,7 @@ export function CategoryProductGrid({
   viewMode,
   categoryFilters,
   filters,
-  dynamicFilters,
+  facetFilters,
   onSortChange,
   onViewModeChange,
   onFiltersChange,
@@ -68,10 +68,10 @@ export function CategoryProductGrid({
         productCount={totalCount}
       />
 
-      {dynamicFilters && dynamicFilters.length > 0 ? (
+      {facetFilters && facetFilters.length > 0 ? (
         <ActiveFilters
           activeFilters={categoryFilters}
-          filterGroups={dynamicFilters}
+          filterGroups={facetFilters}
           onRemoveFilter={(filterKey) => {
             const newFilters = { ...filters }
             delete newFilters[filterKey as keyof ProductFilters]
