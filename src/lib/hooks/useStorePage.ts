@@ -17,7 +17,7 @@ import {
 
 /**
  * Store path page: resolve routing, then category browse via search-first
- * (GET /search/?category=) instead of listing + dynamic-filters.
+ * (GET /search/?category=) with facets from the same response.
  *
  * Network (category): resolve-path + search — ≤2 GETs for listing+facets.
  */
@@ -88,6 +88,7 @@ export function useStorePage() {
       brand: brandFilter,
       price_range: priceRangeFilter,
       in_stock: inStockFilter,
+      include_facets: true,
     }
   }, [
     isCategory,
@@ -119,7 +120,7 @@ export function useStorePage() {
     }
   }, [isCategory, resolved, listingSearch.data, categoryPath])
 
-  const dynamicFiltersData = useMemo(() => {
+  const categoryFacetsData = useMemo(() => {
     if (!isCategory || !resolved) return undefined
     const facetGroups = mapSearchFacetsToFilterGroups(listingSearch.data?.facets)
     return {
@@ -139,8 +140,8 @@ export function useStorePage() {
     error: listingSearch.error,
   }
 
-  const dynamicFilters = {
-    data: dynamicFiltersData,
+  const categoryFacets = {
+    data: categoryFacetsData,
     isLoading: listingSearch.isLoading && !listingSearch.data,
   }
 
@@ -153,7 +154,7 @@ export function useStorePage() {
   const meta = useCategoryPageMeta({
     categorySlug: categoryPath || storePath,
     productsData: listing.data,
-    filtersData: dynamicFilters.data,
+    filtersData: categoryFacets.data,
     listingError: listing.error,
     listingLoading: listing.isLoading,
   })
@@ -172,7 +173,7 @@ export function useStorePage() {
     setFilters,
     listing,
     detail,
-    dynamicFilters,
+    categoryFacets,
     meta,
   }
 }

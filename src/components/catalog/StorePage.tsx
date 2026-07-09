@@ -27,7 +27,7 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
     setFilters,
     listing,
     detail,
-    dynamicFilters,
+    categoryFacets,
     meta,
   } = useStorePage()
 
@@ -64,8 +64,8 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
     isCategory &&
     meta.isOverLimit &&
     !listing.isLoading &&
-    !dynamicFilters.isLoading &&
-    (listing.data || dynamicFilters.data) &&
+    !categoryFacets.isLoading &&
+    (listing.data || categoryFacets.data) &&
     (meta.subcategories.length > 0 || meta.productCount > 0)
   ) {
     return (
@@ -84,12 +84,12 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
         categorySlug={categoryPath}
         products={listing.data?.results || []}
         totalCount={listing.data?.count || 0}
-        loading={listing.isLoading || dynamicFilters.isLoading}
+        loading={listing.isLoading || categoryFacets.isLoading}
         error={listing.error}
         categoryName={meta.categoryName}
         subcategories={meta.subcategories}
-        dynamicFilters={dynamicFilters.data?.filters ?? undefined}
-        filtersLoading={dynamicFilters.isLoading}
+        facetFilters={categoryFacets.data?.filters ?? undefined}
+        filtersLoading={categoryFacets.isLoading}
         filters={filters}
         onFiltersChange={setFilters}
       />

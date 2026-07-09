@@ -4,17 +4,17 @@ import { FilterGroup, ProductFilters } from '@/lib/services/products'
 import { ChevronDownIcon, SearchIcon } from '@/components/icons'
 import { SIDEBAR } from '@/lib/constant'
 
-interface DynamicFiltersSidebarProps {
+interface SearchFacetsSidebarProps {
   filters: FilterGroup[]
   activeFilters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
 }
 
-export function DynamicFiltersSidebar({
+export function SearchFacetsSidebar({
   filters,
   activeFilters,
   onFiltersChange,
-}: DynamicFiltersSidebarProps) {
+}: SearchFacetsSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [showMoreStates, setShowMoreStates] = useState<Record<string, boolean>>({})
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
@@ -23,7 +23,6 @@ export function DynamicFiltersSidebar({
     const newFilters = { ...activeFilters }
 
     if (isMultiple) {
-      // Multi-select: use comma-separated string
       const currentValue = newFilters[filterId as keyof ProductFilters] as string | undefined
       const currentValues = currentValue?.split(',').filter(Boolean) || []
       const valueStr = String(optionValue)
@@ -36,17 +35,16 @@ export function DynamicFiltersSidebar({
       }
 
       if (currentValues.length > 0) {
-        newFilters[filterId as keyof ProductFilters] = currentValues.join(',') as any
+        newFilters[filterId as keyof ProductFilters] = currentValues.join(',') as ProductFilters[keyof ProductFilters]
       } else {
         delete newFilters[filterId as keyof ProductFilters]
       }
     } else {
-      // Single select: toggle
       const currentValue = newFilters[filterId as keyof ProductFilters]
       if (currentValue === optionValue) {
         delete newFilters[filterId as keyof ProductFilters]
       } else {
-        newFilters[filterId as keyof ProductFilters] = optionValue as any
+        newFilters[filterId as keyof ProductFilters] = optionValue as ProductFilters[keyof ProductFilters]
       }
     }
 
@@ -89,8 +87,6 @@ export function DynamicFiltersSidebar({
     }))
   }
 
-  // Always show filter sidebar container, even if no filters
-  // Empty state will be handled by parent component
   if (!filters || filters.length === 0) {
     return (
       <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
@@ -108,7 +104,6 @@ export function DynamicFiltersSidebar({
         <FilterGroupItem
           key={filterGroup.id}
           filterGroup={filterGroup}
-          activeFilters={activeFilters}
           expanded={expandedSections[filterGroup.id] ?? true}
           showMore={showMoreStates[filterGroup.id] ?? false}
           searchQuery={searchQueries[filterGroup.id] || ''}
@@ -126,7 +121,6 @@ export function DynamicFiltersSidebar({
 
 interface FilterGroupItemProps {
   filterGroup: FilterGroup
-  activeFilters: ProductFilters
   expanded: boolean
   showMore: boolean
   searchQuery: string
@@ -140,7 +134,6 @@ interface FilterGroupItemProps {
 
 function FilterGroupItem({
   filterGroup,
-  activeFilters,
   expanded,
   showMore,
   searchQuery,
@@ -192,7 +185,6 @@ function FilterGroupItem({
 
       {expanded && (
         <div className="space-y-3">
-          {/* Search input for text-based filters */}
           {filterGroup.type === 'multiple' && (
             <div className="relative">
               <input
@@ -208,10 +200,8 @@ function FilterGroupItem({
             </div>
           )}
 
-          {/* Filter Options */}
           <div className="space-y-2">
             {filterGroup.type === 'range' ? (
-              // Price range buttons
               visibleOptions.map((option) => {
                 const isActive = isFilterActive(filterGroup.id, option.value)
                 return (
@@ -233,7 +223,6 @@ function FilterGroupItem({
                 )
               })
             ) : (
-              // Checkboxes or radio buttons
               visibleOptions.map((option) => {
                 const isActive = isFilterActive(filterGroup.id, option.value)
                 return (
@@ -267,7 +256,6 @@ function FilterGroupItem({
             )}
           </div>
 
-          {/* Show More / Show Less */}
           {hasMore && (
             <button
               onClick={onToggleShowMore}

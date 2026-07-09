@@ -18,7 +18,7 @@ interface CategoryListingPageContentProps {
   error: Error | null
   categoryName?: string | null
   subcategories?: Subcategory[]
-  dynamicFilters?: FilterGroup[]
+  facetFilters?: FilterGroup[]
   filtersLoading?: boolean
   filters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
@@ -32,7 +32,7 @@ export function CategoryListingPageContent({
   error,
   categoryName,
   subcategories = [],
-  dynamicFilters,
+  facetFilters,
   filtersLoading = false,
   filters,
   onFiltersChange,
@@ -84,7 +84,7 @@ export function CategoryListingPageContent({
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <CategoryListingSidebar
-          dynamicFilters={dynamicFilters}
+          facetFilters={facetFilters}
           filtersLoading={filtersLoading}
           categoryFilters={listing.categoryFilters}
           onFiltersChange={listing.handleFiltersChange}
@@ -93,7 +93,7 @@ export function CategoryListingPageContent({
         <CategoryListingMobileFilters
           open={listing.showMobileFilters}
           onClose={() => listing.setShowMobileFilters(false)}
-          dynamicFilters={dynamicFilters}
+          facetFilters={facetFilters}
           filtersLoading={filtersLoading}
           categoryFilters={listing.categoryFilters}
           onFiltersChange={listing.handleFiltersChange}
@@ -107,7 +107,7 @@ export function CategoryListingPageContent({
           viewMode={listing.viewMode}
           categoryFilters={listing.categoryFilters}
           filters={filters}
-          dynamicFilters={dynamicFilters}
+          facetFilters={facetFilters}
           onSortChange={listing.handleSortChange}
           onViewModeChange={listing.setViewMode}
           onFiltersChange={onFiltersChange}
