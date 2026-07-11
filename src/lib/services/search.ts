@@ -86,10 +86,11 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
   const brandOptions = mapFacetOptions(facets.brand, (bucket) => {
     const id = bucket.id
     if (id == null || !bucket.name) return null
+    const value: string | number = typeof id === 'boolean' ? String(id) : id
     return {
       id: String(id),
       label: bucket.name,
-      value: id,
+      value,
       count: bucket.count,
     }
   })

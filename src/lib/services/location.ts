@@ -22,25 +22,6 @@ export interface District {
   id_commune?: string | null
 }
 
-export interface Location {
-  id: number
-  address: string
-  lat: string
-  lng: string
-  city: number
-  district: number
-  city_info?: { id: number; name: string }
-  district_info?: { id: number; name: string }
-}
-
-export interface CreateLocationData {
-  lat: string
-  lng: string
-  city: number
-  district: number
-  address: string
-}
-
 /** GET /common-cities/ */
 export async function getCities(): Promise<{ data?: City[]; error?: string }> {
   try {
@@ -77,27 +58,5 @@ export async function getDistrictsByCity(
     return {
       error: err.response?.data?.detail || err.message || 'Không thể lấy danh sách phường/xã',
     }
-  }
-}
-
-export async function createLocation(
-  data: CreateLocationData
-): Promise<{ data?: Location; error?: string }> {
-  try {
-    const response = await axios.post<Location>(`${MAIN_API_URL}/common-locations/`, data, {
-      headers: { ...mainApiAuthHeaders() },
-    })
-    if (response.status === 201 && response.data) {
-      return { data: response.data }
-    }
-    return { error: 'Không thể tạo địa chỉ' }
-  } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    const errorMessage =
-      err.response?.data?.detail ||
-      err.response?.data?.message ||
-      err.message ||
-      'Không thể tạo địa chỉ'
-    return { error: errorMessage }
   }
 }

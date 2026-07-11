@@ -40,24 +40,12 @@ export function useOrder(orderNumber: string, options?: { enabled?: boolean }) {
 }
 
 /**
- * @deprecated Use `useCheckoutCart` from `src/lib/hooks/useCarts.ts` for checkout flow.
- * This hook remains only for legacy compatibility.
+ * Removed from checkout path — use `useCheckoutCart` from `src/lib/hooks/useCarts.ts`.
+ * Kept export so accidental imports fail loudly at runtime.
  */
 export function useCreateOrder() {
-  const queryClient = useQueryClient()
-
   return useMutation({
-    mutationFn: async (order: Order) => {
-      const response = await createOrder(order)
-      if (response.error) {
-        throw new Error(response.error)
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      // Invalidate orders query để refetch danh sách orders
-      queryClient.invalidateQueries({ queryKey: ['orders'] })
-    },
+    mutationFn: async (order: Order) => createOrder(order),
   })
 }
 
