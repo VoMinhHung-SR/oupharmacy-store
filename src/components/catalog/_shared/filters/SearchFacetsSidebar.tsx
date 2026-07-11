@@ -20,11 +20,13 @@ export function SearchFacetsSidebar({
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
 
   const handleFilterToggle = useCallback((filterId: string, optionValue: string | number, isMultiple: boolean) => {
-    const newFilters = { ...activeFilters }
+    const newFilters: ProductFilters = { ...activeFilters }
+    const bag = newFilters as Record<string, string | number | boolean | undefined>
 
     if (isMultiple) {
-      const currentValue = newFilters[filterId as keyof ProductFilters] as string | undefined
-      const currentValues = currentValue?.split(',').filter(Boolean) || []
+      const currentValue = bag[filterId]
+      const currentValues =
+        typeof currentValue === 'string' ? currentValue.split(',').filter(Boolean) : []
       const valueStr = String(optionValue)
       const index = currentValues.indexOf(valueStr)
 
@@ -35,16 +37,15 @@ export function SearchFacetsSidebar({
       }
 
       if (currentValues.length > 0) {
-        newFilters[filterId as keyof ProductFilters] = currentValues.join(',') as ProductFilters[keyof ProductFilters]
+        bag[filterId] = currentValues.join(',')
       } else {
-        delete newFilters[filterId as keyof ProductFilters]
+        delete bag[filterId]
       }
     } else {
-      const currentValue = newFilters[filterId as keyof ProductFilters]
-      if (currentValue === optionValue) {
-        delete newFilters[filterId as keyof ProductFilters]
+      if (bag[filterId] === optionValue) {
+        delete bag[filterId]
       } else {
-        newFilters[filterId as keyof ProductFilters] = optionValue as ProductFilters[keyof ProductFilters]
+        bag[filterId] = optionValue
       }
     }
 
