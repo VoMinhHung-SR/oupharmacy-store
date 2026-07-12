@@ -37,6 +37,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
 | Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
+| Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
 | HTTP client & env | `src/lib/api.ts`, `src/lib/services/*.ts` |
 
@@ -83,3 +84,57 @@ Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 - Kế hoạch feat: `.cursor/plans/` trong repo này.
 - Tên file plan: **`[UnDone] … .plan.md`** khi mở việc; đổi thành **`[Done] …`** khi đóng feat (chi tiết: `PersonalProject/.cursor/rules/planning-project-plans-folder.mdc`).
 - Template mới: [`.cursor/plans/_template.plan.md`](.cursor/plans/_template.plan.md).
+
+## API catalog (store backend)
+
+| UI | Endpoint |
+|----|----------|
+| Category browse + sidebar filters | `GET /resolve-path/{path}/` + `GET /search/?category=` |
+| Global search `/tim-kiem` | `GET /search/?q=` |
+| Header suggest | `GET /search/?q=&include_facets=false` |
+
+Migration 2026-07-10 (xóa `dynamic-filters`): `Clinic-Oupharmacy-BE/storeApp/guidelines/search-facets-migration-2026-07-10.md` · FE routing: [`docs/ROUTING.md`](docs/ROUTING.md).
+
+<!-- gitnexus:start -->
+# GitNexus — Code Intelligence
+
+This project is indexed by GitNexus as **oupharmacy-store** (2224 symbols, 3734 relationships, 135 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+
+> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
+
+## Always Do
+
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
+- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
+- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
+
+## Never Do
+
+- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
+- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
+- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+
+## Resources
+
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/oupharmacy-store/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/oupharmacy-store/clusters` | All functional areas |
+| `gitnexus://repo/oupharmacy-store/processes` | All execution flows |
+| `gitnexus://repo/oupharmacy-store/process/{name}` | Step-by-step execution trace |
+
+## CLI
+
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
+<!-- gitnexus:end -->

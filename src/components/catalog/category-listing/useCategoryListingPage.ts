@@ -31,24 +31,8 @@ export function useCategoryListingPage({
     return rest
   }, [filters])
 
-  const sortedProducts = useMemo(() => {
-    if (!products.length) return products
-
-    if (categoryFilters.ordering) {
-      return products
-    }
-
-    const sorted = [...products]
-    switch (sortOption) {
-      case 'price-low':
-        return sorted.sort((a, b) => (a.price_value || 0) - (b.price_value || 0))
-      case 'price-high':
-        return sorted.sort((a, b) => (b.price_value || 0) - (a.price_value || 0))
-      case 'bestselling':
-      default:
-        return sorted.sort((a, b) => (b.in_stock || 0) - (a.in_stock || 0))
-    }
-  }, [products, sortOption, categoryFilters.ordering])
+  // Search-first: sort is applied on the server via GET /search/?sort=
+  const sortedProducts = products
 
   const handleSortChange = (sort: CategorySortOption) => {
     setSortOption(sort)

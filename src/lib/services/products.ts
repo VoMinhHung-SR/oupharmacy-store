@@ -160,31 +160,28 @@ export interface FilterGroup {
   maxVisible?: number
 }
 
-export interface DynamicFiltersResponse {
+export interface CategoryBrowseMeta {
   categorySlug: string
   categoryName: string
   productCount: number
   hasSubcategories: boolean
   subcategories: Subcategory[]
   overLimit: boolean
-  variants?: {
-    brands?: string[]
-    priceRanges?: Array<{ min: number; max?: number; label: string }>
-    targetAudiences?: string[]
-    flavors?: string[]
-    countries?: string[]
-    [key: string]: any
-  }
   filters?: FilterGroup[]
 }
+
+/** @deprecated Use CategoryBrowseMeta */
+export type DynamicFiltersResponse = CategoryBrowseMeta
 
 export interface ProductFilters {
   kw?: string
   category?: number
-  brand?: number
+  brand?: number | string
   min_price?: number
   max_price?: number
-  in_stock?: boolean
+  in_stock?: boolean | string
+  /** Search-first facet key from GET /search/ facets.price_ranges */
+  price_range?: string
   price_sort?: 'asc' | 'desc'
   search?: string
   ordering?: string

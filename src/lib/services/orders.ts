@@ -99,22 +99,6 @@ function normalizeOrder(raw: Record<string, unknown>): Order {
   }
 }
 
-function serializeOrderForApi(order: Order): Record<string, unknown> {
-  return {
-    ...order,
-    items: order.items.map((item) => ({
-      id: item.id,
-      product_variant: item.variant_unit_id,
-      ...(item.product_variant_unit_id ? { product_variant_unit: item.product_variant_unit_id } : {}),
-      quantity: item.quantity,
-      price: item.price,
-      subtotal: item.subtotal,
-      name: item.name,
-      image_url: item.image_url,
-    })),
-  }
-}
-
 export async function getOrders(userId?: number, filters?: OrderListFilters) {
   const qs = buildOrderListQuery(filters)
   if (userId) {
@@ -164,11 +148,13 @@ export async function getOrder(orderNumber: string) {
 }
 
 /**
- * @deprecated Use cart-first checkout via `checkoutCart` in `src/lib/services/carts.ts`.
- * This endpoint is kept temporarily for backward compatibility.
+ * Removed: direct POST /orders/ is not supported for checkout.
+ * Use cart-first `checkoutCart` in `src/lib/services/carts.ts`.
  */
-export async function createOrder(order: Order) {
-  return apiPost<Order>('/orders/', serializeOrderForApi(order) as unknown as Order)
+export async function createOrder(_order: Order): Promise<never> {
+  throw new Error(
+    'createOrder(POST /orders/) removed — use checkoutCart from @/lib/services/carts'
+  )
 }
 
 export async function updateOrderStatus(orderNumber: string, status: Order['status']) {

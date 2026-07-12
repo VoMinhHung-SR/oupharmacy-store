@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicFiltersSidebar } from '@/components/catalog/_shared/filters/DynamicFiltersSidebar'
+import { SearchFacetsSidebar } from '@/components/catalog/_shared/filters/SearchFacetsSidebar'
 import { CloseIcon } from '@/components/icons'
 import { ProductFilters, FilterGroup } from '@/lib/services/products'
 import { SIDEBAR } from '@/lib/constant'
@@ -8,7 +8,7 @@ import { SIDEBAR } from '@/lib/constant'
 interface CategoryListingMobileFiltersProps {
   open: boolean
   onClose: () => void
-  dynamicFilters?: FilterGroup[]
+  facetFilters?: FilterGroup[]
   filtersLoading: boolean
   categoryFilters: Omit<ProductFilters, 'category'>
   onFiltersChange: (filters: ProductFilters) => void
@@ -17,7 +17,7 @@ interface CategoryListingMobileFiltersProps {
 export function CategoryListingMobileFilters({
   open,
   onClose,
-  dynamicFilters,
+  facetFilters,
   filtersLoading,
   categoryFilters,
   onFiltersChange,
@@ -41,14 +41,14 @@ export function CategoryListingMobileFilters({
             <CloseIcon />
           </button>
         </div>
-        {filtersLoading || dynamicFilters === undefined ? (
+        {filtersLoading || facetFilters === undefined ? (
           <div className="space-y-4">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Bộ lọc nâng cao</h2>
             <p className="text-sm text-gray-500">Đang tải bộ lọc...</p>
           </div>
         ) : (
-          <DynamicFiltersSidebar
-            filters={dynamicFilters}
+          <SearchFacetsSidebar
+            filters={facetFilters}
             activeFilters={categoryFilters}
             onFiltersChange={onFiltersChange}
           />

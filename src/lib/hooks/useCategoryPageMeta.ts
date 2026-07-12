@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import type {
   CategoryProductsResponse,
-  DynamicFiltersResponse,
+  CategoryBrowseMeta,
   Subcategory,
 } from '@/lib/services/products'
 
@@ -14,7 +14,7 @@ function isCategoryProductsResponse(data: unknown): data is CategoryProductsResp
 type UseCategoryPageMetaArgs = {
   categorySlug: string
   productsData?: CategoryProductsResponse
-  filtersData?: DynamicFiltersResponse
+  filtersData?: CategoryBrowseMeta
   listingError: Error | null
   listingLoading: boolean
 }
