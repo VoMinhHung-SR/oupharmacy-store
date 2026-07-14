@@ -42,3 +42,7 @@ next-env.d.ts
 .cursor/
 .agents/
 .gitnexus
+
+# GitNexus / Claude local agent artifacts
+.claude/
+CLAUDE.md
