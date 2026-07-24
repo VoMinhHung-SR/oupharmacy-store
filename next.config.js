@@ -1,4 +1,40 @@
 const createNextIntlPlugin = require('next-intl/plugin')
+const withPWA = require('@ducanh2912/next-pwa').default({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  // Keep Workbox defaults (static CacheFirst, etc.) and append overrides below.
+  extendDefaultRuntimeCaching: true,
+  workboxOptions: {
+    disableDevLogs: true,
+    runtimeCaching: [
+      {
+        // Prefer fresh SSR HTML for catalog/cart/checkout.
+        urlPattern: ({ request }) => request.destination === 'document',
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'documents',
+          networkTimeoutSeconds: 10,
+          expiration: {
+            maxEntries: 32,
+            maxAgeSeconds: 60 * 60,
+          },
+        },
+      },
+      {
+        // Never cache auth / store API responses in the SW.
+        urlPattern: ({ url }) =>
+          url.pathname.startsWith('/api/') ||
+          url.pathname.includes('/auth') ||
+          /\/api\/store\//.test(url.pathname),
+        handler: 'NetworkOnly',
+        options: {
+          cacheName: 'api-bypass',
+        },
+      },
+    ],
+  },
+})
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -21,4 +57,5 @@ const nextConfig = {
   trailingSlash: false,
 }
 
-module.exports = withNextIntl(nextConfig)
+// PWA outermost so Workbox build hooks run after next-intl plugin wrap.
+module.exports = withPWA(withNextIntl(nextConfig))
