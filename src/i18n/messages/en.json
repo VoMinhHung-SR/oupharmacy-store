@@ -87,6 +87,16 @@
     "paymentMethod": "Payment Method",
     "shippingMethod": "Shipping Method",
     "orderSummary": "Order Summary"
+  },
+  "pwa": {
+    "installTitle": "Install OUPharmacy",
+    "installAndroidBody": "Add to your home screen for a quick app-like experience — no store download.",
+    "installIosBody": "In Safari: tap Share → Add to Home Screen.",
+    "installCta": "Install",
+    "installing": "Installing…",
+    "dismiss": "Not now",
+    "footerTitle": "Install the app",
+    "footerHint": "On your phone: add OUPharmacy to the Home Screen from the browser (PWA)."
   }
 }
 

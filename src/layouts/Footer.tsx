@@ -28,11 +28,15 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
           <div className="lg:col-span-3">
-            <div className="font-semibold text-gray-800">Tải ứng dụng</div>
-            <p className="mt-2">Sắp ra mắt trên iOS và Android.</p>
+            <div className="font-semibold text-gray-800">Cài ứng dụng</div>
+            <p className="mt-2">
+              Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA).
+            </p>
           </div>
         </div>
-        <div className="mt-8 text-center text-xs text-gray-500">© {new Date().getFullYear()} OUPharmacy. All rights reserved.</div>
+        <div className="mt-8 pb-[env(safe-area-inset-bottom)] text-center text-xs text-gray-500">
+          © {new Date().getFullYear()} OUPharmacy. All rights reserved.
+        </div>
       </div>
     </footer>
   )

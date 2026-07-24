@@ -87,6 +87,16 @@
     "paymentMethod": "Phương thức thanh toán",
     "shippingMethod": "Phương thức vận chuyển",
     "orderSummary": "Tóm tắt đơn hàng"
+  },
+  "pwa": {
+    "installTitle": "Cài OUPharmacy",
+    "installAndroidBody": "Thêm vào màn hình chính để mở nhanh như ứng dụng, không cần App Store.",
+    "installIosBody": "Trên Safari: chạm Share (Chia sẻ) → Add to Home Screen (Thêm vào Màn hình chính).",
+    "installCta": "Cài app",
+    "installing": "Đang cài…",
+    "dismiss": "Để sau",
+    "footerTitle": "Cài ứng dụng",
+    "footerHint": "Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA)."
   }
 }
 

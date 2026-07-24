@@ -12,6 +12,7 @@ import { CheckoutProvider } from '@/contexts/CheckoutContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { LoginModal } from '@/components/modals/LoginModal'
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 import { Providers } from './providers'
 import { fetchCommonCitiesServer } from '@/lib/services/location.server'
 
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0369a1',
+  viewportFit: 'cover',
 }
 
 export default async function RootLayout({
@@ -74,6 +76,7 @@ export default async function RootLayout({
                     </main>
                     <Footer />
                       <LoginModal />
+                      <PwaInstallPrompt />
                   </CheckoutProvider>
                 </WishlistProvider>
               </CartProvider>
