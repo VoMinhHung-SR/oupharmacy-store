@@ -96,7 +96,10 @@
     "installing": "Installing…",
     "dismiss": "Not now",
     "footerTitle": "Install the app",
-    "footerHint": "On your phone: add OUPharmacy to the Home Screen from the browser (PWA)."
+    "footerHint": "On your phone: add OUPharmacy to the Home Screen from the browser (PWA).",
+    "offlineTitle": "You are offline",
+    "offlineBody": "This page could not be loaded. Check your connection and try again.",
+    "offlineHome": "Back to home"
   }
 }
 

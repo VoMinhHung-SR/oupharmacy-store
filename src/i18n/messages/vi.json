@@ -96,7 +96,10 @@
     "installing": "Đang cài…",
     "dismiss": "Để sau",
     "footerTitle": "Cài ứng dụng",
-    "footerHint": "Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA)."
+    "footerHint": "Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA).",
+    "offlineTitle": "Không có kết nối mạng",
+    "offlineBody": "Không tải được trang. Kiểm tra Wi‑Fi/4G rồi thử lại.",
+    "offlineHome": "Về trang chủ"
   }
 }
 
