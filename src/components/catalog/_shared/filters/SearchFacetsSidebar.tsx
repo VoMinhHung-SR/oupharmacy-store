@@ -8,12 +8,15 @@ interface SearchFacetsSidebarProps {
   filters: FilterGroup[]
   activeFilters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
+  /** Fill parent width (mobile drawer); default keeps desktop column width. */
+  compact?: boolean
 }
 
 export function SearchFacetsSidebar({
   filters,
   activeFilters,
   onFiltersChange,
+  compact = false,
 }: SearchFacetsSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [showMoreStates, setShowMoreStates] = useState<Record<string, boolean>>({})
@@ -88,18 +91,27 @@ export function SearchFacetsSidebar({
     }))
   }
 
+  const shellClass = compact
+    ? 'w-full min-w-0 space-y-4 bg-white'
+    : 'w-full min-w-0 space-y-4 rounded-lg bg-white p-4'
+  const shellStyle = compact ? undefined : { width: `${SIDEBAR.WIDTH}px` }
+
   if (!filters || filters.length === 0) {
     return (
-      <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+      <div className={shellClass} style={shellStyle}>
+        {!compact ? (
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Bộ lọc nâng cao</h2>
+        ) : null}
         <p className="text-sm text-gray-500">Không có bộ lọc khả dụng</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 bg-white rounded-lg p-4" style={{ width: `${SIDEBAR.WIDTH}px` }}>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Bộ lọc nâng cao</h2>
+    <div className={shellClass} style={shellStyle}>
+      {!compact ? (
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Bộ lọc nâng cao</h2>
+      ) : null}
 
       {filters.map((filterGroup) => (
         <FilterGroupItem

@@ -50,8 +50,9 @@ export const PRODUCT_LISTING = {
 
 // Sidebar
 export const SIDEBAR = {
-  WIDTH: 256, // 64 * 4px = 256px (w-64)
-  MOBILE_WIDTH: 256, // Same as desktop for mobile overlay
+  WIDTH: 256, // 64 * 4px = 256px (w-64) — desktop sticky column
+  /** Mobile filter drawer; keep below ~90vw so backdrop stays tappable. */
+  MOBILE_WIDTH: 360,
   STICKY_TOP: 32, // 8 * 4px = 32px (top-8)
   Z_INDEX_OVERLAY: 40,
   Z_INDEX_SIDEBAR: 50,

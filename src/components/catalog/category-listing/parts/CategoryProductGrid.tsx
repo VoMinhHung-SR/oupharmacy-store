@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
 import {
   Product,
@@ -11,10 +12,19 @@ import {
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
 import { ProductListView } from '@/components/catalog/_shared/listing/ProductListView'
 import { ActiveFilters } from '@/components/catalog/_shared/filters/ActiveFilters'
-import { FilterIcon } from '@/components/icons'
+import { ChevronRightIcon, FilterIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
 import { PAGINATION } from '@/lib/constant'
 import { CategorySortOption, CategoryViewMode } from '@/components/catalog/category-listing/useCategoryListingPage'
+
+const NON_FACET_FILTER_KEYS = new Set([
+  'page',
+  'page_size',
+  'ordering',
+  'price_sort',
+  'category',
+  'q',
+])
 
 interface CategoryProductGridProps {
   categorySlug: string
@@ -47,16 +57,59 @@ export function CategoryProductGrid({
   onHandleFiltersChange,
   onOpenMobileFilters,
 }: CategoryProductGridProps) {
+  const activeFacetCount = useMemo(() => {
+    return Object.entries(categoryFilters).filter(([key, value]) => {
+      if (NON_FACET_FILTER_KEYS.has(key)) return false
+      if (value === undefined || value === null || value === '') return false
+      if (Array.isArray(value) && value.length === 0) return false
+      return true
+    }).length
+  }, [categoryFilters])
+
+  const hasActiveFacets = activeFacetCount > 0
+
   return (
     <main className="min-w-0 flex-1">
-      <div className="mb-4 lg:hidden">
+      <div className="mb-3 lg:hidden">
         <button
           type="button"
           onClick={onOpenMobileFilters}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
+            hasActiveFacets
+              ? 'border-primary-300 bg-primary-50'
+              : 'border-gray-200 bg-white hover:bg-gray-50'
+          }`}
+          aria-label={
+            hasActiveFacets ? `Bộ lọc, ${activeFacetCount} đang chọn` : 'Mở bộ lọc'
+          }
         >
-          <FilterIcon />
-          <span>Bộ lọc</span>
+          <span
+            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+              hasActiveFacets ? 'bg-primary-600 text-white' : 'bg-primary-50 text-primary-700'
+            }`}
+          >
+            <FilterIcon className="h-4 w-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span
+              className={`block text-sm font-semibold ${
+                hasActiveFacets ? 'text-primary-800' : 'text-gray-900'
+              }`}
+            >
+              Bộ lọc
+            </span>
+            <span className="block truncate text-xs text-gray-500">
+              {hasActiveFacets
+                ? `${activeFacetCount} bộ lọc đang áp dụng`
+                : 'Thương hiệu, giá, xuất xứ…'}
+            </span>
+          </span>
+          {hasActiveFacets ? (
+            <span className="inline-flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-bold text-white">
+              {activeFacetCount}
+            </span>
+          ) : null}
+          <ChevronRightIcon className="h-4 w-4 shrink-0 text-gray-400" />
         </button>
       </div>
 
