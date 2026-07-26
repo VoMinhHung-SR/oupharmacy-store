@@ -25,24 +25,26 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
   productCount,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-      <div className="flex items-center gap-2">
-        <h1 className="text-xl font-semibold text-gray-900">Danh sách sản phẩm</h1>
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <h1 className="text-lg font-semibold text-gray-900 sm:text-xl">Danh sách sản phẩm</h1>
         {productCount !== undefined && (
           <span className="text-sm text-gray-500">({productCount} sản phẩm)</span>
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-4">
         {/* Sort options */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700 whitespace-nowrap">Sắp xếp theo:</span>
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="hidden shrink-0 text-sm text-gray-700 whitespace-nowrap sm:inline">
+            Sắp xếp theo:
+          </span>
+          <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-lg bg-gray-100 p-1 scrollbar-hide">
             {SORT_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 onClick={() => onSortChange(option.value)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors sm:px-3 ${
                   sortOption === option.value
                     ? 'bg-white text-primary-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -55,10 +57,10 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
         </div>
 
         {/* View mode toggle */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 p-1">
           <button
             onClick={() => onViewModeChange('grid')}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`rounded-lg p-2 transition-colors ${
               viewMode === 'grid'
                 ? 'bg-white text-primary-700 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -69,7 +71,7 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
           </button>
           <button
             onClick={() => onViewModeChange('list')}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`rounded-lg p-2 transition-colors ${
               viewMode === 'list'
                 ? 'bg-white text-primary-700 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'

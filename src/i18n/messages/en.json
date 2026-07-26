@@ -89,14 +89,12 @@
     "orderSummary": "Order Summary"
   },
   "pwa": {
-    "installTitle": "Install OUPharmacy",
-    "installAndroidBody": "Add to your home screen for a quick app-like experience — no store download.",
-    "installIosBody": "In Safari: tap Share → Add to Home Screen.",
-    "installCta": "Install",
-    "installing": "Installing…",
+    "installTitle": "Add to Home Screen",
+    "installAndroidBody": "Add a shortcut to your home screen for quicker access to the store.",
+    "installIosBody": "Safari → Share → Add to Home Screen for quicker access.",
+    "installCta": "Add shortcut",
+    "installing": "Adding…",
     "dismiss": "Not now",
-    "footerTitle": "Install the app",
-    "footerHint": "On your phone: add OUPharmacy to the Home Screen from the browser (PWA).",
     "offlineTitle": "You are offline",
     "offlineBody": "This page could not be loaded. Check your connection and try again.",
     "offlineHome": "Back to home"

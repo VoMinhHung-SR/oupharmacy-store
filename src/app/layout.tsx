@@ -13,6 +13,7 @@ import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { LoginModal } from '@/components/modals/LoginModal'
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
+import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegister'
 import { Providers } from './providers'
 import { fetchCommonCitiesServer } from '@/lib/services/location.server'
 
@@ -61,7 +62,7 @@ export default async function RootLayout({
 
   return (
     <html lang="vi">
-      <body className={inter.className}>
+      <body className={`${inter.className} overflow-x-hidden`}>
         <NextIntlClientProvider messages={messages}>
           <Providers initialCities={initialCities} initialCitiesError={initialCitiesError}>
             <AuthProvider>
@@ -76,6 +77,7 @@ export default async function RootLayout({
                     </main>
                     <Footer />
                       <LoginModal />
+                      <PwaServiceWorkerRegister />
                       <PwaInstallPrompt />
                   </CheckoutProvider>
                 </WishlistProvider>

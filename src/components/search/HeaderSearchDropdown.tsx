@@ -32,13 +32,13 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
           aria-expanded={s.open}
           aria-controls={s.panelId}
           aria-autocomplete="list"
-          className="min-w-0 flex-1 bg-transparent px-4 py-3 pl-5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none"
+          className="min-w-0 flex-1 bg-transparent px-3 py-2.5 pl-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none sm:px-4 sm:py-3 sm:pl-5"
         />
         {s.query ? (
           <button
             type="button"
             onClick={s.clearQuery}
-            className="mr-0.5 shrink-0 rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            className="mr-0.5 shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 sm:p-2"
             aria-label={s.t('headerSearch.clearInput')}
           >
             <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
@@ -50,11 +50,11 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
             </svg>
           </button>
         ) : null}
-        <div className="flex shrink-0 items-center gap-0.5 pr-1.5">
+        <div className="flex shrink-0 items-center gap-0.5 pr-1 sm:pr-1.5">
           <button
             type="button"
             disabled
-            className="cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50"
+            className="hidden cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50 sm:inline-flex"
             aria-disabled="true"
             title={s.t('headerSearch.voiceDisabled')}
           >
@@ -70,7 +70,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
           <button
             type="button"
             disabled
-            className="cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50"
+            className="hidden cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50 sm:inline-flex"
             aria-disabled="true"
             title={s.t('headerSearch.scanDisabled')}
           >
@@ -85,7 +85,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
           </button>
           <button
             type="submit"
-            className="rounded-full p-2 text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-600"
+            className="rounded-full p-1.5 text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-600 sm:p-2"
             aria-label={s.t('headerSearch.submitAria')}
           >
             <SearchIcon className="h-5 w-5" />

@@ -193,13 +193,13 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
   return (
     <>
       <nav
-        className="relative z-30 bg-white border-b border-gray-200 shadow-sm"
-        style={{ overflow: 'visible' }}
+        className="relative z-30 overflow-x-hidden border-b border-gray-200 bg-white shadow-sm"
+        style={{ overflowX: 'hidden', overflowY: 'visible' }}
       >
-        <Container className="relative" style={{ overflow: 'visible' }}>
+        <Container className="relative overflow-x-hidden" style={{ overflowX: 'hidden', overflowY: 'visible' }}>
           <div
-            className="flex items-center gap-0 relative"
-            style={{ overflow: 'visible' }}
+            className="relative flex items-center gap-0 overflow-x-hidden"
+            style={{ overflowX: 'hidden', overflowY: 'visible' }}
           >
             {canScrollLeft && (
               <button
@@ -226,7 +226,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
 
             <div
               ref={scrollContainerRef}
-              className="flex items-center gap-6 overflow-x-auto overflow-y-visible scrollbar-hide flex-1 min-w-0 touch-manipulation"
+              className="flex min-w-0 flex-1 touch-manipulation items-center gap-4 overflow-x-auto overflow-y-visible scrollbar-hide sm:gap-6"
             >
               {categories.map((category) => {
                 const hasChildren =
@@ -255,7 +255,9 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                       aria-haspopup={hasChildren ? 'true' : undefined}
                       aria-expanded={hasChildren ? isHovered : undefined}
                     >
-                      <span className="text-sm font-medium">{category.name}</span>
+                      <span className="max-w-[10rem] truncate text-sm font-medium sm:max-w-none" title={category.name}>
+                        {category.name}
+                      </span>
                       {hasChildren && (
                         <svg
                           className={`w-4 h-4 transition-transform ${

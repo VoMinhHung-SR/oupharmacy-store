@@ -44,13 +44,13 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ productName, productUr
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-600 transition-colors hover:bg-gray-50"
-        aria-label="Share product"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto sm:px-3"
+        aria-label="Chia sẻ sản phẩm"
       >
         <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
         </svg>
-        <span style={{ color: '#6B7280' }}>Chia sẻ</span>
+        <span className="hidden text-gray-500 sm:inline">Chia sẻ</span>
       </button>
 
       {showMenu && (

@@ -53,7 +53,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
               <li key={index} className="flex items-center gap-2">
                 <Link 
                   href={item.href} 
-                  className="text-primary-500 hover:text-primary-700 truncate max-w-[200px]"
+                  className="max-w-[120px] truncate text-primary-500 hover:text-primary-700 sm:max-w-[200px]"
                   title={item.label}
                 >
                   {truncateLabel(item.label)}
@@ -65,7 +65,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
           return (
             <li 
               key={index} 
-              className="text-gray-900 font-medium truncate max-w-[300px]"
+              className="max-w-[160px] truncate font-medium text-gray-900 sm:max-w-[300px]"
               title={item.label}
             >
               {truncateLabel(item.label)}

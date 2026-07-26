@@ -52,19 +52,19 @@ export const Header: React.FC = () => {
       {/* Main header */}
       <div className="py-3">
         <Container>
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
+            <Link href="/" className="min-w-0 flex-shrink-0 hover:opacity-90 transition-opacity">
               <div className="flex flex-col">
-                <span className="text-xl font-bold leading-tight text-white lg:text-2xl">NHÀ THUỐC</span>
-                <span className="text-base font-semibold leading-tight text-primary-100 lg:text-lg">OUPHARMACY</span>
+                <span className="text-lg font-bold leading-tight text-white sm:text-xl lg:text-2xl">NHÀ THUỐC</span>
+                <span className="text-sm font-semibold leading-tight text-primary-100 sm:text-base lg:text-lg">OUPHARMACY</span>
               </div>
             </Link>
 
             <HeaderSearchDropdown popularTerms={displayTerms} />
 
             {/* Right actions */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
               {isAuthenticated ? (
                 <AvatarBadge />
               ) : (
@@ -72,14 +72,15 @@ export const Header: React.FC = () => {
                   onClick={() => openModal()}
                   className="flex items-center gap-2 text-sm font-medium text-white hover:text-primary-100 transition-colors whitespace-nowrap"
                   type="button"
+                  aria-label={t('login')}
                 >
                   <UserIcon className="w-5 h-5" />
-                  <span>{t('login')}</span>
+                  <span className="hidden sm:inline">{t('login')}</span>
                 </button>
               )}
               <Link
                 href="/gio-hang"
-                className="relative flex items-center gap-2 rounded-full bg-primary-700 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors whitespace-nowrap hover:bg-primary-800"
+                className="relative flex items-center gap-2 rounded-full bg-primary-700 px-2.5 py-2 text-sm font-medium text-white shadow-sm transition-colors whitespace-nowrap hover:bg-primary-800 sm:px-3"
                 aria-label={t('cart')}
               >
                 <CartIcon className="w-5 h-5 shrink-0" strokeWidth={2} />

@@ -89,14 +89,12 @@
     "orderSummary": "Tóm tắt đơn hàng"
   },
   "pwa": {
-    "installTitle": "Cài OUPharmacy",
-    "installAndroidBody": "Thêm vào màn hình chính để mở nhanh như ứng dụng, không cần App Store.",
-    "installIosBody": "Trên Safari: chạm Share (Chia sẻ) → Add to Home Screen (Thêm vào Màn hình chính).",
-    "installCta": "Cài app",
-    "installing": "Đang cài…",
+    "installTitle": "Thêm vào Màn hình chính",
+    "installAndroidBody": "Thêm lối tắt ra màn hình chính để mở store nhanh hơn.",
+    "installIosBody": "Safari → Share → Thêm vào Màn hình chính để mở nhanh hơn.",
+    "installCta": "Thêm lối tắt",
+    "installing": "Đang thêm…",
     "dismiss": "Để sau",
-    "footerTitle": "Cài ứng dụng",
-    "footerHint": "Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA).",
     "offlineTitle": "Không có kết nối mạng",
     "offlineBody": "Không tải được trang. Kiểm tra Wi‑Fi/4G rồi thử lại.",
     "offlineHome": "Về trang chủ"

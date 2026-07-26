@@ -2,7 +2,8 @@ const createNextIntlPlugin = require('next-intl/plugin')
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
-  register: true,
+  // Custom client register — auto-register crashes on http://LAN-IP (no secure context).
+  register: false,
   // Keep Workbox defaults (static CacheFirst, etc.) and append overrides below.
   extendDefaultRuntimeCaching: true,
   workboxOptions: {
@@ -55,6 +56,19 @@ const nextConfig = {
     ],
   },
   trailingSlash: false,
+  // LAN / phone preview: scripts ship with crossorigin="anonymous" and need ACAO
+  // when the page is opened via http://<lan-ip>:3000 (not only localhost).
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,HEAD,OPTIONS' },
+        ],
+      },
+    ]
+  },
 }
 
 // PWA outermost so Workbox build hooks run after next-intl plugin wrap.

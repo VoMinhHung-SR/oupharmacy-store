@@ -75,12 +75,14 @@ export function ActiveFilters({
         return (
           <span
             key={key}
-            className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
+            className="inline-flex max-w-full items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-sm text-primary-700"
           >
-            <span>{filterLabel}: {displayValue}</span>
+            <span className="min-w-0 truncate" title={`${filterLabel}: ${displayValue}`}>
+              {filterLabel}: {displayValue}
+            </span>
             <button
               onClick={() => onRemoveFilter(key)}
-              className="hover:text-primary-900 ml-1"
+              className="ml-1 shrink-0 hover:text-primary-900"
               aria-label={`Remove ${filterLabel} filter`}
             >
               <XIcon className="w-4 h-4" />

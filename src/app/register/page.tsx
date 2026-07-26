@@ -102,7 +102,7 @@ export default function RegisterPage() {
       </div>
 
       <form
-        className="space-y-6 bg-white rounded-lg shadow-md p-6"
+        className="space-y-6 rounded-lg bg-white p-4 shadow-md sm:p-6"
         onSubmit={handleSubmit(onFormSubmit, (errors) => {
           const firstError = Object.values(errors)[0]
           if (firstError?.message) {
@@ -130,17 +130,17 @@ export default function RegisterPage() {
             <div className="text-red-700 text-xl">Vui lòng làm mới trang</div>
           </div>
         ) : (
-          <div className="flex justify-between items-center pt-6 border-t">
+          <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/"
-              className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:w-auto"
             >
               Quay lại
             </Link>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:w-auto"
             >
               {isLoading ? (
                 <span className="flex items-center">

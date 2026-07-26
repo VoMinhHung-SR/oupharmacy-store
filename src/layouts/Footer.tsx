@@ -6,11 +6,11 @@ export const Footer: React.FC = () => {
     <footer className="border-t border-gray-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-6 text-sm text-gray-600 md:grid-cols-2 lg:grid-cols-12">
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-5">
             <div className="font-semibold text-gray-800">Nhà thuốc OUPharmacy</div>
             <p className="mt-2">Hệ thống nhà thuốc trực tuyến. Giao hàng nhanh, hàng chính hãng.</p>
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="font-semibold text-gray-800">Danh mục</div>
             <ul className="mt-2 space-y-2">
               <li><Link href="/duoc-my-pham" className="hover:text-primary-700">Dược mỹ phẩm</Link></li>
@@ -19,19 +19,13 @@ export const Footer: React.FC = () => {
               <li><Link href="/thuoc" className="hover:text-primary-700">Thuốc</Link></li>
             </ul>
           </div>
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <div className="font-semibold text-gray-800">Hỗ trợ</div>
             <ul className="mt-2 space-y-2">
               <li><Link href="/tro-giup" className="hover:text-primary-700">Trung tâm trợ giúp</Link></li>
               <li><Link href="/chinh-sach-doi-tra" className="hover:text-primary-700">Chính sách đổi trả</Link></li>
               <li><Link href="/lien-he" className="hover:text-primary-700">Liên hệ</Link></li>
             </ul>
-          </div>
-          <div className="lg:col-span-3">
-            <div className="font-semibold text-gray-800">Cài ứng dụng</div>
-            <p className="mt-2">
-              Trên điện thoại: thêm OUPharmacy vào Màn hình chính từ trình duyệt (PWA).
-            </p>
           </div>
         </div>
         <div className="mt-8 pb-[env(safe-area-inset-bottom)] text-center text-xs text-gray-500">
@@ -43,4 +37,3 @@ export const Footer: React.FC = () => {
 }
 
 export default Footer
-

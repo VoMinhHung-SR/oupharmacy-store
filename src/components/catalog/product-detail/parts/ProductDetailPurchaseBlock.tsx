@@ -140,7 +140,7 @@ export function ProductDetailPurchaseBlock({
       {product.in_stock > 0 ? (
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Chọn số lượng</label>
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <QuantityStepper
               value={quantity}
               max={maxSelectableQuantity}
@@ -150,7 +150,7 @@ export function ProductDetailPurchaseBlock({
             <Button
               onClick={onAddToCart}
               disabled={product.in_stock === 0}
-              className="h-12 flex-1 rounded-xl"
+              className="h-12 w-full flex-1 rounded-xl sm:w-auto"
               size="lg"
             >
               Thêm vào giỏ
