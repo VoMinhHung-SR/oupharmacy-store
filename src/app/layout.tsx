@@ -12,7 +12,6 @@ import { CheckoutProvider } from '@/contexts/CheckoutContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { LoginModal } from '@/components/modals/LoginModal'
-import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegister'
 import { Providers } from './providers'
 import { fetchCommonCitiesServer } from '@/lib/services/location.server'
@@ -78,7 +77,6 @@ export default async function RootLayout({
                     <Footer />
                       <LoginModal />
                       <PwaServiceWorkerRegister />
-                      <PwaInstallPrompt />
                   </CheckoutProvider>
                 </WishlistProvider>
               </CartProvider>

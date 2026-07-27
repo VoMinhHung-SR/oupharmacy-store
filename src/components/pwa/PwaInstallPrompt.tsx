@@ -12,13 +12,13 @@ import {
   type BeforeInstallPromptEvent,
 } from '@/lib/pwa/install'
 
-const SHOW_DELAY_MS = 2500
+const SHOW_DELAY_MS = 1800
 
 type PromptMode = 'android' | 'ios' | null
 
 /**
- * Bottom tip: Chrome `beforeinstallprompt` or Safari iOS Add to Home Screen.
- * Hidden when standalone or dismissed (14 days). Copy avoids “install app” soft-claim.
+ * Mobile top-header tip: Chrome `beforeinstallprompt` or Safari Add to Home Screen.
+ * Hidden when standalone, dismissed (14 days), or viewport ≥ md.
  */
 export function PwaInstallPrompt() {
   const t = useTranslations('pwa')
@@ -81,58 +81,48 @@ export function PwaInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2"
-      role="dialog"
+      className="border-b border-gray-200 bg-white text-gray-900 md:hidden"
+      role="region"
       aria-labelledby="pwa-install-title"
       aria-describedby="pwa-install-desc"
     >
-      <div className="relative mx-auto max-w-lg rounded-xl border border-primary-200 bg-white p-3.5 shadow-lg ring-1 ring-black/5 sm:p-4">
+      <div className="flex items-center gap-2 px-2.5 py-2 sm:px-3">
         <button
           type="button"
           onClick={close}
-          className="absolute right-2 top-2 rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="shrink-0 rounded p-1 text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label={t('dismiss')}
         >
-          <CloseIcon className="h-4 w-4" />
+          <CloseIcon className="h-3.5 w-3.5" />
         </button>
 
-        <div className="flex gap-3 pr-7">
-          <Image
-            src="/icons/icon-192.png"
-            alt=""
-            width={40}
-            height={40}
-            className="h-10 w-10 flex-shrink-0 rounded-lg"
-          />
-          <div className="min-w-0 flex-1">
-            <p id="pwa-install-title" className="text-sm font-semibold leading-snug text-gray-900">
-              {t('installTitle')}
-            </p>
-            <p id="pwa-install-desc" className="mt-1 text-xs leading-relaxed text-gray-600 line-clamp-2">
-              {mode === 'android' ? t('installAndroidBody') : t('installIosBody')}
-            </p>
-          </div>
+        <Image
+          src="/icons/icon-192.png"
+          alt=""
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0 rounded-lg"
+        />
+
+        <div className="min-w-0 flex-1">
+          <p id="pwa-install-title" className="truncate text-sm font-semibold leading-tight text-gray-900">
+            {t('bannerTitle')}
+          </p>
+          <p id="pwa-install-desc" className="truncate text-[11px] leading-tight text-gray-500">
+            {mode === 'android' ? t('bannerAndroidBody') : t('bannerIosBody')}
+          </p>
         </div>
 
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-          {mode === 'android' ? (
-            <button
-              type="button"
-              onClick={onInstall}
-              disabled={installing || !deferred}
-              className="w-full rounded-lg bg-primary-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-60 sm:w-auto sm:py-1.5 sm:text-xs"
-            >
-              {installing ? t('installing') : t('installCta')}
-            </button>
-          ) : null}
+        {mode === 'android' ? (
           <button
             type="button"
-            onClick={close}
-            className="w-full rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 sm:w-auto sm:py-1.5 sm:text-xs"
+            onClick={onInstall}
+            disabled={installing || !deferred}
+            className="shrink-0 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 disabled:opacity-60"
           >
-            {t('dismiss')}
+            {installing ? t('installing') : t('openCta')}
           </button>
-        </div>
+        ) : null}
       </div>
     </div>
   )

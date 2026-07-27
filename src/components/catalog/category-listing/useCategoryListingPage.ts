@@ -47,6 +47,8 @@ export function useCategoryListingPage({
       delete newFilters.ordering
     }
 
+    // Load-more accumulates pages — sort must restart from page 1.
+    newFilters.page = PAGINATION.DEFAULT_PAGE
     onFiltersChange(newFilters as ProductFilters)
   }
 

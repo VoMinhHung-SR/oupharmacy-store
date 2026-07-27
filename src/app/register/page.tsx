@@ -9,6 +9,8 @@ import { registerSchema, type RegisterFormData } from '@/lib/validations/auth'
 import { useRegister } from '@/lib/hooks/useRegister'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import UserInfoForm from '@/components/register/UserInfoForm'
+import { FormPageSkeleton } from '@/components/skeletons'
+import { BackdropLoading } from '@/components/BackdropLoading'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -74,25 +76,12 @@ export default function RegisterPage() {
   const isLoading = loading || openBackdrop || isLoadingUserRole
 
   if (isLoadingUserRole) {
-    return (
-      <div className="mx-auto max-w-4xl py-8 px-4">
-        <div className="flex items-center justify-center min-h-[300px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
-      </div>
-    )
+    return <FormPageSkeleton />
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-8 px-4">
-      {openBackdrop && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-center">Đang xử lý...</p>
-          </div>
-        </div>
-      )}
+      <BackdropLoading isOpen={openBackdrop} loadingText="Đang xử lý..." />
 
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Đăng ký tài khoản</h1>

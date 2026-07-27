@@ -8,9 +8,22 @@ import { sortOptionToStoreSearchSort } from '@/lib/services/search'
 import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
 import { SearchResultsContent } from '@/components/catalog'
 import { PAGINATION } from '@/lib/constant'
+import { getListProductKey, type Product } from '@/lib/services/products'
 import type { SearchKeywordItem } from '@/lib/services/searchTerms'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
+
+function mergeUniqueProducts(existing: Product[], incoming: Product[]): Product[] {
+  if (incoming.length === 0) return existing
+  const seen = new Set(existing.map(getListProductKey))
+  const next = incoming.filter((item) => {
+    const key = getListProductKey(item)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  return next.length === 0 ? existing : [...existing, ...next]
+}
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
@@ -19,9 +32,11 @@ export default function SearchPage() {
   const [page, setPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
   const [sortOption, setSortOption] = useState<SortOption>('bestselling')
   const [popularTerms, setPopularTerms] = useState<SearchKeywordItem[]>([])
+  const [accumulatedProducts, setAccumulatedProducts] = useState<Product[]>([])
 
   useEffect(() => {
     setPage(PAGINATION.DEFAULT_PAGE)
+    setAccumulatedProducts([])
   }, [q])
 
   const searchParamsApi = useMemo(
@@ -38,7 +53,21 @@ export default function SearchPage() {
     [q, page, sortOption]
   )
 
-  const { data, isLoading, error } = useStoreSearch(searchParamsApi, { enabled: !!q })
+  const { data, isLoading, isFetching, isPlaceholderData, dataUpdatedAt, error } = useStoreSearch(
+    searchParamsApi,
+    { enabled: !!q }
+  )
+
+  useEffect(() => {
+    if (!data) return
+    if (isPlaceholderData) return
+    const items = data.items ?? []
+    if (page <= 1) {
+      setAccumulatedProducts(items)
+      return
+    }
+    setAccumulatedProducts((prev) => mergeUniqueProducts(prev, items))
+  }, [data, dataUpdatedAt, isPlaceholderData, page])
 
   useEffect(() => {
     if (!q) return
@@ -51,12 +80,16 @@ export default function SearchPage() {
     })
   }, [])
 
+  const isInitialLoad = isLoading && accumulatedProducts.length === 0 && !data
+  const isFetchingMore = page > 1 && isFetching
+
   return (
     <SearchResultsContent
       query={q}
-      products={data?.items ?? []}
+      products={accumulatedProducts}
       totalCount={data?.meta.total ?? 0}
-      loading={isLoading}
+      loading={isInitialLoad}
+      isFetchingMore={isFetchingMore}
       error={error}
       page={page}
       pageSize={PAGINATION.DEFAULT_PAGE_SIZE}
@@ -65,7 +98,7 @@ export default function SearchPage() {
         setSortOption(sort)
         setPage(PAGINATION.DEFAULT_PAGE)
       }}
-      onPageChange={setPage}
+      onLoadMore={() => setPage((p) => p + 1)}
       popularTerms={popularTerms}
     />
   )

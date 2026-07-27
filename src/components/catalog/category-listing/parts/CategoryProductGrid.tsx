@@ -10,12 +10,12 @@ import {
   getListProductKey,
 } from '@/lib/services/products'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
+import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
 import {
   ActiveFilters,
   NON_FACET_FILTER_KEYS,
   stripFacetFilters,
 } from '@/components/catalog/_shared/filters/ActiveFilters'
-import { Pagination } from '@/components/Pagination'
 import { PAGINATION } from '@/lib/constant'
 import { CategorySortOption } from '@/components/catalog/category-listing/useCategoryListingPage'
 
@@ -27,6 +27,7 @@ interface CategoryProductGridProps {
   categoryFilters: Omit<ProductFilters, 'category'>
   filters: ProductFilters
   facetFilters?: FilterGroup[]
+  isFetchingMore?: boolean
   onSortChange: (sort: CategorySortOption) => void
   onFiltersChange: (filters: ProductFilters) => void
   onHandleFiltersChange: (filters: ProductFilters) => void
@@ -41,6 +42,7 @@ export function CategoryProductGrid({
   categoryFilters,
   filters,
   facetFilters,
+  isFetchingMore = false,
   onSortChange,
   onFiltersChange,
   onHandleFiltersChange,
@@ -55,6 +57,20 @@ export function CategoryProductGrid({
     }).length
   }, [categoryFilters])
 
+  const pageSize = filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE
+  const currentPage = categoryFilters.page || PAGINATION.DEFAULT_PAGE
+  const remainingCount = Math.max(0, totalCount - products.length)
+  const hasMore = remainingCount > 0 && products.length > 0
+
+  const handleLoadMore = () => {
+    if (isFetchingMore || !hasMore) return
+    onFiltersChange({
+      ...categoryFilters,
+      page: currentPage + 1,
+      page_size: pageSize,
+    } as ProductFilters)
+  }
+
   return (
     <main className="min-w-0 flex-1">
       <ProductSortAndView
@@ -65,7 +81,7 @@ export function CategoryProductGrid({
         activeFacetCount={activeFacetCount}
         notice={
           <p className="text-xs leading-relaxed text-gray-400">
-            Lưu ý: Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
+            <b>Lưu ý: </b>Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
           </p>
         }
       />
@@ -77,7 +93,7 @@ export function CategoryProductGrid({
           onRemoveFilter={(filterKey) => {
             const newFilters = { ...filters }
             delete newFilters[filterKey as keyof ProductFilters]
-            onFiltersChange(newFilters)
+            onHandleFiltersChange(newFilters)
           }}
           onClearAll={() => onHandleFiltersChange(stripFacetFilters(filters))}
         />
@@ -89,7 +105,7 @@ export function CategoryProductGrid({
           <p className="text-sm text-gray-500">Vui lòng thử lại sau hoặc chọn danh mục khác</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={getListProductKey(product)}
@@ -99,12 +115,13 @@ export function CategoryProductGrid({
         </div>
       )}
 
-      <Pagination
-        currentPage={categoryFilters.page || PAGINATION.DEFAULT_PAGE}
-        totalPages={Math.ceil(totalCount / (filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE))}
-        onPageChange={(page) => onFiltersChange({ ...categoryFilters, page } as ProductFilters)}
-        buttonClassName="text-gray-600"
-      />
+      {hasMore ? (
+        <LoadMoreProductsButton
+          remainingCount={remainingCount}
+          onLoadMore={handleLoadMore}
+          loading={isFetchingMore}
+        />
+      ) : null}
     </main>
   )
 }

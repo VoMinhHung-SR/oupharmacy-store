@@ -3,6 +3,7 @@ import React, { useMemo } from 'react'
 import Link from 'next/link'
 import { Subcategory } from '@/lib/services/products'
 import { CategoryIcon } from '@/components/icons'
+import { SkeletonPulse } from '@/components/skeletons'
 
 interface SubcategoriesGridProps {
   subcategories: Subcategory[]
@@ -27,18 +28,16 @@ export function SubcategoriesGrid({
   if (loading) {
     return (
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          Danh mục sản phẩm
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">Danh mục sản phẩm</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="flex flex-col items-center p-4 bg-gray-100 border border-gray-200 rounded-lg animate-pulse"
+              className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4"
             >
-              <div className="w-12 h-12 mb-3 bg-gray-200 rounded-lg" />
-              <div className="h-4 w-16 bg-gray-200 rounded mb-2" />
-              <div className="h-3 w-12 bg-gray-200 rounded" />
+              <SkeletonPulse className="mb-3 h-12 w-12 rounded-lg" />
+              <SkeletonPulse className="mb-2 h-4 w-16" />
+              <SkeletonPulse className="h-3 w-12" />
             </div>
           ))}
         </div>

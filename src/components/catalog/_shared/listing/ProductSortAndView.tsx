@@ -46,10 +46,10 @@ export const ProductSortAndView: React.FC<ProductSortAndViewProps> = ({
             <button
               type="button"
               onClick={onOpenFilters}
-              className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 lg:hidden ${
+              className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 lg:hidden ${
                 hasActiveFacets
                   ? 'border-primary-300 bg-primary-50 text-primary-800'
-                  : 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50'
+                  : 'border-gray-200 bg-white text-gray-800'
               }`}
               aria-label={
                 hasActiveFacets ? `Bộ lọc, ${activeFacetCount} đang chọn` : 'Mở bộ lọc'

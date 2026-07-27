@@ -1,10 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { PAGINATION } from '@/lib/constant'
-import { ProductFilters } from '@/lib/services/products'
+import { getListProductKey, Product, ProductFilters } from '@/lib/services/products'
 import { pathnameToStorePath, parseVariantIdFromSearch, resolveStorePath } from '@/lib/store-path'
 import { useProductByCategoryAndProductSlug } from './useProducts'
 import { useStoreSearch } from './useStoreSearch'
@@ -14,6 +14,18 @@ import {
   sortOptionToStoreSearchSort,
   type StoreSearchParams,
 } from '@/lib/services/search'
+
+function mergeUniqueProducts(existing: Product[], incoming: Product[]): Product[] {
+  if (incoming.length === 0) return existing
+  const seen = new Set(existing.map(getListProductKey))
+  const next = incoming.filter((item) => {
+    const key = getListProductKey(item)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  return next.length === 0 ? existing : [...existing, ...next]
+}
 
 /**
  * Store path page: resolve routing, then category browse via search-first
@@ -49,6 +61,15 @@ export function useStorePage() {
     page: PAGINATION.DEFAULT_PAGE,
     page_size: PAGINATION.DEFAULT_PAGE_SIZE,
   })
+  const [accumulatedProducts, setAccumulatedProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    setFilters({
+      page: PAGINATION.DEFAULT_PAGE,
+      page_size: PAGINATION.DEFAULT_PAGE_SIZE,
+    })
+    setAccumulatedProducts([])
+  }, [categoryId])
 
   const searchSort = useMemo(() => {
     if (filters.price_sort === 'asc' || filters.ordering === 'price_value') {
@@ -77,12 +98,14 @@ export function useStorePage() {
     return raw || undefined
   }, [filters])
 
+  const currentPage = filters.page ?? PAGINATION.DEFAULT_PAGE
+
   const categorySearchParams = useMemo((): StoreSearchParams | undefined => {
     if (!isCategory || categoryId == null) return undefined
     return {
       q: '',
       category: categoryId,
-      page: filters.page ?? PAGINATION.DEFAULT_PAGE,
+      page: currentPage,
       page_size: filters.page_size ?? PAGINATION.DEFAULT_PAGE_SIZE,
       sort: searchSort,
       brand: brandFilter,
@@ -93,7 +116,7 @@ export function useStorePage() {
   }, [
     isCategory,
     categoryId,
-    filters.page,
+    currentPage,
     filters.page_size,
     searchSort,
     brandFilter,
@@ -105,20 +128,39 @@ export function useStorePage() {
     enabled: isCategory && categoryId != null && resolved?.over_limit !== true,
   })
 
+  useEffect(() => {
+    if (!isCategory || !listingSearch.data) return
+    if (listingSearch.isPlaceholderData) return
+
+    const items = listingSearch.data.items ?? []
+    if (currentPage <= 1) {
+      setAccumulatedProducts(items)
+      return
+    }
+    setAccumulatedProducts((prev) => mergeUniqueProducts(prev, items))
+  }, [
+    isCategory,
+    listingSearch.data,
+    listingSearch.dataUpdatedAt,
+    listingSearch.isPlaceholderData,
+    currentPage,
+  ])
+
   const listingData = useMemo(() => {
     if (!isCategory || !resolved) return undefined
     const search = listingSearch.data
+    const total = search?.meta.total ?? resolved.product_count ?? 0
     return {
       categorySlug: categoryPath,
       categoryName: resolved.category_name || categoryPath,
-      productCount: resolved.product_count ?? search?.meta.total ?? 0,
+      productCount: resolved.product_count ?? total,
       hasSubcategories: resolved.has_subcategories ?? (resolved.subcategories?.length ?? 0) > 0,
       subcategories: resolved.subcategories ?? [],
       overLimit: resolved.over_limit ?? false,
-      count: search?.meta.total ?? resolved.product_count ?? 0,
-      results: search?.items ?? [],
+      count: total,
+      results: accumulatedProducts,
     }
-  }, [isCategory, resolved, listingSearch.data, categoryPath])
+  }, [isCategory, resolved, listingSearch.data, categoryPath, accumulatedProducts])
 
   const categoryFacetsData = useMemo(() => {
     if (!isCategory || !resolved) return undefined
@@ -134,9 +176,13 @@ export function useStorePage() {
     }
   }, [isCategory, resolved, listingSearch.data, categoryPath])
 
+  const isInitialListingLoad =
+    listingSearch.isLoading && accumulatedProducts.length === 0 && !listingSearch.data
+
   const listing = {
     data: listingData,
-    isLoading: listingSearch.isLoading || listingSearch.isFetching,
+    isLoading: isInitialListingLoad,
+    isFetchingMore: currentPage > 1 && listingSearch.isFetching,
     error: listingSearch.error,
   }
 

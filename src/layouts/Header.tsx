@@ -8,8 +8,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
 import { HeaderSearchDropdown } from '@/components/search/HeaderSearchDropdown'
-import { CartIcon, UserIcon } from '@/components/icons'
-import { useCart } from '@/contexts/CartContext'
+import { UserIcon } from '@/components/icons'
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
+import { HeaderCartDropdown } from '@/layouts/HeaderCartDropdown'
 import { getPopularSearchTerms } from '@/lib/services/searchTerms'
 import type { SearchKeywordItem } from '@/lib/services/searchTerms'
 
@@ -19,7 +20,6 @@ export const Header: React.FC = () => {
   const t = useTranslations('common')
   const { isAuthenticated } = useAuth()
   const { openModal } = useLoginModal()
-  const { items } = useCart()
   const [popularTerms, setPopularTerms] = useState<SearchKeywordItem[]>([])
 
   useEffect(() => {
@@ -35,15 +35,19 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 left-0 right-0 z-40 w-full bg-primary-600 pt-[env(safe-area-inset-top)] text-white shadow-lg">
-      {/* Top bar - Tải ứng dụng | Tư vấn ngay */}
-      <div className="border-b border-white/10 bg-primary-700/80 py-1.5 text-xs text-white">
+      <PwaInstallPrompt />
+
+      {/* Top bar — desktop chrome */}
+      <div className="hidden border-b border-white/10 bg-primary-700/80 py-1.5 text-xs text-white md:block">
         <Container>
-          <div className="flex justify-between items-center">
-            <div className="hidden md:flex items-center gap-4">
-              <span className="hover:text-primary-100 transition-colors cursor-pointer">Đặt lịch khám</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="cursor-pointer transition-colors hover:text-primary-100">Đặt lịch khám</span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="font-medium">Hotline: <span className="font-bold">Tại đây</span></span>
+              <span className="font-medium">
+                Hotline: <span className="font-bold">Tại đây</span>
+              </span>
             </div>
           </div>
         </Container>
@@ -78,19 +82,7 @@ export const Header: React.FC = () => {
                   <span className="hidden sm:inline">{t('login')}</span>
                 </button>
               )}
-              <Link
-                href="/gio-hang"
-                className="relative flex items-center gap-2 rounded-full bg-primary-700 px-2.5 py-2 text-sm font-medium text-white shadow-sm transition-colors whitespace-nowrap hover:bg-primary-800 sm:px-3"
-                aria-label={t('cart')}
-              >
-                <CartIcon className="w-5 h-5 shrink-0" strokeWidth={2} />
-                <span className="hidden sm:inline">{t('cart')}</span>
-                {items.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-accent-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center font-bold px-1">
-                    {items.length}
-                  </span>
-                )}
-              </Link>
+              <HeaderCartDropdown />
             </div>
           </div>
 

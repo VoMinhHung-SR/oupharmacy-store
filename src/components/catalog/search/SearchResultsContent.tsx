@@ -5,9 +5,9 @@ import { ProductCard } from '@/components/cards/ProductCard'
 import { Product, buildProductCardPayload, getListProductKey } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
+import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
 import { SearchResultsSkeleton } from '@/components/catalog/search/SearchResultsSkeleton'
 import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
-import { Pagination } from '@/components/Pagination'
 import { SearchKeywordItem } from '@/lib/services/searchTerms'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
@@ -17,12 +17,13 @@ interface SearchResultsContentProps {
   products: Product[]
   totalCount: number
   loading: boolean
+  isFetchingMore?: boolean
   error: Error | null
   page: number
   pageSize: number
   sortOption: SortOption
   onSortChange: (sort: SortOption) => void
-  onPageChange: (page: number) => void
+  onLoadMore: () => void
   popularTerms?: SearchKeywordItem[]
 }
 
@@ -31,21 +32,23 @@ export function SearchResultsContent({
   products,
   totalCount,
   loading,
+  isFetchingMore = false,
   error,
-  page,
-  pageSize,
+  page: _page,
+  pageSize: _pageSize,
   sortOption,
   onSortChange,
-  onPageChange,
+  onLoadMore,
   popularTerms = [],
 }: SearchResultsContentProps) {
-  const totalPages = Math.ceil(totalCount / pageSize) || 1
-
   const breadcrumbItems: CrumbItem[] = [
     { label: 'Trang chủ', href: '/' },
     { label: 'Tìm kiếm', href: '/tim-kiem' },
     ...(query ? [{ label: `"${query}"` }] : []),
   ]
+
+  const remainingCount = Math.max(0, totalCount - products.length)
+  const hasMore = remainingCount > 0 && products.length > 0
 
   if (!query.trim()) {
     return (
@@ -121,7 +124,7 @@ export function SearchResultsContent({
           ) : null}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={getListProductKey(product)}
@@ -131,10 +134,12 @@ export function SearchResultsContent({
         </div>
       )}
 
-      {products.length > 0 && totalPages > 1 ? (
-        <div className="mt-8 flex justify-center">
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
-        </div>
+      {hasMore ? (
+        <LoadMoreProductsButton
+          remainingCount={remainingCount}
+          onLoadMore={onLoadMore}
+          loading={isFetchingMore}
+        />
       ) : null}
     </Container>
   )

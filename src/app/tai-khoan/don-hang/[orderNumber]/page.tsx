@@ -11,6 +11,7 @@ import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
+import { OrderDetailSkeleton } from '@/components/skeletons'
 
 interface Props {
   params: { orderNumber: string }
@@ -118,13 +119,7 @@ export default function OrderDetailPage({ params }: Props) {
           backHref="/tai-khoan/don-hang"
         />
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p className="mt-4 text-gray-600">Đang tải thông tin đơn hàng...</p>
-          </div>
-        )}
+        {isLoading && <OrderDetailSkeleton />}
 
         {/* Error State */}
         {error && (

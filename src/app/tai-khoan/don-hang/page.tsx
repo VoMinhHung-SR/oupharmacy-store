@@ -11,6 +11,7 @@ import { Pagination } from '@/components/Pagination'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 import { formatVnd } from '@/lib/utils/currency'
+import { OrdersListSkeleton } from '@/components/skeletons'
 
 const PAGE_SIZE = 10
 
@@ -188,12 +189,7 @@ export default function OrdersListPage() {
           }
         />
 
-        {isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p className="mt-4 text-gray-600">Đang tải danh sách đơn hàng...</p>
-          </div>
-        )}
+        {isLoading && <OrdersListSkeleton />}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-6">

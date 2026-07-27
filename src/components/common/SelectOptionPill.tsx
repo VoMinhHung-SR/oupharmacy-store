@@ -33,10 +33,10 @@ export function SelectOptionPill({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[50px] border border-solid bg-white font-medium text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[50px] border border-solid bg-white font-medium text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
         selected
           ? `border-primary-600 ${sizeClass}`
-          : `border-gray-300 hover:border-gray-400 ${sizeClass}`
+          : `border-gray-300 ${sizeClass}`
       } ${className}`.trim()}
     >
       {selected ? (
