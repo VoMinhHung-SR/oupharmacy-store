@@ -1,20 +1,16 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Product, buildProductCardPayload, getListProductKey } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
-import { ProductListView } from '@/components/catalog/_shared/listing/ProductListView'
 import { SearchResultsSkeleton } from '@/components/catalog/search/SearchResultsSkeleton'
 import Breadcrumb, { CrumbItem } from '@/components/Breadcrumb'
 import { Pagination } from '@/components/Pagination'
-import { PRODUCT_LISTING } from '@/lib/constant'
 import { SearchKeywordItem } from '@/lib/services/searchTerms'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
-type ViewMode = 'grid' | 'list'
 
 interface SearchResultsContentProps {
   query: string
@@ -43,8 +39,6 @@ export function SearchResultsContent({
   onPageChange,
   popularTerms = [],
 }: SearchResultsContentProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
-
   const totalPages = Math.ceil(totalCount / pageSize) || 1
 
   const breadcrumbItems: CrumbItem[] = [
@@ -100,9 +94,7 @@ export function SearchResultsContent({
       <div className="mt-4">
         <ProductSortAndView
           sortOption={sortOption}
-          viewMode={viewMode}
           onSortChange={onSortChange}
-          onViewModeChange={setViewMode}
           productCount={totalCount}
         />
         <h2 className="mb-4 text-lg text-gray-700">
@@ -128,7 +120,7 @@ export function SearchResultsContent({
             </div>
           ) : null}
         </div>
-      ) : viewMode === 'grid' ? (
+      ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
@@ -137,8 +129,6 @@ export function SearchResultsContent({
             />
           ))}
         </div>
-      ) : (
-        <ProductListView products={products} />
       )}
 
       {products.length > 0 && totalPages > 1 ? (

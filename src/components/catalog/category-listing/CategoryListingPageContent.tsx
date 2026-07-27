@@ -104,12 +104,10 @@ export function CategoryListingPageContent({
           products={listing.sortedProducts}
           totalCount={totalCount}
           sortOption={listing.sortOption}
-          viewMode={listing.viewMode}
           categoryFilters={listing.categoryFilters}
           filters={filters}
           facetFilters={facetFilters}
           onSortChange={listing.handleSortChange}
-          onViewModeChange={listing.setViewMode}
           onFiltersChange={onFiltersChange}
           onHandleFiltersChange={listing.handleFiltersChange}
           onOpenMobileFilters={() => listing.setShowMobileFilters(true)}

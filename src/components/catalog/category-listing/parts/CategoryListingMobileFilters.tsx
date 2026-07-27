@@ -2,29 +2,12 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import { SearchFacetsSidebar } from '@/components/catalog/_shared/filters/SearchFacetsSidebar'
+import {
+  NON_FACET_FILTER_KEYS,
+  stripFacetFilters,
+} from '@/components/catalog/_shared/filters/ActiveFilters'
 import { OfferSheet } from '@/components/sheets'
 import { ProductFilters, FilterGroup } from '@/lib/services/products'
-
-const NON_FACET_FILTER_KEYS = new Set([
-  'page',
-  'page_size',
-  'ordering',
-  'price_sort',
-  'category',
-  'q',
-])
-
-function stripFacetFilters(
-  filters: Omit<ProductFilters, 'category'>
-): Omit<ProductFilters, 'category'> {
-  const next: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(filters)) {
-    if (NON_FACET_FILTER_KEYS.has(key)) {
-      next[key] = value
-    }
-  }
-  return next as Omit<ProductFilters, 'category'>
-}
 
 function countFacetFilters(filters: Omit<ProductFilters, 'category'>): number {
   return Object.entries(filters).filter(([key, value]) => {
@@ -80,7 +63,7 @@ export function CategoryListingMobileFilters({
   }
 
   const handleClear = () => {
-    setDraftFilters(stripFacetFilters(draftFilters))
+    setDraftFilters(stripFacetFilters(draftFilters as ProductFilters))
   }
 
   return (
@@ -111,7 +94,7 @@ export function CategoryListingMobileFilters({
           </button>
         </div>
       }
-      >
+    >
       <div className="px-4 pb-2 pt-1 sm:px-5">
         {filtersLoading || facetFilters === undefined ? (
           <p className="py-8 text-center text-sm text-gray-500">Đang tải bộ lọc...</p>

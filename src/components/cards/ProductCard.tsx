@@ -147,7 +147,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link
       href={productLink}
-      className="group relative flex flex-col h-full rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
+      className="group relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-3 transition-shadow hover:shadow-md sm:p-4"
     >
       {/* Badges overlay — offset -4 aligns with card border; image markup matches original */}
       <div className="relative">
@@ -251,14 +251,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <>
               <button
                 type="button"
-                className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
                 onClick={handleNavigate}
               >
                 Tư vấn ngay
               </button>
               <button
                 type="button"
-                className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
                 onClick={(e) => {
                   e.preventDefault()
                   // TODO: Navigate to pharmacy finder
@@ -270,7 +270,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <button
               type="button"
-              className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+              className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
               onClick={handleAddToCart}
             >
               Thêm vào giỏ

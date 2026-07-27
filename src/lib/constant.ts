@@ -45,7 +45,6 @@ export const PRODUCT_LISTING = {
     DESKTOP: 4,
   },
   DEFAULT_SORT: 'bestselling' as const,
-  DEFAULT_VIEW_MODE: 'grid' as const,
 } as const
 
 // Sidebar

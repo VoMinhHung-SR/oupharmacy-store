@@ -10,33 +10,24 @@ import {
   getListProductKey,
 } from '@/lib/services/products'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
-import { ProductListView } from '@/components/catalog/_shared/listing/ProductListView'
-import { ActiveFilters } from '@/components/catalog/_shared/filters/ActiveFilters'
-import { ChevronRightIcon, FilterIcon } from '@/components/icons'
+import {
+  ActiveFilters,
+  NON_FACET_FILTER_KEYS,
+  stripFacetFilters,
+} from '@/components/catalog/_shared/filters/ActiveFilters'
 import { Pagination } from '@/components/Pagination'
 import { PAGINATION } from '@/lib/constant'
-import { CategorySortOption, CategoryViewMode } from '@/components/catalog/category-listing/useCategoryListingPage'
-
-const NON_FACET_FILTER_KEYS = new Set([
-  'page',
-  'page_size',
-  'ordering',
-  'price_sort',
-  'category',
-  'q',
-])
+import { CategorySortOption } from '@/components/catalog/category-listing/useCategoryListingPage'
 
 interface CategoryProductGridProps {
   categorySlug: string
   products: Product[]
   totalCount: number
   sortOption: CategorySortOption
-  viewMode: CategoryViewMode
   categoryFilters: Omit<ProductFilters, 'category'>
   filters: ProductFilters
   facetFilters?: FilterGroup[]
   onSortChange: (sort: CategorySortOption) => void
-  onViewModeChange: (mode: CategoryViewMode) => void
   onFiltersChange: (filters: ProductFilters) => void
   onHandleFiltersChange: (filters: ProductFilters) => void
   onOpenMobileFilters: () => void
@@ -47,12 +38,10 @@ export function CategoryProductGrid({
   products,
   totalCount,
   sortOption,
-  viewMode,
   categoryFilters,
   filters,
   facetFilters,
   onSortChange,
-  onViewModeChange,
   onFiltersChange,
   onHandleFiltersChange,
   onOpenMobileFilters,
@@ -66,59 +55,19 @@ export function CategoryProductGrid({
     }).length
   }, [categoryFilters])
 
-  const hasActiveFacets = activeFacetCount > 0
-
   return (
     <main className="min-w-0 flex-1">
-      <div className="mb-3 lg:hidden">
-        <button
-          type="button"
-          onClick={onOpenMobileFilters}
-          className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
-            hasActiveFacets
-              ? 'border-primary-300 bg-primary-50'
-              : 'border-gray-200 bg-white hover:bg-gray-50'
-          }`}
-          aria-label={
-            hasActiveFacets ? `Bộ lọc, ${activeFacetCount} đang chọn` : 'Mở bộ lọc'
-          }
-        >
-          <span
-            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-              hasActiveFacets ? 'bg-primary-600 text-white' : 'bg-primary-50 text-primary-700'
-            }`}
-          >
-            <FilterIcon className="h-4 w-4" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span
-              className={`block text-sm font-semibold ${
-                hasActiveFacets ? 'text-primary-800' : 'text-gray-900'
-              }`}
-            >
-              Bộ lọc
-            </span>
-            <span className="block truncate text-xs text-gray-500">
-              {hasActiveFacets
-                ? `${activeFacetCount} bộ lọc đang áp dụng`
-                : 'Thương hiệu, giá, xuất xứ…'}
-            </span>
-          </span>
-          {hasActiveFacets ? (
-            <span className="inline-flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-bold text-white">
-              {activeFacetCount}
-            </span>
-          ) : null}
-          <ChevronRightIcon className="h-4 w-4 shrink-0 text-gray-400" />
-        </button>
-      </div>
-
       <ProductSortAndView
         sortOption={sortOption}
-        viewMode={viewMode}
         onSortChange={onSortChange}
-        onViewModeChange={onViewModeChange}
         productCount={totalCount}
+        onOpenFilters={onOpenMobileFilters}
+        activeFacetCount={activeFacetCount}
+        notice={
+          <p className="text-xs leading-relaxed text-gray-400">
+            Lưu ý: Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
+          </p>
+        }
       />
 
       {facetFilters && facetFilters.length > 0 ? (
@@ -130,23 +79,17 @@ export function CategoryProductGrid({
             delete newFilters[filterKey as keyof ProductFilters]
             onFiltersChange(newFilters)
           }}
-          onClearAll={() => onHandleFiltersChange({})}
+          onClearAll={() => onHandleFiltersChange(stripFacetFilters(filters))}
         />
       ) : null}
 
-      <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        <p>
-          <strong>Lưu ý:</strong> Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
-        </p>
-      </div>
-
       {products.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
           <p className="mb-2 text-gray-600">Không tìm thấy sản phẩm nào trong danh mục này</p>
           <p className="text-sm text-gray-500">Vui lòng thử lại sau hoặc chọn danh mục khác</p>
         </div>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={getListProductKey(product)}
@@ -154,8 +97,6 @@ export function CategoryProductGrid({
             />
           ))}
         </div>
-      ) : (
-        <ProductListView products={products} currentCategorySlug={categorySlug} />
       )}
 
       <Pagination

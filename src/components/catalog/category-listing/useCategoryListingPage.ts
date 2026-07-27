@@ -5,7 +5,6 @@ import { Product, ProductFilters } from '@/lib/services/products'
 import { PAGINATION, PRODUCT_LISTING } from '@/lib/constant'
 
 export type CategorySortOption = 'bestselling' | 'price-low' | 'price-high'
-export type CategoryViewMode = 'grid' | 'list'
 
 interface UseCategoryListingPageParams {
   categorySlug: string
@@ -23,7 +22,6 @@ export function useCategoryListingPage({
   onFiltersChange,
 }: UseCategoryListingPageParams) {
   const [sortOption, setSortOption] = useState<CategorySortOption>(PRODUCT_LISTING.DEFAULT_SORT)
-  const [viewMode, setViewMode] = useState<CategoryViewMode>(PRODUCT_LISTING.DEFAULT_VIEW_MODE)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   const categoryFilters = useMemo(() => {
@@ -108,8 +106,6 @@ export function useCategoryListingPage({
 
   return {
     sortOption,
-    viewMode,
-    setViewMode,
     showMobileFilters,
     setShowMobileFilters,
     categoryFilters,
