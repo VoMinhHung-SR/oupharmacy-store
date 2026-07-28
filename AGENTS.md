@@ -70,6 +70,7 @@ npm run start    # chạy build
 - `NEXT_PUBLIC_API_URL` — API store (prefix `/api/store`).
 - `NEXT_PUBLIC_MAIN_API_URL` — API chính (user, OAuth, common-config, …).
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase (xem `src/lib/config/firebase.ts`).
+- `NEXT_PUBLIC_ENABLE_PWA` — `true` để bật PWA (SW + install banner). Local/dev để trống hoặc `false`; set trên container / staging / production.
 
 Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 

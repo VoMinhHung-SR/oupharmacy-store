@@ -15,6 +15,8 @@ interface CategoryListingPageContentProps {
   products: Product[]
   totalCount: number
   loading: boolean
+  isRefreshing?: boolean
+  isFetchingMore?: boolean
   error: Error | null
   categoryName?: string | null
   subcategories?: Subcategory[]
@@ -29,6 +31,8 @@ export function CategoryListingPageContent({
   products,
   totalCount,
   loading,
+  isRefreshing = false,
+  isFetchingMore = false,
   error,
   categoryName,
   subcategories = [],
@@ -104,12 +108,12 @@ export function CategoryListingPageContent({
           products={listing.sortedProducts}
           totalCount={totalCount}
           sortOption={listing.sortOption}
-          viewMode={listing.viewMode}
           categoryFilters={listing.categoryFilters}
           filters={filters}
           facetFilters={facetFilters}
+          isRefreshing={isRefreshing}
+          isFetchingMore={isFetchingMore}
           onSortChange={listing.handleSortChange}
-          onViewModeChange={listing.setViewMode}
           onFiltersChange={onFiltersChange}
           onHandleFiltersChange={listing.handleFiltersChange}
           onOpenMobileFilters={() => listing.setShowMobileFilters(true)}

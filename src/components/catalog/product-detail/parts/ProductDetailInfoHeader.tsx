@@ -51,9 +51,11 @@ export function ProductDetailInfoHeader({
         </div>
       ) : null}
 
-      <h1 className="flex-1 text-2xl font-semibold leading-tight text-gray-900">{productName}</h1>
+      <h1 className="flex-1 text-lg font-semibold leading-snug text-gray-900 sm:text-xl md:text-2xl md:leading-tight">
+        {productName}
+      </h1>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-600 sm:text-sm">
         <span>{product.id.toString().padStart(8, '0')}</span>
         <span>•</span>
         <span className="flex items-center gap-1">

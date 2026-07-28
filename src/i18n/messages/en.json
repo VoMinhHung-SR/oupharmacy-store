@@ -87,6 +87,21 @@
     "paymentMethod": "Payment Method",
     "shippingMethod": "Shipping Method",
     "orderSummary": "Order Summary"
+  },
+  "pwa": {
+    "installTitle": "Add to Home Screen",
+    "installAndroidBody": "Add a shortcut to your home screen for quicker access to the store.",
+    "installIosBody": "Safari → Share → Add to Home Screen for quicker access.",
+    "bannerTitle": "OUPharmacy Pharmacy App",
+    "bannerAndroidBody": "Open faster from your home screen",
+    "bannerIosBody": "Safari → Share → Add to Home Screen",
+    "installCta": "Add shortcut",
+    "openCta": "Open",
+    "installing": "Adding…",
+    "dismiss": "Not now",
+    "offlineTitle": "You are offline",
+    "offlineBody": "This page could not be loaded. Check your connection and try again.",
+    "offlineHome": "Back to home"
   }
 }
 

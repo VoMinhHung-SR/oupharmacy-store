@@ -1,19 +1,21 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { PAGINATION } from '@/lib/constant'
-import { ProductFilters } from '@/lib/services/products'
+import { mergeUniqueProducts, Product, ProductFilters } from '@/lib/services/products'
 import { pathnameToStorePath, parseVariantIdFromSearch, resolveStorePath } from '@/lib/store-path'
 import { useProductByCategoryAndProductSlug } from './useProducts'
 import { useStoreSearch } from './useStoreSearch'
 import { useCategoryPageMeta } from './useCategoryPageMeta'
 import {
-  mapSearchFacetsToFilterGroups,
   sortOptionToStoreSearchSort,
   type StoreSearchParams,
 } from '@/lib/services/search'
+import { usePreservedSearchFacets } from './usePreservedSearchFacets'
+import { pickFacetSearchParams } from '@/lib/listing/facetSearchParams'
+import { getListingRequestUiFlags } from '@/lib/listing/getListingRequestUiFlags'
 
 /**
  * Store path page: resolve routing, then category browse via search-first
@@ -49,6 +51,15 @@ export function useStorePage() {
     page: PAGINATION.DEFAULT_PAGE,
     page_size: PAGINATION.DEFAULT_PAGE_SIZE,
   })
+  const [accumulatedProducts, setAccumulatedProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    setFilters({
+      page: PAGINATION.DEFAULT_PAGE,
+      page_size: PAGINATION.DEFAULT_PAGE_SIZE,
+    })
+    setAccumulatedProducts([])
+  }, [categoryId])
 
   const searchSort = useMemo(() => {
     if (filters.price_sort === 'asc' || filters.ordering === 'price_value') {
@@ -60,83 +71,108 @@ export function useStorePage() {
     return sortOptionToStoreSearchSort('bestselling')
   }, [filters.price_sort, filters.ordering])
 
-  const inStockFilter = useMemo(() => {
-    const raw = filters.in_stock as boolean | string | undefined
-    if (raw === true || raw === 'true') return true
-    if (raw === false || raw === 'false') return false
-    return undefined
-  }, [filters.in_stock])
-
-  const brandFilter = useMemo(() => {
-    if (filters.brand == null || filters.brand === '') return undefined
-    return filters.brand
-  }, [filters.brand])
-
-  const priceRangeFilter = useMemo(() => {
-    const raw = (filters as ProductFilters & { price_range?: string }).price_range
-    return raw || undefined
-  }, [filters])
+  const facetParams = useMemo(() => pickFacetSearchParams(filters), [filters])
+  const currentPage = filters.page ?? PAGINATION.DEFAULT_PAGE
 
   const categorySearchParams = useMemo((): StoreSearchParams | undefined => {
     if (!isCategory || categoryId == null) return undefined
     return {
       q: '',
       category: categoryId,
-      page: filters.page ?? PAGINATION.DEFAULT_PAGE,
+      page: currentPage,
       page_size: filters.page_size ?? PAGINATION.DEFAULT_PAGE_SIZE,
       sort: searchSort,
-      brand: brandFilter,
-      price_range: priceRangeFilter,
-      in_stock: inStockFilter,
+      brand: facetParams.brand,
+      price_range: facetParams.price_range,
+      in_stock: facetParams.in_stock,
       include_facets: true,
     }
   }, [
     isCategory,
     categoryId,
-    filters.page,
+    currentPage,
     filters.page_size,
     searchSort,
-    brandFilter,
-    priceRangeFilter,
-    inStockFilter,
+    facetParams,
   ])
 
   const listingSearch = useStoreSearch(categorySearchParams, {
     enabled: isCategory && categoryId != null && resolved?.over_limit !== true,
   })
 
+  useEffect(() => {
+    if (!isCategory || !listingSearch.data || listingSearch.isPlaceholderData) return
+
+    const items = listingSearch.data.items ?? []
+    if (currentPage <= 1) {
+      setAccumulatedProducts(items)
+      return
+    }
+    setAccumulatedProducts((prev) => mergeUniqueProducts(prev, items))
+  }, [
+    isCategory,
+    listingSearch.data,
+    listingSearch.dataUpdatedAt,
+    listingSearch.isPlaceholderData,
+    currentPage,
+  ])
+
   const listingData = useMemo(() => {
     if (!isCategory || !resolved) return undefined
     const search = listingSearch.data
+    const total = search?.meta.total ?? resolved.product_count ?? 0
     return {
       categorySlug: categoryPath,
       categoryName: resolved.category_name || categoryPath,
-      productCount: resolved.product_count ?? search?.meta.total ?? 0,
+      productCount: resolved.product_count ?? total,
       hasSubcategories: resolved.has_subcategories ?? (resolved.subcategories?.length ?? 0) > 0,
       subcategories: resolved.subcategories ?? [],
       overLimit: resolved.over_limit ?? false,
-      count: search?.meta.total ?? resolved.product_count ?? 0,
-      results: search?.items ?? [],
+      count: total,
+      results: accumulatedProducts,
     }
-  }, [isCategory, resolved, listingSearch.data, categoryPath])
+  }, [isCategory, resolved, listingSearch.data, categoryPath, accumulatedProducts])
+
+  const hasActiveFacetFilters =
+    facetParams.brand != null ||
+    facetParams.price_range != null ||
+    facetParams.in_stock != null
+
+  const preservedFacetFilters = usePreservedSearchFacets(listingSearch.data?.facets, {
+    scopeKey: categoryId,
+    hasActiveFacetFilters,
+    isPlaceholderData: listingSearch.isPlaceholderData,
+    dataUpdatedAt: listingSearch.dataUpdatedAt,
+  })
 
   const categoryFacetsData = useMemo(() => {
-    if (!isCategory || !resolved) return undefined
-    const facetGroups = mapSearchFacetsToFilterGroups(listingSearch.data?.facets)
+    if (!listingData) return undefined
     return {
-      categorySlug: categoryPath,
-      categoryName: resolved.category_name || categoryPath,
-      productCount: resolved.product_count ?? listingSearch.data?.meta.total ?? 0,
-      hasSubcategories: resolved.has_subcategories ?? false,
-      subcategories: resolved.subcategories ?? [],
-      overLimit: resolved.over_limit ?? false,
-      filters: facetGroups,
+      categorySlug: listingData.categorySlug,
+      categoryName: listingData.categoryName,
+      productCount: listingData.productCount,
+      hasSubcategories: listingData.hasSubcategories,
+      subcategories: listingData.subcategories,
+      overLimit: listingData.overLimit,
+      filters: preservedFacetFilters,
     }
-  }, [isCategory, resolved, listingSearch.data, categoryPath])
+  }, [listingData, preservedFacetFilters])
+
+  const { isInitialLoad, isRefreshing, isFetchingMore } = getListingRequestUiFlags({
+    page: currentPage,
+    productCount: accumulatedProducts.length,
+    hasData: !!listingSearch.data,
+    isLoading: listingSearch.isLoading,
+    isFetching: listingSearch.isFetching,
+    isPlaceholderData: listingSearch.isPlaceholderData,
+    enabled: isCategory,
+  })
 
   const listing = {
     data: listingData,
-    isLoading: listingSearch.isLoading || listingSearch.isFetching,
+    isLoading: isInitialLoad,
+    isFetchingMore,
+    isRefreshing,
     error: listingSearch.error,
   }
 

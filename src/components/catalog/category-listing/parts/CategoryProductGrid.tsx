@@ -9,24 +9,27 @@ import {
   getListProductKey,
 } from '@/lib/services/products'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
-import { ProductListView } from '@/components/catalog/_shared/listing/ProductListView'
-import { ActiveFilters } from '@/components/catalog/_shared/filters/ActiveFilters'
-import { FilterIcon } from '@/components/icons'
-import { Pagination } from '@/components/Pagination'
+import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
+import {
+  ActiveFilters,
+  countActiveFacetFilters,
+  stripFacetFilters,
+} from '@/components/catalog/_shared/filters/ActiveFilters'
 import { PAGINATION } from '@/lib/constant'
-import { CategorySortOption, CategoryViewMode } from '@/components/catalog/category-listing/useCategoryListingPage'
+import { CategorySortOption } from '@/components/catalog/category-listing/useCategoryListingPage'
+import { BackdropLoading } from '@/components/BackdropLoading'
 
 interface CategoryProductGridProps {
   categorySlug: string
   products: Product[]
   totalCount: number
   sortOption: CategorySortOption
-  viewMode: CategoryViewMode
   categoryFilters: Omit<ProductFilters, 'category'>
   filters: ProductFilters
   facetFilters?: FilterGroup[]
+  isRefreshing?: boolean
+  isFetchingMore?: boolean
   onSortChange: (sort: CategorySortOption) => void
-  onViewModeChange: (mode: CategoryViewMode) => void
   onFiltersChange: (filters: ProductFilters) => void
   onHandleFiltersChange: (filters: ProductFilters) => void
   onOpenMobileFilters: () => void
@@ -37,35 +40,44 @@ export function CategoryProductGrid({
   products,
   totalCount,
   sortOption,
-  viewMode,
   categoryFilters,
   filters,
   facetFilters,
+  isRefreshing = false,
+  isFetchingMore = false,
   onSortChange,
-  onViewModeChange,
   onFiltersChange,
   onHandleFiltersChange,
   onOpenMobileFilters,
 }: CategoryProductGridProps) {
+  const activeFacetCount = countActiveFacetFilters(categoryFilters as ProductFilters)
+  const pageSize = filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE
+  const currentPage = categoryFilters.page || PAGINATION.DEFAULT_PAGE
+  const remainingCount = Math.max(0, totalCount - products.length)
+  const hasMore = remainingCount > 0 && products.length > 0
+
+  const handleLoadMore = () => {
+    if (isFetchingMore || !hasMore) return
+    onFiltersChange({
+      ...categoryFilters,
+      page: currentPage + 1,
+      page_size: pageSize,
+    } as ProductFilters)
+  }
+
   return (
     <main className="min-w-0 flex-1">
-      <div className="mb-4 lg:hidden">
-        <button
-          type="button"
-          onClick={onOpenMobileFilters}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-        >
-          <FilterIcon />
-          <span>Bộ lọc</span>
-        </button>
-      </div>
-
       <ProductSortAndView
         sortOption={sortOption}
-        viewMode={viewMode}
         onSortChange={onSortChange}
-        onViewModeChange={onViewModeChange}
         productCount={totalCount}
+        onOpenFilters={onOpenMobileFilters}
+        activeFacetCount={activeFacetCount}
+        notice={
+          <p className="text-xs leading-relaxed text-gray-400">
+            <b>Lưu ý: </b>Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
+          </p>
+        }
       />
 
       {facetFilters && facetFilters.length > 0 ? (
@@ -75,25 +87,19 @@ export function CategoryProductGrid({
           onRemoveFilter={(filterKey) => {
             const newFilters = { ...filters }
             delete newFilters[filterKey as keyof ProductFilters]
-            onFiltersChange(newFilters)
+            onHandleFiltersChange(newFilters)
           }}
-          onClearAll={() => onHandleFiltersChange({})}
+          onClearAll={() => onHandleFiltersChange(stripFacetFilters(filters))}
         />
       ) : null}
 
-      <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        <p>
-          <strong>Lưu ý:</strong> Thuốc kê đơn và một số sản phẩm sẽ cần tư vấn từ dược sĩ
-        </p>
-      </div>
-
-      {products.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+      {products.length === 0 && !isRefreshing ? (
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
           <p className="mb-2 text-gray-600">Không tìm thấy sản phẩm nào trong danh mục này</p>
           <p className="text-sm text-gray-500">Vui lòng thử lại sau hoặc chọn danh mục khác</p>
         </div>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      ) : (
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={getListProductKey(product)}
@@ -101,15 +107,22 @@ export function CategoryProductGrid({
             />
           ))}
         </div>
-      ) : (
-        <ProductListView products={products} currentCategorySlug={categorySlug} />
       )}
 
-      <Pagination
-        currentPage={categoryFilters.page || PAGINATION.DEFAULT_PAGE}
-        totalPages={Math.ceil(totalCount / (filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE))}
-        onPageChange={(page) => onFiltersChange({ ...categoryFilters, page } as ProductFilters)}
-        buttonClassName="text-gray-600"
+      {hasMore && !isRefreshing ? (
+        <LoadMoreProductsButton
+          remainingCount={remainingCount}
+          onLoadMore={handleLoadMore}
+          loading={isFetchingMore}
+        />
+      ) : null}
+
+      <BackdropLoading
+        isOpen={isRefreshing}
+        loadingText="Đang lọc sản phẩm…"
+        lockScroll={false}
+        opacity={0.45}
+        size="md"
       />
     </main>
   )

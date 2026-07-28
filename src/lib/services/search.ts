@@ -119,7 +119,7 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
     groups.push({
       id: 'price_range',
       label: 'Khoảng giá',
-      type: 'single',
+      type: 'range',
       options: priceOptions,
     })
   }
@@ -145,6 +145,50 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
   }
 
   return groups
+}
+
+/**
+ * Keep option lists from an unfiltered facet snapshot; update counts from the
+ * current (filtered) response. Prevents radios/checkboxes from vanishing when
+ * the API returns facets scoped to the active filters.
+ */
+export function mergeFilterGroupsPreserveOptions(
+  base: FilterGroup[],
+  current: FilterGroup[]
+): FilterGroup[] {
+  if (!base.length) return current
+  if (!current.length) return base
+
+  const currentById = new Map(current.map((group) => [group.id, group]))
+
+  const merged = base.map((baseGroup) => {
+    const curr = currentById.get(baseGroup.id)
+    if (!curr) return baseGroup
+
+    const countByValue = new Map(
+      curr.options.map((option) => [String(option.value), option.count] as const)
+    )
+
+    return {
+      ...baseGroup,
+      label: curr.label || baseGroup.label,
+      type: curr.type || baseGroup.type,
+      options: baseGroup.options.map((option) => ({
+        ...option,
+        count: countByValue.has(String(option.value))
+          ? countByValue.get(String(option.value))
+          : 0,
+      })),
+    }
+  })
+
+  for (const group of current) {
+    if (!base.some((b) => b.id === group.id)) {
+      merged.push(group)
+    }
+  }
+
+  return merged
 }
 
 export async function searchStoreProducts(

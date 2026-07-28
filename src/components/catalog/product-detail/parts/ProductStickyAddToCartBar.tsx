@@ -65,28 +65,27 @@ export function ProductStickyAddToCartBar({
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-3 z-40 transition-all duration-300 ease-out ${
+      className={`fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 transition-all duration-300 ease-out ${
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'
       }`}
       aria-hidden={!visible}
     >
       <Container className="py-1">
-        <div className="mx-auto w-[90%] rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] md:px-4 md:py-3">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] md:max-w-none md:px-4 md:py-3">
+          {/* Mobile: price | qty | ATC always visible. Desktop: + image/name/unit. */}
+          <div className="flex min-w-0 items-center gap-2 md:gap-3">
             {imageUrl ? (
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white md:h-12 md:w-12">
+              <div className="hidden h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white md:block md:h-12 md:w-12">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageUrl} alt={productName} className="h-full w-full object-cover" />
               </div>
             ) : null}
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <p className="line-clamp-2 flex-1 text-sm font-semibold leading-5 text-gray-900">
-                {productName}
-              </p>
-              <p className="shrink-0 text-base font-bold text-primary-700 md:text-lg md:leading-6">
-                {priceValue.toLocaleString('vi-VN')}₫
-              </p>
-            </div>
+            <p className="hidden min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-5 text-gray-900 md:block">
+              {productName}
+            </p>
+            <p className="shrink-0 text-sm font-bold tabular-nums text-primary-700 md:text-lg md:leading-6">
+              {priceValue.toLocaleString('vi-VN')}₫
+            </p>
             <div ref={unitMenuRef} className="relative hidden md:block">
               <button
                 type="button"
@@ -138,9 +137,14 @@ export function ProductStickyAddToCartBar({
               value={quantity}
               max={maxQuantity}
               onChange={onQuantityChange}
-              size="md"
+              size="xs"
+              className="shrink-0"
             />
-            <Button onClick={onAddToCart} className="min-w-[150px] rounded-full" size="md">
+            <Button
+              onClick={onAddToCart}
+              className="h-8 min-w-[7.5rem] flex-1 rounded-full px-3 text-xs whitespace-nowrap sm:h-9 sm:min-w-[9rem] sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
+              size="md"
+            >
               Thêm vào giỏ
             </Button>
           </div>

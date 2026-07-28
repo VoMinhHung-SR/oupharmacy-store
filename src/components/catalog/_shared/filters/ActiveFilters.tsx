@@ -1,7 +1,39 @@
 'use client'
+
 import React, { useMemo } from 'react'
 import { ProductFilters, FilterGroup } from '@/lib/services/products'
 import { XIcon } from '@/components/icons'
+
+/** Keys that are pagination/sort/search meta — never shown as facet chips. */
+export const NON_FACET_FILTER_KEYS = new Set([
+  'page',
+  'page_size',
+  'ordering',
+  'price_sort',
+  'category',
+  'q',
+])
+
+export function stripFacetFilters(filters: ProductFilters): ProductFilters {
+  const next: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(filters)) {
+    if (NON_FACET_FILTER_KEYS.has(key)) {
+      next[key] = value
+    }
+  }
+  return next as ProductFilters
+}
+
+export function isActiveFacetEntry(key: string, value: unknown): boolean {
+  if (NON_FACET_FILTER_KEYS.has(key)) return false
+  if (value === undefined || value === null || value === '') return false
+  if (Array.isArray(value) && value.length === 0) return false
+  return true
+}
+
+export function countActiveFacetFilters(filters: ProductFilters): number {
+  return Object.entries(filters).filter(([key, value]) => isActiveFacetEntry(key, value)).length
+}
 
 interface ActiveFiltersProps {
   activeFilters: ProductFilters
@@ -16,81 +48,67 @@ export function ActiveFilters({
   onRemoveFilter,
   onClearAll,
 }: ActiveFiltersProps) {
-  // Build filter labels map from filterGroups (memoized)
-  const { filterLabels, optionLabels } = useMemo(() => {
-    const labels: Record<string, string> = {}
+  const optionLabels = useMemo(() => {
     const options: Record<string, Record<string | number, string>> = {}
-  
-  filterGroups.forEach(group => {
-      labels[group.id] = group.label
+    filterGroups.forEach((group) => {
       options[group.id] = {}
-    group.options.forEach(option => {
+      group.options.forEach((option) => {
         options[group.id][option.value] = option.label
+      })
     })
-  })
-    
-    return { filterLabels: labels, optionLabels: options }
+    return options
   }, [filterGroups])
 
-  // Get active filter entries (memoized)
-  const activeFilterEntries = useMemo(() => 
-    Object.entries(activeFilters).filter(
-    ([key, value]) => 
-      value !== undefined && 
-      value !== null && 
-      value !== '' && 
-      key !== 'page' && 
-      key !== 'page_size'
-    ),
+  const activeFilterEntries = useMemo(
+    () => Object.entries(activeFilters).filter(([key, value]) => isActiveFacetEntry(key, value)),
     [activeFilters]
   )
-  
+
   if (activeFilterEntries.length === 0) {
     return null
   }
 
-  const getFilterDisplayValue = (key: string, value: any): string => {
-    // Handle comma-separated values (multi-select)
+  const getFilterDisplayValue = (key: string, value: unknown): string => {
     if (typeof value === 'string' && value.includes(',')) {
       const values = value.split(',').filter(Boolean)
-      const labels = values.map(v => {
-        const optionLabel = optionLabels[key]?.[v]
-        return optionLabel || v
-      })
-      return labels.join(', ')
+      return values.map((v) => optionLabels[key]?.[v] || v).join(', ')
     }
-    
-    // Handle single value
-    const optionLabel = optionLabels[key]?.[value]
+
+    const optionLabel = optionLabels[key]?.[value as string | number]
     return optionLabel || String(value)
   }
 
+  const chipCount = activeFilterEntries.length
+
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <span className="text-sm font-medium text-gray-700">Bộ lọc đang áp dụng:</span>
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 shadow-sm">
+      <span className="text-sm font-medium text-gray-800">Lọc theo ({chipCount})</span>
       {activeFilterEntries.map(([key, value]) => {
         const displayValue = getFilterDisplayValue(key, value)
-        const filterLabel = filterLabels[key] || key
-        
+
         return (
           <span
             key={key}
-            className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
+            className="inline-flex max-w-full items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-800 sm:text-sm"
           >
-            <span>{filterLabel}: {displayValue}</span>
+            <span className="min-w-0 truncate" title={displayValue}>
+              {displayValue}
+            </span>
             <button
+              type="button"
               onClick={() => onRemoveFilter(key)}
-              className="hover:text-primary-900 ml-1"
-              aria-label={`Remove ${filterLabel} filter`}
+              className="ml-0.5 shrink-0 rounded-full p-0.5 text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              aria-label={`Xóa bộ lọc ${displayValue}`}
             >
-              <XIcon className="w-4 h-4" />
+              <XIcon className="h-3.5 w-3.5" />
             </button>
           </span>
         )
       })}
       <button
+        type="button"
         onClick={onClearAll}
-        className="text-sm text-primary-600 hover:text-primary-700 underline"
+        className="ml-auto text-sm font-medium text-primary-600 focus:outline-none focus-visible:underline"
       >
         Xóa tất cả
       </button>

@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
+    <div className="mx-auto max-w-md space-y-6 px-4 py-8 sm:px-0">
       <h1 className="text-xl font-semibold">Quên mật khẩu</h1>
       <p className="text-sm text-gray-600">
         Nhập email đã đăng ký, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.

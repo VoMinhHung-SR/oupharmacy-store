@@ -30,12 +30,30 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
     null,
   )
   const [isNavigating, setIsNavigating] = useState(false)
+  /** Mega-menu only on desktop hover — touch/mobile uses category links. */
+  const [desktopMegaEnabled, setDesktopMegaEnabled] = useState(false)
   const categoryRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)')
+    const sync = () => setDesktopMegaEnabled(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
     setIsNavigating(false)
   }, [pathname, searchParams])
+
+  useEffect(() => {
+    if (!desktopMegaEnabled && hoveredCategoryId !== null) {
+      setHoveredCategoryId(null)
+      setHoveredLevel1Id(null)
+      setDropdownPosition(null)
+    }
+  }, [desktopMegaEnabled, hoveredCategoryId])
 
   const checkScrollButtons = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -193,13 +211,13 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
   return (
     <>
       <nav
-        className="relative z-30 bg-white border-b border-gray-200 shadow-sm"
-        style={{ overflow: 'visible' }}
+        className="relative z-30 hidden overflow-x-hidden border-b border-gray-200 bg-white shadow-sm lg:block"
+        style={{ overflowX: 'hidden', overflowY: 'visible' }}
       >
-        <Container className="relative" style={{ overflow: 'visible' }}>
+        <Container className="relative overflow-x-hidden" style={{ overflowX: 'hidden', overflowY: 'visible' }}>
           <div
-            className="flex items-center gap-0 relative"
-            style={{ overflow: 'visible' }}
+            className="relative flex items-center gap-0 overflow-x-hidden"
+            style={{ overflowX: 'hidden', overflowY: 'visible' }}
           >
             {canScrollLeft && (
               <button
@@ -226,7 +244,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
 
             <div
               ref={scrollContainerRef}
-              className="flex items-center gap-6 overflow-x-auto overflow-y-visible scrollbar-hide flex-1 min-w-0 touch-manipulation"
+              className="scrollbar-hide flex min-w-0 flex-1 touch-manipulation items-center justify-start gap-3 overflow-x-auto overflow-y-hidden sm:gap-5 md:justify-center lg:justify-start"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {categories.map((category) => {
                 const hasChildren =
@@ -243,22 +262,26 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                     }}
                     className="relative"
                     onMouseEnter={() => {
-                      if (hasChildren) handleCategoryMouseEnter(category.id)
+                      if (desktopMegaEnabled && hasChildren) {
+                        handleCategoryMouseEnter(category.id)
+                      }
                     }}
-                    onMouseLeave={handleCategoryMouseLeave}
+                    onMouseLeave={desktopMegaEnabled ? handleCategoryMouseLeave : undefined}
                   >
                     <Link
                       href={category.href}
-                      className={`flex items-center gap-1 py-3 px-2 border-b-2 border-transparent hover:text-primary-700 hover:border-primary-700 text-gray-700 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
-                        isHovered ? 'text-primary-700 border-primary-700' : ''
+                      className={`flex items-center justify-center gap-1 border-b-2 border-transparent px-2 py-2.5 text-gray-700 transition-colors whitespace-nowrap hover:border-primary-700 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
+                        isHovered ? 'border-primary-700 text-primary-700' : ''
                       }`}
-                      aria-haspopup={hasChildren ? 'true' : undefined}
-                      aria-expanded={hasChildren ? isHovered : undefined}
+                      aria-haspopup={desktopMegaEnabled && hasChildren ? 'true' : undefined}
+                      aria-expanded={desktopMegaEnabled && hasChildren ? isHovered : undefined}
                     >
-                      <span className="text-sm font-medium">{category.name}</span>
-                      {hasChildren && (
+                      <span className="max-w-[10rem] truncate text-sm font-medium sm:max-w-none" title={category.name}>
+                        {category.name}
+                      </span>
+                      {hasChildren && desktopMegaEnabled && (
                         <svg
-                          className={`w-4 h-4 transition-transform ${
+                          className={`hidden h-4 w-4 transition-transform lg:block ${
                             isHovered ? 'rotate-180' : ''
                           }`}
                           fill="none"
@@ -280,7 +303,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
               })}
             </div>
 
-            {hoveredCategoryId !== null &&
+            {desktopMegaEnabled &&
+              hoveredCategoryId !== null &&
               dropdownPosition &&
               hoveredCategory && (
                 <div data-dropdown>

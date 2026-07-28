@@ -80,28 +80,28 @@ export const LoginModal: React.FC = () => {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
         onClick={closeModal}
       >
         {/* Modal */}
         <div
-          className="bg-white rounded-lg shadow-xl w-full max-w-md relative max-h-[90vh] overflow-y-auto"
+          className="relative max-h-[min(90vh,100dvh)] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-lg"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+            className="absolute right-3 top-3 z-10 text-gray-400 transition-colors hover:text-gray-600 sm:right-4 sm:top-4"
             aria-label="Đóng"
           >
             <XIcon size={24} />
           </button>
 
           {/* Content */}
-          <div className="p-8 space-y-6">
-            <div className="text-center"  >
-              <h2 className="text-2xl font-semibold text-gray-900">Đăng nhập</h2>
-              <p className="text-sm text-gray-600 mt-1">
+          <div className="space-y-5 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:space-y-6 sm:p-8">
+            <div className="pr-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900 sm:text-2xl">Đăng nhập</h2>
+              <p className="mt-1 text-sm text-gray-600">
               Vui lòng đăng nhập để hưởng những đặc quyền dành cho thành viên.
               </p>
             </div>
@@ -206,7 +206,7 @@ export const LoginModal: React.FC = () => {
               )}
             </button>
 
-            <div className="flex justify-between text-sm pt-4 border-t border-gray-200">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4 text-sm">
               <Link 
                 href="/register" 
                 onClick={closeModal}
