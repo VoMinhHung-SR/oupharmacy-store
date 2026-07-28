@@ -211,7 +211,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
   return (
     <>
       <nav
-        className="relative z-30 overflow-x-hidden border-b border-gray-200 bg-white shadow-sm"
+        className="relative z-30 hidden overflow-x-hidden border-b border-gray-200 bg-white shadow-sm lg:block"
         style={{ overflowX: 'hidden', overflowY: 'visible' }}
       >
         <Container className="relative overflow-x-hidden" style={{ overflowX: 'hidden', overflowY: 'visible' }}>

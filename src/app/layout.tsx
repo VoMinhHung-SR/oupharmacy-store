@@ -1,10 +1,10 @@
+import { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import './globals.css'
-import Header from '@/layouts/Header'
-import NavigationBarWrapper from '@/layouts/NavigationBarWrapper'
+import StoreNavShell from '@/layouts/StoreNavShell'
 import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -13,6 +13,7 @@ import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { LoginModal } from '@/components/modals/LoginModal'
 import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegister'
+import { ChunkLoadRecovery } from '@/components/pwa/ChunkLoadRecovery'
 import { Providers } from './providers'
 import { fetchCommonCitiesServer } from '@/lib/services/location.server'
 
@@ -69,8 +70,10 @@ export default async function RootLayout({
               <CartProvider>
                 <WishlistProvider>
                   <CheckoutProvider>
-                    <Header />
-                    <NavigationBarWrapper />
+                    <ChunkLoadRecovery />
+                    <Suspense fallback={null}>
+                      <StoreNavShell />
+                    </Suspense>
                     <main className="relative z-0 bg-[#ededed] border-0">
                       {children}
                     </main>

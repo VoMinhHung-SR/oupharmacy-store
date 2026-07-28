@@ -1,7 +1,11 @@
 const createNextIntlPlugin = require('next-intl/plugin')
+
+/** Opt-in only — set NEXT_PUBLIC_ENABLE_PWA=true in container/staging/production. */
+const enablePwa = process.env.NEXT_PUBLIC_ENABLE_PWA === 'true'
+
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  disable: !enablePwa,
   // Custom client register — auto-register crashes on http://LAN-IP (no secure context).
   register: false,
   // Keep Workbox defaults (static CacheFirst, etc.) and append overrides below.

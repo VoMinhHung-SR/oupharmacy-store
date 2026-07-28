@@ -1,22 +1,9 @@
-import React from 'react'
-import { getCategoriesSSG, CategoryLevel0, hrefFromWebSlug } from '@/lib/services/categories'
-import NavigationBar from './NavigationBar'
+import type { NavigationCategory } from '@/layouts/NavigationBar/types'
+import { getCategoriesSSG, hrefFromWebSlug, type CategoryLevel0 } from '@/lib/services/categories'
 
-/**
- * Server Component wrapper — fetch categories (SSG/ISR) for desktop nav only.
- * Prefer `StoreNavShell` in root layout for header + mobile drawer + nav.
- */
-export default async function NavigationBarWrapper() {
-  let categories: CategoryLevel0[] = []
-
-  try {
-    categories = await getCategoriesSSG()
-  } catch (error) {
-    console.error('Error fetching categories for NavigationBar:', error)
-    categories = []
-  }
-
-  const navigationCategories = categories.map((level0) => ({
+/** Map store category tree → nav chrome shape (shared by desktop bar + mobile drawer). */
+export function mapCategoriesToNavigation(categories: CategoryLevel0[]): NavigationCategory[] {
+  return categories.map((level0) => ({
     id: level0.id,
     name: level0.name,
     href: `/${level0.path_slug || level0.slug}`,
@@ -45,6 +32,14 @@ export default async function NavigationBarWrapper() {
         }
       }) || [],
   }))
+}
 
-  return <NavigationBar categories={navigationCategories} />
+export async function loadNavigationCategories(): Promise<NavigationCategory[]> {
+  try {
+    const categories = await getCategoriesSSG()
+    return mapCategoriesToNavigation(categories)
+  } catch (error) {
+    console.error('Error fetching categories for nav chrome:', error)
+    return []
+  }
 }

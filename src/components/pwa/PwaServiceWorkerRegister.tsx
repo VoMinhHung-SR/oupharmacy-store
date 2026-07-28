@@ -1,16 +1,35 @@
 'use client'
 
 import { useEffect } from 'react'
+import { isPwaEnabled } from '@/lib/pwa/config'
+
+async function unregisterAllServiceWorkers() {
+  if (!('serviceWorker' in navigator)) return
+  const regs = await navigator.serviceWorker.getRegistrations()
+  await Promise.all(regs.map((reg) => reg.unregister()))
+  if ('caches' in window) {
+    const keys = await caches.keys()
+    await Promise.all(keys.map((key) => caches.delete(key)))
+  }
+}
 
 /**
- * Register the Workbox SW only in a secure context (HTTPS or localhost).
- * On plain http://<lan-ip>, `navigator.serviceWorker` is undefined and
- * next-pwa's auto-register would throw a client-side exception.
+ * Registers Workbox SW only when `NEXT_PUBLIC_ENABLE_PWA=true`
+ * (container / staging / production). Otherwise unregisters leftovers
+ * so local/dev never keeps a stale SW.
  */
 export function PwaServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!('serviceWorker' in navigator)) return
+
+    if (!isPwaEnabled()) {
+      void unregisterAllServiceWorkers().catch((err) => {
+        console.warn('[pwa] unregister (PWA disabled) failed', err)
+      })
+      return
+    }
+
     if (!window.isSecureContext) return
 
     const onLoad = () => {

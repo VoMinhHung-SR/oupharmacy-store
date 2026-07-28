@@ -11,6 +11,7 @@ import {
   isStandaloneDisplay,
   type BeforeInstallPromptEvent,
 } from '@/lib/pwa/install'
+import { isPwaEnabled } from '@/lib/pwa/config'
 
 const SHOW_DELAY_MS = 1800
 
@@ -27,6 +28,7 @@ export function PwaInstallPrompt() {
   const [installing, setInstalling] = useState(false)
 
   useEffect(() => {
+    if (!isPwaEnabled()) return
     if (isStandaloneDisplay() || isInstallDismissed()) return
 
     let cancelled = false

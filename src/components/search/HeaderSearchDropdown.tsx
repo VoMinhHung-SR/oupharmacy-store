@@ -13,7 +13,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
   const s = useHeaderSearchDropdown()
 
   return (
-    <div ref={s.rootRef} className="relative min-w-0 max-w-2xl flex-1">
+    <div ref={s.rootRef} className="relative w-full min-w-0 max-w-2xl">
       <form
         onSubmit={s.onSubmit}
         role="search"

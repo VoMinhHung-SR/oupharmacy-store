@@ -70,7 +70,7 @@ export function HeaderCartDropdown() {
             </span>
           ) : null}
         </span>
-        <span className="hidden sm:inline">{t('cart')}</span>
+        <span className="hidden lg:inline">{t('cart')}</span>
       </Link>
 
       {/* Desktop / tablet hover panel — mobile taps through to /gio-hang */}
