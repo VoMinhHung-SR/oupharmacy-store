@@ -4,28 +4,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { PAGINATION } from '@/lib/constant'
-import { getListProductKey, Product, ProductFilters } from '@/lib/services/products'
+import { mergeUniqueProducts, Product, ProductFilters } from '@/lib/services/products'
 import { pathnameToStorePath, parseVariantIdFromSearch, resolveStorePath } from '@/lib/store-path'
 import { useProductByCategoryAndProductSlug } from './useProducts'
 import { useStoreSearch } from './useStoreSearch'
 import { useCategoryPageMeta } from './useCategoryPageMeta'
 import {
-  mapSearchFacetsToFilterGroups,
   sortOptionToStoreSearchSort,
   type StoreSearchParams,
 } from '@/lib/services/search'
-
-function mergeUniqueProducts(existing: Product[], incoming: Product[]): Product[] {
-  if (incoming.length === 0) return existing
-  const seen = new Set(existing.map(getListProductKey))
-  const next = incoming.filter((item) => {
-    const key = getListProductKey(item)
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-  return next.length === 0 ? existing : [...existing, ...next]
-}
+import { usePreservedSearchFacets } from './usePreservedSearchFacets'
+import { pickFacetSearchParams } from '@/lib/listing/facetSearchParams'
+import { getListingRequestUiFlags } from '@/lib/listing/getListingRequestUiFlags'
 
 /**
  * Store path page: resolve routing, then category browse via search-first
@@ -81,23 +71,7 @@ export function useStorePage() {
     return sortOptionToStoreSearchSort('bestselling')
   }, [filters.price_sort, filters.ordering])
 
-  const inStockFilter = useMemo(() => {
-    const raw = filters.in_stock as boolean | string | undefined
-    if (raw === true || raw === 'true') return true
-    if (raw === false || raw === 'false') return false
-    return undefined
-  }, [filters.in_stock])
-
-  const brandFilter = useMemo(() => {
-    if (filters.brand == null || filters.brand === '') return undefined
-    return filters.brand
-  }, [filters.brand])
-
-  const priceRangeFilter = useMemo(() => {
-    const raw = (filters as ProductFilters & { price_range?: string }).price_range
-    return raw || undefined
-  }, [filters])
-
+  const facetParams = useMemo(() => pickFacetSearchParams(filters), [filters])
   const currentPage = filters.page ?? PAGINATION.DEFAULT_PAGE
 
   const categorySearchParams = useMemo((): StoreSearchParams | undefined => {
@@ -108,9 +82,9 @@ export function useStorePage() {
       page: currentPage,
       page_size: filters.page_size ?? PAGINATION.DEFAULT_PAGE_SIZE,
       sort: searchSort,
-      brand: brandFilter,
-      price_range: priceRangeFilter,
-      in_stock: inStockFilter,
+      brand: facetParams.brand,
+      price_range: facetParams.price_range,
+      in_stock: facetParams.in_stock,
       include_facets: true,
     }
   }, [
@@ -119,9 +93,7 @@ export function useStorePage() {
     currentPage,
     filters.page_size,
     searchSort,
-    brandFilter,
-    priceRangeFilter,
-    inStockFilter,
+    facetParams,
   ])
 
   const listingSearch = useStoreSearch(categorySearchParams, {
@@ -129,8 +101,7 @@ export function useStorePage() {
   })
 
   useEffect(() => {
-    if (!isCategory || !listingSearch.data) return
-    if (listingSearch.isPlaceholderData) return
+    if (!isCategory || !listingSearch.data || listingSearch.isPlaceholderData) return
 
     const items = listingSearch.data.items ?? []
     if (currentPage <= 1) {
@@ -162,27 +133,46 @@ export function useStorePage() {
     }
   }, [isCategory, resolved, listingSearch.data, categoryPath, accumulatedProducts])
 
-  const categoryFacetsData = useMemo(() => {
-    if (!isCategory || !resolved) return undefined
-    const facetGroups = mapSearchFacetsToFilterGroups(listingSearch.data?.facets)
-    return {
-      categorySlug: categoryPath,
-      categoryName: resolved.category_name || categoryPath,
-      productCount: resolved.product_count ?? listingSearch.data?.meta.total ?? 0,
-      hasSubcategories: resolved.has_subcategories ?? false,
-      subcategories: resolved.subcategories ?? [],
-      overLimit: resolved.over_limit ?? false,
-      filters: facetGroups,
-    }
-  }, [isCategory, resolved, listingSearch.data, categoryPath])
+  const hasActiveFacetFilters =
+    facetParams.brand != null ||
+    facetParams.price_range != null ||
+    facetParams.in_stock != null
 
-  const isInitialListingLoad =
-    listingSearch.isLoading && accumulatedProducts.length === 0 && !listingSearch.data
+  const preservedFacetFilters = usePreservedSearchFacets(listingSearch.data?.facets, {
+    scopeKey: categoryId,
+    hasActiveFacetFilters,
+    isPlaceholderData: listingSearch.isPlaceholderData,
+    dataUpdatedAt: listingSearch.dataUpdatedAt,
+  })
+
+  const categoryFacetsData = useMemo(() => {
+    if (!listingData) return undefined
+    return {
+      categorySlug: listingData.categorySlug,
+      categoryName: listingData.categoryName,
+      productCount: listingData.productCount,
+      hasSubcategories: listingData.hasSubcategories,
+      subcategories: listingData.subcategories,
+      overLimit: listingData.overLimit,
+      filters: preservedFacetFilters,
+    }
+  }, [listingData, preservedFacetFilters])
+
+  const { isInitialLoad, isRefreshing, isFetchingMore } = getListingRequestUiFlags({
+    page: currentPage,
+    productCount: accumulatedProducts.length,
+    hasData: !!listingSearch.data,
+    isLoading: listingSearch.isLoading,
+    isFetching: listingSearch.isFetching,
+    isPlaceholderData: listingSearch.isPlaceholderData,
+    enabled: isCategory,
+  })
 
   const listing = {
     data: listingData,
-    isLoading: isInitialListingLoad,
-    isFetchingMore: currentPage > 1 && listingSearch.isFetching,
+    isLoading: isInitialLoad,
+    isFetchingMore,
+    isRefreshing,
     error: listingSearch.error,
   }
 

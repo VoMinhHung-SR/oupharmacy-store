@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { SearchIcon } from '@/components/icons'
+import { SearchIcon, XCircleIcon, MicIcon, QrScanIcon } from '@/components/icons'
 import { HeaderSearchBrowsePanel, HeaderSearchSuggestionsPanel } from './HeaderSearchDropdownPanels'
 import { useHeaderSearchDropdown } from './useHeaderSearchDropdown'
 
@@ -13,7 +13,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
   const s = useHeaderSearchDropdown()
 
   return (
-    <div ref={s.rootRef} className="relative w-full min-w-0 max-w-2xl">
+    <div ref={s.rootRef} className="relative w-full min-w-0 lg:max-w-2xl">
       <form
         onSubmit={s.onSubmit}
         role="search"
@@ -41,13 +41,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
             className="mr-0.5 shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 sm:p-2"
             aria-label={s.t('headerSearch.clearInput')}
           >
-            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <XCircleIcon className="h-4 w-4" />
           </button>
         ) : null}
         <div className="flex shrink-0 items-center gap-0.5 pr-1 sm:pr-1.5">
@@ -58,14 +52,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
             aria-disabled="true"
             title={s.t('headerSearch.voiceDisabled')}
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-              />
-            </svg>
+            <MicIcon className="h-5 w-5" />
           </button>
           <button
             type="button"
@@ -74,14 +61,7 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
             aria-disabled="true"
             title={s.t('headerSearch.scanDisabled')}
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-              />
-            </svg>
+            <QrScanIcon className="h-5 w-5" />
           </button>
           <button
             type="submit"

@@ -1,6 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
 import { ProductCard } from '@/components/cards/ProductCard'
 import {
   Product,
@@ -13,11 +12,12 @@ import { ProductSortAndView } from '@/components/catalog/_shared/listing/Product
 import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
 import {
   ActiveFilters,
-  NON_FACET_FILTER_KEYS,
+  countActiveFacetFilters,
   stripFacetFilters,
 } from '@/components/catalog/_shared/filters/ActiveFilters'
 import { PAGINATION } from '@/lib/constant'
 import { CategorySortOption } from '@/components/catalog/category-listing/useCategoryListingPage'
+import { BackdropLoading } from '@/components/BackdropLoading'
 
 interface CategoryProductGridProps {
   categorySlug: string
@@ -27,6 +27,7 @@ interface CategoryProductGridProps {
   categoryFilters: Omit<ProductFilters, 'category'>
   filters: ProductFilters
   facetFilters?: FilterGroup[]
+  isRefreshing?: boolean
   isFetchingMore?: boolean
   onSortChange: (sort: CategorySortOption) => void
   onFiltersChange: (filters: ProductFilters) => void
@@ -42,21 +43,14 @@ export function CategoryProductGrid({
   categoryFilters,
   filters,
   facetFilters,
+  isRefreshing = false,
   isFetchingMore = false,
   onSortChange,
   onFiltersChange,
   onHandleFiltersChange,
   onOpenMobileFilters,
 }: CategoryProductGridProps) {
-  const activeFacetCount = useMemo(() => {
-    return Object.entries(categoryFilters).filter(([key, value]) => {
-      if (NON_FACET_FILTER_KEYS.has(key)) return false
-      if (value === undefined || value === null || value === '') return false
-      if (Array.isArray(value) && value.length === 0) return false
-      return true
-    }).length
-  }, [categoryFilters])
-
+  const activeFacetCount = countActiveFacetFilters(categoryFilters as ProductFilters)
   const pageSize = filters.page_size || PAGINATION.DEFAULT_PAGE_SIZE
   const currentPage = categoryFilters.page || PAGINATION.DEFAULT_PAGE
   const remainingCount = Math.max(0, totalCount - products.length)
@@ -99,7 +93,7 @@ export function CategoryProductGrid({
         />
       ) : null}
 
-      {products.length === 0 ? (
+      {products.length === 0 && !isRefreshing ? (
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
           <p className="mb-2 text-gray-600">Không tìm thấy sản phẩm nào trong danh mục này</p>
           <p className="text-sm text-gray-500">Vui lòng thử lại sau hoặc chọn danh mục khác</p>
@@ -115,13 +109,21 @@ export function CategoryProductGrid({
         </div>
       )}
 
-      {hasMore ? (
+      {hasMore && !isRefreshing ? (
         <LoadMoreProductsButton
           remainingCount={remainingCount}
           onLoadMore={handleLoadMore}
           loading={isFetchingMore}
         />
       ) : null}
+
+      <BackdropLoading
+        isOpen={isRefreshing}
+        loadingText="Đang lọc sản phẩm…"
+        lockScroll={false}
+        opacity={0.45}
+        size="md"
+      />
     </main>
   )
 }

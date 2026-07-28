@@ -25,7 +25,9 @@ export function ProductListingSkeleton({
   return (
     <Container className="py-4">
       {breadcrumbItems ? (
-        <Breadcrumb items={breadcrumbItems} />
+        <div className="mb-4">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
       ) : (
         <div className="mb-4">
           <SkeletonPulse className="h-4 w-40 sm:w-56" />
@@ -33,7 +35,7 @@ export function ProductListingSkeleton({
       )}
 
       {isCategory ? (
-        <div className="mb-6 mt-0 flex items-center gap-2">
+        <div className="mb-6 flex items-center gap-2">
           <SkeletonPulse className="hidden h-10 w-10 shrink-0 rounded-full sm:block" />
           <div className="flex min-w-0 flex-1 gap-2 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -42,19 +44,13 @@ export function ProductListingSkeleton({
           </div>
           <SkeletonPulse className="hidden h-10 w-10 shrink-0 rounded-full sm:block" />
         </div>
-      ) : (
-        <div className="mb-4 mt-4" />
-      )}
+      ) : null}
 
-      <div className={`flex flex-col gap-6 ${isCategory ? 'lg:flex-row' : ''}`}>
-        {isCategory ? <FacetsSidebarSkeleton /> : null}
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <FacetsSidebarSkeleton />
 
         <main className="min-w-0 flex-1 space-y-3">
-          <ListingToolbarSkeleton showMobileFilter={isCategory} />
-
-          {!isCategory ? (
-            <SkeletonPulse className="mb-1 h-5 w-40" />
-          ) : null}
+          <ListingToolbarSkeleton showMobileFilter />
 
           <ProductGridSkeleton count={cardCount} columns="listing" />
 

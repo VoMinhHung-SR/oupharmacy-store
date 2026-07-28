@@ -351,6 +351,19 @@ export function getListProductKey(product: Product): string {
   return String(product.product_entity_id ?? product.product?.id ?? product.id)
 }
 
+/** Append load-more pages without duplicating product rows. */
+export function mergeUniqueProducts(existing: Product[], incoming: Product[]): Product[] {
+  if (incoming.length === 0) return existing
+  const seen = new Set(existing.map(getListProductKey))
+  const next = incoming.filter((item) => {
+    const key = getListProductKey(item)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  return next.length === 0 ? existing : [...existing, ...next]
+}
+
 /** Store route href from BE `web_slug` (full category path + product slug). */
 export function toStoreProductHref(webSlug?: string | null): string | null {
   if (!webSlug?.trim()) return null

@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useMemo } from 'react'
 import { ProductFilters, FilterGroup } from '@/lib/services/products'
 import { XIcon } from '@/components/icons'
@@ -23,6 +24,17 @@ export function stripFacetFilters(filters: ProductFilters): ProductFilters {
   return next as ProductFilters
 }
 
+export function isActiveFacetEntry(key: string, value: unknown): boolean {
+  if (NON_FACET_FILTER_KEYS.has(key)) return false
+  if (value === undefined || value === null || value === '') return false
+  if (Array.isArray(value) && value.length === 0) return false
+  return true
+}
+
+export function countActiveFacetFilters(filters: ProductFilters): number {
+  return Object.entries(filters).filter(([key, value]) => isActiveFacetEntry(key, value)).length
+}
+
 interface ActiveFiltersProps {
   activeFilters: ProductFilters
   filterGroups: FilterGroup[]
@@ -36,29 +48,19 @@ export function ActiveFilters({
   onRemoveFilter,
   onClearAll,
 }: ActiveFiltersProps) {
-  const { filterLabels, optionLabels } = useMemo(() => {
-    const labels: Record<string, string> = {}
+  const optionLabels = useMemo(() => {
     const options: Record<string, Record<string | number, string>> = {}
-
     filterGroups.forEach((group) => {
-      labels[group.id] = group.label
       options[group.id] = {}
       group.options.forEach((option) => {
         options[group.id][option.value] = option.label
       })
     })
-
-    return { filterLabels: labels, optionLabels: options }
+    return options
   }, [filterGroups])
 
   const activeFilterEntries = useMemo(
-    () =>
-      Object.entries(activeFilters).filter(([key, value]) => {
-        if (NON_FACET_FILTER_KEYS.has(key)) return false
-        if (value === undefined || value === null || value === '') return false
-        if (Array.isArray(value) && value.length === 0) return false
-        return true
-      }),
+    () => Object.entries(activeFilters).filter(([key, value]) => isActiveFacetEntry(key, value)),
     [activeFilters]
   )
 
@@ -76,28 +78,29 @@ export function ActiveFilters({
     return optionLabel || String(value)
   }
 
+  const chipCount = activeFilterEntries.length
+
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-gray-700 sm:text-sm">Bộ lọc đang áp dụng:</span>
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 shadow-sm">
+      <span className="text-sm font-medium text-gray-800">Lọc theo ({chipCount})</span>
       {activeFilterEntries.map(([key, value]) => {
         const displayValue = getFilterDisplayValue(key, value)
-        const filterLabel = filterLabels[key] || key
 
         return (
           <span
             key={key}
-            className="inline-flex max-w-full items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs text-primary-700 sm:text-sm"
+            className="inline-flex max-w-full items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-800 sm:text-sm"
           >
-            <span className="min-w-0 truncate" title={`${filterLabel}: ${displayValue}`}>
-              {filterLabel}: {displayValue}
+            <span className="min-w-0 truncate" title={displayValue}>
+              {displayValue}
             </span>
             <button
               type="button"
               onClick={() => onRemoveFilter(key)}
-              className="ml-1 shrink-0 hover:text-primary-900"
-              aria-label={`Xóa bộ lọc ${filterLabel}`}
+              className="ml-0.5 shrink-0 rounded-full p-0.5 text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              aria-label={`Xóa bộ lọc ${displayValue}`}
             >
-              <XIcon className="h-4 w-4" />
+              <XIcon className="h-3.5 w-3.5" />
             </button>
           </span>
         )
@@ -105,7 +108,7 @@ export function ActiveFilters({
       <button
         type="button"
         onClick={onClearAll}
-        className="text-xs text-primary-600 underline hover:text-primary-700 sm:text-sm"
+        className="ml-auto text-sm font-medium text-primary-600 focus:outline-none focus-visible:underline"
       >
         Xóa tất cả
       </button>

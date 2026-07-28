@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Container from '@/components/Container'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
@@ -13,8 +13,7 @@ import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 import { HeaderCartDropdown } from '@/layouts/HeaderCartDropdown'
 import { MobileNavDrawer } from '@/layouts/MobileNavDrawer'
 import { useMobileNavUi } from '@/layouts/nav/NavProviders'
-import { getPopularSearchTerms } from '@/lib/services/searchTerms'
-import type { SearchKeywordItem } from '@/lib/services/searchTerms'
+import { usePopularSearchTerms } from '@/lib/hooks/usePopularSearchTerms'
 
 const FALLBACK_POPULAR_TERMS = [
   'Omega 3',
@@ -45,13 +44,7 @@ export const Header: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const { openModal } = useLoginModal()
   const { openNav } = useMobileNavUi()
-  const [popularTerms, setPopularTerms] = useState<SearchKeywordItem[]>([])
-
-  useEffect(() => {
-    getPopularSearchTerms(20).then((res) => {
-      if (res.data && Array.isArray(res.data)) setPopularTerms(res.data)
-    })
-  }, [])
+  const { data: popularTerms = [] } = usePopularSearchTerms(20)
 
   const displayTerms =
     popularTerms.length > 0 ? popularTerms.map((item) => item.keyword) : FALLBACK_POPULAR_TERMS
@@ -79,23 +72,25 @@ export const Header: React.FC = () => {
 
       <div className="py-2.5 lg:py-3">
         <Container>
-          {/* Mobile (&lt; lg): row1 menu|logo|cart · row2 search */}
+          {/* Mobile (&lt; lg): row1 menu|logo|cart · row2 full-width search */}
           <div className="lg:hidden">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={openNav}
-                className="shrink-0 rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                aria-label="Mở menu danh mục"
-              >
-                <MenuIcon className="h-6 w-6" />
-              </button>
-              <BrandLogo className="min-w-0 flex-1 text-center" />
-              <div className="shrink-0">
+            <div className="grid grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center gap-x-2">
+              <div className="justify-self-start">
+                <button
+                  type="button"
+                  onClick={openNav}
+                  className="rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                  aria-label="Mở menu danh mục"
+                >
+                  <MenuIcon className="h-6 w-6" />
+                </button>
+              </div>
+              <BrandLogo className="text-center" />
+              <div className="justify-self-end">
                 <HeaderCartDropdown />
               </div>
             </div>
-            <div className="mt-2.5 min-w-0">
+            <div className="mt-2.5 w-full min-w-0">
               <HeaderSearchDropdown popularTerms={displayTerms} />
             </div>
           </div>

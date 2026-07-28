@@ -85,6 +85,7 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
         products={listing.data?.results || []}
         totalCount={listing.data?.count || 0}
         loading={listing.isLoading || (categoryFacets.isLoading && !listing.data)}
+        isRefreshing={listing.isRefreshing}
         isFetchingMore={listing.isFetchingMore}
         error={listing.error}
         categoryName={meta.categoryName}

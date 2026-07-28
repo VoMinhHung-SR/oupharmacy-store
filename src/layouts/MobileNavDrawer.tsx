@@ -56,7 +56,8 @@ function CategoryAccordion({
       >
         <span className={expanded ? 'text-primary-700' : undefined}>{category.name}</span>
         <ChevronDownIcon
-          className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${expanded ? 'rotate-180 text-primary-600' : ''}`}
+          className={`h-4 w-4 shrink-0 ${expanded ? 'text-primary-600' : 'text-gray-400'}`}
+          rotated={expanded}
         />
       </button>
 
