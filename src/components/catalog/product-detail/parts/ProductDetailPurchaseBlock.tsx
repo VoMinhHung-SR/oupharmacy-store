@@ -106,22 +106,25 @@ export function ProductDetailPurchaseBlock({
       ) : null}
 
       <div>
-        <div className="text-3xl font-bold text-primary-700">
+        <div className="text-xl font-bold text-primary-700 sm:text-2xl md:text-3xl">
           {effectivePriceValue.toLocaleString('vi-VN')}₫
           {selectedUnitName ? (
-            <span className="text-2xl font-semibold text-primary-700"> / {selectedUnitName}</span>
+            <span className="text-base font-semibold text-primary-700 sm:text-xl md:text-2xl">
+              {' '}
+              / {selectedUnitName}
+            </span>
           ) : null}
         </div>
         {effectiveCompareAtPrice && effectiveCompareAtPrice > effectivePriceValue ? (
-          <div className="text-base text-gray-400 line-through">
+          <div className="text-sm text-gray-400 line-through sm:text-base">
             {effectiveCompareAtPrice.toLocaleString('vi-VN')}₫
           </div>
         ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="shrink-0 text-sm font-medium text-gray-700">Chọn đơn vị tính</span>
-        <div className="ml-2 flex flex-wrap gap-2 md:ml-3">
+        <span className="shrink-0 text-xs font-medium text-gray-700 sm:text-sm">Chọn đơn vị tính</span>
+        <div className="ml-0 flex flex-wrap gap-2 sm:ml-2 md:ml-3">
           {displayUnitOptions.map((unit) => {
             const isSelected =
               (selectedUnit?.unit_id ?? product.default_unit_id ?? 0) === unit.unit_id
@@ -139,18 +142,19 @@ export function ProductDetailPurchaseBlock({
 
       {product.in_stock > 0 ? (
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Chọn số lượng</label>
-          <div className="flex min-w-0 items-center gap-3">
+          <label className="mb-2 block text-xs font-medium text-gray-700 sm:text-sm">Chọn số lượng</label>
+          <div className="flex min-w-0 flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:gap-3">
             <QuantityStepper
               value={quantity}
               max={maxSelectableQuantity}
               onChange={onQuantityChange}
-              size="lg"
+              size="md"
+              className="self-start"
             />
             <Button
               onClick={onAddToCart}
               disabled={product.in_stock === 0}
-              className="h-12 flex-1 rounded-xl"
+              className="h-10 w-full flex-1 rounded-xl text-sm sm:h-11 sm:w-auto sm:text-base"
               size="lg"
             >
               Thêm vào giỏ

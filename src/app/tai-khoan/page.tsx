@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { UserIcon, CreditCardIcon, BellIcon, SettingsIcon, LockIcon, KeyIcon, OrderIcon } from '@/components/icons'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountHubSkeleton } from '@/components/skeletons'
 
 export default function AccountPage() {
   const { user, isAuthenticated, loading } = useAuth()
@@ -21,9 +22,7 @@ export default function AccountPage() {
   if (loading) {
     return (
       <AccountPageShell>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
+        <AccountHubSkeleton />
       </AccountPageShell>
     )
   }

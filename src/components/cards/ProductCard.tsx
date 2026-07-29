@@ -147,10 +147,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link
       href={productLink}
-      className="group relative flex flex-col h-full rounded-lg border border-gray-200 bg-white p-4 hover:shadow-lg transition-all"
+      className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
     >
-      {/* Badges overlay — offset -4 aligns with card border; image markup matches original */}
-      <div className="relative">
+      <div className="relative shrink-0">
         {product.brand_country ? (
           <CardBadge
             country={product.brand_country}
@@ -172,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 alt={product.name}
                 width={300}
                 height={300}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                className="h-full w-full object-cover"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
@@ -183,85 +182,85 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </div>
 
-      {/* Product info */}
-      <div className="flex flex-col flex-1 min-h-0">
-        <div className="space-y-2 flex-shrink-0">
-          <div className="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-primary-700 min-h-[2.5rem]">
-            {product.name}
-          </div>
-          {isConsultPrice ? (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="text-xs text-amber-800">
-                <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-2 flex-wrap">
-                {product.variant_count && product.variant_count > 1 && (
-                  <span className="text-xs text-gray-500">{product.variant_count} quy cách</span>
-                )}
-                <div className="text-primary-700 font-bold text-base">
-                  {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
-                  {(selectedUnit?.price_value ?? product.price).toLocaleString('vi-VN')}₫
-                </div>
-                {selectedUnit?.unit_name && (
-                  <div className="text-primary-700 text-sm">/ {selectedUnit.unit_name}</div>
-                )}
-                {(selectedUnit?.compare_at_price || product.originalPrice) &&
-                  (selectedUnit?.compare_at_price || product.originalPrice)! >
-                    (selectedUnit?.price_value ?? product.price) && (
-                  <div className="text-gray-400 text-sm line-through ml-auto">
-                    {(selectedUnit?.compare_at_price || product.originalPrice || 0).toLocaleString('vi-VN')}₫
-                  </div>
-                )}
-              </div>
-
-              {product.packaging && (
-                <div className="text-xs text-gray-500">{product.packaging}</div>
-              )}
-              {unitOptions.length > 1 && (
-                <div className={`mt-2 grid w-full ${unitGridClassName} gap-1`}>
-                  {unitOptions.map((unit) => (
-                    <button
-                      key={unit.unit_id}
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setSelectedUnitId(unit.unit_id)
-                      }}
-                      className={`h-7 rounded-md border px-2 text-xs text-center transition-colors ${
-                        (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
-                          ? 'border-primary-600 bg-white text-primary-700'
-                          : 'border-gray-300 bg-gray-100 text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {unit.unit_name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900">
+          {product.name}
         </div>
 
-        <div className={`mt-auto pt-2 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
+        {isConsultPrice ? (
+          <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
+            <p className="text-xs text-amber-800">
+              <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+            </p>
+          </div>
+        ) : (
+          <div className="mt-2 space-y-1">
+            <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <span className="text-base font-bold tabular-nums text-primary-700">
+                {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                {(selectedUnit?.price_value ?? product.price).toLocaleString('vi-VN')}₫
+              </span>
+              {selectedUnit?.unit_name ? (
+                <span className="text-sm text-primary-700">/ {selectedUnit.unit_name}</span>
+              ) : null}
+              {(selectedUnit?.compare_at_price || product.originalPrice) &&
+              (selectedUnit?.compare_at_price || product.originalPrice)! >
+                (selectedUnit?.price_value ?? product.price) ? (
+                <span className="text-sm text-gray-400 line-through">
+                  {(
+                    selectedUnit?.compare_at_price ||
+                    product.originalPrice ||
+                    0
+                  ).toLocaleString('vi-VN')}
+                  ₫
+                </span>
+              ) : null}
+            </div>
+
+            <div className="min-h-[1rem] truncate text-xs text-gray-500">
+              {product.packaging || '\u00a0'}
+            </div>
+
+            {unitOptions.length > 1 ? (
+              <div className={`grid w-full ${unitGridClassName} gap-1 pt-1`}>
+                {unitOptions.map((unit) => (
+                  <button
+                    key={unit.unit_id}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setSelectedUnitId(unit.unit_id)
+                    }}
+                    className={`h-7 rounded-md border px-2 text-center text-xs ${
+                      (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
+                        ? 'border-primary-600 bg-white text-primary-700'
+                        : 'border-gray-300 bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {unit.unit_name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
           {isConsultPrice ? (
             <>
               <button
                 type="button"
-                className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
                 onClick={handleNavigate}
               >
                 Tư vấn ngay
               </button>
               <button
                 type="button"
-                className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700"
                 onClick={(e) => {
                   e.preventDefault()
-                  // TODO: Navigate to pharmacy finder
                 }}
               >
                 Tìm nhà thuốc
@@ -270,7 +269,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <button
               type="button"
-              className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+              className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
               onClick={handleAddToCart}
             >
               Thêm vào giỏ

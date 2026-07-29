@@ -69,13 +69,13 @@ const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
         </button>
       )}
 
-      <div onClick={(e) => e.stopPropagation()} className="relative max-w-7xl max-h-full">
+      <div onClick={(e) => e.stopPropagation()} className="relative h-[min(90vh,90vw)] w-[min(90vh,90vw)] max-w-7xl">
         <Image
           src={image}
           alt={productName}
-          width={1200}
-          height={1200}
-          className="max-h-[90vh] w-auto object-contain"
+          fill
+          sizes="90vw"
+          className="object-contain object-center"
           priority
         />
       </div>
@@ -176,19 +176,19 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-100 group cursor-zoom-in">
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-white group cursor-zoom-in">
         {currentImage ? (
           <Image
             src={currentImage}
             alt={productName}
-            width={600}
-            height={600}
-            className="h-full w-full object-contain transition-transform group-hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 600px"
+            className="object-contain object-center p-2 transition-transform duration-200 md:group-hover:scale-105"
             priority
             onClick={handleImageClick}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center bg-gray-100">
             <ImagePlaceholderIcon className="h-24 w-24 text-gray-400" />
           </div>
         )}
@@ -196,15 +196,23 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         {allImages.length > 1 && (
           <>
             <button
-              onClick={handlePrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md opacity-0 transition-opacity hover:bg-white group-hover:opacity-100"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePrev()
+              }}
+              className="absolute left-2 top-1/2 z-[1] -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md opacity-100 transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
               aria-label="Previous image"
             >
               <ChevronLeftIcon className="w-5 h-5 text-gray-700" />
             </button>
             <button
-              onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md opacity-0 transition-opacity hover:bg-white group-hover:opacity-100"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleNext()
+              }}
+              className="absolute right-2 top-1/2 z-[1] -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md opacity-100 transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
               aria-label="Next image"
             >
               <ChevronRightIcon className="w-5 h-5 text-gray-700" />
@@ -217,28 +225,27 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         <div className="relative">
           <div
             ref={thumbnailRef}
-            className="flex gap-2 overflow-x-auto pb-2 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            style={{ scrollBehavior: 'smooth' }}
+            className="scrollbar-hide flex justify-center gap-2 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none' }}
           >
             {allImages.map((image, index) => (
               <button
                 key={`${image}-${index}`}
+                type="button"
                 onClick={() => handleThumbnailClick(index)}
-                className={`flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                   selectedIndex === index
                     ? 'border-primary-600 ring-2 ring-primary-200'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="aspect-square w-20">
-                  <Image
-                    src={image}
-                    alt={`${productName} - ${index + 1}`}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                <Image
+                  src={image}
+                  alt={`${productName} - ${index + 1}`}
+                  fill
+                  sizes="80px"
+                  className="object-contain object-center bg-white p-0.5"
+                />
               </button>
             ))}
           </div>
@@ -246,15 +253,17 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           {allImages.length > 4 && (
             <>
               <button
+                type="button"
                 onClick={() => scrollThumbnails('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md border border-gray-200"
+                className="absolute left-0 top-1/2 z-[1] -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-1.5 shadow-md hover:bg-white"
                 aria-label="Scroll thumbnails left"
               >
                 <ChevronLeftIcon className="w-4 h-4 text-gray-700" />
               </button>
               <button
+                type="button"
                 onClick={() => scrollThumbnails('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md border border-gray-200"
+                className="absolute right-0 top-1/2 z-[1] -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-1.5 shadow-md hover:bg-white"
                 aria-label="Scroll thumbnails right"
               >
                 <ChevronRightIcon className="w-4 h-4 text-gray-700" />

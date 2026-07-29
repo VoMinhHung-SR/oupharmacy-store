@@ -22,6 +22,8 @@ export function middleware(request: NextRequest) {
   return NextResponse.next()
 }
 
+// Narrow matcher only — PWA assets (/manifest.webmanifest, /sw.js, /workbox-*.js,
+// /icons/*) are not matched and must stay unblocked for installability.
 export const config = {
   matcher: [
     '/(vi|en)/:path*',

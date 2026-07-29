@@ -289,7 +289,7 @@ export default function CartPage() {
                           <h3 className="col-span-3 text-sm font-semibold leading-snug text-slate-900 line-clamp-2">
                             {item.name}
                           </h3>
-                          <div className="col-span-3 flex flex-wrap items-center gap-3">
+                          <div className="col-span-3 flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
                             <span className="text-base font-bold text-primary-700">
                               {formatMoney(lineTotal)}
                             </span>
@@ -299,12 +299,14 @@ export default function CartPage() {
                               onInc={() => handleQuantityChange(item.id, item.qty + 1)}
                               disableDec={item.qty <= 1}
                             />
-                            <UnitSelect
-                              value={selectedUnitId}
-                              options={unitOptions}
-                              disabled={isUpdatingUnit || unitOptions.length <= 1}
-                              onChange={(nextUnitId) => scheduleUnitChange(item.id, selectedUnitId, nextUnitId)}
-                            />
+                            <div className="min-w-0 flex-1 basis-full sm:basis-auto sm:flex-none">
+                              <UnitSelect
+                                value={selectedUnitId}
+                                options={unitOptions}
+                                disabled={isUpdatingUnit || unitOptions.length <= 1}
+                                onChange={(nextUnitId) => scheduleUnitChange(item.id, selectedUnitId, nextUnitId)}
+                              />
+                            </div>
                           </div>
                         </div>
 

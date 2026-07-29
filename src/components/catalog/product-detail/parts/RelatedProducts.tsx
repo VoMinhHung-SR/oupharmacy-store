@@ -11,6 +11,7 @@ import {
 } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
 import { Container } from '@/components/Container'
+import { ProductGridSkeleton } from '@/components/skeletons'
 
 interface RelatedProductsProps {
   currentProduct: Product
@@ -47,31 +48,27 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
       ?.filter((p) => (p.product_entity_id ?? p.product?.id ?? p.id) !== currentEntityId)
       .slice(0, limit) || []
 
-  if (!categoryId || relatedProducts.length === 0) {
+  if (!categoryId) {
     return null
   }
 
   if (isLoading) {
     return (
       <Container className="py-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sản phẩm liên quan</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="aspect-square bg-gray-200 rounded-lg mb-2" />
-              <div className="h-4 bg-gray-200 rounded mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-2/3" />
-            </div>
-          ))}
-        </div>
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">Sản phẩm liên quan</h2>
+        <ProductGridSkeleton count={6} columns="related" />
       </Container>
     )
   }
 
+  if (relatedProducts.length === 0) {
+    return null
+  }
+
   return (
     <Container className="py-8">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sản phẩm liên quan</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <h2 className="mb-6 text-2xl font-semibold text-gray-900">Sản phẩm liên quan</h2>
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
         {relatedProducts.map((product) => {
           return (
             <ProductCard

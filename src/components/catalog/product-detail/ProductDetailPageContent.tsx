@@ -76,9 +76,13 @@ export function ProductDetailPageContent({
 
   return (
     <Container className="pb-28 md:pb-32">
-      <Breadcrumb items={state.breadcrumbItems} className="py-4" />
+      <Breadcrumb
+        items={state.breadcrumbItems}
+        className="py-4 max-md:[&_ol>li:last-child]:hidden max-md:[&_ol>li:nth-last-child(2)>span:last-child]:hidden"
+        maxItemLength={20}
+      />
 
-      <div className="space-y-6 rounded-lg bg-white p-6">
+      <div className="space-y-6 rounded-lg bg-white p-4 sm:p-6">
         <div className="grid gap-8 md:grid-cols-2">
           <ProductImageGallery
             mainImage={state.productImageUrl ?? undefined}

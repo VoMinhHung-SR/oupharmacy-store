@@ -87,6 +87,21 @@
     "paymentMethod": "Phương thức thanh toán",
     "shippingMethod": "Phương thức vận chuyển",
     "orderSummary": "Tóm tắt đơn hàng"
+  },
+  "pwa": {
+    "installTitle": "Thêm vào Màn hình chính",
+    "installAndroidBody": "Thêm lối tắt ra màn hình chính để mở store nhanh hơn.",
+    "installIosBody": "Safari → Share → Thêm vào Màn hình chính để mở nhanh hơn.",
+    "bannerTitle": "Ứng dụng Nhà thuốc OUPharmacy",
+    "bannerAndroidBody": "Mở nhanh hơn từ màn hình chính",
+    "bannerIosBody": "Safari → Share → Thêm vào MH chính",
+    "installCta": "Thêm lối tắt",
+    "openCta": "Mở",
+    "installing": "Đang thêm…",
+    "dismiss": "Để sau",
+    "offlineTitle": "Không có kết nối mạng",
+    "offlineBody": "Không tải được trang. Kiểm tra Wi‑Fi/4G rồi thử lại.",
+    "offlineHome": "Về trang chủ"
   }
 }
 

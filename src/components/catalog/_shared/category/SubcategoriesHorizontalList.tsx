@@ -63,13 +63,11 @@ export function SubcategoriesHorizontalList({
   }
 
   const buttonBase =
-  'h-10 w-10 rounded-full flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+    'flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
 
-  const buttonActive =
-  'bg-white shadow-md hover:shadow-lg hover:bg-gray-50 text-gray-700'
+  const buttonActive = 'bg-white text-gray-700 shadow-md'
 
-  const buttonDisabled =
-  'bg-gray-100 text-gray-300 cursor-not-allowed'
+  const buttonDisabled = 'cursor-not-allowed bg-gray-100 text-gray-300'
 
   return (
     <div className="mb-6 flex items-stretch">
@@ -104,23 +102,13 @@ export function SubcategoriesHorizontalList({
           <Link
             key={subcat.slug}
             href={`/${subcat.slug}`}
-            className="flex items-center gap-2 px-3 py-3 bg-white
-              border border-gray-200
-              rounded-lg
-              whitespace-nowrap
-              flex-shrink-0
-              hover:border-primary-500
-              hover:bg-primary-50
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
-              transition
-            "
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             title={`View ${getSubcategoryName(subcat.name)} category`}
           >
-            <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-              {/* CategoryIcon */}
-              <CategoryIcon 
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+              <CategoryIcon
                 categorySlug={subcat.slug}
-                className="w-5 h-5 text-gray-600 hover:text-primary-600 transition-colors"
+                className="h-5 w-5 text-gray-600"
                 aria-hidden="true"
               />
             </div>

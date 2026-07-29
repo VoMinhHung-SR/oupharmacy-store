@@ -13,6 +13,7 @@ import { toastSuccess } from '@/lib/utils/toast'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { PRICE_CONSULT } from '@/lib/constant'
 import { buildProductHref } from '@/lib/services/products'
+import { ProductGridSkeleton, SkeletonPulse } from '@/components/skeletons'
 
 export default function WishlistPage() {
   const { isAuthenticated, loading } = useAuth()
@@ -127,6 +128,18 @@ export default function WishlistPage() {
   }
 
   const getProductLink = (item: typeof items[0]) => buildProductHref(item.category_slug, item.product_slug) ?? '#'
+
+  if (loading) {
+    return (
+      <Container className="py-6">
+        <div className="mb-6 space-y-2">
+          <SkeletonPulse className="h-7 w-48" />
+          <SkeletonPulse className="h-4 w-32" />
+        </div>
+        <ProductGridSkeleton count={8} />
+      </Container>
+    )
+  }
 
   if (!isAuthenticated) {
     return null

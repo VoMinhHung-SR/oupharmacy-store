@@ -11,6 +11,7 @@ import { Pagination } from '@/components/Pagination'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 import { formatVnd } from '@/lib/utils/currency'
+import { OrdersListSkeleton } from '@/components/skeletons'
 
 const PAGE_SIZE = 10
 
@@ -147,22 +148,22 @@ export default function OrdersListPage() {
           title="Đơn hàng của tôi"
           rightSlot={
             !isLoading && !error && !rawEmpty ? (
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <label className="flex min-w-0 flex-col gap-1 text-sm text-gray-700 sm:flex-row sm:items-center sm:gap-2">
                 <span className="whitespace-nowrap">Mã đơn</span>
                 <input
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   placeholder="VD: ORD2026..."
-                  className="w-52 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:w-52"
                 />
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex min-w-0 flex-col gap-1 text-sm text-gray-700 sm:flex-row sm:items-center sm:gap-2">
                 <span className="whitespace-nowrap">Trạng thái</span>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:w-auto"
                 >
                   <option value="ALL">Tất cả</option>
                   <option value="PENDING">Đang chờ xử lý</option>
@@ -172,12 +173,12 @@ export default function OrdersListPage() {
                   <option value="CANCELLED">Đã hủy</option>
                 </select>
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex min-w-0 flex-col gap-1 text-sm text-gray-700 sm:flex-row sm:items-center sm:gap-2">
                 <span className="whitespace-nowrap">Sắp xếp</span>
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:w-auto"
                 >
                   <option value="newest">Mới nhất trước</option>
                   <option value="oldest">Cũ nhất trước</option>
@@ -188,12 +189,7 @@ export default function OrdersListPage() {
           }
         />
 
-        {isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p className="mt-4 text-gray-600">Đang tải danh sách đơn hàng...</p>
-          </div>
-        )}
+        {isLoading && <OrdersListSkeleton />}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-6">

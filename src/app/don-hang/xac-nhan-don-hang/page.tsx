@@ -9,6 +9,7 @@ import { loadGuestOrderConfirmation } from '@/lib/utils/guestOrderConfirmation'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
 import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
+import { OrderDetailSkeleton } from '@/components/skeletons'
 
 export default function OrderConfirmationPage() {
   const { isAuthenticated } = useAuth()
@@ -56,10 +57,9 @@ export default function OrderConfirmationPage() {
 
   if (isLoading) {
     return (
-      <Container className="py-16 sm:py-24">
-        <div className="flex min-h-[32vh] items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary-600" aria-busy="true" />
-        </div>
+      <Container className="space-y-6 py-6 sm:py-8">
+        <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
+        <OrderDetailSkeleton />
       </Container>
     )
   }
