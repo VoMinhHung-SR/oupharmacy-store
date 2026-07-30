@@ -83,6 +83,7 @@ export function useStorePage() {
       page_size: filters.page_size ?? PAGINATION.DEFAULT_PAGE_SIZE,
       sort: searchSort,
       brand: facetParams.brand,
+      origin_country: facetParams.origin_country,
       price_range: facetParams.price_range,
       in_stock: facetParams.in_stock,
       include_facets: true,
@@ -135,6 +136,7 @@ export function useStorePage() {
 
   const hasActiveFacetFilters =
     facetParams.brand != null ||
+    facetParams.origin_country != null ||
     facetParams.price_range != null ||
     facetParams.in_stock != null
 

@@ -41,7 +41,9 @@ export default function SearchPage() {
             page,
             page_size: PAGINATION.DEFAULT_PAGE_SIZE,
             sort: sortOptionToStoreSearchSort(sortOption),
+            category: facetParams.category,
             brand: facetParams.brand,
+            origin_country: facetParams.origin_country,
             price_range: facetParams.price_range,
             in_stock: facetParams.in_stock,
             include_facets: true,
@@ -71,7 +73,9 @@ export default function SearchPage() {
   }, [q])
 
   const hasActiveFacetFilters =
+    facetParams.category != null ||
     facetParams.brand != null ||
+    facetParams.origin_country != null ||
     facetParams.price_range != null ||
     facetParams.in_stock != null
 

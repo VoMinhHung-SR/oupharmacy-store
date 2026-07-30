@@ -10,7 +10,6 @@ export const NON_FACET_FILTER_KEYS = new Set([
   'page_size',
   'ordering',
   'price_sort',
-  'category',
   'q',
 ])
 

@@ -42,8 +42,12 @@ export function SearchFacetsSidebar({
 
     if (isMultiple) {
       const currentValue = bag[filterId]
-      const currentValues =
-        typeof currentValue === 'string' ? currentValue.split(',').filter(Boolean) : []
+      let currentValues: string[] = []
+      if (typeof currentValue === 'string') {
+        currentValues = currentValue.split(',').filter(Boolean)
+      } else if (typeof currentValue === 'number') {
+        currentValues = [String(currentValue)]
+      }
       const valueStr = String(optionValue)
       const index = currentValues.indexOf(valueStr)
 

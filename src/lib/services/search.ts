@@ -11,6 +11,7 @@ export type StoreSearchParams = {
   sort?: StoreSearchSort
   category?: string | number
   brand?: string | number
+  origin_country?: string
   price_range?: string
   in_stock?: boolean
   /** Skip facet SQL when only items are needed (header suggest). */
@@ -37,6 +38,7 @@ export type StoreSearchFacetBucket = {
 export type StoreSearchFacets = {
   category?: StoreSearchFacetBucket[]
   brand?: StoreSearchFacetBucket[]
+  origin_country?: StoreSearchFacetBucket[]
   price_ranges?: StoreSearchFacetBucket[]
   in_stock?: StoreSearchFacetBucket[]
 }
@@ -62,6 +64,7 @@ function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
   if (params.sort) qs.set('sort', params.sort)
   if (params.category != null && params.category !== '') qs.set('category', String(params.category))
   if (params.brand != null && params.brand !== '') qs.set('brand', String(params.brand))
+  if (params.origin_country) qs.set('origin_country', params.origin_country)
   if (params.price_range) qs.set('price_range', params.price_range)
   if (params.in_stock === true) qs.set('in_stock', 'true')
   if (params.in_stock === false) qs.set('in_stock', 'false')
@@ -83,6 +86,28 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
 
   const groups: FilterGroup[] = []
 
+  const categoryOptions = mapFacetOptions(facets.category, (bucket) => {
+    const id = bucket.id
+    if (id == null || !bucket.name) return null
+    const value: string | number = typeof id === 'boolean' ? String(id) : id
+    return {
+      id: String(id),
+      label: bucket.name,
+      value,
+      count: bucket.count,
+    }
+  })
+  if (categoryOptions.length) {
+    groups.push({
+      id: 'category',
+      label: 'Danh mục',
+      type: 'single',
+      options: categoryOptions,
+      showMore: categoryOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
   const brandOptions = mapFacetOptions(facets.brand, (bucket) => {
     const id = bucket.id
     if (id == null || !bucket.name) return null
@@ -98,9 +123,30 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
     groups.push({
       id: 'brand',
       label: 'Thương hiệu',
-      type: 'single',
+      type: 'multiple',
       options: brandOptions,
       showMore: brandOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
+  const originOptions = mapFacetOptions(facets.origin_country, (bucket) => {
+    const key = String(bucket.key ?? bucket.name ?? '')
+    if (!key) return null
+    return {
+      id: key,
+      label: bucket.name || key,
+      value: key,
+      count: bucket.count,
+    }
+  })
+  if (originOptions.length) {
+    groups.push({
+      id: 'origin_country',
+      label: 'Nước sản xuất',
+      type: 'multiple',
+      options: originOptions,
+      showMore: originOptions.length > 8,
       maxVisible: 8,
     })
   }
