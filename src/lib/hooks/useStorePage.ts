@@ -86,6 +86,7 @@ export function useStorePage() {
       origin_country: facetParams.origin_country,
       price_range: facetParams.price_range,
       in_stock: facetParams.in_stock,
+      attrs: facetParams.attrs.length ? facetParams.attrs : undefined,
       include_facets: true,
     }
   }, [
@@ -138,7 +139,8 @@ export function useStorePage() {
     facetParams.brand != null ||
     facetParams.origin_country != null ||
     facetParams.price_range != null ||
-    facetParams.in_stock != null
+    facetParams.in_stock != null ||
+    facetParams.attrs.length > 0
 
   const preservedFacetFilters = usePreservedSearchFacets(listingSearch.data?.facets, {
     scopeKey: categoryId,

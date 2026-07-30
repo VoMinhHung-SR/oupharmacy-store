@@ -57,7 +57,7 @@ Import rules: feature folders import `_shared/*` or `common/`; PDP parts stay un
 
 | Param | Dùng khi |
 |-------|----------|
-| `category`, `brand`, `origin_country`, `price_range`, `in_stock`, `sort` | Category browse + sidebar filters (`brand` / `origin_country` hỗ trợ CSV multi) |
+| `category`, `brand`, `origin_country`, `attrs`, `price_range`, `in_stock`, `sort` | Category browse + sidebar filters (`brand` / `origin_country` CSV multi; `attrs=code:slug` repeatable) |
 | `q` | Global search `/tim-kiem`, header suggest |
 | `include_facets=false` | Header dropdown (chỉ items) |
 

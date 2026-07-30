@@ -14,6 +14,8 @@ export type StoreSearchParams = {
   origin_country?: string
   price_range?: string
   in_stock?: boolean
+  /** Repeatable attrs=code:slug tokens. */
+  attrs?: string[]
   /** Skip facet SQL when only items are needed (header suggest). */
   include_facets?: boolean
 }
@@ -35,10 +37,22 @@ export type StoreSearchFacetBucket = {
   count: number
 }
 
+export type StoreSearchAttributeFacet = {
+  code: string
+  label: string
+  type?: 'multiple' | 'single' | string
+  options: Array<{
+    slug: string
+    label: string
+    count: number
+  }>
+}
+
 export type StoreSearchFacets = {
   category?: StoreSearchFacetBucket[]
   brand?: StoreSearchFacetBucket[]
   origin_country?: StoreSearchFacetBucket[]
+  attributes?: StoreSearchAttributeFacet[]
   price_ranges?: StoreSearchFacetBucket[]
   in_stock?: StoreSearchFacetBucket[]
 }
@@ -68,6 +82,11 @@ function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
   if (params.price_range) qs.set('price_range', params.price_range)
   if (params.in_stock === true) qs.set('in_stock', 'true')
   if (params.in_stock === false) qs.set('in_stock', 'false')
+  if (params.attrs?.length) {
+    for (const token of params.attrs) {
+      if (token) qs.append('attrs', token)
+    }
+  }
   if (params.include_facets === false) qs.set('include_facets', 'false')
   return qs
 }
@@ -147,6 +166,28 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
       type: 'multiple',
       options: originOptions,
       showMore: originOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
+  for (const attrGroup of facets.attributes ?? []) {
+    if (!attrGroup?.code || !attrGroup.options?.length) continue
+    const options: FilterOption[] = attrGroup.options
+      .filter((opt) => opt?.slug)
+      .map((opt) => ({
+        id: opt.slug,
+        label: opt.label || opt.slug,
+        value: opt.slug,
+        count: opt.count,
+      }))
+    if (!options.length) continue
+    const facetType = attrGroup.type === 'single' ? 'single' : 'multiple'
+    groups.push({
+      id: attrGroup.code,
+      label: attrGroup.label || attrGroup.code,
+      type: facetType,
+      options,
+      showMore: options.length > 8,
       maxVisible: 8,
     })
   }
