@@ -211,25 +211,7 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
     })
   }
 
-  const stockOptions = mapFacetOptions(facets.in_stock, (bucket) => {
-    const key = bucket.key
-    if (key !== true && key !== false && key !== 'true' && key !== 'false') return null
-    const inStock = key === true || key === 'true'
-    return {
-      id: inStock ? 'in_stock' : 'out_of_stock',
-      label: inStock ? 'Còn hàng' : 'Hết hàng',
-      value: inStock ? 'true' : 'false',
-      count: bucket.count,
-    }
-  })
-  if (stockOptions.length) {
-    groups.push({
-      id: 'in_stock',
-      label: 'Tình trạng',
-      type: 'single',
-      options: stockOptions,
-    })
-  }
+  // Stock status (Còn hàng / Hết hàng) intentionally omitted from sidebar.
 
   return groups
 }

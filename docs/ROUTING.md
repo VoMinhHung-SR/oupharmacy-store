@@ -22,9 +22,16 @@
 3. Product → detail API + `?v=` (optional); PDP có selector quy cách nếu `variants.length > 1`
 4. Header suggest → `GET /search/?q=&page_size=8&include_facets=false` (không facet SQL)
 
+**Route shell:** `app/[category-slug]/[[...slug]]/page.tsx` (optional catch-all) — parent và nested dùng cùng `StorePage` (không remount khi 1→2 segment).
+
+**Loading UX:** không dùng full-screen `BackdropLoading` cho browse catalog.
+- Click: `markStoreNavIntent` (product card / subcategory) → skeleton **đúng loại** trong lúc resolve
+- Sau resolve: page đúng type; listing/detail dùng in-page skeleton hoặc `isRefreshing` (overlay nhẹ trên grid)
+- Cold multi-segment không intent: ưu tiên list shell (tránh PDP→list trên nested category)
+
 Code:
 
-- `src/lib/store-path/` — resolve + href helpers
+- `src/lib/store-path/` — resolve + href + `nav-intent` + `pendingShellWhileResolving`
 - `src/lib/hooks/useStorePage.ts` — orchestration
 - `src/components/catalog/StorePage.tsx` — UI switch (category | PDP | not_found)
 
@@ -60,6 +67,17 @@ Import rules: feature folders import `_shared/*` or `common/`; PDP parts stay un
 | `category`, `brand`, `origin_country`, `attrs`, `price_range`, `in_stock`, `sort` | Category browse + sidebar filters (`brand` / `origin_country` CSV multi; `attrs=code:slug` repeatable) |
 | `q` | Global search `/tim-kiem`, header suggest |
 | `include_facets=false` | Header dropdown (chỉ items) |
+
+### Attribute facets (FE)
+
+- BE SoT: `Clinic-Oupharmacy-BE/storeApp/guidelines/catalog-attributes.md`
+- `facets.attributes[]` → `mapSearchFacetsToFilterGroups` (`search.ts`) → sidebar groups động
+- Query: `collectAttrFacetParams` / `pickFacetSearchParams` (`facetSearchParams.ts`) → repeatable `attrs`
+- Entry: `useStorePage.ts`, `tim-kiem/page.tsx`
+- Sidebar: chỉ hiện **label** option (không hiện `(count)`); không map facet `in_stock` (Tình trạng)
+- Không hardcode audience/flavor lists trên FE
+
+**Coverage note:** facet `attributes` chỉ aggregate SP đã có `ProductAttributeValue`. Listing ~trăm SP nhưng PAV coverage thấp → sidebar attr chỉ vài option — không phải bug đếm. `origin_country` lấy từ `Brand.country` (đầy hơn).
 
 ## Commands (refactor / verify)
 
