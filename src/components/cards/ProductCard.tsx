@@ -14,6 +14,7 @@ import {
   cardCornerTabRightPromoClass,
 } from '@/components/badges/cardCornerStyles'
 import { mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
+import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
 
 interface ProductCardProps {
   product: {
@@ -147,6 +148,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link
       href={productLink}
+      onClick={() => markStoreNavIntent('product', productLink)}
       className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
     >
       <div className="relative shrink-0">

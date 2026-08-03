@@ -8,16 +8,23 @@ import { OverLimitMessage } from '@/components/catalog/_shared/category/OverLimi
 import { CategoryListingSkeleton } from '@/components/catalog/_shared/listing/CategoryListingSkeleton'
 import { NotFoundContent } from '@/components/NotFoundContent'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
-import { shouldShowProductDetailSkeletonWhileResolving } from '@/lib/store-path/loading-hint'
+import { pendingShellWhileResolving } from '@/lib/store-path/loading-hint'
 
 type StorePageProps = {
   minSegments?: number
 }
 
+/**
+ * Catalog route shell.
+ * - While resolve is in flight: in-page skeleton from nav intent (not full-screen backdrop).
+ * - After resolve: correct page; listing/detail use their own loading / isRefreshing.
+ */
 export function StorePage({ minSegments = 1 }: StorePageProps) {
   const {
     storePath,
+    navIntent,
     resolvingPath,
+    previousResolvedWhileNavigating,
     page,
     isCategory,
     isProduct,
@@ -37,10 +44,11 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
   }
 
   if (resolvingPath) {
-    if (shouldShowProductDetailSkeletonWhileResolving(storePath)) {
-      return <ProductDetailPageSkeleton />
-    }
-    return <CategoryListingSkeleton />
+    const shell = pendingShellWhileResolving(storePath, {
+      intent: navIntent,
+      previous: previousResolvedWhileNavigating,
+    })
+    return shell === 'product' ? <ProductDetailPageSkeleton /> : <CategoryListingSkeleton />
   }
 
   if (isProduct && productSlug) {

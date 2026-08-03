@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Subcategory } from '@/lib/services/products'
 import { CategoryIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
+import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
 
 interface SubcategoriesHorizontalListProps {
   subcategories: Subcategory[]
@@ -102,6 +103,7 @@ export function SubcategoriesHorizontalList({
           <Link
             key={subcat.slug}
             href={`/${subcat.slug}`}
+            onClick={() => markStoreNavIntent('category', subcat.slug)}
             className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             title={`View ${getSubcategoryName(subcat.name)} category`}
           >

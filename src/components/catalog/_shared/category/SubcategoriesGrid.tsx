@@ -3,6 +3,7 @@ import React, { useMemo } from 'react'
 import Link from 'next/link'
 import { Subcategory } from '@/lib/services/products'
 import { CategoryIcon } from '@/components/icons'
+import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
 import { SkeletonPulse } from '@/components/skeletons'
 
 interface SubcategoriesGridProps {
@@ -56,6 +57,7 @@ export function SubcategoriesGrid({
           <Link
             key={subcat.slug}
             href={`/${subcat.slug}`}
+            onClick={() => markStoreNavIntent('category', subcat.slug)}
             className="group flex flex-col items-center p-4 bg-white border border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             title={`View ${subcat.displayName} category`}
           >
