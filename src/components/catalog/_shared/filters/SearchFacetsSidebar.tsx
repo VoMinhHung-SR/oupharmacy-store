@@ -42,8 +42,12 @@ export function SearchFacetsSidebar({
 
     if (isMultiple) {
       const currentValue = bag[filterId]
-      const currentValues =
-        typeof currentValue === 'string' ? currentValue.split(',').filter(Boolean) : []
+      let currentValues: string[] = []
+      if (typeof currentValue === 'string') {
+        currentValues = currentValue.split(',').filter(Boolean)
+      } else if (typeof currentValue === 'number') {
+        currentValues = [String(currentValue)]
+      }
       const valueStr = String(optionValue)
       const index = currentValues.indexOf(valueStr)
 
@@ -232,11 +236,6 @@ function FilterGroupItem({
                   >
                     <span className="flex items-center justify-between gap-2">
                       <span>{option.label}</span>
-                      {option.count !== undefined ? (
-                        <span className={`text-xs ${isActive ? 'text-primary-600' : 'text-gray-400'}`}>
-                          ({option.count})
-                        </span>
-                      ) : null}
                     </span>
                   </button>
                 )
@@ -311,9 +310,6 @@ function FacetOptionRow({
         <span className={`min-w-0 flex-1 text-sm ${active ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
           {option.label}
         </span>
-        {option.count !== undefined ? (
-          <span className="shrink-0 text-xs text-gray-400">({option.count})</span>
-        ) : null}
       </button>
     </li>
   )

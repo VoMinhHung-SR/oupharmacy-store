@@ -11,8 +11,11 @@ export type StoreSearchParams = {
   sort?: StoreSearchSort
   category?: string | number
   brand?: string | number
+  origin_country?: string
   price_range?: string
   in_stock?: boolean
+  /** Repeatable attrs=code:slug tokens. */
+  attrs?: string[]
   /** Skip facet SQL when only items are needed (header suggest). */
   include_facets?: boolean
 }
@@ -34,9 +37,22 @@ export type StoreSearchFacetBucket = {
   count: number
 }
 
+export type StoreSearchAttributeFacet = {
+  code: string
+  label: string
+  type?: 'multiple' | 'single' | string
+  options: Array<{
+    slug: string
+    label: string
+    count: number
+  }>
+}
+
 export type StoreSearchFacets = {
   category?: StoreSearchFacetBucket[]
   brand?: StoreSearchFacetBucket[]
+  origin_country?: StoreSearchFacetBucket[]
+  attributes?: StoreSearchAttributeFacet[]
   price_ranges?: StoreSearchFacetBucket[]
   in_stock?: StoreSearchFacetBucket[]
 }
@@ -62,9 +78,15 @@ function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
   if (params.sort) qs.set('sort', params.sort)
   if (params.category != null && params.category !== '') qs.set('category', String(params.category))
   if (params.brand != null && params.brand !== '') qs.set('brand', String(params.brand))
+  if (params.origin_country) qs.set('origin_country', params.origin_country)
   if (params.price_range) qs.set('price_range', params.price_range)
   if (params.in_stock === true) qs.set('in_stock', 'true')
   if (params.in_stock === false) qs.set('in_stock', 'false')
+  if (params.attrs?.length) {
+    for (const token of params.attrs) {
+      if (token) qs.append('attrs', token)
+    }
+  }
   if (params.include_facets === false) qs.set('include_facets', 'false')
   return qs
 }
@@ -83,6 +105,28 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
 
   const groups: FilterGroup[] = []
 
+  const categoryOptions = mapFacetOptions(facets.category, (bucket) => {
+    const id = bucket.id
+    if (id == null || !bucket.name) return null
+    const value: string | number = typeof id === 'boolean' ? String(id) : id
+    return {
+      id: String(id),
+      label: bucket.name,
+      value,
+      count: bucket.count,
+    }
+  })
+  if (categoryOptions.length) {
+    groups.push({
+      id: 'category',
+      label: 'Danh mục',
+      type: 'single',
+      options: categoryOptions,
+      showMore: categoryOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
   const brandOptions = mapFacetOptions(facets.brand, (bucket) => {
     const id = bucket.id
     if (id == null || !bucket.name) return null
@@ -98,9 +142,52 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
     groups.push({
       id: 'brand',
       label: 'Thương hiệu',
-      type: 'single',
+      type: 'multiple',
       options: brandOptions,
       showMore: brandOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
+  const originOptions = mapFacetOptions(facets.origin_country, (bucket) => {
+    const key = String(bucket.key ?? bucket.name ?? '')
+    if (!key) return null
+    return {
+      id: key,
+      label: bucket.name || key,
+      value: key,
+      count: bucket.count,
+    }
+  })
+  if (originOptions.length) {
+    groups.push({
+      id: 'origin_country',
+      label: 'Nước sản xuất',
+      type: 'multiple',
+      options: originOptions,
+      showMore: originOptions.length > 8,
+      maxVisible: 8,
+    })
+  }
+
+  for (const attrGroup of facets.attributes ?? []) {
+    if (!attrGroup?.code || !attrGroup.options?.length) continue
+    const options: FilterOption[] = attrGroup.options
+      .filter((opt) => opt?.slug)
+      .map((opt) => ({
+        id: opt.slug,
+        label: opt.label || opt.slug,
+        value: opt.slug,
+        count: opt.count,
+      }))
+    if (!options.length) continue
+    const facetType = attrGroup.type === 'single' ? 'single' : 'multiple'
+    groups.push({
+      id: attrGroup.code,
+      label: attrGroup.label || attrGroup.code,
+      type: facetType,
+      options,
+      showMore: options.length > 8,
       maxVisible: 8,
     })
   }
@@ -124,25 +211,7 @@ export function mapSearchFacetsToFilterGroups(facets?: StoreSearchFacets | null)
     })
   }
 
-  const stockOptions = mapFacetOptions(facets.in_stock, (bucket) => {
-    const key = bucket.key
-    if (key !== true && key !== false && key !== 'true' && key !== 'false') return null
-    const inStock = key === true || key === 'true'
-    return {
-      id: inStock ? 'in_stock' : 'out_of_stock',
-      label: inStock ? 'Còn hàng' : 'Hết hàng',
-      value: inStock ? 'true' : 'false',
-      count: bucket.count,
-    }
-  })
-  if (stockOptions.length) {
-    groups.push({
-      id: 'in_stock',
-      label: 'Tình trạng',
-      type: 'single',
-      options: stockOptions,
-    })
-  }
+  // Stock status (Còn hàng / Hết hàng) intentionally omitted from sidebar.
 
   return groups
 }
