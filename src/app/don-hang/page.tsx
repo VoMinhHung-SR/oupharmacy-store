@@ -61,6 +61,7 @@ export default function CheckoutPage() {
     shippingDiscountAmount = 0,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
+    isLoading: cartLoading,
   } = useCart()
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
@@ -360,6 +361,19 @@ export default function CheckoutPage() {
       toastError(error instanceof Error ? error.message : 'Áp dụng mã giảm giá thất bại.')
       throw error
     }
+  }
+
+  if (cartLoading) {
+    return (
+      <div className="min-h-[60vh] bg-[#ededed]" aria-busy="true" aria-label="Đang tải thanh toán">
+        <Container className="py-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)]">
+            <div className="min-h-[20rem] animate-pulse rounded-xl bg-white shadow-sm" />
+            <div className="min-h-[14rem] animate-pulse rounded-xl bg-white shadow-sm" />
+          </div>
+        </Container>
+      </div>
+    )
   }
 
   if (items.length === 0) {

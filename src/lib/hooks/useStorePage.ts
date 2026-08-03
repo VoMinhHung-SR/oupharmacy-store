@@ -31,13 +31,17 @@ export function useStorePage() {
 
   const {
     data: resolved,
-    isPending: resolvingPath,
+    isPending: resolvePending,
+    isFetching: resolveFetching,
     error: resolveError,
   } = useQuery({
     queryKey: ['resolve-store-path', storePath],
     queryFn: () => resolveStorePath(storePath),
     staleTime: 60_000,
   })
+
+  // Keep skeleton until the first resolve payload exists (avoids not_found/empty flash).
+  const resolvingPath = resolvePending || (!resolved && resolveFetching)
 
   const page = resolved?.page ?? 'not_found'
   const isCategory = page === 'category'

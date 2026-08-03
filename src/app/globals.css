@@ -122,4 +122,73 @@ body {
   .animate-fadeIn {
     animation: fadeIn 0.3s ease-out;
   }
+
+  /**
+   * Receipt card + Long Châu scallop.
+   * Mask geometry is set in CartReceiptCard (measured width, phase at x=0).
+   * Do not put fixed 41.2px / 50% positions here — that breaks L/R edges.
+   */
+  .cart-receipt {
+    position: relative;
+    filter:
+      drop-shadow(0 0 0.5px rgb(148 163 184 / 0.7))
+      drop-shadow(0 2px 6px rgb(15 23 42 / 0.06));
+  }
+
+  .cart-receipt__body {
+    background: #ffffff;
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding: 1.25rem 1.25rem 0.65rem;
+  }
+
+  .cart-receipt__scallop {
+    display: block;
+    width: 100%;
+    margin: -1px 0 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  /**
+   * Round cart select controls (native checkbox → circular).
+   * Works without @tailwindcss/forms.
+   */
+  .cart-select-check {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 9999px;
+    border: 2.5px solid rgb(148 163 184);
+    background-color: #ffffff;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.7rem 0.7rem;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .cart-select-check:hover {
+    border-color: #0ea5e9;
+  }
+
+  .cart-select-check:focus-visible {
+    outline: 2px solid #0284c7;
+    outline-offset: 2px;
+  }
+
+  .cart-select-check:checked {
+    border-color: #0369a1;
+    background-color: #0369a1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .cart-select-check:indeterminate {
+    border-color: #0369a1;
+    background-color: #0369a1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
 }
