@@ -7,3 +7,8 @@ export { CheckoutNotesSection } from './CheckoutNotesSection'
 export { CheckoutProductList } from './CheckoutProductList'
 export type { CheckoutProductLine } from './CheckoutProductList'
 export { ShippingAddressDisplay } from './ShippingAddressDisplay'
+export {
+  CheckoutReceiptBlock,
+  CheckoutMobileReceiptDock,
+} from './CheckoutMobileReceipt'
+export type { CheckoutReceiptTotals } from './CheckoutMobileReceipt'

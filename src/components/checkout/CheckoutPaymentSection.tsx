@@ -20,8 +20,8 @@ export function CheckoutPaymentSection({
   error,
 }: CheckoutPaymentSectionProps) {
   return (
-    <section className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
-      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900">
+    <section className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-5 md:p-6">
+      <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900 sm:mb-4">
         <CreditCardIcon className="h-5 w-5 shrink-0 text-primary-600" />
         Chọn phương thức thanh toán
       </h2>
@@ -39,7 +39,7 @@ export function CheckoutPaymentSection({
           {methods.map((method) => (
             <label
               key={method.id}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors ${
+              className={`flex min-h-[3.25rem] cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors sm:p-3.5 ${
                 selectedId === method.id
                   ? 'border-primary-600 bg-primary-50 text-primary-900'
                   : 'border-slate-200 text-slate-900 hover:border-slate-300'

@@ -17,7 +17,8 @@ import type { CheckoutInformationFormData } from '@/lib/validations/checkout'
 import { getCities, getDistrictsByCity, type City, type District } from '@/lib/services/location'
 import { UserIcon, LocationIcon } from '@/components/icons'
 import { toastError } from '@/lib/utils/toast'
-import { SelectField, TextField } from '@/components/TextField'
+import { TextField } from '@/components/TextField'
+import { SearchableSelect } from '@/components/common/SearchableSelect'
 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
@@ -133,13 +134,13 @@ export function CheckoutInfoSection({
   }, [savedInfo?.city_id])
 
   return (
-    <section className="relative isolate z-0 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-6">
+    <section className="relative z-0 rounded-xl border border-slate-200/60 bg-white p-4 shadow-[0_2px_16px_rgba(15,23,42,0.06)] sm:p-5 md:p-6">
       <form
         onSubmit={handleSubmit(onSubmit, (errs) => {
           const first = Object.values(errs)[0]
           if (first?.message) toastError(first.message as string)
         })}
-        className="space-y-6"
+        className="space-y-5 sm:space-y-6"
       >
         <div>
           <SectionTitle icon={<UserIcon className="h-5 w-5 shrink-0 text-primary-600" />} title="Thông tin người đặt" />
@@ -211,15 +212,17 @@ export function CheckoutInfoSection({
               name="city_id"
               control={control}
               render={({ field }) => (
-                <SelectField
-                  {...field}
-                  variant="outline"
+                <SearchableSelect
                   id="checkout-city-id"
+                  value={field.value ?? ''}
                   disabled={loadingCities}
                   error={!!errors.city_id}
                   helperText={errors.city_id?.message}
-                  onChange={(e) => {
-                    const v = e.target.value
+                  placeholder={loadingCities ? 'Đang tải…' : 'Chọn Tỉnh/Thành phố'}
+                  searchPlaceholder="Nhập tìm Tỉnh/Thành phố"
+                  title="Chọn Tỉnh/Thành phố"
+                  options={cities.map((c) => ({ value: String(c.id), label: c.name }))}
+                  onChange={(v) => {
                     field.onChange(v)
                     setValue('commune_id', '')
                     setValue('ward', '')
@@ -227,43 +230,31 @@ export function CheckoutInfoSection({
                     const name = cities.find((c) => String(c.id) === v)?.name
                     setValue('province', name || '')
                   }}
-                >
-                  <option value="">{loadingCities ? 'Đang tải…' : 'Chọn Tỉnh/Thành phố'}</option>
-                  {cities.map((c) => (
-                    <option key={c.id} value={String(c.id)} className="text-slate-900">
-                      {c.name}
-                    </option>
-                  ))}
-                </SelectField>
+                />
               )}
             />
             <Controller
               name="commune_id"
               control={control}
               render={({ field }) => (
-                <SelectField
-                  {...field}
-                  variant="outline"
+                <SearchableSelect
                   id="checkout-commune-id"
+                  value={field.value ?? ''}
                   disabled={!cityId || loadingCommunes}
                   error={!!errors.commune_id}
                   helperText={errors.commune_id?.message}
-                  onChange={(e) => {
-                    const v = e.target.value
+                  placeholder={
+                    !cityId ? 'Chọn tỉnh/thành trước' : loadingCommunes ? 'Đang tải…' : 'Chọn Phường/Xã'
+                  }
+                  searchPlaceholder="Nhập tìm Phường/Xã"
+                  title="Chọn Phường/Xã"
+                  options={communes.map((c) => ({ value: String(c.id), label: c.name }))}
+                  onChange={(v) => {
                     field.onChange(v)
                     const row = communes.find((c) => String(c.id) === v)
                     setValue('ward', row?.name || '')
                   }}
-                >
-                  <option value="">
-                    {!cityId ? 'Chọn tỉnh/thành trước' : loadingCommunes ? 'Đang tải…' : 'Chọn Phường/Xã'}
-                  </option>
-                  {communes.map((c) => (
-                    <option key={c.id} value={String(c.id)} className="text-slate-900">
-                      {c.name}
-                    </option>
-                  ))}
-                </SelectField>
+                />
               )}
             />
           </div>
@@ -297,7 +288,7 @@ export function CheckoutInfoSection({
 
         <button
           type="submit"
-          className="ml-auto block rounded-lg bg-primary-100 px-4 py-2.5 text-sm font-medium text-primary-800 transition hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="block w-full rounded-full bg-primary-100 px-4 py-2.5 text-sm font-medium text-primary-800 transition hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:ml-auto sm:w-auto"
         >
           Lưu thông tin
         </button>

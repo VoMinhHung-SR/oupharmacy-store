@@ -5,6 +5,8 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
 type CartReceiptCardProps = {
   children: React.ReactNode
   className?: string
+  /** Bottom Long Châu scallop. Dock/sticky bars often omit it. */
+  showScallop?: boolean
 }
 
 /** Long Châu base period (px) — used only to pick wave count / scale ratios. */
@@ -43,7 +45,11 @@ function buildLcMask(width: number) {
  * Cart order-summary receipt card.
  * Scallop = LC dual radial-gradient mask, sized from measured width.
  */
-export function CartReceiptCard({ children, className = '' }: CartReceiptCardProps) {
+export function CartReceiptCard({
+  children,
+  className = '',
+  showScallop = true,
+}: CartReceiptCardProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
 
@@ -62,24 +68,35 @@ export function CartReceiptCard({ children, className = '' }: CartReceiptCardPro
     return () => ro.disconnect()
   }, [])
 
-  const scallop = useMemo(() => (width > 0 ? buildLcMask(width) : null), [width])
+  const scallop = useMemo(
+    () => (showScallop && width > 0 ? buildLcMask(width) : null),
+    [showScallop, width]
+  )
 
   return (
     <div ref={rootRef} className={`cart-receipt ${className}`.trim()}>
-      <div className="cart-receipt__body">{children}</div>
       <div
-        className="cart-receipt__scallop"
-        aria-hidden
-        style={
-          scallop
-            ? {
-                height: scallop.height,
-                WebkitMask: scallop.mask,
-                mask: scallop.mask,
-              }
-            : { height: LC_HEIGHT }
+        className={
+          showScallop ? 'cart-receipt__body' : 'cart-receipt__body cart-receipt__body--dock'
         }
-      />
+      >
+        {children}
+      </div>
+      {showScallop ? (
+        <div
+          className="cart-receipt__scallop"
+          aria-hidden
+          style={
+            scallop
+              ? {
+                  height: scallop.height,
+                  WebkitMask: scallop.mask,
+                  mask: scallop.mask,
+                }
+              : { height: LC_HEIGHT }
+          }
+        />
+      ) : null}
     </div>
   )
 }
