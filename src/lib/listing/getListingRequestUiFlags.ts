@@ -23,11 +23,13 @@ export function getListingRequestUiFlags(input: {
     !input.isFetching &&
     input.productCount === 0
 
+  // Include !hasData so the first frame after a query becomes enabled
+  // (fetchStatus still idle) shows skeleton instead of an empty full layout.
+  const isAwaitingFirstResult =
+    input.isLoading || input.isFetching || input.isPlaceholderData || !input.hasData
+
   const isInitialLoad =
-    enabled &&
-    input.productCount === 0 &&
-    !isSettledEmpty &&
-    (input.isLoading || input.isFetching || input.isPlaceholderData)
+    enabled && input.productCount === 0 && !isSettledEmpty && isAwaitingFirstResult
 
   return {
     isInitialLoad,

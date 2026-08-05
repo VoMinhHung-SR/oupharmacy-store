@@ -52,7 +52,9 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
   }
 
   if (isProduct && productSlug) {
-    const detailLoading = detail.isLoading && !detail.data
+    // Avoid empty “not found” flash for one frame before the detail query starts fetching.
+    const detailLoading =
+      !detail.data && (detail.isPending || detail.isLoading || detail.isFetching)
     return (
       <ProductDetailPageContent
         product={detail.data}

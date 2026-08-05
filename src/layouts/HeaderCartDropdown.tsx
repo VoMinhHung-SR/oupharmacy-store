@@ -12,7 +12,7 @@ const CLOSE_DELAY_MS = 120
 
 export function HeaderCartDropdown() {
   const t = useTranslations('common')
-  const { items, remove } = useCart()
+  const { items, remove, isLoading: cartLoading } = useCart()
   const [open, setOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const panelId = useId()
@@ -38,6 +38,7 @@ export function HeaderCartDropdown() {
 
   const count = items.length
   const badgeLabel = count > 99 ? '99+' : String(count)
+  const showBadge = !cartLoading && count > 0
 
   return (
     <div
@@ -61,7 +62,7 @@ export function HeaderCartDropdown() {
       >
         <span className="relative inline-flex shrink-0">
           <CartIcon className="h-5 w-5" strokeWidth={2} />
-          {count > 0 ? (
+          {showBadge ? (
             <span
               className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-accent-500 px-0.5 text-[10px] font-bold leading-none text-white ring-2 ring-primary-600"
               aria-hidden
