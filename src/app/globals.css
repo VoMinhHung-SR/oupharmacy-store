@@ -124,9 +124,9 @@ body {
   }
 
   /**
-   * Receipt card + Long Châu scallop.
+   * Receipt card with a decorative scalloped edge.
    * Mask geometry is set in CartReceiptCard (measured width, phase at x=0).
-   * Do not put fixed 41.2px / 50% positions here — that breaks L/R edges.
+   * Keep fixed mask dimensions out of CSS so both side edges remain aligned.
    */
   .cart-receipt {
     position: relative;

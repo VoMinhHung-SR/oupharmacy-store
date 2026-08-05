@@ -5,34 +5,34 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
 type CartReceiptCardProps = {
   children: React.ReactNode
   className?: string
-  /** Bottom Long Châu scallop. Dock/sticky bars often omit it. */
+  /** Decorative bottom edge. Dock and sticky variants can omit it. */
   showScallop?: boolean
 }
 
-/** Long Châu base period (px) — used only to pick wave count / scale ratios. */
-const LC_PERIOD = 41.2
-const LC_RADIUS = 11.52
-const LC_HEIGHT = 24
-const LC_LIFT = 15.45
-const LC_SINK = 5.15
-const LC_QUARTER = 10.3
+/** Base dimensions used to calculate the responsive scallop geometry. */
+const SCALLOP_PERIOD = 41.2
+const SCALLOP_RADIUS = 11.52
+const SCALLOP_HEIGHT = 24
+const SCALLOP_LIFT = 15.45
+const SCALLOP_SINK = 5.15
+const SCALLOP_QUARTER = 10.3
 
 /**
- * Pixel-perfect LC scallop. Never use fixed 41.2px + 50% mask position —
- * that leaves flat remnants on L/R when width % 41.2 ≠ 0.
+ * Builds an edge-to-edge scallop mask from the measured container width.
+ * A fixed period and centered mask can leave flat remnants at either side.
  */
-function buildLcMask(width: number) {
-  const n = Math.max(1, Math.round(width / LC_PERIOD))
+function buildScallopMask(width: number) {
+  const n = Math.max(1, Math.round(width / SCALLOP_PERIOD))
   const p = width / n
-  const scale = p / LC_PERIOD
-  const r = LC_RADIUS * scale
+  const scale = p / SCALLOP_PERIOD
+  const r = SCALLOP_RADIUS * scale
   const half = p / 2
-  const quarter = LC_QUARTER * scale
-  const lift = LC_LIFT * scale
-  const sink = LC_SINK * scale
-  const height = LC_HEIGHT * scale
+  const quarter = SCALLOP_QUARTER * scale
+  const lift = SCALLOP_LIFT * scale
+  const sink = SCALLOP_SINK * scale
+  const height = SCALLOP_HEIGHT * scale
 
-  // Phase locked to x=0 (not 50%) so first/last teeth meet the side edges.
+  // Anchor at x=0 so the first and last curves meet the container edges.
   const mask = [
     `radial-gradient(${r}px at 50% calc(100% - ${lift}px), #000 99%, #0000 101%) ${-half}px 0 / ${p}px 100% repeat-x`,
     `radial-gradient(${r}px at 50% calc(100% + ${sink}px), #0000 99%, #000 101%) 0 calc(100% - ${quarter}px) / ${p}px 100% repeat-x`,
@@ -43,7 +43,7 @@ function buildLcMask(width: number) {
 
 /**
  * Cart order-summary receipt card.
- * Scallop = LC dual radial-gradient mask, sized from measured width.
+ * The decorative edge uses a dual radial-gradient mask sized to the card.
  */
 export function CartReceiptCard({
   children,
@@ -69,7 +69,7 @@ export function CartReceiptCard({
   }, [])
 
   const scallop = useMemo(
-    () => (showScallop && width > 0 ? buildLcMask(width) : null),
+    () => (showScallop && width > 0 ? buildScallopMask(width) : null),
     [showScallop, width]
   )
 
@@ -93,7 +93,7 @@ export function CartReceiptCard({
                   WebkitMask: scallop.mask,
                   mask: scallop.mask,
                 }
-              : { height: LC_HEIGHT }
+              : { height: SCALLOP_HEIGHT }
           }
         />
       ) : null}

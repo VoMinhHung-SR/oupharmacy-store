@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import {
   buildCheckoutDeliveryPayload,
