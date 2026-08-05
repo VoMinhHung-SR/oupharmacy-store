@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import {
   buildCheckoutDeliveryPayload,
@@ -25,11 +26,10 @@ import {
   CheckoutInfoSection,
   CheckoutShippingSection,
   CheckoutPaymentSection,
-  CheckoutOrderSummary,
-  CheckoutVoucherSection,
   CheckoutProductList,
+  CheckoutReceiptBlock,
+  CheckoutMobileReceiptDock,
 } from '@/components/checkout'
-import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
 import {
   pickPreferredShippingMethod,
   shouldShowShippingMethodChoice,
@@ -61,6 +61,7 @@ export default function CheckoutPage() {
     shippingDiscountAmount = 0,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
+    isLoading: cartLoading,
   } = useCart()
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
@@ -68,7 +69,9 @@ export default function CheckoutPage() {
   const selectShippingMutation = useSelectShippingMethod()
   const applyVoucherMutation = useApplyVoucher()
   const hasCompletedOrderRef = useRef(false)
+  const receiptInflowRef = useRef<HTMLDivElement>(null)
   const [hideLineDetail, setHideLineDetail] = useState(false)
+  const [receiptDockPinned, setReceiptDockPinned] = useState(true)
   const [redirectingToConfirmation, setRedirectingToConfirmation] = useState(false)
 
   const paymentMethods = Array.isArray(paymentMethodsData) ? paymentMethodsData.filter((m) => m.active) : []
@@ -362,21 +365,40 @@ export default function CheckoutPage() {
     }
   }
 
+  if (cartLoading) {
+    return (
+      <div className="bg-[#ededed]" aria-busy="true" aria-label="Đang tải thanh toán">
+        <Container className="py-3 sm:py-4">
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_min(20rem,32%)] xl:gap-x-8">
+            <div className="min-h-[20rem] animate-pulse rounded-xl bg-white shadow-sm" />
+            <div className="min-h-[14rem] animate-pulse rounded-xl bg-white shadow-sm" />
+          </div>
+        </Container>
+      </div>
+    )
+  }
+
   if (items.length === 0) {
     return null
   }
 
   return (
-    <div className="min-h-[60vh] bg-slate-50/80">
+    <div className="bg-[#ededed]">
       <LoadingBackdrop
         isOpen={showCheckoutBackdrop}
         loadingText={checkoutBackdropText}
         size="lg"
         zIndex={10000}
       />
-      <Container className="py-4">
-        <div className="grid grid-cols-1 gap-y-3 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start lg:gap-x-8 lg:gap-y-2">
-          <div className="lg:col-start-1 lg:row-start-1">
+      <Container className="py-3 sm:py-4">
+        <div
+          className={`grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_min(20rem,32%)] xl:items-start xl:gap-x-8 xl:gap-y-2 xl:pb-0 ${
+            receiptDockPinned
+              ? 'pb-[calc(9rem+env(safe-area-inset-bottom,0px))]'
+              : 'pb-3'
+          }`}
+        >
+          <div className="xl:col-start-1 xl:row-start-1">
             <Link
               href="/gio-hang"
               className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary-700"
@@ -386,13 +408,16 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
-          <div className="relative z-0 min-w-0 space-y-4 md:space-y-5 lg:col-start-1 lg:row-start-2">
+          {/* Phone/tablet order: products → info → shipping → payment → price */}
+          <div className="min-w-0 xl:col-start-1 xl:row-start-2">
             <CheckoutProductList
               items={productLines}
               lineSubtotal={scopedLineSubtotal}
               hideProductNames={hideLineDetail}
             />
+          </div>
 
+          <div className="relative z-0 min-w-0 space-y-3 sm:space-y-4 xl:col-start-1 xl:row-start-3">
             <CheckoutInfoSection
               register={register}
               control={control}
@@ -437,25 +462,12 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <aside className="flex min-h-0 min-w-0 flex-col pb-1 lg:col-start-2 lg:row-start-2 lg:sticky lg:top-36 lg:max-h-[calc(100dvh-10rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-3">
-            <div className="relative rounded-xl border border-slate-200/60 bg-white shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
-              <div className="p-5 pb-4">
-                <CheckoutVoucherSection
-                  onApplyVoucher={handleApplyVoucher}
-                  isApplying={applyVoucherMutation.isPending}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
-                <span className="text-sm text-slate-700">Ẩn thông tin sản phẩm khi giao hàng</span>
-                <input
-                  type="checkbox"
-                  checked={hideLineDetail}
-                  onChange={(e) => setHideLineDetail(e.target.checked)}
-                  className="h-4 w-4 shrink-0 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                />
-              </div>
-              <CheckoutOrderSummary
-                embedded
+          <aside
+            ref={receiptInflowRef}
+            className="flex w-full min-h-0 min-w-0 flex-col xl:col-start-2 xl:row-start-2 xl:row-span-2 xl:sticky xl:top-36 xl:self-start xl:pb-2"
+          >
+            <div className="min-h-0 xl:max-h-[calc(100dvh-10rem)] xl:overflow-y-auto xl:overscroll-contain">
+              <CheckoutReceiptBlock
                 subtotal={scopedLineSubtotal}
                 shippingFee={displayShippingFee}
                 total={orderTotal}
@@ -467,23 +479,40 @@ export default function CheckoutPage() {
                 discountAmount={displayOrderDiscount}
                 shippingDiscountAmount={displayShippingDiscount}
                 directDiscount={displayDirectDiscount}
+                hideLineDetail={hideLineDetail}
+                onHideLineDetailChange={setHideLineDetail}
+                onApplyVoucher={handleApplyVoucher}
+                isApplyingVoucher={applyVoucherMutation.isPending}
                 onPlaceOrder={handlePlaceOrder}
                 isSubmitting={isSubmitting}
                 canSubmit={canSubmit}
-              />
-              <div
-                className="pointer-events-none h-3 w-full bg-slate-50/80"
-                style={{
-                  backgroundImage:
-                    'radial-gradient(circle at 9px 0, transparent 7px, rgb(255 255 255) 7.5px)',
-                  backgroundSize: '18px 12px',
-                  backgroundRepeat: 'repeat-x',
-                  backgroundPosition: 'center top',
-                }}
-                aria-hidden
+                showPlaceOrder="always"
               />
             </div>
           </aside>
+
+          <CheckoutMobileReceiptDock
+            targetRef={receiptInflowRef}
+            onPinnedChange={setReceiptDockPinned}
+            subtotal={scopedLineSubtotal}
+            shippingFee={displayShippingFee}
+            total={orderTotal}
+            hasShippingSelected={
+              Boolean(selectedShippingMethodFromList) ||
+              (qualifiesFreeShipping && shippingMethods.length > 0 && !showShippingMethodChoice)
+            }
+            qualifiesFreeShipping={qualifiesFreeShipping}
+            discountAmount={displayOrderDiscount}
+            shippingDiscountAmount={displayShippingDiscount}
+            directDiscount={displayDirectDiscount}
+            hideLineDetail={hideLineDetail}
+            onHideLineDetailChange={setHideLineDetail}
+            onApplyVoucher={handleApplyVoucher}
+            isApplyingVoucher={applyVoucherMutation.isPending}
+            onPlaceOrder={handlePlaceOrder}
+            isSubmitting={isSubmitting}
+            canSubmit={canSubmit}
+          />
         </div>
       </Container>
     </div>

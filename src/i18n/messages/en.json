@@ -101,7 +101,14 @@
     "dismiss": "Not now",
     "offlineTitle": "You are offline",
     "offlineBody": "This page could not be loaded. Check your connection and try again.",
-    "offlineHome": "Back to home"
+    "offlineHome": "Back to home",
+    "cartBannerTitle": "Buy on the app",
+    "cartBannerDesktopBody": "Scan to open on your phone — track orders and get offers faster.",
+    "cartBannerMobileHintBody": "Add a home-screen shortcut to open the store faster.",
+    "cartBannerStandaloneBody": "You're already using the app. Track orders and offers from your home screen.",
+    "cartBannerStandaloneBadge": "Installed on this device",
+    "cartBannerQrAlt": "QR code to open OUPharmacy on your phone",
+    "cartBannerQrHint": "Scan with your camera to open the store on your phone"
   }
 }
 

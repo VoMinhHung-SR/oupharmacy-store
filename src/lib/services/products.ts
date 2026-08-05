@@ -175,13 +175,15 @@ export type DynamicFiltersResponse = CategoryBrowseMeta
 
 export interface ProductFilters {
   kw?: string
-  category?: number
+  category?: number | string
   brand?: number | string
   min_price?: number
   max_price?: number
   in_stock?: boolean | string
   /** Search-first facet key from GET /search/ facets.price_ranges */
   price_range?: string
+  /** Search-first facet from GET /search/ facets.origin_country (CSV multi). */
+  origin_country?: string
   price_sort?: 'asc' | 'desc'
   search?: string
   ordering?: string

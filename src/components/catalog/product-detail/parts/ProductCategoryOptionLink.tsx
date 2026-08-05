@@ -6,7 +6,7 @@ interface ProductCategoryOptionLinkProps {
   href: string
 }
 
-/** Category chip on PDP — matches listing subcategory option style (ref Long Chau / category row). */
+/** Category chip that reuses the subcategory option style from catalog listings. */
 export function ProductCategoryOptionLink({ name, href }: ProductCategoryOptionLinkProps) {
   const slug = href.replace(/^\//, '')
 

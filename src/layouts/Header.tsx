@@ -13,6 +13,7 @@ import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 import { HeaderCartDropdown } from '@/layouts/HeaderCartDropdown'
 import { MobileNavDrawer } from '@/layouts/MobileNavDrawer'
 import { useMobileNavUi } from '@/layouts/nav/NavProviders'
+import { useCompactOnScroll } from '@/lib/hooks/useCompactOnScroll'
 import { usePopularSearchTerms } from '@/lib/hooks/usePopularSearchTerms'
 
 const FALLBACK_POPULAR_TERMS = [
@@ -25,6 +26,8 @@ const FALLBACK_POPULAR_TERMS = [
   'Men vi sinh',
   'Kem chống nắng',
 ]
+
+const HEADER_MOTION = 'duration-400 ease-[cubic-bezier(0.33,1,0.68,1)]'
 
 function BrandLogo({ className = '' }: { className?: string }) {
   return (
@@ -45,6 +48,7 @@ export const Header: React.FC = () => {
   const { openModal } = useLoginModal()
   const { openNav } = useMobileNavUi()
   const { data: popularTerms = [] } = usePopularSearchTerms(20)
+  const compact = useCompactOnScroll()
 
   const displayTerms =
     popularTerms.length > 0 ? popularTerms.map((item) => item.keyword) : FALLBACK_POPULAR_TERMS
@@ -70,32 +74,44 @@ export const Header: React.FC = () => {
         </Container>
       </div>
 
-      <div className="py-2.5 lg:py-3">
+      <div className={`lg:py-3 ${HEADER_MOTION} transition-[padding] ${compact ? 'py-2' : 'py-2.5'}`}>
         <Container>
-          {/* Mobile (&lt; lg): row1 menu|logo|cart · row2 full-width search */}
-          <div className="lg:hidden">
-            <div className="grid grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center gap-x-2">
-              <div className="justify-self-start">
-                <button
-                  type="button"
-                  onClick={openNav}
-                  className="rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                  aria-label="Mở menu danh mục"
-                >
-                  <MenuIcon className="h-6 w-6" />
-                </button>
+          <div className="relative lg:hidden">
+            <div className="grid w-full grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center gap-x-2">
+              <button
+                type="button"
+                onClick={openNav}
+                className="relative z-20 justify-self-start self-center rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                aria-label="Mở menu danh mục"
+              >
+                <MenuIcon className="h-6 w-6" />
+              </button>
+
+              <div
+                className={`justify-self-center self-center ${HEADER_MOTION} transition-[opacity,transform] ${
+                  compact
+                    ? 'pointer-events-none -translate-y-1 scale-[0.96] opacity-0'
+                    : 'scale-100 opacity-100'
+                }`}
+                aria-hidden={compact}
+              >
+                <BrandLogo className="text-center" />
               </div>
-              <BrandLogo className="text-center" />
-              <div className="justify-self-end">
+
+              <div className="relative z-20 justify-self-end self-center">
                 <HeaderCartDropdown />
               </div>
             </div>
-            <div className="mt-2.5 w-full min-w-0">
+
+            <div
+              className={`relative z-10 min-w-0 ${HEADER_MOTION} transition-[margin] ${
+                compact ? 'mt-[calc(-2.65rem)] ml-[3.15rem] mr-[3.15rem]' : 'mt-2.5 ml-0 mr-0'
+              }`}
+            >
               <HeaderSearchDropdown popularTerms={displayTerms} />
             </div>
           </div>
 
-          {/* Desktop (lg+): logo | search | account | cart */}
           <div className="hidden items-center gap-3 lg:flex">
             <BrandLogo />
             <div className="min-w-0 flex-1">

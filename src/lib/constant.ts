@@ -59,29 +59,13 @@ export const SIDEBAR = {
 
 // Product Filters
 export const PRODUCT_FILTERS = {
-  TARGET_AUDIENCES: [
-    { id: 'all', label: 'Tất cả' },
-    { id: 'children', label: 'Trẻ em' },
-    { id: 'adults', label: 'Người trưởng thành' },
-    { id: 'elderly', label: 'Người lớn' },
-    { id: 'seniors', label: 'Người cao tuổi' },
-  ] as const,
-  
   PRICE_RANGES: [
     { label: 'Dưới 100.000₫', min: 0, max: 100000 },
     { label: '100.000₫ đến 300.000₫', min: 100000, max: 300000 },
     { label: '300.000₫ đến 500.000₫', min: 300000, max: 500000 },
     { label: 'Trên 500.000₫', min: 500000, max: undefined },
   ] as const,
-  
-  FLAVORS: [
-    { id: 'all', label: 'Tất cả' },
-    { id: 'vanilla', label: 'Vani' },
-    { id: 'orange', label: 'Vị Cam' },
-    { id: 'strawberry', label: 'Vị Dâu' },
-    { id: 'orange-scent', label: 'Hương cam' },
-  ] as const,
-  
+
   SORT_OPTIONS: [
     { value: 'bestselling', label: 'Bán chạy' },
     { value: 'price-low', label: 'Giá thấp' },

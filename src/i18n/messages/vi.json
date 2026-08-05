@@ -101,7 +101,14 @@
     "dismiss": "Để sau",
     "offlineTitle": "Không có kết nối mạng",
     "offlineBody": "Không tải được trang. Kiểm tra Wi‑Fi/4G rồi thử lại.",
-    "offlineHome": "Về trang chủ"
+    "offlineHome": "Về trang chủ",
+    "cartBannerTitle": "Mua trên app",
+    "cartBannerDesktopBody": "Quét mã để mở trên điện thoại — theo dõi đơn và nhận ưu đãi nhanh hơn.",
+    "cartBannerMobileHintBody": "Cài lối tắt ra màn hình chính để mở store nhanh hơn.",
+    "cartBannerStandaloneBody": "Bạn đang dùng phiên bản app. Theo dõi đơn và ưu đãi ngay trên màn hình chính.",
+    "cartBannerStandaloneBadge": "Đã cài trên thiết bị này",
+    "cartBannerQrAlt": "Mã QR mở OUPharmacy trên điện thoại",
+    "cartBannerQrHint": "Quét bằng camera để mở cửa hàng trên điện thoại"
   }
 }
 

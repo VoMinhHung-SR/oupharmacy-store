@@ -51,4 +51,9 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 2. State chia sẻ → xem sẵn context; tránh duplicate global state.
 3. Gọi dữ liệu → thêm/thay method trong `src/lib/services/`, tái dùng `api.ts` khi đúng base store.
 
+### Faceted search / advanced filters
+
+- Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).
+- Attribute filters: `attrs=code:slug` — xem BE `storeApp/guidelines/catalog-attributes.md` và FE `docs/ROUTING.md` (Attribute facets).
+
 Cập nhật file này khi thay đổi luồng lớn (auth, API gateway, i18n).

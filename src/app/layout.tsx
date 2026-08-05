@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import './globals.css'
 import StoreNavShell from '@/layouts/StoreNavShell'
+import { StoreNavFallback } from '@/layouts/StoreNavFallback'
 import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -71,7 +72,7 @@ export default async function RootLayout({
                 <WishlistProvider>
                   <CheckoutProvider>
                     <ChunkLoadRecovery />
-                    <Suspense fallback={null}>
+                    <Suspense fallback={<StoreNavFallback />}>
                       <StoreNavShell />
                     </Suspense>
                     <main className="relative z-0 bg-[#ededed] border-0">

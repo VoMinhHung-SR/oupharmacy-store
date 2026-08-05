@@ -43,10 +43,10 @@ export function CheckoutVoucherSection({ onApplyVoucher, isApplying }: CheckoutV
         type="button"
         title="Áp dụng ưu đãi để được giảm giá"
         onClick={() => setSheetOpen(true)}
-        className="flex w-full min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border border-primary-100 bg-primary-50 px-2.5 py-2 text-left text-xs font-medium leading-none tracking-tight text-primary-800 transition-colors hover:bg-primary-100/80 xl:gap-2 xl:px-4 xl:py-3 xl:text-sm xl:leading-normal xl:tracking-normal"
+        className="mb-4 flex w-full min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border border-primary-100 bg-primary-50 px-3 py-2.5 text-left text-xs font-medium leading-snug text-primary-800 transition-colors hover:bg-primary-100/80 sm:px-4 sm:py-3 sm:text-sm"
       >
         <span className="min-w-0 flex-1 truncate">Áp dụng ưu đãi để được giảm giá</span>
-        <ChevronRightIcon className="h-4 w-4 shrink-0 text-primary-600 xl:h-5 xl:w-5" />
+        <ChevronRightIcon className="h-4 w-4 shrink-0 text-primary-600 sm:h-5 sm:w-5" />
       </button>
 
       <OfferSheet
