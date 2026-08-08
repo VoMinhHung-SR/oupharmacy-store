@@ -176,6 +176,8 @@ export type DynamicFiltersResponse = CategoryBrowseMeta
 export interface ProductFilters {
   kw?: string
   category?: number | string
+  /** Filter by category slug or path_slug (store ProductFilter). */
+  category_slug?: string
   brand?: number | string
   min_price?: number
   max_price?: number

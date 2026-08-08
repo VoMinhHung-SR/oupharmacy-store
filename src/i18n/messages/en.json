@@ -109,6 +109,21 @@
     "cartBannerStandaloneBadge": "Installed on this device",
     "cartBannerQrAlt": "QR code to open OUPharmacy on your phone",
     "cartBannerQrHint": "Scan with your camera to open the store on your phone"
+  },
+  "campaign": {
+    "indexTitle": "Promotions",
+    "indexSubtitle": "Active campaigns",
+    "indexEmpty": "There are no promotions running right now.",
+    "indexError": "Could not load promotions. Please try again.",
+    "retry": "Retry",
+    "viewCampaign": "View campaign",
+    "backToIndex": "All promotions",
+    "backHome": "Back to home",
+    "productsStub": "Products for this campaign will be available soon.",
+    "productsHeading": "Products in this campaign",
+    "browseCatalog": "Browse catalog",
+    "dateRange": "From {start} to {end}",
+    "dateRangeLabel": "Dates"
   }
 }
 
