@@ -109,6 +109,21 @@
     "cartBannerStandaloneBadge": "Đã cài trên thiết bị này",
     "cartBannerQrAlt": "Mã QR mở OUPharmacy trên điện thoại",
     "cartBannerQrHint": "Quét bằng camera để mở cửa hàng trên điện thoại"
+  },
+  "campaign": {
+    "indexTitle": "Khuyến mãi",
+    "indexSubtitle": "Các chương trình đang diễn ra",
+    "indexEmpty": "Hiện chưa có chương trình khuyến mãi nào đang diễn ra.",
+    "indexError": "Không tải được danh sách khuyến mãi. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "viewCampaign": "Xem chương trình",
+    "backToIndex": "Tất cả khuyến mãi",
+    "backHome": "Về trang chủ",
+    "productsStub": "Sản phẩm của chương trình sẽ sớm được cập nhật.",
+    "productsHeading": "Sản phẩm trong chương trình",
+    "browseCatalog": "Xem danh mục sản phẩm",
+    "dateRange": "Từ {start} đến {end}",
+    "dateRangeLabel": "Thời gian"
   }
 }
 

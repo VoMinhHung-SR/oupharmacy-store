@@ -1,15 +1,24 @@
 import Link from 'next/link'
-import HeroBanner from '@/sections/HeroBanner'
 import FeaturedCategories from '@/sections/FeaturedCategories'
 import FavoriteBrands from '@/sections/FavoriteBrands'
 import BestsellingProducts from '@/sections/BestsellingProducts'
-import PromotionalBanners from '@/sections/PromotionalBanners'
+import { CampaignHeroSlot, CampaignPromoSlots, pickHomePlacement } from '@/components/campaign'
+import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
 import { HOME_QUICK_LINKS } from '@/lib/constant'
 
 export default async function Home() {
+  const placementsPayload = await getCampaignPlacementsSSG({
+    slots: ['HOME_HERO', 'HOME_PROMO_LEFT', 'HOME_PROMO_RIGHT'],
+  })
+  const placements = placementsPayload?.placements ?? null
+
+  const hero = pickHomePlacement(placements, 'HOME_HERO')
+  const promoLeft = pickHomePlacement(placements, 'HOME_PROMO_LEFT')
+  const promoRight = pickHomePlacement(placements, 'HOME_PROMO_RIGHT')
+
   return (
     <main className="min-h-screen bg-white">
-      <HeroBanner />
+      <CampaignHeroSlot placement={hero} />
 
       <FeaturedCategories />
 
@@ -17,21 +26,21 @@ export default async function Home() {
 
       <BestsellingProducts />
 
-      <PromotionalBanners />
+      <CampaignPromoSlots left={promoLeft} right={promoRight} />
 
-      <section className="py-12 bg-white" aria-label="Lối tắt dịch vụ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <section className="bg-white py-12" aria-label="Lối tắt dịch vụ">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {HOME_QUICK_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-lg hover:border-primary-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                className="flex flex-col items-center rounded-lg border border-gray-200 p-4 transition-all hover:border-primary-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                <span className="text-4xl mb-2" aria-hidden>
+                <span className="mb-2 text-4xl" aria-hidden>
                   {link.icon}
                 </span>
-                <span className="text-sm font-medium text-gray-900 text-center">{link.title}</span>
+                <span className="text-center text-sm font-medium text-gray-900">{link.title}</span>
               </Link>
             ))}
           </div>
