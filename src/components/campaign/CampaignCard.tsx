@@ -1,23 +1,6 @@
 import Link from 'next/link'
 import type { PublicCampaignListItem } from '@/lib/services/campaign'
-
-function formatCampaignRange(startAt: string, endAt: string): string {
-  try {
-    const start = new Date(startAt)
-    const end = new Date(endAt)
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-      return `${startAt} – ${endAt}`
-    }
-    const opts: Intl.DateTimeFormatOptions = {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }
-    return `${start.toLocaleDateString('vi-VN', opts)} – ${end.toLocaleDateString('vi-VN', opts)}`
-  } catch {
-    return `${startAt} – ${endAt}`
-  }
-}
+import { formatCampaignDateRange } from './campaignPlacementUtils'
 
 export interface CampaignCardProps {
   campaign: PublicCampaignListItem
@@ -30,8 +13,8 @@ export function CampaignCard({ campaign, viewLabel, dateRangeLabel }: CampaignCa
   const href = `/khuyen-mai/${encodeURIComponent(campaign.slug)}`
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg">
-      <div className="flex h-40 items-center justify-center bg-gray-100">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="aspect-[16/9] bg-gray-100">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- campaign CDN hosts vary
           <img
@@ -40,7 +23,7 @@ export function CampaignCard({ campaign, viewLabel, dateRangeLabel }: CampaignCa
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-8 text-center text-sm font-semibold text-white">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 px-4 text-center text-sm font-semibold text-white">
             {campaign.title}
           </div>
         )}
@@ -52,7 +35,7 @@ export function CampaignCard({ campaign, viewLabel, dateRangeLabel }: CampaignCa
         ) : null}
         <p className="text-xs text-gray-500">
           <span className="font-medium">{dateRangeLabel}: </span>
-          {formatCampaignRange(campaign.start_at, campaign.end_at)}
+          {formatCampaignDateRange(campaign.start_at, campaign.end_at)}
         </p>
         <div className="mt-auto pt-2">
           <Link

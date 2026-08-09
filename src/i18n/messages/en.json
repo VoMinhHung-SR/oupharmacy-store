@@ -120,10 +120,16 @@
     "backToIndex": "All promotions",
     "backHome": "Back to home",
     "productsStub": "Products for this campaign will be available soon.",
-    "productsHeading": "Products in this campaign",
+    "productsHeading": "Featured products",
     "browseCatalog": "Browse catalog",
     "dateRange": "From {start} to {end}",
-    "dateRangeLabel": "Dates"
+    "dateRangeLabel": "Dates",
+    "previewBanner": "Preview — not published",
+    "featuredChip": "Featured products",
+    "voucherHeading": "Promo codes",
+    "termsHeading": "Program terms",
+    "termsMore": "Read full terms",
+    "termsLess": "Hide terms"
   }
 }
 

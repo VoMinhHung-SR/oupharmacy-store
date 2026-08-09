@@ -56,4 +56,11 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 - Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).
 - Attribute filters: `attrs=code:slug` — xem BE `storeApp/guidelines/catalog-attributes.md` và FE `docs/ROUTING.md` (Attribute facets).
 
+### Campaign landing preview (D-19)
+
+- Public: `/khuyen-mai`, `/khuyen-mai/[slug]` via `getCampaignBySlugSSG` / `getCampaignsSSG`.
+- Staff preview: `/khuyen-mai/[slug]?preview=<token>` (Jazzmin-signed, TTL 2h). RSC fetch uses `cache: 'no-store'`. Banner when `is_preview`; skip `CampaignAttributionBeacon`. Index and home do not read `preview`.
+- Invalid/missing token on a draft slug → same 404 as unknown slug.
+- Placement images: first-party CDN only (`res.cloudinary.com` / OUPharmacy). No third-party stock hosts. Missing image → brand gradient, still readable.
+
 Cập nhật file này khi thay đổi luồng lớn (auth, API gateway, i18n).
