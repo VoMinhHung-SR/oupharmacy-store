@@ -2,8 +2,19 @@ import type { PlacementWinner, PublicCampaignDetail } from '@/lib/services/campa
 
 const CATEGORY_LABELS: Record<string, string> = {
   'duoc-my-pham': 'Dược mỹ phẩm',
+  'cham-soc-da-mat': 'Chăm sóc da mặt',
+  'sua-rua-mat-kem-gel-sua': 'Sữa rửa mặt',
+  'chong-nang-da-mat': 'Chống nắng',
+  'duong-da-mat': 'Dưỡng da mặt',
+  'mat-na': 'Mặt nạ',
+  'nuoc-tay-trang': 'Tẩy trang',
   'thuc-pham-chuc-nang': 'Thực phẩm chức năng',
+  'vitamin-khoang-chat': 'Vitamin & khoáng chất',
+  'vitamin-tong-hop': 'Vitamin tổng hợp',
+  'canxi-vitamin-D': 'Canxi & vitamin D',
   'trang-thiet-bi-y-te': 'Thiết bị y tế',
+  'dung-cu-y-te': 'Dụng cụ y tế',
+  'bang-y-te': 'Băng y tế',
   'thuoc': 'Thuốc',
   'cham-soc-ca-nhan': 'Chăm sóc cá nhân',
 }

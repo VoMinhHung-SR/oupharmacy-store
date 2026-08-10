@@ -56,6 +56,18 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 - Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).
 - Attribute filters: `attrs=code:slug` — xem BE `storeApp/guidelines/catalog-attributes.md` và FE `docs/ROUTING.md` (Attribute facets).
 
+### Home merchandising (P8 / D-20)
+
+Fixed section frame; placement content from Jazzmin:
+
+1. `CampaignHomeCluster` — `HOME_HERO` + `HOME_PROMO_LEFT` (secondary) + stacked `HOME_STRIP` / `HOME_PROMO_RIGHT` (notices)
+2. Quick cate bar (`HOME_QUICK_LINKS`)
+3. Hot sale / bestsellers (`BestsellingProducts`)
+4. Featured categories (12)
+5. Favorite brands
+
+Empty/error → static `HeroBanner` / `PromotionalBanners` (D-08). No mock placement fill. No flash-sale price engine.
+
 ### Campaign landing preview (D-19)
 
 - Public: `/khuyen-mai`, `/khuyen-mai/[slug]` via `getCampaignBySlugSSG` / `getCampaignsSSG`.
