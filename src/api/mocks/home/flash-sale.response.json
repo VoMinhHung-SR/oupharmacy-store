@@ -1,0 +1,96 @@
+{
+  "title": "Flash sale giá tốt",
+  "cta_label": "Xem ngay",
+  "cta_url": "/khuyen-mai",
+  "windows": [
+    {
+      "id": "win-today",
+      "label": "08:00 - 22:00",
+      "starts_at": "2026-08-12T01:00:00.000Z",
+      "ends_at": "2026-08-12T15:00:00.000Z",
+      "status": "upcoming"
+    },
+    {
+      "id": "win-tomorrow",
+      "label": "08:00 - 22:00",
+      "starts_at": "2026-08-13T01:00:00.000Z",
+      "ends_at": "2026-08-13T15:00:00.000Z",
+      "status": "upcoming"
+    }
+  ],
+  "active_window_id": "win-today",
+  "products": [
+    {
+      "id": "flash-1",
+      "name": "Sữa rửa mặt dịu nhẹ 60g",
+      "price": 89000,
+      "originalPrice": 129000,
+      "discount": 31,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Tuýp 60g",
+      "href": "/tim-kiem?q=sua-rua-mat",
+      "brand_country": "Hàn Quốc",
+      "in_stock": 20
+    },
+    {
+      "id": "flash-2",
+      "name": "Viên uống vitamin tổng hợp",
+      "price": 245000,
+      "originalPrice": 350000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 60 viên",
+      "href": "/tim-kiem?q=vitamin",
+      "brand_country": "Mỹ",
+      "in_stock": 12
+    },
+    {
+      "id": "flash-3",
+      "name": "Kem dưỡng ẩm sáng da 50g",
+      "price": 270900,
+      "originalPrice": 387000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 50g",
+      "href": "/tim-kiem?q=kem-duong",
+      "brand_country": "Ấn Độ",
+      "in_stock": 9
+    },
+    {
+      "id": "flash-4",
+      "name": "Dung dịch nhỏ mắt dưỡng ẩm 13ml",
+      "price": 42000,
+      "originalPrice": 52000,
+      "discount": 19,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Chai 13ml",
+      "href": "/tim-kiem?q=nho-mat",
+      "brand_country": "Nhật Bản",
+      "in_stock": 30
+    },
+    {
+      "id": "flash-5",
+      "name": "Mặt nạ dưỡng ẩm phục hồi da",
+      "price": 154000,
+      "originalPrice": 220000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 10 miếng",
+      "href": "/tim-kiem?q=mat-na",
+      "brand_country": "Hàn Quốc",
+      "in_stock": 22
+    },
+    {
+      "id": "flash-6",
+      "name": "Sữa rửa mặt thảo dược 100g",
+      "price": 79000,
+      "originalPrice": 99000,
+      "discount": 20,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Tuýp 100g",
+      "href": "/tim-kiem?q=sua-rua-mat",
+      "brand_country": "Việt Nam",
+      "in_stock": 18
+    }
+  ]
+}

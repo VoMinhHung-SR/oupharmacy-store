@@ -3,11 +3,16 @@
 import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
-import { HOME_MOCK_BRANDS } from '@/lib/homeMerchandising'
+import favoriteBrands from '@/api/mocks/home/favorite-brands.response.json'
+import type { FavoriteBrandsResponse } from '@/api/mocks/home/types'
 
+/** Favorite brands — fixed section; data from `home/favorite-brands.response.json`. */
 export const FavoriteBrands: React.FC = () => {
+  const data = favoriteBrands as FavoriteBrandsResponse
+  const brands = [...data.brands].sort((a, b) => b.discountPercent - a.discountPercent)
+
   return (
-    <section className="bg-primary-50 py-10 sm:py-12">
+    <section className="bg-primary-50 py-10 sm:py-12" aria-label={data.title}>
       <Container>
         <div className="mb-8 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600">
@@ -15,11 +20,11 @@ export const FavoriteBrands: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Thương hiệu yêu thích</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{data.title}</h2>
         </div>
 
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {HOME_MOCK_BRANDS.map((brand) => (
+          {brands.map((brand) => (
             <Link
               key={brand.id}
               href={brand.href}
@@ -27,7 +32,7 @@ export const FavoriteBrands: React.FC = () => {
             >
               <div className="aspect-[4/3] bg-gray-50">
                 {brand.productImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- catalog CDN
+                  // eslint-disable-next-line @next/next/no-img-element -- first-party /mocks asset
                   <img src={brand.productImage} alt="" className="h-full w-full object-contain p-3" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-3xl text-gray-400">
@@ -40,7 +45,9 @@ export const FavoriteBrands: React.FC = () => {
                   {brand.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="text-sm font-semibold text-gray-900">{brand.name}</div>
-                <div className="mt-1 text-sm font-medium text-primary-600">Giảm đến {brand.discountPercent}%</div>
+                <div className="mt-1 text-sm font-medium text-primary-600">
+                  Giảm đến {brand.discountPercent}%
+                </div>
               </div>
             </Link>
           ))}

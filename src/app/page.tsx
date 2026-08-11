@@ -2,19 +2,21 @@ import Link from 'next/link'
 import FeaturedCategories from '@/sections/FeaturedCategories'
 import FavoriteBrands from '@/sections/FavoriteBrands'
 import BestsellingProducts from '@/sections/BestsellingProducts'
+import FlashSaleProducts from '@/sections/FlashSaleProducts'
 import { CampaignHomeCluster, pickHomePlacement } from '@/components/campaign'
 import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
 import { HOME_QUICK_LINKS } from '@/lib/constant'
 
 /**
- * Home layout (existing sections; placement-driven top cluster):
- * 1) HERO → PROMO_LEFT + (STRIP | PROMO_RIGHT) notices
+ * Home layout:
+ * 1) CampaignHomeCluster — Jazzmin placements (CMS)
  * 2) Quick cate bar
- * 3) Bestsellers
- * 4) Featured categories
- * 5) Favorite brands
+ * 3) Flash sale — fixture until merch API (campaign-like; not D-01 price engine)
+ * 4) Hot sale / bestsellers — fixture → later catalog query
+ * 5) Featured categories — fixture → later category API
+ * 6) Favorite brands — fixture → later brand API
  *
- * Content from Jazzmin placements; frame fixed (D-20). D-08 fallbacks inside cluster.
+ * Placement empty/error → static HeroBanner / PromotionalBanners (D-08). No mock fill on slots.
  */
 export default async function Home() {
   const placementsPayload = await getCampaignPlacementsSSG({
@@ -55,6 +57,7 @@ export default async function Home() {
         </div>
       </section>
 
+      <FlashSaleProducts />
       <BestsellingProducts />
       <FeaturedCategories />
       <FavoriteBrands />

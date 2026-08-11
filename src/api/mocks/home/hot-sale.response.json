@@ -1,0 +1,77 @@
+{
+  "title": "Sản phẩm bán chạy",
+  "products": [
+    {
+      "id": "hot-1",
+      "name": "Mặt nạ dưỡng ẩm phục hồi da",
+      "price": 154000,
+      "originalPrice": 220000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 10 miếng",
+      "href": "/tim-kiem?q=mat-na",
+      "brand_country": "Hàn Quốc",
+      "in_stock": 22
+    },
+    {
+      "id": "hot-2",
+      "name": "Dung dịch nhỏ mắt dưỡng ẩm 13ml",
+      "price": 42000,
+      "originalPrice": 52000,
+      "discount": 19,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Chai 13ml",
+      "href": "/tim-kiem?q=nho-mat",
+      "brand_country": "Nhật Bản",
+      "in_stock": 30
+    },
+    {
+      "id": "hot-3",
+      "name": "Sữa rửa mặt dịu nhẹ 60g",
+      "price": 89000,
+      "originalPrice": 129000,
+      "discount": 31,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Tuýp 60g",
+      "href": "/tim-kiem?q=sua-rua-mat",
+      "brand_country": "Hàn Quốc",
+      "in_stock": 20
+    },
+    {
+      "id": "hot-4",
+      "name": "Sữa rửa mặt thảo dược 100g",
+      "price": 79000,
+      "originalPrice": 99000,
+      "discount": 20,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Tuýp 100g",
+      "href": "/tim-kiem?q=sua-rua-mat",
+      "brand_country": "Việt Nam",
+      "in_stock": 18
+    },
+    {
+      "id": "hot-5",
+      "name": "Viên uống vitamin tổng hợp",
+      "price": 245000,
+      "originalPrice": 350000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 60 viên",
+      "href": "/tim-kiem?q=vitamin",
+      "brand_country": "Mỹ",
+      "in_stock": 12
+    },
+    {
+      "id": "hot-6",
+      "name": "Kem dưỡng ẩm sáng da 50g",
+      "price": 270900,
+      "originalPrice": 387000,
+      "discount": 30,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 50g",
+      "href": "/tim-kiem?q=kem-duong",
+      "brand_country": "Ấn Độ",
+      "in_stock": 9
+    }
+  ]
+}

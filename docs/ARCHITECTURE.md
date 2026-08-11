@@ -58,15 +58,18 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 
 ### Home merchandising (P8 / D-20)
 
-Fixed section frame; placement content from Jazzmin:
+Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 
-1. `CampaignHomeCluster` — `HOME_HERO` + `HOME_PROMO_LEFT` (secondary) + stacked `HOME_STRIP` / `HOME_PROMO_RIGHT` (notices)
-2. Quick cate bar (`HOME_QUICK_LINKS`)
-3. Hot sale / bestsellers (`BestsellingProducts`)
-4. Featured categories (12)
-5. Favorite brands
+| Section | Source | Notes |
+|---------|--------|--------|
+| Hero cluster | Jazzmin placements | `HOME_HERO` + `HOME_PROMO_LEFT` + `HOME_STRIP` / `HOME_PROMO_RIGHT` |
+| Quick cate | `HOME_QUICK_LINKS` | FE constant |
+| Flash sale | `home/flash-sale.response.json` | Campaign-like windows + rail; **not** price overwrite (D-01); BE TBD |
+| Hot sale | `home/hot-sale.response.json` | Fixed section → later catalog/search |
+| Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
+| Favorite brands | `home/favorite-brands.response.json` | Fixed section → later brand API |
 
-Empty/error → static `HeroBanner` / `PromotionalBanners` (D-08). No mock placement fill. No flash-sale price engine.
+Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.
 
 ### Campaign landing preview (D-19)
 
