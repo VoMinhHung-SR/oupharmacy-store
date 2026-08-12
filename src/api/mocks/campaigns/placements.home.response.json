@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-08-11T00:00:00.000Z",
+  "placements": {
+    "HOME_HERO": {
+      "campaign_id": 6,
+      "campaign_slug": "home-cms-p8-demo",
+      "title": "Homepage CMS — Da xinh mùa mới",
+      "subtitle": "Publish Jazzmin → / đổi hero",
+      "cta_label": "Khám phá",
+      "cta_url": "/khuyen-mai/home-cms-p8-demo",
+      "image_desktop_url": "/mocks/banner.svg",
+      "image_mobile_url": "/mocks/banner.svg",
+      "image_alt": "Home CMS hero"
+    },
+    "HOME_STRIP": {
+      "campaign_id": 6,
+      "campaign_slug": "home-cms-p8-demo",
+      "title": "Freeship đơn từ 300K — mã FREESHIP30K",
+      "subtitle": "Thông báo HOME_STRIP",
+      "cta_label": "Lấy mã",
+      "cta_url": "/khuyen-mai/home-cms-p8-demo",
+      "image_desktop_url": null,
+      "image_mobile_url": null,
+      "image_alt": "Home strip"
+    },
+    "HOME_PROMO_LEFT": {
+      "campaign_id": 6,
+      "campaign_slug": "home-cms-p8-demo",
+      "title": "Combo sạch – dưỡng – chống nắng",
+      "subtitle": "Promo trái",
+      "cta_label": "Xem combo",
+      "cta_url": "/khuyen-mai/home-cms-p8-demo",
+      "image_desktop_url": "/mocks/banner.svg",
+      "image_mobile_url": "/mocks/banner.svg",
+      "image_alt": "Promo left"
+    },
+    "HOME_PROMO_RIGHT": {
+      "campaign_id": 6,
+      "campaign_slug": "home-cms-p8-demo",
+      "title": "Góc hiểu đúng về da",
+      "subtitle": "Promo phải",
+      "cta_label": "Đọc ngay",
+      "cta_url": "/goc-suc-khoe",
+      "image_desktop_url": "/mocks/banner.svg",
+      "image_mobile_url": "/mocks/banner.svg",
+      "image_alt": "Promo right"
+    }
+  }
+}

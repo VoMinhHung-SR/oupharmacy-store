@@ -3,89 +3,24 @@
 import React from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
+import hotSale from '@/api/mocks/home/hot-sale.response.json'
+import type { HotSaleResponse } from '@/api/mocks/home/types'
 
-interface Product {
-  id: string
-  name: string
-  price: number
-  price_display?: string
-  originalPrice?: number
-  discount?: number
-  image_url?: string
-  packaging?: string
-  variant_unit_id?: number
-  in_stock?: number
-  category_slug?: string
-  product_slug?: string
-}
+/** Hot-sale / bestsellers — fixed section; data from `home/hot-sale.response.json`. */
+export const BestsellingProducts: React.FC = () => {
+  const data = hotSale as HotSaleResponse
 
-interface BestsellingProductsProps {
-  products?: Product[]
-}
-
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Thực phẩm bảo vệ sức khỏe NMN PQQ',
-    price: 6675000,
-    originalPrice: 8900000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 10,
-  },
-  {
-    id: '2',
-    name: 'Viên uống Best King Jpanwell hỗ trợ tăng cường sinh lý và khả năng',
-    price: 1040000,
-    originalPrice: 1300000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 15,
-  },
-  {
-    id: '3',
-    name: 'Viên uống giảm ho Nano Anpacov Biochempha',
-    price: 119200,
-    originalPrice: 149000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 20,
-  },
-  {
-    id: '4',
-    name: 'Viên nhai Brauer Baby & Kids Ultra Pure DHA hỗ trợ phát triển não',
-    price: 388800,
-    originalPrice: 486000,
-    packaging: 'Hộp 60 viên',
-    in_stock: 12,
-  },
-  {
-    id: '5',
-    name: 'Nước Yến Sào Cao Cấp Nunest Relax - Ngủ Ngon, Giảm Căng thẳng',
-    price: 246750,
-    originalPrice: 329000,
-    packaging: 'Hộp 6 Hũ',
-    in_stock: 8,
-  },
-  {
-    id: '6',
-    name: 'Chai xịt Aloclair Plus Spray giảm đau nhanh bệnh tay chân miệng',
-    price: 229000,
-    packaging: 'Hộp x 15ml',
-    in_stock: 25,
-  },
-]
-
-export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ products = mockProducts }) => {
   return (
-    <section className="py-12 bg-white">
+    <section className="bg-white py-8 sm:py-10" aria-label={data.title}>
       <Container>
-        {/* Section header */}
-        <div className="bg-red-600 text-white inline-block px-6 py-2 rounded-t-lg mb-6">
-          <h2 className="text-xl font-bold">Sản phẩm bán chạy</h2>
-        </div>
-
-        {/* Products grid */}
-        <div className="bg-primary-50 p-6 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {products.map((product) => (
+        <div className="overflow-hidden rounded-2xl bg-accent-500 p-4 sm:p-5">
+          <div className="mb-4 flex items-center justify-center">
+            <div className="rounded-t-lg bg-accent-600 px-6 py-2 text-white shadow">
+              <h2 className="text-lg font-bold sm:text-xl">{data.title}</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {data.products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -96,4 +31,3 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ produc
 }
 
 export default BestsellingProducts
-

@@ -16,14 +16,14 @@ export default async function CampaignIndexPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="border-b border-gray-100 bg-gradient-to-r from-primary-500 to-primary-700 py-10 text-white sm:py-12">
+      <section className="border-b border-gray-100 bg-white py-8 sm:py-10">
         <Container>
-          <h1 className="text-3xl font-bold sm:text-4xl">{t('indexTitle')}</h1>
-          <p className="mt-2 text-primary-100">{t('indexSubtitle')}</p>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{t('indexTitle')}</h1>
+          <p className="mt-2 text-sm text-gray-600 sm:text-base">{t('indexSubtitle')}</p>
         </Container>
       </section>
 
-      <Container className="py-10 sm:py-12">
+      <Container className="py-8 sm:py-10">
         {campaigns.length === 0 ? (
           <div className="mx-auto max-w-lg py-16 text-center">
             <p className="text-base text-gray-600">{t('indexEmpty')}</p>

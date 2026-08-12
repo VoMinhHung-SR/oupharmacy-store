@@ -56,4 +56,26 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 - Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).
 - Attribute filters: `attrs=code:slug` — xem BE `storeApp/guidelines/catalog-attributes.md` và FE `docs/ROUTING.md` (Attribute facets).
 
+### Home merchandising (P8 / D-20)
+
+Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
+
+| Section | Source | Notes |
+|---------|--------|--------|
+| Hero cluster | Jazzmin placements | `HOME_HERO` + `HOME_PROMO_LEFT` + `HOME_STRIP` / `HOME_PROMO_RIGHT` |
+| Quick cate | `HOME_QUICK_LINKS` | FE constant |
+| Flash sale | `home/flash-sale.response.json` | Campaign-like windows + rail; **not** price overwrite (D-01); BE TBD |
+| Hot sale | `home/hot-sale.response.json` | Fixed section → later catalog/search |
+| Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
+| Favorite brands | `home/favorite-brands.response.json` | Fixed section → later brand API |
+
+Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.
+
+### Campaign landing preview (D-19)
+
+- Public: `/khuyen-mai`, `/khuyen-mai/[slug]` via `getCampaignBySlugSSG` / `getCampaignsSSG`.
+- Staff preview: `/khuyen-mai/[slug]?preview=<token>` (Jazzmin-signed, TTL 2h). RSC fetch uses `cache: 'no-store'`. Banner when `is_preview`; skip `CampaignAttributionBeacon`. Index and home do not read `preview`.
+- Invalid/missing token on a draft slug → same 404 as unknown slug.
+- Placement images: first-party CDN only (`res.cloudinary.com` / OUPharmacy). No third-party stock hosts. Missing image → brand gradient, still readable.
+
 Cập nhật file này khi thay đổi luồng lớn (auth, API gateway, i18n).

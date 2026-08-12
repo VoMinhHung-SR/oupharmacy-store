@@ -1,23 +1,5 @@
-import { HtmlContent } from '@/components/common/HtmlContent'
 import type { PublicCampaignDetail } from '@/lib/services/campaign'
-
-function formatCampaignRange(startAt: string, endAt: string): string {
-  try {
-    const start = new Date(startAt)
-    const end = new Date(endAt)
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-      return `${startAt} – ${endAt}`
-    }
-    const opts: Intl.DateTimeFormatOptions = {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }
-    return `${start.toLocaleDateString('vi-VN', opts)} – ${end.toLocaleDateString('vi-VN', opts)}`
-  } catch {
-    return `${startAt} – ${endAt}`
-  }
-}
+import { formatCampaignDateRange, pickLandingBanner } from './campaignPlacementUtils'
 
 export interface CampaignLandingHeaderProps {
   campaign: PublicCampaignDetail
@@ -28,24 +10,46 @@ export function CampaignLandingHeader({
   campaign,
   dateRangeLabel,
 }: CampaignLandingHeaderProps) {
+  const banner = pickLandingBanner(campaign)
+  const desktopSrc = banner?.image_desktop_url?.trim() || null
+  const mobileSrc = banner?.image_mobile_url?.trim() || desktopSrc
+  const alt = banner?.image_alt?.trim() || campaign.title
+  const range = formatCampaignDateRange(campaign.start_at, campaign.end_at)
+
   return (
-    <header className="border-b border-gray-100 bg-gradient-to-r from-primary-500 to-primary-700 py-10 text-white sm:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-          {campaign.title}
-        </h1>
-        {campaign.subtitle ? (
-          <p className="mt-3 text-lg text-primary-100 sm:text-xl">{campaign.subtitle}</p>
+    <header>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 to-primary-900 shadow-sm">
+        {mobileSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element -- first-party / configured CDN only
+          <img
+            src={mobileSrc}
+            alt={alt}
+            className="h-52 w-full object-cover sm:hidden"
+          />
         ) : null}
-        <p className="mt-4 text-sm text-primary-100">
-          <span className="font-medium">{dateRangeLabel}: </span>
-          {formatCampaignRange(campaign.start_at, campaign.end_at)}
-        </p>
-        {campaign.description_html ? (
-          <div className="prose prose-invert mt-6 max-w-3xl prose-p:text-primary-50">
-            <HtmlContent html={campaign.description_html} />
-          </div>
+        {desktopSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={desktopSrc}
+            alt={alt}
+            className="hidden h-64 w-full object-cover sm:block md:h-80 lg:h-[22rem]"
+          />
         ) : null}
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/5"
+          aria-hidden
+        />
+        <div className="relative z-10 flex min-h-[13rem] flex-col justify-end p-5 sm:min-h-[20rem] sm:p-8 md:min-h-[22rem] md:p-10">
+          <p className="inline-flex w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            {dateRangeLabel}: {range}
+          </p>
+          <h1 className="mt-3 max-w-3xl text-2xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
+            {campaign.title}
+          </h1>
+          {campaign.subtitle ? (
+            <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-lg">{campaign.subtitle}</p>
+          ) : null}
+        </div>
       </div>
     </header>
   )

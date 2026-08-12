@@ -71,6 +71,8 @@ export interface PublicCampaignDetail {
   product_mids: string[]
   category_slugs: string[]
   vouchers: PublicCampaignVoucher[]
+  /** Present only on signed preview of a non-public campaign (D-19). */
+  is_preview?: boolean
 }
 
 export interface PlacementWinner {
@@ -175,11 +177,15 @@ export async function getCampaignPlacementsSSG(
 /**
  * Server/SSG fetch for campaign detail by slug.
  * Returns null on 404/error so landing can show not-found without leaking drafts.
+ * Pass previewToken for Jazzmin signed preview (no-store; D-19).
  */
 export async function getCampaignBySlugSSG(
-  slug: string
+  slug: string,
+  options?: { previewToken?: string }
 ): Promise<PublicCampaignDetail | null> {
-  const url = `${storeApiBase()}/campaigns/${encodeURIComponent(slug)}/`
+  const token = options?.previewToken?.trim()
+  const query = token ? `?preview=${encodeURIComponent(token)}` : ''
+  const url = `${storeApiBase()}/campaigns/${encodeURIComponent(slug)}/${query}`
 
   try {
     const response = await fetch(url, {
@@ -188,7 +194,7 @@ export async function getCampaignBySlugSSG(
         'Content-Type': 'application/json',
         'Accept-Language': 'vi',
       },
-      next: { revalidate: 60 },
+      ...(token ? { cache: 'no-store' as const } : { next: { revalidate: 60 } }),
     })
 
     if (response.status === 404) {

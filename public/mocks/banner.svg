@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="OUPharmacy mock banner">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <circle cx="980" cy="220" r="160" fill="#7dd3fc" opacity="0.2"/>
+  <circle cx="1100" cy="420" r="120" fill="#bae6fd" opacity="0.25"/>
+  <text x="80" y="300" font-family="system-ui,sans-serif" font-size="48" font-weight="700" fill="#ffffff">OUPharmacy</text>
+  <text x="80" y="360" font-family="system-ui,sans-serif" font-size="28" fill="#e0f2fe">Mock banner asset</text>
+</svg>

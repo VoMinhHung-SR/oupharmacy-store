@@ -120,10 +120,16 @@
     "backToIndex": "Tất cả khuyến mãi",
     "backHome": "Về trang chủ",
     "productsStub": "Sản phẩm của chương trình sẽ sớm được cập nhật.",
-    "productsHeading": "Sản phẩm trong chương trình",
+    "productsHeading": "Sản phẩm nổi bật",
     "browseCatalog": "Xem danh mục sản phẩm",
     "dateRange": "Từ {start} đến {end}",
-    "dateRangeLabel": "Thời gian"
+    "dateRangeLabel": "Thời gian",
+    "previewBanner": "Chế độ xem trước — chưa public",
+    "featuredChip": "Sản phẩm nổi bật",
+    "voucherHeading": "Mã ưu đãi",
+    "termsHeading": "Thể lệ chương trình",
+    "termsMore": "Xem thêm thể lệ",
+    "termsLess": "Thu gọn thể lệ"
   }
 }
 
