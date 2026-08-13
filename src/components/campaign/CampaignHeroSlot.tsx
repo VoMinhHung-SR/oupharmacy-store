@@ -17,8 +17,8 @@ export interface CampaignHeroSlotProps {
 
 const TRANSITION_MS = 500
 
-/** First-party home-cms creatives are 16:9. */
-const HERO_MAIN_ASPECT = 'aspect-[16/9]'
+/** Wide hero frame (~4.34:1). Keeps band short so theme BG + main PNG stay aligned. */
+const HERO_MAIN_ASPECT = 'aspect-[1280/295]'
 
 function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
   const desktopSrc = placement.image_desktop_url?.trim() || null
@@ -33,14 +33,14 @@ function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
           <img
             src={mobileSrc || desktopSrc || ''}
             alt={alt}
-            className="absolute inset-0 h-full w-full object-cover md:hidden"
+            className="absolute inset-0 h-full w-full object-contain md:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={desktopSrc || mobileSrc || ''}
             alt=""
             aria-hidden
-            className="absolute inset-0 hidden h-full w-full object-cover md:block"
+            className="absolute inset-0 hidden h-full w-full object-contain md:block"
           />
         </>
       ) : (

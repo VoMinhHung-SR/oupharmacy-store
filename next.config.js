@@ -52,6 +52,12 @@ const nextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
+      // Catalog packshots from import pipeline (legacy host in store DB until Cloudinary cutover).
+      {
+        protocol: 'https',
+        hostname: 'cdn.nhathuoclongchau.com.vn',
+        pathname: '/**',
+      },
     ],
   },
   trailingSlash: false,
