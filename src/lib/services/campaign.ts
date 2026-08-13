@@ -1,19 +1,19 @@
 import { apiGet } from '../api'
 
-/** Placement slot keys — keep in sync with storeApp.CampaignPlacement.SLOT_CHOICES */
+/** Placement slot keys — sync with storeApp.CampaignPlacement.SLOT_CHOICES (D-21). */
 export type CampaignSlot =
   | 'HOME_HERO'
-  | 'HOME_PROMO_LEFT'
-  | 'HOME_PROMO_RIGHT'
-  | 'HOME_STRIP'
+  | 'HOME_SECONDARY'
+  | 'HOME_NOTICE_TOP'
+  | 'HOME_NOTICE_BOTTOM'
   | 'CATEGORY_BANNER'
   | 'SEARCH_BANNER'
 
 export const CAMPAIGN_SLOTS: CampaignSlot[] = [
   'HOME_HERO',
-  'HOME_PROMO_LEFT',
-  'HOME_PROMO_RIGHT',
-  'HOME_STRIP',
+  'HOME_SECONDARY',
+  'HOME_NOTICE_TOP',
+  'HOME_NOTICE_BOTTOM',
   'CATEGORY_BANNER',
   'SEARCH_BANNER',
 ]
@@ -82,14 +82,24 @@ export interface PlacementWinner {
   subtitle: string | null
   cta_label: string | null
   cta_url: string | null
+  /** Main creative (hero content card). */
   image_desktop_url: string | null
   image_mobile_url: string | null
   image_alt: string | null
+  sort_order?: number
+  /**
+   * Full-bleed theme behind the hero band (syncs with active main slide).
+   * Optional until BE ships the field — FE may attach demo themes.
+   */
+  theme_image_url?: string | null
 }
+
+/** D-22: carousel slots are Subject[]; notice slots are Subject | null. */
+export type PlacementSlotValue = PlacementWinner | PlacementWinner[] | null
 
 export interface CampaignPlacementsResponse {
   generated_at: string
-  placements: Partial<Record<CampaignSlot | string, PlacementWinner | null>>
+  placements: Partial<Record<CampaignSlot | string, PlacementSlotValue>>
 }
 
 export interface GetCampaignsParams {
@@ -98,7 +108,7 @@ export interface GetCampaignsParams {
 }
 
 export interface GetCampaignPlacementsParams {
-  /** Limit slots; comma-joined in query (e.g. HOME_HERO,HOME_STRIP). */
+  /** Limit slots; comma-joined in query (e.g. HOME_HERO,HOME_NOTICE_TOP). */
   slots?: CampaignSlot[] | string[]
 }
 

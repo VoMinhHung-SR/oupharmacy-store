@@ -25,6 +25,7 @@ export type FlashSaleWindow = {
 }
 
 export type FlashSaleResponse = {
+  enabled?: boolean
   title: string
   cta_label: string
   cta_url: string

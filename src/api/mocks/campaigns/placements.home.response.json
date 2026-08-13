@@ -1,49 +1,94 @@
 {
-  "generated_at": "2026-08-11T00:00:00.000Z",
+  "generated_at": "2026-08-13T16:45:00.000Z",
   "placements": {
-    "HOME_HERO": {
+    "HOME_HERO": [
+      {
+        "campaign_id": 6,
+        "campaign_slug": "home-cms-p9-demo",
+        "title": "Tủ thuốc thông minh — Quản lý hạn dùng gia đình",
+        "subtitle": "Nhập danh sách thuốc dễ dàng, nhận cảnh báo hết hạn tự động trước 30 ngày.",
+        "cta_label": "Trải nghiệm ngay",
+        "cta_url": "/tu-thuoc-thong-minh",
+        "image_desktop_url": "/mocks/home-cms/hero-main-1.png",
+        "image_mobile_url": "/mocks/home-cms/hero-main-1.png",
+        "image_alt": "Tủ thuốc thông minh OUPharmacy",
+        "sort_order": 0,
+        "theme_image_url": "/mocks/home-cms/hero-theme-1.png"
+      },
+      {
+        "campaign_id": 6,
+        "campaign_slug": "home-cms-p9-demo",
+        "title": "Da xinh đón mùa mới — Combo Sạch & Dưỡng chuẩn Y khoa",
+        "subtitle": "Giải pháp toàn diện từ sữa rửa mặt thảo dược đến kem chống nắng bảo vệ tối ưu.",
+        "cta_label": "Khám phá combo",
+        "cta_url": "/khuyen-mai/da-xinh-mua-moi",
+        "image_desktop_url": "/mocks/home-cms/hero-main-2.png",
+        "image_mobile_url": "/mocks/home-cms/hero-main-2.png",
+        "image_alt": "Combo chăm sóc da mùa mới",
+        "sort_order": 1,
+        "theme_image_url": "/mocks/home-cms/hero-theme-2.png"
+      },
+      {
+        "campaign_id": 6,
+        "campaign_slug": "home-cms-p9-demo",
+        "title": "Tư vấn trực tuyến cùng Dược sĩ chuyên sâu 24/7",
+        "subtitle": "Giải đáp mọi thắc mắc về liều dùng, triệu chứng bệnh và đơn thuốc an toàn.",
+        "cta_label": "Kết nối ngay",
+        "cta_url": "/tu-van-duoc-si",
+        "image_desktop_url": "/mocks/home-cms/hero-main-3.png",
+        "image_mobile_url": "/mocks/home-cms/hero-main-3.png",
+        "image_alt": "Tư vấn dược sĩ trực tuyến",
+        "sort_order": 2,
+        "theme_image_url": "/mocks/home-cms/hero-theme-3.png"
+      }
+    ],
+    "HOME_SECONDARY": [
+      {
+        "campaign_id": 6,
+        "campaign_slug": "home-cms-p9-demo",
+        "title": "Sữa dinh dưỡng cao cấp & Vitamin thiết yếu",
+        "subtitle": "Tăng cường sức đề kháng, bảo vệ thể chất toàn diện mỗi ngày. Giảm đến 30% khi mua kèm đơn hàng đầu tiên.",
+        "cta_label": "Mua ngay",
+        "cta_url": "/tim-kiem?q=vitamin",
+        "image_desktop_url": "/mocks/home-cms/secondary-1.png",
+        "image_mobile_url": "/mocks/home-cms/secondary-1.png",
+        "image_alt": "Sữa dinh dưỡng và vitamin",
+        "sort_order": 0
+      },
+      {
+        "campaign_id": 6,
+        "campaign_slug": "home-cms-p9-demo",
+        "title": "Đặc quyền thành viên OUPharmacy",
+        "subtitle": "Miễn phí vận chuyển toàn quốc cho đơn hàng từ 300K kèm tích điểm đổi quà. Nhập mã FREESHIP30K.",
+        "cta_label": "Lấy mã ngay",
+        "cta_url": "/khuyen-mai/dac-quyen-thanh-vien",
+        "image_desktop_url": "/mocks/home-cms/secondary-2.png",
+        "image_mobile_url": "/mocks/home-cms/secondary-2.png",
+        "image_alt": "Đặc quyền thành viên FREESHIP30K",
+        "sort_order": 1
+      }
+    ],
+    "HOME_NOTICE_TOP": {
       "campaign_id": 6,
-      "campaign_slug": "home-cms-p8-demo",
-      "title": "Homepage CMS — Da xinh mùa mới",
-      "subtitle": "Publish Jazzmin → / đổi hero",
-      "cta_label": "Khám phá",
-      "cta_url": "/khuyen-mai/home-cms-p8-demo",
-      "image_desktop_url": "/mocks/banner.svg",
-      "image_mobile_url": "/mocks/banner.svg",
-      "image_alt": "Home CMS hero"
-    },
-    "HOME_STRIP": {
-      "campaign_id": 6,
-      "campaign_slug": "home-cms-p8-demo",
-      "title": "Freeship đơn từ 300K — mã FREESHIP30K",
-      "subtitle": "Thông báo HOME_STRIP",
-      "cta_label": "Lấy mã",
-      "cta_url": "/khuyen-mai/home-cms-p8-demo",
-      "image_desktop_url": null,
-      "image_mobile_url": null,
-      "image_alt": "Home strip"
-    },
-    "HOME_PROMO_LEFT": {
-      "campaign_id": 6,
-      "campaign_slug": "home-cms-p8-demo",
-      "title": "Combo sạch – dưỡng – chống nắng",
-      "subtitle": "Promo trái",
-      "cta_label": "Xem combo",
-      "cta_url": "/khuyen-mai/home-cms-p8-demo",
-      "image_desktop_url": "/mocks/banner.svg",
-      "image_mobile_url": "/mocks/banner.svg",
-      "image_alt": "Promo left"
-    },
-    "HOME_PROMO_RIGHT": {
-      "campaign_id": 6,
-      "campaign_slug": "home-cms-p8-demo",
-      "title": "Góc hiểu đúng về da",
-      "subtitle": "Promo phải",
-      "cta_label": "Đọc ngay",
+      "campaign_slug": "home-cms-p9-demo",
+      "title": "Hiểu đúng về dược phẩm & Sức khỏe A-Z",
+      "subtitle": "Cẩm nang tra cứu triệu chứng, cách sử dụng thuốc an toàn và khoa học cho cả gia đình.",
+      "cta_label": "Đọc ngay →",
       "cta_url": "/goc-suc-khoe",
-      "image_desktop_url": "/mocks/banner.svg",
-      "image_mobile_url": "/mocks/banner.svg",
-      "image_alt": "Promo right"
+      "image_desktop_url": "/mocks/home-cms/notice-top.png",
+      "image_mobile_url": "/mocks/home-cms/notice-top.png",
+      "image_alt": "Góc sức khỏe A-Z"
+    },
+    "HOME_NOTICE_BOTTOM": {
+      "campaign_id": 6,
+      "campaign_slug": "home-cms-p9-demo",
+      "title": "Tra cứu lịch hẹn khám & Cơ sở nhà thuốc",
+      "subtitle": "Hệ thống mạng lưới chi nhánh và lịch trực của đội ngũ bác sĩ, dược sĩ gần bạn nhất.",
+      "cta_label": "Tra cứu ngay →",
+      "cta_url": "/tim-nha-thuoc",
+      "image_desktop_url": "/mocks/home-cms/notice-bottom.png",
+      "image_mobile_url": "/mocks/home-cms/notice-bottom.png",
+      "image_alt": "Lịch hẹn và nhà thuốc"
     }
   }
 }

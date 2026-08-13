@@ -9,10 +9,14 @@ import type { FlashSaleResponse } from '@/api/mocks/home/types'
 
 /**
  * Flash sale rail — fixed frame; payload from `home/flash-sale.response.json`.
- * Campaign-like windows + product list; does not overwrite catalog price (D-01).
+ * D-23: hide when enabled=false or products empty. Does not overwrite catalog price (D-01).
  */
 export const FlashSaleProducts: React.FC = () => {
   const data = flashSale as FlashSaleResponse
+  const enabled = data.enabled !== false
+  const products = data.products || []
+  if (!enabled || products.length === 0) return null
+
   const activeId = data.active_window_id
 
   return (
@@ -49,7 +53,7 @@ export const FlashSaleProducts: React.FC = () => {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {data.products.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
