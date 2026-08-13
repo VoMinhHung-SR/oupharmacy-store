@@ -17,7 +17,7 @@ export interface CampaignHeroSlotProps {
 
 const TRANSITION_MS = 500
 
-/** Wide hero frame (~4.34:1). Keeps band short so theme BG + main PNG stay aligned. */
+/** Wide hero frame (~4.34:1). Main PNG fills this box; theme peeks in page gutters. */
 const HERO_MAIN_ASPECT = 'aspect-[1280/295]'
 
 function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
@@ -33,14 +33,14 @@ function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
           <img
             src={mobileSrc || desktopSrc || ''}
             alt={alt}
-            className="absolute inset-0 h-full w-full object-contain md:hidden"
+            className="absolute inset-0 h-full w-full object-cover object-center md:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={desktopSrc || mobileSrc || ''}
             alt=""
             aria-hidden
-            className="absolute inset-0 hidden h-full w-full object-contain md:block"
+            className="absolute inset-0 hidden h-full w-full object-cover object-center md:block"
           />
         </>
       ) : (
@@ -120,7 +120,16 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
   if (count === 0) return null
 
   const stage = (
-    <div className={`relative w-full overflow-hidden ${HERO_MAIN_ASPECT}`}>
+    <div
+      className={`relative w-full overflow-hidden ${HERO_MAIN_ASPECT}`}
+      style={{
+        // Soft L/R dissolve into theme band so main + BG read as one surface.
+        WebkitMaskImage:
+          'linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%)',
+        maskImage:
+          'linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%)',
+      }}
+    >
       {count === 1 ? (
         <HeroSlideLink placement={list[0]} className="absolute inset-0" />
       ) : (
