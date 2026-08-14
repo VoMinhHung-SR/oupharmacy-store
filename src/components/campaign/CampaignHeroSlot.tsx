@@ -17,8 +17,8 @@ export interface CampaignHeroSlotProps {
 
 const TRANSITION_MS = 500
 
-/** Wide hero frame (~4.34:1). Main PNG fills this box; theme peeks in page gutters. */
-const HERO_MAIN_ASPECT = 'aspect-[1280/295]'
+/** Hero 3.7:1 — matches 1920×516 creatives. */
+const HERO_MAIN_ASPECT = 'aspect-[1920/516]'
 
 function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
   const desktopSrc = placement.image_desktop_url?.trim() || null
@@ -95,7 +95,7 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
   activeIndex,
   onActiveIndexChange,
 }) => {
-  const list = slides.slice(0, 3)
+  const list = slides.slice(0, 2)
   const [uncontrolled, setUncontrolled] = useState(0)
   const controlled = typeof activeIndex === 'number'
   const index = controlled ? activeIndex : uncontrolled
@@ -120,44 +120,37 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
   if (count === 0) return null
 
   const stage = (
-    <div
-      className={`relative w-full overflow-hidden ${HERO_MAIN_ASPECT}`}
-      style={{
-        // Soft L/R dissolve into theme band so main + BG read as one surface.
-        WebkitMaskImage:
-          'linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%)',
-        maskImage:
-          'linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%)',
-      }}
-    >
-      {count === 1 ? (
-        <HeroSlideLink placement={list[0]} className="absolute inset-0" />
-      ) : (
-        list.map((slide, i) => {
-          const active = i === index
-          return (
-            <HeroSlideLink
-              key={`${slide.campaign_id}-${slide.sort_order ?? i}-${i}`}
-              placement={slide}
-              inert={!active}
-              className="absolute inset-0 transition-opacity ease-in-out"
-              style={{
-                opacity: active ? 1 : 0,
-                transitionDuration: `${TRANSITION_MS}ms`,
-                zIndex: active ? 1 : 0,
-                pointerEvents: active ? 'auto' : 'none',
-              }}
-            />
-          )
-        })
-      )}
+    <div className={`relative w-full ${HERO_MAIN_ASPECT}`}>
+      <div className="hero-slot-blend absolute inset-0">
+        {count === 1 ? (
+          <HeroSlideLink placement={list[0]} className="absolute inset-0" />
+        ) : (
+          list.map((slide, i) => {
+            const active = i === index
+            return (
+              <HeroSlideLink
+                key={`${slide.campaign_id}-${slide.sort_order ?? i}-${i}`}
+                placement={slide}
+                inert={!active}
+                className="absolute inset-0 transition-opacity ease-in-out"
+                style={{
+                  opacity: active ? 1 : 0,
+                  transitionDuration: `${TRANSITION_MS}ms`,
+                  zIndex: active ? 1 : 0,
+                  pointerEvents: active ? 'auto' : 'none',
+                }}
+              />
+            )
+          })
+        )}
+      </div>
 
       {count > 1 ? (
         <>
           <button
             type="button"
             aria-label="Slide trước"
-            className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-slate-800 shadow hover:bg-white"
+            className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80 sm:left-3"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
@@ -169,7 +162,7 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
           <button
             type="button"
             aria-label="Slide sau"
-            className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-slate-800 shadow hover:bg-white"
+            className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80 sm:right-3"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
@@ -178,7 +171,10 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
           >
             ›
           </button>
-          <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5" role="tablist">
+          <div
+            className="absolute bottom-[22%] left-0 right-0 z-20 flex justify-center gap-1.5"
+            role="tablist"
+          >
             {list.map((slide, i) => (
               <button
                 key={`dot-${slide.campaign_id}-${i}`}
@@ -186,7 +182,7 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
                 role="tab"
                 aria-selected={i === index}
                 aria-label={`Slide ${i + 1}`}
-                className={`h-2 w-2 rounded-full shadow ${i === index ? 'bg-white' : 'bg-white/60'}`}
+                className={`h-2 w-2 rounded-full shadow-sm ${i === index ? 'bg-white' : 'bg-white/55'}`}
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()

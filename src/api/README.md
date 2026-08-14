@@ -4,6 +4,12 @@ Fixtures mirror **response bodies**. Prefer first-party `/mocks/*.svg`.
 
 Generated homepage CMS PNGs live under `public/mocks/home-cms/` (gitignored) — keep locally for QA; seed via BE `seed_home_cms_demo`.
 
+| Slot | File | Pixels | Ratio | CSS |
+|------|------|--------|-------|-----|
+| Hero | `hero-main-{1,2}.png` | 1920×516 | 3.7:1 | `aspect-[1920/516]` + `object-cover` |
+| Campaign lớn | `secondary-{1,2,3}.png` | 1300×400 | 3.25:1 | `aspect-[13/4]` |
+| Campaign nhỏ | `notice-{top,bottom}.png` | 1020×300 | 3.4:1 | `aspect-[17/5]` |
+
 ## Taxonomy (home)
 
 | Kind | Path | Role |

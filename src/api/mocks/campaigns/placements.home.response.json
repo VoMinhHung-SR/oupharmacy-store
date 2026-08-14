@@ -27,7 +27,9 @@
         "image_alt": "Combo chăm sóc da mùa mới",
         "sort_order": 1,
         "theme_image_url": "/mocks/home-cms/hero-theme-2.png"
-      },
+      }
+    ],
+    "HOME_SECONDARY": [
       {
         "campaign_id": 6,
         "campaign_slug": "home-cms-p9-demo",
@@ -35,14 +37,11 @@
         "subtitle": "Giải đáp mọi thắc mắc về liều dùng, triệu chứng bệnh và đơn thuốc an toàn.",
         "cta_label": "Kết nối ngay",
         "cta_url": "/tu-van-duoc-si",
-        "image_desktop_url": "/mocks/home-cms/hero-main-3.png",
-        "image_mobile_url": "/mocks/home-cms/hero-main-3.png",
+        "image_desktop_url": "/mocks/home-cms/secondary-1.png",
+        "image_mobile_url": "/mocks/home-cms/secondary-1.png",
         "image_alt": "Tư vấn dược sĩ trực tuyến",
-        "sort_order": 2,
-        "theme_image_url": "/mocks/home-cms/hero-theme-3.png"
-      }
-    ],
-    "HOME_SECONDARY": [
+        "sort_order": 0
+      },
       {
         "campaign_id": 6,
         "campaign_slug": "home-cms-p9-demo",
@@ -50,10 +49,10 @@
         "subtitle": "Tăng cường sức đề kháng, bảo vệ thể chất toàn diện mỗi ngày. Giảm đến 30% khi mua kèm đơn hàng đầu tiên.",
         "cta_label": "Mua ngay",
         "cta_url": "/tim-kiem?q=vitamin",
-        "image_desktop_url": "/mocks/home-cms/secondary-1.png",
-        "image_mobile_url": "/mocks/home-cms/secondary-1.png",
+        "image_desktop_url": "/mocks/home-cms/secondary-2.png",
+        "image_mobile_url": "/mocks/home-cms/secondary-2.png",
         "image_alt": "Sữa dinh dưỡng và vitamin",
-        "sort_order": 0
+        "sort_order": 1
       },
       {
         "campaign_id": 6,
@@ -62,10 +61,10 @@
         "subtitle": "Miễn phí vận chuyển toàn quốc cho đơn hàng từ 300K kèm tích điểm đổi quà. Nhập mã FREESHIP30K.",
         "cta_label": "Lấy mã ngay",
         "cta_url": "/khuyen-mai/dac-quyen-thanh-vien",
-        "image_desktop_url": "/mocks/home-cms/secondary-2.png",
-        "image_mobile_url": "/mocks/home-cms/secondary-2.png",
+        "image_desktop_url": "/mocks/home-cms/secondary-3.png",
+        "image_mobile_url": "/mocks/home-cms/secondary-3.png",
         "image_alt": "Đặc quyền thành viên FREESHIP30K",
-        "sort_order": 1
+        "sort_order": 2
       }
     ],
     "HOME_NOTICE_TOP": {

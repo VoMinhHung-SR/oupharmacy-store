@@ -10,9 +10,8 @@ import { HOME_QUICK_LINKS } from '@/lib/constant'
 
 /** BE does not expose theme_image_url yet — fall back to first-party demo themes by sort_order. */
 function withHeroThemeFallback(slides: PlacementWinner[]): PlacementWinner[] {
-  return slides.slice(0, 3).map((slide, i) => {
-    const order = slide.sort_order ?? i
-    const themeIdx = Math.min(Math.max(order, 0), 2) + 1
+  return slides.slice(0, 2).map((slide, i) => {
+    const themeIdx = Math.min(i, 1) + 1
     return {
       ...slide,
       theme_image_url:
