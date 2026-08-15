@@ -20,9 +20,9 @@ export const FlashSaleProducts: React.FC = () => {
   const activeId = data.active_window_id
 
   return (
-    <section className="bg-white py-8 sm:py-10" aria-label={data.title}>
+    <section className="bg-white pb-8 pt-1 sm:pb-10 sm:pt-2" aria-label={data.title}>
       <Container>
-        <div className="overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 p-4 sm:p-5">
+        <div className="p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-gray-900 sm:text-xl">{data.title}</h2>

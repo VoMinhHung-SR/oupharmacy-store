@@ -62,8 +62,9 @@ export default async function Home() {
         footer={quickLinks}
       />
 
+      <FlashSaleProducts />
+
       <div className="relative z-10 bg-white">
-        <FlashSaleProducts />
         <BestsellingProducts />
         <FeaturedCategories />
         <FavoriteBrands />

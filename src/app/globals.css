@@ -124,21 +124,35 @@ body {
   }
 
   /**
-   * Dissolve the opaque hero creative into the theme band along the bottom edge.
+   * Hero creative: fade top/bottom + left/right (corners dissolve harder).
    */
   .hero-slot-blend {
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%, #000 72%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-composite: destination-in;
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%, #000 72%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  /**
+   * Theme wash: keep the watercolor in the upper band; no extra box height (avoids nested scroll).
+   */
+  .home-cms-band-fade {
     -webkit-mask-image: linear-gradient(
       to bottom,
       #000 0%,
       #000 72%,
-      rgba(0, 0, 0, 0.55) 88%,
+      rgba(0, 0, 0, 0.4) 88%,
       transparent 100%
     );
     mask-image: linear-gradient(
       to bottom,
       #000 0%,
       #000 72%,
-      rgba(0, 0, 0, 0.55) 88%,
+      rgba(0, 0, 0, 0.4) 88%,
       transparent 100%
     );
   }

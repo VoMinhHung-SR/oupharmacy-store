@@ -37,9 +37,7 @@ function SecondarySlide({ placement }: { placement: PlacementWinner }) {
   const alt = placement.image_alt?.trim() || placement.title
 
   const body = (
-    <div
-      className={`relative flex overflow-hidden rounded-2xl bg-primary-700 text-white ${SECONDARY_ASPECT}`}
-    >
+    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-primary-700 text-white">
       {imageSrc ? (
         // eslint-disable-next-line @next/next/no-img-element -- campaign CDN
         <img
@@ -63,7 +61,11 @@ function SecondarySlide({ placement }: { placement: PlacementWinner }) {
 
   if (!href) return body
   return (
-    <Link href={href} className="block" onClick={() => setCampaignAttributionId(placement.campaign_id)}>
+    <Link
+      href={href}
+      className="block h-full w-full"
+      onClick={() => setCampaignAttributionId(placement.campaign_id)}
+    >
       {body}
     </Link>
   )
@@ -72,6 +74,7 @@ function SecondarySlide({ placement }: { placement: PlacementWinner }) {
 function SecondaryCarousel({ slides }: { slides: PlacementWinner[] }) {
   const list = slides.slice(0, 5)
   const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
   const count = list.length
 
   const go = useCallback(
@@ -83,21 +86,54 @@ function SecondaryCarousel({ slides }: { slides: PlacementWinner[] }) {
   )
 
   useEffect(() => {
-    if (count <= 1) return
-    const id = window.setInterval(() => go(index + 1), 5500)
+    if (count <= 1 || paused) return
+    const id = window.setInterval(() => {
+      setIndex((current) => (current + 1) % count)
+    }, 5000)
     return () => window.clearInterval(id)
-  }, [count, index, go])
+  }, [count, paused])
 
   if (count === 0) return null
-  if (count === 1) return <SecondarySlide placement={list[0]} />
+
+  const stage =
+    count === 1 ? (
+      <div className={SECONDARY_ASPECT}>
+        <SecondarySlide placement={list[0]} />
+      </div>
+    ) : (
+      <div className={`relative ${SECONDARY_ASPECT}`}>
+        {list.map((slide, i) => {
+          const active = i === index
+          return (
+            <div
+              key={`${slide.campaign_id}-${slide.sort_order ?? i}-${i}`}
+              className="absolute inset-0 transition-opacity duration-500 ease-in-out"
+              style={{
+                opacity: active ? 1 : 0,
+                zIndex: active ? 1 : 0,
+                pointerEvents: active ? 'auto' : 'none',
+              }}
+            >
+              <SecondarySlide placement={slide} />
+            </div>
+          )
+        })}
+      </div>
+    )
+
+  if (count === 1) return stage
 
   return (
-    <div className="relative">
-      <SecondarySlide placement={list[index]} />
+    <div
+      className="relative"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {stage}
       <button
         type="button"
         aria-label="Banner phụ trước"
-        className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/45 px-2.5 py-1.5 text-sm text-white hover:bg-black/60"
+        className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
@@ -109,7 +145,7 @@ function SecondaryCarousel({ slides }: { slides: PlacementWinner[] }) {
       <button
         type="button"
         aria-label="Banner phụ sau"
-        className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/45 px-2.5 py-1.5 text-sm text-white hover:bg-black/60"
+        className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
@@ -220,7 +256,7 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
 
   return (
     <section className="relative isolate overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <div aria-hidden className="home-cms-band-fade pointer-events-none absolute inset-0 -z-10">
         {slides.map((slide, i) => {
           const src = slide.theme_image_url?.trim()
           if (!src) return null
@@ -240,10 +276,9 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
           )
         })}
         {!activeTheme ? (
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-200 via-sky-100 to-[#ededed]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-sky-200 via-sky-100 to-transparent" />
         ) : null}
 
-        {/* Soft color bleed from the active hero into the theme (smoke halo). */}
         {slides.map((slide, i) => {
           const src = slide.image_desktop_url?.trim() || slide.image_mobile_url?.trim()
           if (!src) return null
@@ -254,20 +289,24 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
               key={`ambient-${slide.campaign_id}-${i}`}
               src={src}
               alt=""
-              className="absolute inset-x-0 top-0 h-[70%] w-full scale-110 object-cover object-top blur-3xl transition-opacity ease-in-out"
+              className="absolute inset-x-0 top-0 h-[58%] w-full object-cover object-top blur-2xl transition-opacity ease-in-out"
               style={{
-                opacity: active ? 0.5 : 0,
+                opacity: active ? 0.35 : 0,
                 transitionDuration: `${THEME_FADE_MS}ms`,
               }}
             />
           )
         })}
-
-        <div className="absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-b from-transparent via-[#ededed]/75 to-[#ededed]" />
       </div>
 
+      {/* Hero wash → section white (same as featured-categories). */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-40 bg-gradient-to-b from-transparent via-white/80 to-white sm:h-52"
+      />
+
       {/* Same max-w as header; slightly less padding so the hero band reads a bit wider. */}
-      <div className="relative z-10 mx-auto max-w-7xl px-2 pt-3 sm:px-3 sm:pt-4 lg:px-4">
+      <div className="relative z-10 mx-auto max-w-7xl px-2 pb-3 pt-3 sm:px-3 sm:pb-4 sm:pt-4 lg:px-4">
         {hasHero ? (
           <CampaignHeroSlot
             slides={slides}
