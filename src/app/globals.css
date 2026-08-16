@@ -158,6 +158,67 @@ body {
   }
 
   /**
+   * Bestsellers: 6-up (lg) of a 12-item track. 100% is the scroller box (width: 100%).
+   */
+  .hot-sale-track {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .hot-sale-track > * {
+    flex: 0 0 calc((100% - 0.5rem) / 2);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 640px) {
+    .hot-sale-track > * {
+      flex-basis: calc((100% - 1rem) / 3);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hot-sale-track {
+      gap: 0.5rem;
+    }
+
+    .hot-sale-track > * {
+      flex-basis: calc((100% - 2.5rem) / 6);
+    }
+  }
+
+  /**
+   * Title tab — trapezoid, wider at the top, sits on the orange lid (home rail ref).
+   */
+  .hot-sale-tab {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 20;
+    transform: translate(-50%, -50%);
+    padding: 0.5rem 2.75rem 0.62rem;
+    background-color: theme('colors.accent.600');
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
+    white-space: nowrap;
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+    filter: drop-shadow(0 2px 3px rgb(127 29 29 / 0.22));
+  }
+
+  @media (min-width: 640px) {
+    .hot-sale-tab {
+      padding: 0.55rem 3.25rem 0.7rem;
+      font-size: 1.125rem;
+    }
+  }
+
+  /**
    * Receipt card with a decorative scalloped edge.
    * Mask geometry is set in CartReceiptCard (measured width, phase at x=0).
    * Keep fixed mask dimensions out of CSS so both side edges remain aligned.

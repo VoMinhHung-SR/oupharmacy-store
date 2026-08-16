@@ -13,10 +13,10 @@ export const CARD_CORNER_TAB_LEFT_POSITION = 'absolute -left-4 -top-4'
 export const CARD_CORNER_TAB_LEFT_SHAPE =
   'rounded-tl-lg rounded-br-md border border-gray-200 border-l-0 border-t-0'
 
-export const CARD_CORNER_TAB_RIGHT_POSITION = 'absolute -right-4 -top-4'
+/** Top-right promo: inset from card edge (padding gap), same top as country. */
+export const CARD_CORNER_TAB_RIGHT_POSITION = 'absolute right-0 -top-4'
 
-export const CARD_CORNER_TAB_RIGHT_SHAPE =
-  'rounded-tr-lg rounded-bl-md border border-red-500/30 border-r-0 border-t-0'
+export const CARD_CORNER_TAB_RIGHT_SHAPE = 'rounded-md'
 
 export const cardCornerTabLeftOverlayClass = [
   CARD_CORNER_TAB_POINTER,
@@ -33,5 +33,5 @@ export const cardCornerTabRightPromoClass = [
   CARD_CORNER_TAB_RIGHT_POSITION,
   CARD_CORNER_TAB_RIGHT_SHAPE,
   CORNER_TAB_SHADOW,
-  'bg-red-500 px-2.5 py-1.5 text-xs font-bold leading-none text-white',
+  'inline-flex min-h-[22px] items-center bg-red-500 px-2.5 py-1.5 text-xs font-bold leading-none text-white',
 ].join(' ')
