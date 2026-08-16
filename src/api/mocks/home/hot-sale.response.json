@@ -72,6 +72,78 @@
       "href": "/tim-kiem?q=kem-duong",
       "brand_country": "Ấn Độ",
       "in_stock": 9
+    },
+    {
+      "id": "hot-7",
+      "name": "Omega 3 dầu cá 1000mg",
+      "price": 189000,
+      "originalPrice": 249000,
+      "discount": 24,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 60 viên",
+      "href": "/tim-kiem?q=omega-3",
+      "brand_country": "Mỹ",
+      "in_stock": 16
+    },
+    {
+      "id": "hot-8",
+      "name": "Canxi + Vitamin D3",
+      "price": 165000,
+      "originalPrice": 210000,
+      "discount": 21,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 60 viên",
+      "href": "/tim-kiem?q=canxi",
+      "brand_country": "Pháp",
+      "in_stock": 14
+    },
+    {
+      "id": "hot-9",
+      "name": "Kem chống nắng SPF 50+",
+      "price": 198000,
+      "originalPrice": 265000,
+      "discount": 25,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Tuýp 50g",
+      "href": "/tim-kiem?q=chong-nang",
+      "brand_country": "Hàn Quốc",
+      "in_stock": 11
+    },
+    {
+      "id": "hot-10",
+      "name": "Men vi sinh đường ruột",
+      "price": 135000,
+      "originalPrice": 175000,
+      "discount": 23,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 30 gói",
+      "href": "/tim-kiem?q=men-vi-sinh",
+      "brand_country": "Ý",
+      "in_stock": 19
+    },
+    {
+      "id": "hot-11",
+      "name": "Viên kẽm gluconat 10mg",
+      "price": 68000,
+      "originalPrice": 89000,
+      "discount": 24,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Hộp 60 viên",
+      "href": "/tim-kiem?q=kẽm",
+      "brand_country": "Việt Nam",
+      "in_stock": 27
+    },
+    {
+      "id": "hot-12",
+      "name": "Dung dịch vệ sinh phụ nữ",
+      "price": 95000,
+      "originalPrice": 125000,
+      "discount": 24,
+      "image_url": "/mocks/product.svg",
+      "packaging": "Chai 150ml",
+      "href": "/tim-kiem?q=dung-dich-ve-sinh",
+      "brand_country": "Pháp",
+      "in_stock": 21
     }
   ]
 }

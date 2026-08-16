@@ -49,7 +49,8 @@ function PromoCard({ placement }: { placement: PlacementWinner }) {
 }
 
 /**
- * HOME_PROMO_LEFT / HOME_PROMO_RIGHT winners, or static PromotionalBanners (D-08).
+ * HOME_PROMO_* legacy — prefer CampaignHomeCluster (D-21). Kept for optional reuse.
+ * Left/right cards or static PromotionalBanners (D-08).
  * If only one side wins, still prefer campaign layout for that side + soft empty for the other.
  */
 export const CampaignPromoSlots: React.FC<CampaignPromoSlotsProps> = ({ left, right }) => {

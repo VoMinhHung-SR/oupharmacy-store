@@ -1,4 +1,8 @@
-import type { PlacementWinner, PublicCampaignDetail } from '@/lib/services/campaign'
+import type {
+  PlacementSlotValue,
+  PlacementWinner,
+  PublicCampaignDetail,
+} from '@/lib/services/campaign'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'duoc-my-pham': 'Dược mỹ phẩm',
@@ -58,10 +62,26 @@ export function safeCampaignHref(ctaUrl: string | null | undefined): string | nu
   return trimmed
 }
 
+function asSlideList(value: PlacementSlotValue | undefined): PlacementWinner[] {
+  if (value == null) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return [value]
+}
+
+/** D-22 carousel slots → slides (empty = no winner). Accepts legacy single object. */
+export function pickHomeSlides(
+  placements: Partial<Record<string, PlacementSlotValue>> | null | undefined,
+  slot: string
+): PlacementWinner[] {
+  if (!placements) return []
+  return asSlideList(placements[slot])
+}
+
+/** Notice / single slots → one subject or null. */
 export function pickHomePlacement(
-  placements: Partial<Record<string, PlacementWinner | null>> | null | undefined,
+  placements: Partial<Record<string, PlacementSlotValue>> | null | undefined,
   slot: string
 ): PlacementWinner | null {
-  if (!placements) return null
-  return placements[slot] ?? null
+  const slides = pickHomeSlides(placements, slot)
+  return slides[0] ?? null
 }
