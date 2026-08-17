@@ -1,93 +1,67 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback, useRef } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
+import hotSale from '@/api/mocks/home/hot-sale.response.json'
+import type { HotSaleResponse } from '@/api/mocks/home/types'
 
-interface Product {
-  id: string
-  name: string
-  price: number
-  price_display?: string
-  originalPrice?: number
-  discount?: number
-  image_url?: string
-  packaging?: string
-  variant_unit_id?: number
-  in_stock?: number
-  category_slug?: string
-  product_slug?: string
-}
+const ARROW_CLASS =
+  'absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-600 shadow-md hover:bg-white sm:h-10 sm:w-10'
 
-interface BestsellingProductsProps {
-  products?: Product[]
-}
+/** Hot-sale / bestsellers — mock top-12 rail with carousel (home fixture). */
+export const BestsellingProducts: React.FC = () => {
+  const data = hotSale as HotSaleResponse
+  const products = (data.products || []).slice(0, 12)
+  const scrollerRef = useRef<HTMLDivElement>(null)
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Thực phẩm bảo vệ sức khỏe NMN PQQ',
-    price: 6675000,
-    originalPrice: 8900000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 10,
-  },
-  {
-    id: '2',
-    name: 'Viên uống Best King Jpanwell hỗ trợ tăng cường sinh lý và khả năng',
-    price: 1040000,
-    originalPrice: 1300000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 15,
-  },
-  {
-    id: '3',
-    name: 'Viên uống giảm ho Nano Anpacov Biochempha',
-    price: 119200,
-    originalPrice: 149000,
-    packaging: 'Hộp 60 Viên',
-    in_stock: 20,
-  },
-  {
-    id: '4',
-    name: 'Viên nhai Brauer Baby & Kids Ultra Pure DHA hỗ trợ phát triển não',
-    price: 388800,
-    originalPrice: 486000,
-    packaging: 'Hộp 60 viên',
-    in_stock: 12,
-  },
-  {
-    id: '5',
-    name: 'Nước Yến Sào Cao Cấp Nunest Relax - Ngủ Ngon, Giảm Căng thẳng',
-    price: 246750,
-    originalPrice: 329000,
-    packaging: 'Hộp 6 Hũ',
-    in_stock: 8,
-  },
-  {
-    id: '6',
-    name: 'Chai xịt Aloclair Plus Spray giảm đau nhanh bệnh tay chân miệng',
-    price: 229000,
-    packaging: 'Hộp x 15ml',
-    in_stock: 25,
-  },
-]
+  const scrollPage = useCallback((dir: -1 | 1) => {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
+  }, [])
 
-export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ products = mockProducts }) => {
+  if (products.length === 0) return null
+
   return (
-    <section className="py-12 bg-white">
+    <section className="bg-white pb-8 pt-12 sm:pb-10 sm:pt-14" aria-label={data.title}>
       <Container>
-        {/* Section header */}
-        <div className="bg-red-600 text-white inline-block px-6 py-2 rounded-t-lg mb-6">
-          <h2 className="text-xl font-bold">Sản phẩm bán chạy</h2>
-        </div>
+        <div className="relative">
+          <h2 className="hot-sale-tab">{data.title}</h2>
 
-        {/* Products grid */}
-        <div className="bg-primary-50 p-6 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="relative rounded-2xl bg-[#f39800] px-4 pb-4 pt-6 sm:px-5 sm:pb-5 sm:pt-7">
+            {products.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Sản phẩm trước"
+                  className={`${ARROW_CLASS} left-1 sm:left-1.5`}
+                  onClick={() => scrollPage(-1)}
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Sản phẩm sau"
+                  className={`${ARROW_CLASS} right-1 sm:right-1.5`}
+                  onClick={() => scrollPage(1)}
+                >
+                  <ChevronRightIcon className="h-5 w-5" />
+                </button>
+              </>
+            ) : null}
+
+            <div
+              ref={scrollerRef}
+              className="hot-sale-track scrollbar-hide scroll-smooth"
+            >
+              {products.map((product) => (
+                <div key={product.id}>
+                    <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </Container>
@@ -96,4 +70,3 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({ produc
 }
 
 export default BestsellingProducts
-

@@ -1,0 +1,17 @@
+{
+  "title": "Danh mục nổi bật",
+  "categories": [
+    { "name": "Thần kinh não", "icon": "🧠", "count": 57, "href": "/categories/than-kinh-nao" },
+    { "name": "Vitamin & Khoáng chất", "icon": "💊", "count": 113, "href": "/categories/vitamin-khoang-chat" },
+    { "name": "Sức khoẻ tim mạch", "icon": "❤️", "count": 23, "href": "/categories/suc-khoe-tim-mach" },
+    { "name": "Tăng sức đề kháng, miễn dịch", "icon": "🛡️", "count": 39, "href": "/categories/tang-suc-de-khang" },
+    { "name": "Hỗ trợ tiêu hóa", "icon": "🫀", "count": 68, "href": "/categories/ho-tro-tieu-hoa" },
+    { "name": "Sinh lý - Nội tiết tố", "icon": "⚕️", "count": 42, "href": "/categories/sinh-ly-noi-tiet" },
+    { "name": "Dinh dưỡng", "icon": "⚖️", "count": 37, "href": "/categories/dinh-duong" },
+    { "name": "Hỗ trợ điều trị", "icon": "➕", "count": 125, "href": "/categories/ho-tro-dieu-tri" },
+    { "name": "Giải pháp làn da", "icon": "✨", "count": 88, "href": "/categories/giai-phap-lan-da" },
+    { "name": "Chăm sóc da mặt", "icon": "😷", "count": 198, "href": "/categories/cham-soc-da-mat" },
+    { "name": "Hỗ trợ làm đẹp", "icon": "💅", "count": 22, "href": "/categories/ho-tro-lam-dep" },
+    { "name": "Hỗ trợ tình dục", "icon": "💑", "count": 41, "href": "/categories/ho-tro-tinh-duc" }
+  ]
+}

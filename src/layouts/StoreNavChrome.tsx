@@ -15,7 +15,7 @@ interface StoreNavChromeProps {
 
 /**
  * Client chrome: providers + header + desktop nav bar.
- * Suspense for `useSearchParams` is provided by root layout.
+ * Home atmosphere lives in page hero band (not here).
  */
 export function StoreNavChrome({ categories }: StoreNavChromeProps) {
   return (

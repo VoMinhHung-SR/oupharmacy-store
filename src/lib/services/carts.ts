@@ -88,6 +88,8 @@ export interface CheckoutCartPayload extends CartMutationBase {
   notes?: string
   /** When set, only these server cart line ids are purchased; cart stays active if lines remain. */
   cart_item_ids?: number[]
+  /** Best-effort campaign attribution (D-10); invalid ids ignored by BE. */
+  campaign_id?: number
 }
 
 export async function getCurrentCart() {

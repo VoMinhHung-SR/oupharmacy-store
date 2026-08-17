@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-label="OUPharmacy mock brand">
+  <rect width="640" height="480" fill="#f0fdfa"/>
+  <rect x="160" y="100" width="320" height="200" rx="20" fill="#ccfbf1"/>
+  <circle cx="320" cy="200" r="56" fill="#14b8a6" opacity="0.45"/>
+  <text x="320" y="380" text-anchor="middle" font-family="system-ui,sans-serif" font-size="26" fill="#0f766e">Brand</text>
+</svg>

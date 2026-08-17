@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { getCampaignAttributionId } from '@/lib/utils/campaignAttribution'
 import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import {
@@ -304,12 +305,14 @@ export default function CheckoutPage() {
         hasScopedSubset && checkoutScopedLineIds
           ? checkoutScopedLineIds.map((id) => Number(id))
           : undefined
+      const attributedCampaignId = getCampaignAttributionId()
       const created = await checkoutCartMutation.mutateAsync({
         payment_method_id: paymentMethodId,
         delivery: buildCheckoutDeliveryPayload(formValues),
         notes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
         expected_version: cartVersion,
         ...(scope ? { cart_item_ids: scope } : {}),
+        ...(attributedCampaignId != null ? { campaign_id: attributedCampaignId } : {}),
       })
       if (!isAuthenticated && created && typeof created === 'object') {
         saveGuestOrderConfirmation(created as Record<string, unknown>)

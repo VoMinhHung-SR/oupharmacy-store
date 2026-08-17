@@ -29,6 +29,10 @@
 .DS_Store
 *.pem
 
+# Local/generated homepage CMS creatives (large binaries; fixture JSON stays tracked)
+/public/mocks/home-cms/
+/public/mocks/*.png
+
 # debug
 npm-debug.log*
 yarn-debug.log*

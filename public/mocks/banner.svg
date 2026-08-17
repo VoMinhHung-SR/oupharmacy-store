@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="OUPharmacy campaign banner A">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0%" stop-color="#0c4a6e"/>
+      <stop offset="45%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <circle cx="1040" cy="180" r="200" fill="#7dd3fc" opacity="0.2"/>
+  <circle cx="1180" cy="420" r="140" fill="#e0f2fe" opacity="0.15"/>
+  <circle cx="160" cy="500" r="90" fill="#bae6fd" opacity="0.12"/>
+  <text x="64" y="290" font-family="system-ui,sans-serif" font-size="48" font-weight="700" fill="#ffffff">Banner A</text>
+  <text x="64" y="348" font-family="system-ui,sans-serif" font-size="24" fill="#e0f2fe">Image + link · trên atmosphere</text>
+</svg>

@@ -43,6 +43,14 @@ interface ProductCardProps {
 const getProductLink = (product: ProductCardProps['product']): string | null =>
   product.href ?? null
 
+/** Sale unit for `price / Hộp` — unit_name, else first word of packaging. */
+function unitSaleLabel(unitName?: string, packaging?: string): string | undefined {
+  const named = unitName?.trim()
+  if (named) return named
+  const first = packaging?.trim().split(/\s+/)[0]
+  return first || undefined
+}
+
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
@@ -72,6 +80,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product])
 
   const hasCornerBadges = Boolean(product.brand_country?.trim()) || discount > 0
+  const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
+  const compareAt = selectedUnit?.compare_at_price || product.originalPrice
+  const salePrice = selectedUnit?.price_value ?? product.price
+  const hasCompareAt = Boolean(compareAt && compareAt > salePrice)
 
   const isConsultPrice = useMemo(
     () =>
@@ -197,25 +209,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         ) : (
           <div className="mt-2 space-y-1">
-            <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-              <span className="text-base font-bold tabular-nums text-primary-700">
-                {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
-                {(selectedUnit?.price_value ?? product.price).toLocaleString('vi-VN')}₫
-              </span>
-              {selectedUnit?.unit_name ? (
-                <span className="text-sm text-primary-700">/ {selectedUnit.unit_name}</span>
-              ) : null}
-              {(selectedUnit?.compare_at_price || product.originalPrice) &&
-              (selectedUnit?.compare_at_price || product.originalPrice)! >
-                (selectedUnit?.price_value ?? product.price) ? (
-                <span className="text-sm text-gray-400 line-through">
-                  {(
-                    selectedUnit?.compare_at_price ||
-                    product.originalPrice ||
-                    0
-                  ).toLocaleString('vi-VN')}
-                  ₫
+            <div className="min-w-0">
+              <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                <span className="text-base font-bold tabular-nums text-primary-700">
+                  {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                  {salePrice.toLocaleString('vi-VN')}₫
                 </span>
+                {unitLabel ? (
+                  <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                ) : null}
+              </div>
+              {hasCompareAt ? (
+                <div className="text-xs text-gray-400 line-through">
+                  {compareAt!.toLocaleString('vi-VN')}₫
+                </div>
               ) : null}
             </div>
 
