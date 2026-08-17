@@ -51,6 +51,11 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 2. State chia sẻ → xem sẵn context; tránh duplicate global state.
 3. Gọi dữ liệu → thêm/thay method trong `src/lib/services/`, tái dùng `api.ts` khi đúng base store.
 
+### Smart Medicine Cabinet (P1)
+
+- Route: `/tu-thuoc-thong-minh` (login gate client, cùng pattern `/tai-khoan`).
+- API store: `/cabinets/`, `/cabinet-items/`, `overview/` — tồn nhà, không phải kho `in_stock`.
+
 ### Faceted search / advanced filters
 
 - Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).

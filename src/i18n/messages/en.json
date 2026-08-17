@@ -130,6 +130,63 @@
     "termsHeading": "Program terms",
     "termsMore": "Read full terms",
     "termsLess": "Hide terms"
+  },
+  "cabinet": {
+    "title": "Smart medicine cabinet",
+    "titleHint": "Track household medicines and expiry dates",
+    "subtitle": "{name} · {count} medicines",
+    "addMedicine": "Add medicine",
+    "addTitle": "Add medicine to cabinet",
+    "searchLabel": "Search medicine",
+    "searchPlaceholder": "Medicine name…",
+    "searching": "Searching…",
+    "searchEmpty": "No medicines found",
+    "changeMedicine": "Choose another",
+    "unitLabel": "Unit",
+    "quantityLabel": "Quantity",
+    "expirationLabel": "Expiration date",
+    "confirmAdd": "Add to cabinet",
+    "cancel": "Cancel",
+    "switcherLabel": "Cabinet",
+    "rename": "Rename",
+    "deleteCabinet": "Delete cabinet",
+    "cabinetName": "Cabinet name",
+    "newCabinet": "New cabinet",
+    "createCabinet": "Create",
+    "saveChanges": "Save",
+    "markUsedUp": "Mark as used up",
+    "remove": "Remove from cabinet",
+    "allItems": "All medicines",
+    "emptyCabinet": "This cabinet is empty. Tap Add medicine to start.",
+    "loading": "Loading…",
+    "itemFallback": "Medicine",
+    "counts": {
+      "expired": "Expired",
+      "expiringSoon": "Expiring soon",
+      "expiring": "Needs attention"
+    },
+    "lists": {
+      "expired": "Expired",
+      "expiringSoon": "Expiring soon",
+      "empty": "Nothing in this list"
+    },
+    "status": {
+      "EXPIRED": "Expired",
+      "EXPIRING_SOON": "Expiring soon",
+      "EXPIRING": "Needs attention",
+      "SAFE": "In date"
+    },
+    "toast": {
+      "added": "Added to cabinet",
+      "addFailed": "Could not add medicine",
+      "updated": "Updated",
+      "usedUp": "Marked as used up",
+      "removed": "Removed from cabinet",
+      "actionFailed": "Could not complete action",
+      "cabinetCreated": "Cabinet created",
+      "cabinetRenamed": "Cabinet renamed",
+      "cabinetDeleted": "Cabinet deleted"
+    }
   }
 }
 

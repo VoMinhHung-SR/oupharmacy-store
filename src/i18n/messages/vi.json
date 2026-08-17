@@ -130,6 +130,63 @@
     "termsHeading": "Thể lệ chương trình",
     "termsMore": "Xem thêm thể lệ",
     "termsLess": "Thu gọn thể lệ"
+  },
+  "cabinet": {
+    "title": "Tủ thuốc thông minh",
+    "titleHint": "Quản lý thuốc tại nhà và hạn sử dụng",
+    "subtitle": "{name} · {count} loại thuốc",
+    "addMedicine": "Thêm thuốc",
+    "addTitle": "Thêm thuốc vào tủ",
+    "searchLabel": "Tìm thuốc",
+    "searchPlaceholder": "Nhập tên thuốc…",
+    "searching": "Đang tìm…",
+    "searchEmpty": "Không tìm thấy thuốc",
+    "changeMedicine": "Chọn thuốc khác",
+    "unitLabel": "Đơn vị",
+    "quantityLabel": "Số lượng",
+    "expirationLabel": "Hạn sử dụng",
+    "confirmAdd": "Thêm vào tủ",
+    "cancel": "Hủy",
+    "switcherLabel": "Tủ thuốc",
+    "rename": "Đổi tên",
+    "deleteCabinet": "Xóa tủ",
+    "cabinetName": "Tên tủ",
+    "newCabinet": "Tủ mới",
+    "createCabinet": "Tạo tủ",
+    "saveChanges": "Lưu",
+    "markUsedUp": "Đánh dấu đã dùng hết",
+    "remove": "Xóa khỏi tủ",
+    "allItems": "Tất cả thuốc",
+    "emptyCabinet": "Chưa có thuốc trong tủ. Bấm Thêm thuốc để bắt đầu.",
+    "loading": "Đang tải…",
+    "itemFallback": "Thuốc",
+    "counts": {
+      "expired": "Đã hết hạn",
+      "expiringSoon": "Sắp hết hạn",
+      "expiring": "Cần chú ý"
+    },
+    "lists": {
+      "expired": "Đã hết hạn",
+      "expiringSoon": "Sắp hết hạn",
+      "empty": "Không có thuốc trong mục này"
+    },
+    "status": {
+      "EXPIRED": "Hết hạn",
+      "EXPIRING_SOON": "Sắp hết hạn",
+      "EXPIRING": "Cần chú ý",
+      "SAFE": "Còn hạn"
+    },
+    "toast": {
+      "added": "Đã thêm thuốc vào tủ",
+      "addFailed": "Không thêm được thuốc",
+      "updated": "Đã cập nhật",
+      "usedUp": "Đã đánh dấu dùng hết",
+      "removed": "Đã xóa khỏi tủ",
+      "actionFailed": "Không thực hiện được",
+      "cabinetCreated": "Đã tạo tủ thuốc",
+      "cabinetRenamed": "Đã đổi tên tủ",
+      "cabinetDeleted": "Đã xóa tủ"
+    }
   }
 }
 
