@@ -13,6 +13,7 @@ import { InventoryBadge } from '@/components/cabinet/InventoryBadge'
 import { useCabinet } from '@/lib/hooks/useCabinet'
 import type { CabinetItem } from '@/lib/services/cabinet'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
+import { CartLineThumb } from '@/components/cart/CartLineThumb'
 
 export function CabinetWorkspace() {
   const t = useTranslations('cabinet')
@@ -240,9 +241,10 @@ export function CabinetWorkspace() {
               <li key={item.id}>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 py-3 text-left hover:bg-slate-50"
+                  className="flex w-full items-center gap-2.5 py-3 text-left hover:bg-slate-50"
                   onClick={() => setActiveItem(item)}
                 >
+                  <CartLineThumb src={item.image_url} alt="" size="sm" native />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium text-slate-900">
                       {item.product_name || t('itemFallback')}
@@ -377,10 +379,11 @@ function AlertList({
             <li key={item.id}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
+                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
                 onClick={() => onOpen(item)}
               >
-                <span className="truncate font-medium text-slate-900">
+                <CartLineThumb src={item.image_url} alt="" size="sm" native />
+                <span className="min-w-0 flex-1 truncate font-medium text-slate-900">
                   {item.product_name}
                 </span>
                 <span className="flex items-center gap-1">
