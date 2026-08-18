@@ -61,6 +61,15 @@ const nextConfig = {
     ],
   },
   trailingSlash: false,
+  async redirects() {
+    return [
+      {
+        source: '/tu-thuoc-thong-minh',
+        destination: '/tai-khoan/tu-thuoc',
+        permanent: false,
+      },
+    ]
+  },
   // LAN / phone preview: scripts ship with crossorigin="anonymous" and need ACAO
   // when the page is opened via http://<lan-ip>:3000 (not only localhost).
   async headers() {

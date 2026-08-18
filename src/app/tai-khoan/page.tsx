@@ -71,7 +71,7 @@ export default function AccountPage() {
     {
       title: 'Tủ thuốc thông minh',
       description: 'Theo dõi thuốc tại nhà và hạn sử dụng',
-      href: '/tu-thuoc-thong-minh',
+      href: '/tai-khoan/tu-thuoc',
       icon: <GridIcon className="w-6 h-6" />,
     },
     {

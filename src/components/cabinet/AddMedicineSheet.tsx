@@ -7,7 +7,9 @@ import { Button } from '@/components/Button'
 import { TextField } from '@/components/TextField'
 import { SelectOptionPill } from '@/components/common/SelectOptionPill'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
+import { SkuScanControl } from '@/components/cabinet/SkuScanControl'
 import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
+import type { CreateCabinetItemPayload } from '@/lib/services/cabinet'
 import type { Product } from '@/lib/services/products'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
@@ -15,13 +17,7 @@ type AddMedicineSheetProps = {
   open: boolean
   onClose: () => void
   cabinetId: number
-  onAdd: (payload: {
-    cabinet: number
-    product_variant_id: number
-    product_variant_unit_id: number
-    quantity: number
-    expiration_date: string
-  }) => Promise<unknown>
+  onAdd: (payload: CreateCabinetItemPayload) => Promise<unknown>
 }
 
 export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicineSheetProps) {
@@ -33,6 +29,7 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
   const [unitId, setUnitId] = useState<number | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [expirationDate, setExpirationDate] = useState('')
+  const [lotNumber, setLotNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -48,6 +45,7 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
       setUnitId(null)
       setQuantity(1)
       setExpirationDate('')
+      setLotNumber('')
     }
   }, [open])
 
@@ -63,6 +61,12 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
     setUnitId(defaultUnit?.unit_id ?? product.default_unit_id ?? null)
   }
 
+  const handleSku = (sku: string) => {
+    setSelected(null)
+    setQuery(sku)
+    setDebounced(sku)
+  }
+
   const handleSubmit = async () => {
     if (!selected || unitId == null || !expirationDate || quantity < 1) return
     setSubmitting(true)
@@ -73,6 +77,7 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
         product_variant_unit_id: unitId,
         quantity,
         expiration_date: expirationDate,
+        ...(lotNumber.trim() ? { lot_number: lotNumber.trim() } : {}),
       })
       toastSuccess(t('toast.added'))
       onClose()
@@ -98,7 +103,7 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
           <Button
             className="flex-1"
             disabled={!selected || unitId == null || !expirationDate || submitting}
-            onClick={handleSubmit}
+            onClick={() => void handleSubmit()}
           >
             {t('confirmAdd')}
           </Button>
@@ -113,6 +118,7 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
           onChange={(e) => setQuery(e.target.value)}
           fullWidth
         />
+        {!selected ? <SkuScanControl onSku={handleSku} /> : null}
         {!selected ? (
           <div className="space-y-2">
             {search.isFetching ? <p className="text-sm text-gray-500">{t('searching')}</p> : null}
@@ -178,6 +184,12 @@ export function AddMedicineSheet({ open, onClose, cabinetId, onAdd }: AddMedicin
               label={t('expirationLabel')}
               value={expirationDate}
               onChange={(e) => setExpirationDate(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label={t('lotLabel')}
+              value={lotNumber}
+              onChange={(e) => setLotNumber(e.target.value)}
               fullWidth
             />
           </div>

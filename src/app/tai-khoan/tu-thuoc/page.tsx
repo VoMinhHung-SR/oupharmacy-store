@@ -13,7 +13,7 @@ export default function SmartMedicineCabinetPage() {
 
   React.useEffect(() => {
     if (!loading && !isAuthenticated && !isOpen) {
-      openModal('/tu-thuoc-thong-minh')
+      openModal('/tai-khoan/tu-thuoc')
     }
   }, [isAuthenticated, loading, openModal, isOpen])
 

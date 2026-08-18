@@ -14,6 +14,8 @@ import {
   updateCabinet,
   updateCabinetItem,
   type CreateCabinetItemPayload,
+  type UpdateCabinetItemPayload,
+  type UpdateCabinetPayload,
 } from '@/lib/services/cabinet'
 
 const cabinetKeys = {
@@ -68,7 +70,13 @@ export function useCabinet(enabled: boolean) {
 
   const renameCabinetMutation = useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) =>
-      unwrap(await updateCabinet(id, name)),
+      unwrap(await updateCabinet(id, { name })),
+    onSuccess: invalidate,
+  })
+
+  const updateCabinetMutation = useMutation({
+    mutationFn: async ({ id, payload }: { id: number; payload: UpdateCabinetPayload }) =>
+      unwrap(await updateCabinet(id, payload)),
     onSuccess: invalidate,
   })
 
@@ -92,7 +100,7 @@ export function useCabinet(enabled: boolean) {
       payload,
     }: {
       id: number
-      payload: { quantity?: number; expiration_date?: string }
+      payload: UpdateCabinetItemPayload
     }) => unwrap(await updateCabinetItem(id, payload)),
     onSuccess: invalidate,
   })
@@ -116,6 +124,7 @@ export function useCabinet(enabled: boolean) {
       itemsQuery.error,
     createCabinet: createCabinetMutation,
     renameCabinet: renameCabinetMutation,
+    updateCabinet: updateCabinetMutation,
     deleteCabinet: deleteCabinetMutation,
     addItem: addItemMutation,
     updateItem: updateItemMutation,

@@ -138,13 +138,16 @@
     "addMedicine": "Add medicine",
     "addTitle": "Add medicine to cabinet",
     "searchLabel": "Search medicine",
-    "searchPlaceholder": "Medicine name…",
+    "searchPlaceholder": "Medicine name or SKU…",
     "searching": "Searching…",
     "searchEmpty": "No medicines found",
     "changeMedicine": "Choose another",
     "unitLabel": "Unit",
     "quantityLabel": "Quantity",
     "expirationLabel": "Expiration date",
+    "lotLabel": "Lot number (optional)",
+    "thresholdLabel": "Low-stock threshold",
+    "thresholdHint": "Leave empty to use the default (5). Quantity at or below this value is marked low stock.",
     "confirmAdd": "Add to cabinet",
     "cancel": "Cancel",
     "switcherLabel": "Cabinet",
@@ -163,11 +166,14 @@
     "counts": {
       "expired": "Expired",
       "expiringSoon": "Expiring soon",
-      "expiring": "Needs attention"
+      "expiring": "Needs attention",
+      "lowStock": "Low stock"
     },
     "lists": {
       "expired": "Expired",
       "expiringSoon": "Expiring soon",
+      "lowStock": "Low stock",
+      "refill": "Refill list",
       "empty": "Nothing in this list"
     },
     "status": {
@@ -175,6 +181,41 @@
       "EXPIRING_SOON": "Expiring soon",
       "EXPIRING": "Needs attention",
       "SAFE": "In date"
+    },
+    "inventory": {
+      "LOW_STOCK": "Low stock",
+      "OUT_OF_STOCK": "Used up",
+      "IN_STOCK": "In stock"
+    },
+    "refill": {
+      "toggle": "Add to refill list",
+      "hint": "Does not add to cart yet. Buy again comes in a later step."
+    },
+    "settings": {
+      "title": "Expiry reminders",
+      "alertsAlwaysVisible": "Alert lists on this page stay visible even if reminders are off.",
+      "reminderEnabled": "Enable reminders",
+      "reminderHint": "Saved for later notifications. Does not hide alerts on this page.",
+      "soonDays": "Days before expiry to treat as soon",
+      "soonDaysHint": "Default 30 days. From 1 to 365.",
+      "save": "Save settings",
+      "daysInvalid": "Days must be between 1 and 365"
+    },
+    "scan": {
+      "start": "Scan SKU",
+      "stop": "Stop camera",
+      "hint": "Decode the label, then search by SKU. If the barcode is not the catalog SKU, type it instead.",
+      "unsupported": "This browser cannot scan barcodes. Type the SKU in the search field.",
+      "noCamera": "Could not open the camera. Type the SKU in the search field."
+    },
+    "seed": {
+      "open": "Add from order",
+      "title": "Add medicine from an order",
+      "hint": "Pick an order line, then enter the expiry date. The app will not guess it.",
+      "empty": "No orders to add from yet.",
+      "back": "Pick another line",
+      "hsdRequired": "Expiration date is required.",
+      "missingUnit": "Could not resolve a sell unit for this product."
     },
     "toast": {
       "added": "Added to cabinet",
@@ -185,7 +226,8 @@
       "actionFailed": "Could not complete action",
       "cabinetCreated": "Cabinet created",
       "cabinetRenamed": "Cabinet renamed",
-      "cabinetDeleted": "Cabinet deleted"
+      "cabinetDeleted": "Cabinet deleted",
+      "settingsSaved": "Cabinet settings saved"
     }
   }
 }

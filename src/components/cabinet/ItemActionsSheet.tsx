@@ -7,14 +7,15 @@ import { Button } from '@/components/Button'
 import { TextField } from '@/components/TextField'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
-import type { CabinetItem } from '@/lib/services/cabinet'
+import { InventoryBadge } from '@/components/cabinet/InventoryBadge'
+import type { CabinetItem, UpdateCabinetItemPayload } from '@/lib/services/cabinet'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 type ItemActionsSheetProps = {
   item: CabinetItem | null
   open: boolean
   onClose: () => void
-  onUpdate: (id: number, payload: { quantity?: number; expiration_date?: string }) => Promise<unknown>
+  onUpdate: (id: number, payload: UpdateCabinetItemPayload) => Promise<unknown>
   onDelete: (id: number) => Promise<unknown>
 }
 
@@ -23,28 +24,37 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
   const titleId = useId()
   const [quantity, setQuantity] = useState(1)
   const [expirationDate, setExpirationDate] = useState('')
+  const [lotNumber, setLotNumber] = useState('')
+  const [threshold, setThreshold] = useState('')
+  const [onRefill, setOnRefill] = useState(false)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     if (!item) return
     setQuantity(item.quantity)
     setExpirationDate(item.expiration_date)
+    setLotNumber(item.lot_number ?? '')
+    setThreshold(item.low_stock_threshold != null ? String(item.low_stock_threshold) : '')
+    setOnRefill(item.on_refill_list)
   }, [item])
 
   if (!item) return null
 
-  const run = async (fn: () => Promise<unknown>, successKey: string) => {
+  const run = async (fn: () => Promise<unknown>, successKey: string, close = true) => {
     setBusy(true)
     try {
       await fn()
       toastSuccess(t(successKey))
-      onClose()
+      if (close) onClose()
     } catch (err) {
       toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
     } finally {
       setBusy(false)
     }
   }
+
+  const parsedThreshold = threshold.trim() === '' ? null : Number(threshold)
+  const thresholdValid = parsedThreshold == null || (Number.isFinite(parsedThreshold) && parsedThreshold >= 0)
 
   return (
     <OfferSheet
@@ -56,10 +66,17 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
         <div className="space-y-2 border-t border-slate-100 px-5 py-4">
           <Button
             className="w-full"
-            disabled={busy}
+            disabled={busy || !thresholdValid}
             onClick={() =>
               run(
-                () => onUpdate(item.id, { quantity, expiration_date: expirationDate }),
+                () =>
+                  onUpdate(item.id, {
+                    quantity,
+                    expiration_date: expirationDate,
+                    lot_number: lotNumber.trim() || null,
+                    low_stock_threshold: parsedThreshold,
+                    on_refill_list: onRefill,
+                  }),
                 'toast.updated'
               )
             }
@@ -93,7 +110,10 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
               {item.quantity} {item.unit_name}
             </p>
           </div>
-          <ExpiryBadge status={item.expiration_status} />
+          <div className="flex flex-col items-end gap-1">
+            <ExpiryBadge status={item.expiration_status} />
+            <InventoryBadge status={item.inventory_status} />
+          </div>
         </div>
         <div>
           <p className="mb-2 text-sm font-medium text-slate-700">{t('quantityLabel')}</p>
@@ -106,6 +126,34 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
           onChange={(e) => setExpirationDate(e.target.value)}
           fullWidth
         />
+        <TextField
+          label={t('lotLabel')}
+          value={lotNumber}
+          onChange={(e) => setLotNumber(e.target.value)}
+          fullWidth
+        />
+        <TextField
+          type="number"
+          min={0}
+          label={t('thresholdLabel')}
+          value={threshold}
+          onChange={(e) => setThreshold(e.target.value)}
+          helperText={t('thresholdHint')}
+          fullWidth
+        />
+        <label className="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-3">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600"
+            checked={onRefill}
+            onChange={(e) => setOnRefill(e.target.checked)}
+            disabled={busy}
+          />
+          <span>
+            <span className="block text-sm font-medium text-slate-800">{t('refill.toggle')}</span>
+            <span className="block text-xs text-gray-500">{t('refill.hint')}</span>
+          </span>
+        </label>
       </div>
     </OfferSheet>
   )

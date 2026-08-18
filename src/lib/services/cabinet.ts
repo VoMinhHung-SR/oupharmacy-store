@@ -1,11 +1,13 @@
 import { apiDelete, apiGet, apiPatch, apiPost, type ApiResponse } from '@/lib/api'
 
 export type ExpirationStatus = 'EXPIRED' | 'EXPIRING_SOON' | 'EXPIRING' | 'SAFE'
-export type InventoryStatus = 'IN_STOCK' | 'OUT_OF_STOCK'
+export type InventoryStatus = 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK'
 
 export type Cabinet = {
   id: number
   name: string
+  reminder_enabled: boolean
+  expiring_soon_days: number
   created_date: string
   updated_date: string
 }
@@ -17,6 +19,9 @@ export type CabinetItem = {
   product_variant_unit_id: number
   quantity: number
   expiration_date: string
+  lot_number: string | null
+  low_stock_threshold: number | null
+  on_refill_list: boolean
   expiration_status: ExpirationStatus
   days_until_expiry: number
   inventory_status: InventoryStatus
@@ -35,11 +40,15 @@ export type CabinetOverview = {
     expired: number
     expiring_soon: number
     expiring: number
+    low_stock: number
     in_stock: number
     out_of_stock: number
+    on_refill_list: number
   }
   expired: CabinetItem[]
   expiring_soon: CabinetItem[]
+  low_stock: CabinetItem[]
+  refill_list: CabinetItem[]
 }
 
 export type CreateCabinetItemPayload = {
@@ -48,7 +57,20 @@ export type CreateCabinetItemPayload = {
   product_variant_unit_id: number
   quantity: number
   expiration_date: string
+  lot_number?: string | null
+  low_stock_threshold?: number | null
+  on_refill_list?: boolean
 }
+
+export type UpdateCabinetPayload = {
+  name?: string
+  reminder_enabled?: boolean
+  expiring_soon_days?: number
+}
+
+export type UpdateCabinetItemPayload = Partial<
+  Pick<CabinetItem, 'quantity' | 'expiration_date' | 'lot_number' | 'low_stock_threshold' | 'on_refill_list'>
+>
 
 export function listCabinets() {
   return apiGet<Cabinet[]>('/cabinets/')
@@ -58,8 +80,8 @@ export function createCabinet(name: string) {
   return apiPost<Cabinet>('/cabinets/', { name })
 }
 
-export function updateCabinet(id: number, name: string) {
-  return apiPatch<Cabinet>(`/cabinets/${id}/`, { name })
+export function updateCabinet(id: number, payload: UpdateCabinetPayload) {
+  return apiPatch<Cabinet>(`/cabinets/${id}/`, payload)
 }
 
 export function deleteCabinet(id: number) {
@@ -80,10 +102,7 @@ export function createCabinetItem(payload: CreateCabinetItemPayload) {
   return apiPost<CabinetItem>('/cabinet-items/', payload)
 }
 
-export function updateCabinetItem(
-  id: number,
-  payload: Partial<Pick<CabinetItem, 'quantity' | 'expiration_date'>>
-) {
+export function updateCabinetItem(id: number, payload: UpdateCabinetItemPayload) {
   return apiPatch<CabinetItem>(`/cabinet-items/${id}/`, payload)
 }
 
