@@ -189,7 +189,8 @@
     },
     "refill": {
       "toggle": "Add to refill list",
-      "hint": "Does not add to cart yet. Buy again comes in a later step."
+      "hint": "A reminder only. Buy again adds 1 sell unit to the cart and does not change cabinet quantity.",
+      "buyAgain": "Buy again"
     },
     "settings": {
       "title": "Expiry reminders",
@@ -260,7 +261,10 @@
       "cabinetCreated": "Cabinet created",
       "cabinetRenamed": "Cabinet renamed",
       "cabinetDeleted": "Cabinet deleted",
-      "settingsSaved": "Cabinet settings saved"
+      "settingsSaved": "Cabinet settings saved",
+      "addedToCart": "Added 1 sell unit to the cart. Cabinet quantity is unchanged.",
+      "warehouseOutOfStock": "This item is out of stock in the warehouse. Cabinet quantity is unchanged.",
+      "cartNotReady": "Cart is still loading. Please try again."
     }
   }
 }

@@ -9,6 +9,7 @@ import { QuantityStepper } from '@/components/catalog/product-detail/parts/Quant
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
 import { InventoryBadge } from '@/components/cabinet/InventoryBadge'
 import type { CabinetItem, UpdateCabinetItemPayload } from '@/lib/services/cabinet'
+import { mapBuyAgainError, useCabinetBuyAgain } from '@/lib/hooks/useCabinetBuyAgain'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 type ItemActionsSheetProps = {
@@ -28,6 +29,7 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
   const [threshold, setThreshold] = useState('')
   const [onRefill, setOnRefill] = useState(false)
   const [busy, setBusy] = useState(false)
+  const { buyAgain } = useCabinetBuyAgain()
 
   useEffect(() => {
     if (!item) return
@@ -66,6 +68,22 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
         <div className="space-y-2 border-t border-slate-100 px-5 py-4">
           <Button
             className="w-full"
+            disabled={busy}
+            onClick={() =>
+              run(async () => {
+                try {
+                  await buyAgain(item)
+                } catch (err) {
+                  throw new Error(mapBuyAgainError(err instanceof Error ? err.message : '', t))
+                }
+              }, 'toast.addedToCart', false)
+            }
+          >
+            {t('refill.buyAgain')}
+          </Button>
+          <Button
+            className="w-full"
+            variant="outline"
             disabled={busy || !thresholdValid}
             onClick={() =>
               run(

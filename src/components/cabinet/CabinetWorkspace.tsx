@@ -11,6 +11,7 @@ import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
 import { InventoryBadge } from '@/components/cabinet/InventoryBadge'
 import { useCabinet } from '@/lib/hooks/useCabinet'
+import { mapBuyAgainError, useCabinetBuyAgain } from '@/lib/hooks/useCabinetBuyAgain'
 import type { CabinetItem } from '@/lib/services/cabinet'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { CartLineThumb } from '@/components/cart/CartLineThumb'
@@ -18,6 +19,8 @@ import { CartLineThumb } from '@/components/cart/CartLineThumb'
 export function CabinetWorkspace() {
   const t = useTranslations('cabinet')
   const cabinet = useCabinet(true)
+  const { buyAgain } = useCabinetBuyAgain()
+  const [buyAgainId, setBuyAgainId] = useState<number | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [seedOpen, setSeedOpen] = useState(false)
   const [activeItem, setActiveItem] = useState<CabinetItem | null>(null)
@@ -68,6 +71,18 @@ export function CabinetWorkspace() {
       toastSuccess(t('toast.cabinetDeleted'))
     } catch (err) {
       toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
+    }
+  }
+
+  const handleBuyAgain = async (item: CabinetItem) => {
+    setBuyAgainId(item.id)
+    try {
+      await buyAgain(item)
+      toastSuccess(t('toast.addedToCart'))
+    } catch (err) {
+      toastError(mapBuyAgainError(err instanceof Error ? err.message : '', t))
+    } finally {
+      setBuyAgainId(null)
     }
   }
 
@@ -228,6 +243,9 @@ export function CabinetWorkspace() {
         items={cabinet.overview?.refill_list ?? []}
         onOpen={setActiveItem}
         empty={t('lists.empty')}
+        onBuyAgain={handleBuyAgain}
+        buyAgainLabel={t('refill.buyAgain')}
+        buyAgainBusyId={buyAgainId}
       />
 
       <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -362,11 +380,17 @@ function AlertList({
   items,
   onOpen,
   empty,
+  onBuyAgain,
+  buyAgainLabel,
+  buyAgainBusyId,
 }: {
   title: string
   items: CabinetItem[]
   onOpen: (item: CabinetItem) => void
   empty: string
+  onBuyAgain?: (item: CabinetItem) => void
+  buyAgainLabel?: string
+  buyAgainBusyId?: number | null
 }) {
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -376,10 +400,10 @@ function AlertList({
       ) : (
         <ul className="space-y-2">
           {items.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-50">
               <button
                 type="button"
-                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
+                className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                 onClick={() => onOpen(item)}
               >
                 <CartLineThumb src={item.image_url} alt="" size="sm" native />
@@ -391,6 +415,16 @@ function AlertList({
                   <InventoryBadge status={item.inventory_status} />
                 </span>
               </button>
+              {onBuyAgain && buyAgainLabel ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={buyAgainBusyId != null}
+                  onClick={() => onBuyAgain(item)}
+                >
+                  {buyAgainLabel}
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>

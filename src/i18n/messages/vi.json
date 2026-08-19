@@ -189,7 +189,8 @@
     },
     "refill": {
       "toggle": "Thêm vào danh sách mua lại",
-      "hint": "Chưa thêm vào giỏ. Bạn có thể mua lại ở bước sau."
+      "hint": "Chỉ để nhớ mua. Nút Mua lại thêm 1 đơn vị bán vào giỏ, không trừ số trong tủ.",
+      "buyAgain": "Mua lại"
     },
     "settings": {
       "title": "Nhắc hạn sử dụng",
@@ -260,7 +261,10 @@
       "cabinetCreated": "Đã tạo tủ thuốc",
       "cabinetRenamed": "Đã đổi tên tủ",
       "cabinetDeleted": "Đã xóa tủ",
-      "settingsSaved": "Đã lưu cài đặt tủ"
+      "settingsSaved": "Đã lưu cài đặt tủ",
+      "addedToCart": "Đã thêm 1 đơn vị bán vào giỏ. Số lượng trong tủ không đổi.",
+      "warehouseOutOfStock": "Kho đang hết hàng. Số lượng trong tủ không đổi.",
+      "cartNotReady": "Đang tải giỏ hàng, vui lòng thử lại."
     }
   }
 }
