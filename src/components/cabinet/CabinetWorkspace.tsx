@@ -6,6 +6,7 @@ import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 import { Button } from '@/components/Button'
 import { TextField, SelectField } from '@/components/TextField'
 import { AddMedicineSheet } from '@/components/cabinet/AddMedicineSheet'
+import { CabinetAlertsPanel } from '@/components/cabinet/CabinetAlertsPanel'
 import { ItemActionsSheet } from '@/components/cabinet/ItemActionsSheet'
 import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
@@ -197,6 +198,8 @@ export function CabinetWorkspace() {
         onSave={() => void handleSaveSettings()}
         saving={cabinet.updateCabinet.isPending}
       />
+
+      <CabinetAlertsPanel enabled />
 
       {cabinet.error ? (
         <p className="text-sm text-accent-600">{cabinet.error.message}</p>

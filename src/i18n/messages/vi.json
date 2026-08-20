@@ -202,6 +202,21 @@
       "save": "Lưu cài đặt",
       "daysInvalid": "Số ngày phải từ 1 đến 365"
     },
+    "alerts": {
+      "title": "Thông báo hạn dùng",
+      "hint": "Hộp thư trong app. Quét hàng ngày tạo nhắc khi bật nhắc hạn trên tủ.",
+      "empty": "Chưa có thông báo hạn dùng.",
+      "unreadBadge": "{count} chưa đọc",
+      "markRead": "Đã đọc",
+      "markAllRead": "Đọc hết",
+      "markedRead": "Đã đánh dấu đã đọc",
+      "markedAllRead": "Đã đọc hết thông báo",
+      "read": "Đã đọc",
+      "kind": {
+        "EXPIRED": "Hết hạn",
+        "EXPIRING_SOON": "Sắp hết hạn"
+      }
+    },
     "scan": {
       "start": "Quét mã SKU",
       "stop": "Dừng camera",

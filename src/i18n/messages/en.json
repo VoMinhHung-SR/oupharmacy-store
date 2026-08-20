@@ -202,6 +202,21 @@
       "save": "Save settings",
       "daysInvalid": "Days must be between 1 and 365"
     },
+    "alerts": {
+      "title": "Expiry inbox",
+      "hint": "In-app inbox. A daily scan creates reminders when cabinet reminders are on.",
+      "empty": "No expiry alerts yet.",
+      "unreadBadge": "{count} unread",
+      "markRead": "Mark read",
+      "markAllRead": "Mark all read",
+      "markedRead": "Marked as read",
+      "markedAllRead": "All alerts marked as read",
+      "read": "Read",
+      "kind": {
+        "EXPIRED": "Expired",
+        "EXPIRING_SOON": "Expiring soon"
+      }
+    },
     "scan": {
       "start": "Scan SKU",
       "stop": "Stop camera",
