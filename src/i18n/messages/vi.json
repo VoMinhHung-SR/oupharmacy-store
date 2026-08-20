@@ -265,6 +265,27 @@
         "CANCELLED": "Đã hủy"
       }
     },
+    "seedRx": {
+      "open": "Thêm từ toa khám",
+      "title": "Thêm thuốc từ toa khám",
+      "hint": "Chọn dòng toa của bạn, nhập hạn dùng in trên hộp, rồi thêm vào tủ. Không tự điền HSD.",
+      "hsdHelp": "Lật hộp/vỉ, tìm HSD / EXP, chọn đúng ngày đó.",
+      "hsdRequired": "Bắt buộc nhập hạn dùng trên hộp.",
+      "empty": "Chưa có dòng toa nào gắn tài khoản này. Dùng Thêm thuốc hoặc Thêm từ đơn.",
+      "selectAllCount": "Chọn tất cả có thể thêm ({count})",
+      "addSelected": "Thêm {count} dòng đã chọn",
+      "noChecked": "Chọn ít nhất một thuốc có trong catalog.",
+      "needHsd": "Mỗi dòng đã chọn cần hạn dùng trên hộp.",
+      "missingVariant": "Không khớp catalog — dùng Thêm thuốc để tìm tay.",
+      "addedBulk": "Đã thêm {count} thuốc từ toa vào tủ.",
+      "partialAdded": "Đã thêm {ok}/{total}. Kiểm tra dòng còn thiếu HSD hoặc thử lại.",
+      "addingCount": "Đang thêm {current}/{total}…",
+      "alreadyAdded": "Đã thêm",
+      "showLot": "Thêm số lô (tuỳ chọn)",
+      "rxFallback": "Toa #{id}",
+      "close": "Đóng",
+      "done": "Xong"
+    },
     "toast": {
       "added": "Đã thêm thuốc vào tủ",
       "addedKeepGoing": "Đã thêm vào tủ. Có thể chọn thuốc khác.",

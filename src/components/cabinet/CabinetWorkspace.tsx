@@ -9,6 +9,7 @@ import { AddMedicineSheet } from '@/components/cabinet/AddMedicineSheet'
 import { CabinetAlertsPanel } from '@/components/cabinet/CabinetAlertsPanel'
 import { ItemActionsSheet } from '@/components/cabinet/ItemActionsSheet'
 import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
+import { SeedFromPrescriptionSheet } from '@/components/cabinet/SeedFromPrescriptionSheet'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
 import { InventoryBadge } from '@/components/cabinet/InventoryBadge'
 import { useCabinet } from '@/lib/hooks/useCabinet'
@@ -24,6 +25,7 @@ export function CabinetWorkspace() {
   const [buyAgainId, setBuyAgainId] = useState<number | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [seedOpen, setSeedOpen] = useState(false)
+  const [seedRxOpen, setSeedRxOpen] = useState(false)
   const [activeItem, setActiveItem] = useState<CabinetItem | null>(null)
   const [newName, setNewName] = useState('')
   const [renameValue, setRenameValue] = useState('')
@@ -114,6 +116,9 @@ export function CabinetWorkspace() {
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => setSeedOpen(true)} disabled={!cabinet.selectedId}>
               {t('seed.open')}
+            </Button>
+            <Button variant="outline" onClick={() => setSeedRxOpen(true)} disabled={!cabinet.selectedId}>
+              {t('seedRx.open')}
             </Button>
             <Button onClick={() => setAddOpen(true)} disabled={!cabinet.selectedId}>
               {t('addMedicine')}
@@ -297,6 +302,12 @@ export function CabinetWorkspace() {
           <SeedFromOrderSheet
             open={seedOpen}
             onClose={() => setSeedOpen(false)}
+            cabinetId={cabinet.selectedId}
+            onAdd={(payload) => cabinet.addItem.mutateAsync(payload)}
+          />
+          <SeedFromPrescriptionSheet
+            open={seedRxOpen}
+            onClose={() => setSeedRxOpen(false)}
             cabinetId={cabinet.selectedId}
             onAdd={(payload) => cabinet.addItem.mutateAsync(payload)}
           />

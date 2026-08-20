@@ -1,4 +1,5 @@
-import { apiGet, apiPost, type ApiResponse } from '@/lib/api'
+import { apiGet, apiPost } from '@/lib/api'
+import { unwrap } from '@/lib/services/cabinet'
 
 export type CabinetAlertKind = 'EXPIRED' | 'EXPIRING_SOON'
 
@@ -14,22 +15,15 @@ export type CabinetAlert = {
   updated_date: string
 }
 
-export function listCabinetAlerts(unreadOnly = false) {
+export async function listCabinetAlerts(unreadOnly = false) {
   const path = unreadOnly ? '/cabinet-alerts/?unread=1' : '/cabinet-alerts/'
-  return apiGet<CabinetAlert[]>(path)
+  return unwrap(await apiGet<CabinetAlert[]>(path))
 }
 
-export function markCabinetAlertRead(id: number) {
-  return apiPost<CabinetAlert>(`/cabinet-alerts/${id}/mark-read/`, {})
+export async function markCabinetAlertRead(id: number) {
+  return unwrap(await apiPost<CabinetAlert>(`/cabinet-alerts/${id}/mark-read/`, {}))
 }
 
-export function markAllCabinetAlertsRead() {
-  return apiPost<{ updated: number }>('/cabinet-alerts/mark-all-read/', {})
-}
-
-export function unwrapAlert<T>(response: ApiResponse<T>): T {
-  if (response.error || response.data === undefined) {
-    throw new Error(response.error || 'Request failed')
-  }
-  return response.data
+export async function markAllCabinetAlertsRead() {
+  return unwrap(await apiPost<{ updated: number }>('/cabinet-alerts/mark-all-read/', {}))
 }

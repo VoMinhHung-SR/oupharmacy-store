@@ -51,10 +51,12 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 2. State chia sẻ → xem sẵn context; tránh duplicate global state.
 3. Gọi dữ liệu → thêm/thay method trong `src/lib/services/`, tái dùng `api.ts` khi đúng base store.
 
-### Smart Medicine Cabinet (P2)
+### Smart Medicine Cabinet
 
-- Route: `/tai-khoan/tu-thuoc` (login gate client, cùng pattern `/tai-khoan/don-hang`). `/tu-thuoc-thong-minh` redirect sang đây.
-- API store: `/cabinets/`, `/cabinet-items/`, `overview/` — tồn nhà, không phải kho `in_stock`. P2: low-stock, refill list, lot, reminder settings, scan SKU, seed từ đơn (user nhập HSD).
+- Route: `/tai-khoan/tu-thuoc` (login gate client). `/tu-thuoc-thong-minh` → redirect.
+- **Inventory (Done):** `/cabinets/`, `/cabinet-items/`, `overview/` — tồn nhà ≠ kho `in_stock`. P2 low-stock / refill / lot / reminder / scan SKU / seed đơn (HSD tay). P3 Mua lại → `/carts/items/` (không trừ qty tủ).
+- **Adjacent:** inbox HSD `/cabinet-alerts/` + panel; seed toa `/cabinet-prescription-lines/` + sheet (HSD tay, owner-only).
+- SoT plans: `PersonalProject/plans/[Done] smart-medicine-cabinet.plan.md`, `[Done] smart-cabinet-adjacent-domains.plan.md`.
 
 ### Faceted search / advanced filters
 

@@ -265,6 +265,27 @@
         "CANCELLED": "Cancelled"
       }
     },
+    "seedRx": {
+      "open": "Add from a prescription",
+      "title": "Add medicine from a prescription",
+      "hint": "Select your prescription lines, enter the expiry printed on each pack, then add to the cabinet. Expiry is never guessed.",
+      "hsdHelp": "Turn the pack, find HSD / EXP, and pick that exact date.",
+      "hsdRequired": "The expiry date on the pack is required.",
+      "empty": "No prescription lines linked to this account yet. Use Add medicine or Add from an order.",
+      "selectAllCount": "Select all addable ({count})",
+      "addSelected": "Add {count} selected",
+      "noChecked": "Select at least one catalog-linked medicine.",
+      "needHsd": "Each selected line needs the expiry date from its pack.",
+      "missingVariant": "Not in catalog — use Add medicine to search instead.",
+      "addedBulk": "Added {count} medicines from the prescription.",
+      "partialAdded": "Added {ok}/{total}. Check rows that still need an expiry date, or try again.",
+      "addingCount": "Adding {current}/{total}…",
+      "alreadyAdded": "Added",
+      "showLot": "Add lot number (optional)",
+      "rxFallback": "Rx #{id}",
+      "close": "Close",
+      "done": "Done"
+    },
     "toast": {
       "added": "Added to cabinet",
       "addedKeepGoing": "Added to the cabinet. You can choose another medicine.",

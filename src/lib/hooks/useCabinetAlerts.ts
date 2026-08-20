@@ -5,7 +5,6 @@ import {
   listCabinetAlerts,
   markAllCabinetAlertsRead,
   markCabinetAlertRead,
-  unwrapAlert,
 } from '@/lib/services/cabinetAlerts'
 
 const alertKeys = {
@@ -18,7 +17,7 @@ export function useCabinetAlerts(enabled: boolean, unreadOnly = false) {
 
   const listQuery = useQuery({
     queryKey: alertKeys.list(unreadOnly),
-    queryFn: async () => unwrapAlert(await listCabinetAlerts(unreadOnly)),
+    queryFn: () => listCabinetAlerts(unreadOnly),
     enabled,
   })
 
@@ -27,12 +26,12 @@ export function useCabinetAlerts(enabled: boolean, unreadOnly = false) {
   }
 
   const markRead = useMutation({
-    mutationFn: async (id: number) => unwrapAlert(await markCabinetAlertRead(id)),
+    mutationFn: markCabinetAlertRead,
     onSuccess: invalidate,
   })
 
   const markAllRead = useMutation({
-    mutationFn: async () => unwrapAlert(await markAllCabinetAlertsRead()),
+    mutationFn: markAllCabinetAlertsRead,
     onSuccess: invalidate,
   })
 
