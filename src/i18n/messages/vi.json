@@ -150,12 +150,19 @@
     "thresholdHint": "Để trống sẽ dùng mặc định (5). Số lượng còn lại nhỏ hơn hoặc bằng ngưỡng này được đánh dấu sắp hết.",
     "confirmAdd": "Thêm vào tủ",
     "cancel": "Hủy",
-    "switcherLabel": "Tủ thuốc",
+    "switcherLabel": "Tủ đang xem",
+    "switcherPlaceholder": "Chọn tủ thuốc",
+    "switcherSearch": "Nhập tìm tên tủ…",
+    "switcherTitle": "Chọn tủ thuốc",
+    "switcherEmpty": "Không tìm thấy tủ",
+    "manageCabinet": "Quản lý tủ",
+    "manageCabinetHide": "Ẩn quản lý",
     "rename": "Đổi tên",
     "deleteCabinet": "Xóa tủ",
     "cabinetName": "Tên tủ",
-    "newCabinet": "Tủ mới",
+    "newCabinet": "Tên tủ mới",
     "createCabinet": "Tạo tủ",
+    "createCabinetOpen": "Tạo tủ mới",
     "saveChanges": "Lưu",
     "markUsedUp": "Đánh dấu đã dùng hết",
     "remove": "Xóa khỏi tủ",
@@ -163,6 +170,18 @@
     "emptyCabinet": "Chưa có thuốc trong tủ. Bấm Thêm thuốc để bắt đầu.",
     "loading": "Đang tải…",
     "itemFallback": "Thuốc",
+    "statusSection": {
+      "title": "Thuốc trong tủ",
+      "hint": "Chọn mục bên dưới để xem theo tình trạng. Mặc định hiện tất cả."
+    },
+    "filters": {
+      "all": "Tất cả",
+      "expired": "Đã hết hạn",
+      "expiringSoon": "Sắp hết hạn",
+      "expiring": "Cần chú ý",
+      "lowStock": "Sắp hết số",
+      "refill": "Mua lại"
+    },
     "counts": {
       "expired": "Đã hết hạn",
       "expiringSoon": "Sắp hết hạn",
@@ -193,6 +212,7 @@
       "buyAgain": "Mua lại"
     },
     "settings": {
+      "toggle": "Cài đặt nhắc hạn",
       "title": "Nhắc hạn sử dụng",
       "alertsAlwaysVisible": "Danh sách cảnh báo trên trang này luôn hiện, kể cả khi tắt nhắc.",
       "reminderEnabled": "Bật nhắc hạn",

@@ -150,12 +150,19 @@
     "thresholdHint": "Leave empty to use the default (5). Quantity at or below this value is marked low stock.",
     "confirmAdd": "Add to cabinet",
     "cancel": "Cancel",
-    "switcherLabel": "Cabinet",
+    "switcherLabel": "Viewing cabinet",
+    "switcherPlaceholder": "Select a cabinet",
+    "switcherSearch": "Search cabinets…",
+    "switcherTitle": "Select a cabinet",
+    "switcherEmpty": "No cabinets found",
+    "manageCabinet": "Manage cabinets",
+    "manageCabinetHide": "Hide management",
     "rename": "Rename",
     "deleteCabinet": "Delete cabinet",
     "cabinetName": "Cabinet name",
-    "newCabinet": "New cabinet",
+    "newCabinet": "New cabinet name",
     "createCabinet": "Create",
+    "createCabinetOpen": "Create new cabinet",
     "saveChanges": "Save",
     "markUsedUp": "Mark as used up",
     "remove": "Remove from cabinet",
@@ -163,6 +170,18 @@
     "emptyCabinet": "This cabinet is empty. Tap Add medicine to start.",
     "loading": "Loading…",
     "itemFallback": "Medicine",
+    "statusSection": {
+      "title": "Medicines in this cabinet",
+      "hint": "Pick a filter below to view by status. All medicines are shown by default."
+    },
+    "filters": {
+      "all": "All",
+      "expired": "Expired",
+      "expiringSoon": "Expiring soon",
+      "expiring": "Needs attention",
+      "lowStock": "Low stock",
+      "refill": "Buy again"
+    },
     "counts": {
       "expired": "Expired",
       "expiringSoon": "Expiring soon",
@@ -193,6 +212,7 @@
       "buyAgain": "Buy again"
     },
     "settings": {
+      "toggle": "Reminder settings",
       "title": "Expiry reminders",
       "alertsAlwaysVisible": "Alert lists on this page stay visible even if reminders are off.",
       "reminderEnabled": "Enable reminders",

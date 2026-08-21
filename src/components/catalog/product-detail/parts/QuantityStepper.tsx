@@ -40,14 +40,14 @@ export function QuantityStepper({
 
   return (
     <div
-      className={`divide-x divide-gray-300 overflow-hidden rounded-lg border border-gray-300 bg-white box-border ${s.height} ${
+      className={`quantity-stepper box-border overflow-hidden rounded-lg border border-gray-300 bg-white ${s.height} ${
         fullWidth ? 'flex w-full items-stretch' : 'inline-flex w-max shrink-0 items-stretch'
       } ${className}`}
     >
       <button
         type="button"
         onClick={() => onChange(Math.max(min, value - 1))}
-        className={`flex h-full shrink-0 items-center justify-center ${controlTone(atMin)} ${s.btn} ${s.text}`}
+        className={`flex h-full shrink-0 items-center justify-center rounded-l-lg border-0 bg-white ${controlTone(atMin)} ${s.btn} ${s.text}`}
         disabled={atMin}
         aria-label="Giảm số lượng"
       >
@@ -63,15 +63,15 @@ export function QuantityStepper({
           const parsedValue = digitsOnly ? Number.parseInt(digitsOnly, 10) : min
           onChange(Math.max(min, Math.min(max, parsedValue)))
         }}
-        className={`h-full appearance-none rounded-none border-0 bg-transparent p-0 text-center font-medium text-gray-900 shadow-none outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0 focus:shadow-none ${
-          fullWidth ? 'min-w-0 flex-1' : `shrink-0 ${s.input}`
+        className={`quantity-stepper__input h-full min-w-0 appearance-none !rounded-none border-y-0 border-x border-solid border-gray-300 bg-transparent p-0 text-center font-medium text-gray-900 shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus:shadow-none ${
+          fullWidth ? 'flex-1' : `shrink-0 ${s.input}`
         } ${s.inputText}`}
         aria-label="Số lượng"
       />
       <button
         type="button"
         onClick={() => onChange(Math.min(max, value + 1))}
-        className={`flex h-full shrink-0 items-center justify-center ${controlTone(atMax)} ${s.btn} ${s.text}`}
+        className={`flex h-full shrink-0 items-center justify-center rounded-r-lg border-0 bg-white ${controlTone(atMax)} ${s.btn} ${s.text}`}
         disabled={atMax}
         aria-label="Tăng số lượng"
       >

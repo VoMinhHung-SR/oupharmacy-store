@@ -66,6 +66,22 @@ body {
   }
 }
 
+@layer components {
+  /* Segmented qty control: beat global input[type=text] { border-radius: 12px } */
+  .quantity-stepper .quantity-stepper__input,
+  .quantity-stepper .quantity-stepper__input:focus {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .quantity-stepper .quantity-stepper__input:focus {
+    border-left-color: rgb(209 213 219) !important;
+    border-right-color: rgb(209 213 219) !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+  }
+}
+
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .scrollbar-hide::-webkit-scrollbar {
