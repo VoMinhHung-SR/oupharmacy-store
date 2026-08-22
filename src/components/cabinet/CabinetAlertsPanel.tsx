@@ -28,6 +28,18 @@ export function CabinetAlertsPanel({ enabled }: { enabled: boolean }) {
   }
 
   const unread = alerts.unreadCount
+  const isEmpty = !alerts.isLoading && alerts.alerts.length === 0
+
+  if (isEmpty) {
+    return (
+      <section className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-slate-200 bg-white px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-slate-800">{t('alerts.title')}</p>
+          <p className="text-xs text-gray-500">{t('alerts.empty')}</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -54,9 +66,6 @@ export function CabinetAlertsPanel({ enabled }: { enabled: boolean }) {
       </div>
 
       {alerts.isLoading ? <p className="text-sm text-gray-500">{t('loading')}</p> : null}
-      {!alerts.isLoading && alerts.alerts.length === 0 ? (
-        <p className="text-sm text-gray-500">{t('alerts.empty')}</p>
-      ) : null}
 
       {alerts.alerts.length > 0 ? (
         <ul className="divide-y divide-slate-100">
@@ -74,9 +83,7 @@ export function CabinetAlertsPanel({ enabled }: { enabled: boolean }) {
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">{row.title}</p>
                 <p className="mt-0.5 text-sm text-gray-600">{row.body}</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  {t(`alerts.kind.${row.kind}`)}
-                </p>
+                <p className="mt-1 text-xs text-gray-400">{t(`alerts.kind.${row.kind}`)}</p>
               </div>
               {!row.is_read ? (
                 <Button

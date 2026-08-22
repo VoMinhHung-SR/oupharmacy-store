@@ -111,8 +111,16 @@ export function deleteCabinetItem(id: number) {
 }
 
 export function unwrap<T>(response: ApiResponse<T>): T {
-  if (response.error || response.data === undefined) {
-    throw new Error(response.error || 'Request failed')
+  if (response.error) {
+    throw new Error(response.error)
+  }
+  // DELETE (204) and other empty success bodies — treat as ok for void mutations
+  if (response.data === undefined) {
+    const status = response.status ?? 0
+    if (status >= 200 && status < 300) {
+      return undefined as T
+    }
+    throw new Error('Request failed')
   }
   return response.data
 }
