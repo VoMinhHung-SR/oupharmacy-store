@@ -9,6 +9,8 @@ interface QuantityStepperProps {
   onChange: (value: number) => void
   size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
+  /** Stretch to the parent width; minus/plus stay fixed, the value field grows. */
+  fullWidth?: boolean
 }
 
 const controlTone = (disabled: boolean) =>
@@ -30,6 +32,7 @@ export function QuantityStepper({
   onChange,
   size = 'md',
   className = '',
+  fullWidth = false,
 }: QuantityStepperProps) {
   const s = SIZE[size]
   const atMin = value <= min
@@ -37,12 +40,14 @@ export function QuantityStepper({
 
   return (
     <div
-      className={`inline-flex w-fit max-w-full shrink-0 items-stretch overflow-hidden rounded-lg border border-gray-300 bg-white box-border ${s.height} ${className}`}
+      className={`divide-x divide-gray-300 overflow-hidden rounded-lg border border-gray-300 bg-white box-border ${s.height} ${
+        fullWidth ? 'flex w-full items-stretch' : 'inline-flex w-max shrink-0 items-stretch'
+      } ${className}`}
     >
       <button
         type="button"
         onClick={() => onChange(Math.max(min, value - 1))}
-        className={`flex h-full shrink-0 items-center justify-center border-r border-gray-300 ${controlTone(atMin)} ${s.btn} ${s.text}`}
+        className={`flex h-full shrink-0 items-center justify-center ${controlTone(atMin)} ${s.btn} ${s.text}`}
         disabled={atMin}
         aria-label="Giảm số lượng"
       >
@@ -58,7 +63,9 @@ export function QuantityStepper({
           const parsedValue = digitsOnly ? Number.parseInt(digitsOnly, 10) : min
           onChange(Math.max(min, Math.min(max, parsedValue)))
         }}
-        className={`h-full w-auto min-w-0 shrink-0 border-0 border-r border-gray-300 bg-transparent text-center font-medium text-gray-900 shadow-none focus:outline-none focus:ring-0 ${s.input} ${s.inputText}`}
+        className={`h-full appearance-none rounded-none border-0 bg-transparent p-0 text-center font-medium text-gray-900 shadow-none outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0 focus:shadow-none ${
+          fullWidth ? 'min-w-0 flex-1' : `shrink-0 ${s.input}`
+        } ${s.inputText}`}
         aria-label="Số lượng"
       />
       <button

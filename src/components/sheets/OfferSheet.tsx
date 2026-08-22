@@ -77,7 +77,7 @@ export function OfferSheet({
     <div className={`${shellAlign} ${rootClassName}`.trim()} role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-slate-900/50"
         aria-label="Đóng"
         onClick={onClose}
       />
@@ -105,7 +105,7 @@ export function OfferSheet({
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
         {footer != null ? <div className="shrink-0">{footer}</div> : null}
