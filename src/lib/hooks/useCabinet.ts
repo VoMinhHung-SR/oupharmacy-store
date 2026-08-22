@@ -56,42 +56,42 @@ export function useCabinet(enabled: boolean) {
     enabled: enabled && cabinetId != null,
   })
 
-  const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: cabinetKeys.all })
+  const invalidate = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: cabinetKeys.all })
   }, [queryClient])
 
   const createCabinetMutation = useMutation({
     mutationFn: async (name: string) => unwrap(await createCabinet(name)),
-    onSuccess: (cabinet) => {
-      invalidate()
+    onSuccess: async (cabinet) => {
       setSelectedId(cabinet.id)
+      await invalidate()
     },
   })
 
   const renameCabinetMutation = useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) =>
       unwrap(await updateCabinet(id, { name })),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   })
 
   const updateCabinetMutation = useMutation({
     mutationFn: async ({ id, payload }: { id: number; payload: UpdateCabinetPayload }) =>
       unwrap(await updateCabinet(id, payload)),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   })
 
   const deleteCabinetMutation = useMutation({
     mutationFn: async (id: number) => unwrap(await deleteCabinet(id)),
-    onSuccess: () => {
+    onSuccess: async () => {
       setSelectedId(null)
-      invalidate()
+      await invalidate()
     },
   })
 
   const addItemMutation = useMutation({
     mutationFn: async (payload: CreateCabinetItemPayload) =>
       unwrap(await createCabinetItem(payload)),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   })
 
   const updateItemMutation = useMutation({
@@ -102,12 +102,12 @@ export function useCabinet(enabled: boolean) {
       id: number
       payload: UpdateCabinetItemPayload
     }) => unwrap(await updateCabinetItem(id, payload)),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   })
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: number) => unwrap(await deleteCabinetItem(id)),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   })
 
   return {
