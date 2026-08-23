@@ -36,6 +36,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Đặt hàng / checkout | `src/app/don-hang/`, `src/components/checkout/` |
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
+| Smart Medicine Cabinet | `src/app/tai-khoan/tu-thuoc/`, `src/components/cabinet/`, `docs/smart-medicine-cabinet.md` |
 | Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
 | Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
@@ -93,6 +94,7 @@ Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 | Category browse + sidebar filters | `GET /resolve-path/{path}/` + `GET /search/?category=` |
 | Global search `/tim-kiem` | `GET /search/?q=` |
 | Header suggest | `GET /search/?q=&include_facets=false` |
+| Medicine cabinet | `GET/POST /cabinets/`, `/cabinet-items/`, `/cabinet-alerts/`, `/cabinet-prescription-lines/` — xem [`docs/smart-medicine-cabinet.md`](docs/smart-medicine-cabinet.md) |
 
 Migration 2026-07-10 (xóa `dynamic-filters`): `Clinic-Oupharmacy-BE/storeApp/guidelines/search-facets-migration-2026-07-10.md` · FE routing: [`docs/ROUTING.md`](docs/ROUTING.md).
 
