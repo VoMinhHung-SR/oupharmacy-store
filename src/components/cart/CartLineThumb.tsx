@@ -8,6 +8,8 @@ type CartLineThumbProps = {
   src?: string | null
   alt: string
   size?: 'sm' | 'md'
+  /** Native <img> when the URL may be outside next/image remotePatterns. */
+  native?: boolean
 }
 
 const SIZE = {
@@ -22,20 +24,33 @@ const SIZE = {
 } as const
 
 /** Bordered product thumb with inner padding (cart line items). */
-export function CartLineThumb({ src, alt, size = 'sm' }: CartLineThumbProps) {
+export function CartLineThumb({ src, alt, size = 'sm', native = false }: CartLineThumbProps) {
   const s = SIZE[size]
   return (
     <div
       className={`flex shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white ${s.box}`}
     >
       {src ? (
-        <Image
-          src={src}
-          alt={alt}
-          width={s.px}
-          height={s.px}
-          className="h-full w-full object-contain"
-        />
+        native ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={alt}
+            width={s.px}
+            height={s.px}
+            className="h-full w-full object-contain"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            width={s.px}
+            height={s.px}
+            className="h-full w-full object-contain"
+          />
+        )
       ) : (
         <div className="flex h-full w-full items-center justify-center text-slate-400">
           <ImagePlaceholderIcon className="h-6 w-6" />
