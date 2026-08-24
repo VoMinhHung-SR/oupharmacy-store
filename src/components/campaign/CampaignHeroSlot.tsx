@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 import Container from '@/components/Container'
+import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { setCampaignAttributionId } from '@/lib/utils/campaignAttribution'
 import { safeCampaignHref } from './campaignPlacementUtils'
@@ -147,30 +148,24 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
 
       {count > 1 ? (
         <>
-          <button
-            type="button"
-            aria-label="Slide trước"
-            className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80 sm:left-3"
+          <CarouselArrowButton
+            direction="prev"
+            label="Slide trước"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               setIndex(index - 1)
             }}
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="Slide sau"
-            className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80 sm:right-3"
+          />
+          <CarouselArrowButton
+            direction="next"
+            label="Slide sau"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               setIndex(index + 1)
             }}
-          >
-            ›
-          </button>
+          />
           <div
             className="absolute bottom-[22%] left-0 right-0 z-20 flex justify-center gap-1.5"
             role="tablist"

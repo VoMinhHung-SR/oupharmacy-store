@@ -16,7 +16,7 @@ Generated homepage CMS PNGs live under `public/mocks/home-cms/` (gitignored) —
 |------|------|------|
 | **CMS / campaign placements** | `campaigns/placements.home.response.json` | D-21/D-22: HERO/SECONDARY arrays; NOTICE singles |
 | **Flash sale** (campaign-like) | `home/flash-sale.response.json` | D-23: `enabled` + windows + products — **not** price overwrite (D-01). Hide when disabled or empty |
-| **Hot sale** (fixed section) | `home/hot-sale.response.json` | Bestsellers rail → later `search?sort=bestselling` |
+| **Hot sale** (fixed section) | `home/hot-sale.response.json` | Offline shape reference. Live: `getHotSaleProductsSSG` — per-card discount badge, sort 30→25→20 |
 | **Featured categories** (fixed) | `home/featured-categories.response.json` | Category grid → later category API |
 | **Favorite brands** (fixed) | `home/favorite-brands.response.json` | Brand rail → later brand API |
 

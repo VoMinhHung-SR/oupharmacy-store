@@ -74,7 +74,7 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
 | Quick cate | `HOME_QUICK_LINKS` | FE constant |
 | Flash sale | `home/flash-sale.response.json` | D-23: `enabled` + hide if empty products; **not** price overwrite (D-01) |
-| Hot sale | `home/hot-sale.response.json` | Fixed section → later catalog/search |
+| Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; badge `%` góc phải theo SP (ưu tiên `compare_at`; thiếu → merch 30/25/20); sort giảm dần |
 | Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
 | Favorite brands | `home/favorite-brands.response.json` | Fixed section → later brand API |
 

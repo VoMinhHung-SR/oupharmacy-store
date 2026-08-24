@@ -3,17 +3,22 @@
 import React, { useCallback, useRef } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
-import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
-import hotSale from '@/api/mocks/home/hot-sale.response.json'
-import type { HotSaleResponse } from '@/api/mocks/home/types'
+import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
+import type { ProductCardPayload } from '@/lib/services/products'
 
-const ARROW_CLASS =
-  'absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-600 shadow-md hover:bg-white sm:h-10 sm:w-10'
+const DEFAULT_TITLE = 'Sản phẩm bán chạy'
 
-/** Hot-sale / bestsellers — mock top-12 rail with carousel (home fixture). */
-export const BestsellingProducts: React.FC = () => {
-  const data = hotSale as HotSaleResponse
-  const products = (data.products || []).slice(0, 12)
+type BestsellingProductsProps = {
+  products: ProductCardPayload[]
+  title?: string
+}
+
+/** Hot-sale / bestsellers rail — priced products with per-card discount badge (home SSG). */
+export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
+  products,
+  title = DEFAULT_TITLE,
+}) => {
+  const rail = (products || []).slice(0, 12)
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   const scrollPage = useCallback((dir: -1 | 1) => {
@@ -22,33 +27,33 @@ export const BestsellingProducts: React.FC = () => {
     el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
   }, [])
 
-  if (products.length === 0) return null
+  if (rail.length === 0) return null
 
   return (
-    <section className="bg-white pb-8 pt-12 sm:pb-10 sm:pt-14" aria-label={data.title}>
+    <section className="bg-white pb-8 pt-12 sm:pb-10 sm:pt-14" aria-label={title}>
       <Container>
         <div className="relative">
-          <h2 className="hot-sale-tab">{data.title}</h2>
+          <h2 className="hot-sale-tab">{title}</h2>
 
           <div className="relative rounded-2xl bg-[#f39800] px-4 pb-4 pt-6 sm:px-5 sm:pb-5 sm:pt-7">
-            {products.length > 1 ? (
+            {rail.length > 1 ? (
               <>
-                <button
-                  type="button"
-                  aria-label="Sản phẩm trước"
-                  className={`${ARROW_CLASS} left-1 sm:left-1.5`}
-                  onClick={() => scrollPage(-1)}
-                >
-                  <ChevronLeftIcon className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Sản phẩm sau"
-                  className={`${ARROW_CLASS} right-1 sm:right-1.5`}
-                  onClick={() => scrollPage(1)}
-                >
-                  <ChevronRightIcon className="h-5 w-5" />
-                </button>
+                <CarouselArrowButton
+                  direction="prev"
+                  label="Sản phẩm trước"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(-1)
+                  }}
+                />
+                <CarouselArrowButton
+                  direction="next"
+                  label="Sản phẩm sau"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(1)
+                  }}
+                />
               </>
             ) : null}
 
@@ -56,9 +61,9 @@ export const BestsellingProducts: React.FC = () => {
               ref={scrollerRef}
               className="hot-sale-track scrollbar-hide scroll-smooth"
             >
-              {products.map((product) => (
+              {rail.map((product) => (
                 <div key={product.id}>
-                    <ProductCard product={product} />
+                  <ProductCard product={product} />
                 </div>
               ))}
             </div>

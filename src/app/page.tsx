@@ -6,6 +6,7 @@ import FlashSaleProducts from '@/sections/FlashSaleProducts'
 import { CampaignHomeCluster, pickHomePlacement, pickHomeSlides } from '@/components/campaign'
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
+import { getHotSaleProductsSSG } from '@/lib/services/search'
 import { HOME_QUICK_LINKS } from '@/lib/constant'
 
 /** BE does not expose theme_image_url yet — fall back to first-party demo themes by sort_order. */
@@ -25,9 +26,12 @@ function withHeroThemeFallback(slides: PlacementWinner[]): PlacementWinner[] {
  * SoT: placements API; empty/error → static fallbacks (D-08).
  */
 export default async function Home() {
-  const placementsPayload = await getCampaignPlacementsSSG({
-    slots: ['HOME_HERO', 'HOME_SECONDARY', 'HOME_NOTICE_TOP', 'HOME_NOTICE_BOTTOM'],
-  })
+  const [placementsPayload, hotSaleProducts] = await Promise.all([
+    getCampaignPlacementsSSG({
+      slots: ['HOME_HERO', 'HOME_SECONDARY', 'HOME_NOTICE_TOP', 'HOME_NOTICE_BOTTOM'],
+    }),
+    getHotSaleProductsSSG(12),
+  ])
   const placements = placementsPayload?.placements ?? null
 
   const heroSlides = withHeroThemeFallback(pickHomeSlides(placements, 'HOME_HERO'))
@@ -65,7 +69,7 @@ export default async function Home() {
       <FlashSaleProducts />
 
       <div className="relative z-10 bg-white">
-        <BestsellingProducts />
+        <BestsellingProducts products={hotSaleProducts} />
         <FeaturedCategories />
         <FavoriteBrands />
       </div>

@@ -1,5 +1,97 @@
 import { apiGet, ApiResponse } from '@/lib/api'
-import { normalizeProduct, type FilterGroup, type FilterOption, type Product } from './products'
+import { PRICE_CONSULT } from '@/lib/constant'
+import {
+  buildProductCardPayload,
+  normalizeProduct,
+  type FilterGroup,
+  type FilterOption,
+  type Product,
+  type ProductCardPayload,
+} from './products'
+
+const HOT_SALE_PAGE_SIZE = 12
+/** Fetch extra rows so CONSULT / zero-price variants can be filtered out. */
+const HOT_SALE_FETCH_SIZE = 48
+/** Per-product merch badge tiers when catalog has no compare_at (rail display only). */
+const HOT_SALE_MERCH_TIERS = [30, 25, 20] as const
+
+function storeApiBase(): string {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/store'
+}
+
+/** Storefront listable price (exclude pharmacist-consult products). */
+export function isPricedForHotSale(product: Product): boolean {
+  const defaultUnit =
+    product.unit_options?.find((unit) => unit.is_default) || product.unit_options?.[0]
+  const display = String(defaultUnit?.price_display || product.price_display || '')
+    .trim()
+    .toUpperCase()
+  if (display === PRICE_CONSULT) return false
+  const price = defaultUnit?.price_value ?? product.price_value ?? 0
+  return typeof price === 'number' && Number.isFinite(price) && price > 0
+}
+
+/** Catalog discount % from compare_at / discount_percent (0 if none). */
+export function productCatalogDiscountPercent(product: Product): number {
+  if (typeof product.discount_percent === 'number' && product.discount_percent > 0) {
+    return Math.round(product.discount_percent)
+  }
+  const defaultUnit =
+    product.unit_options?.find((unit) => unit.is_default) || product.unit_options?.[0]
+  const price = defaultUnit?.price_value ?? product.price_value ?? 0
+  const compare = defaultUnit?.compare_at_price ?? product.compare_at_price
+  if (typeof compare === 'number' && compare > price && price > 0) {
+    return Math.round(((compare - price) / compare) * 100)
+  }
+  return 0
+}
+
+function withHotSaleDisplayDiscount(
+  card: ProductCardPayload,
+  discountPercent: number
+): ProductCardPayload {
+  if (discountPercent <= 0) return card
+  if (card.discount && card.discount > 0 && card.originalPrice && card.originalPrice > card.price) {
+    return card
+  }
+  const price = card.price
+  const originalPrice = Math.max(
+    price + 1,
+    Math.round(price / (1 - discountPercent / 100))
+  )
+  return {
+    ...card,
+    discount: discountPercent,
+    originalPrice,
+  }
+}
+
+/**
+ * Build hot-sale cards: prefer catalog discounts; else assign merch 30/25/20 per product.
+ * Sorted by discount % descending (30 → 25 → 20).
+ */
+export function buildHotSaleProductCards(
+  products: Product[],
+  pageSize: number = HOT_SALE_PAGE_SIZE
+): ProductCardPayload[] {
+  const priced = products.filter(isPricedForHotSale).slice(0, pageSize)
+  if (!priced.length) return []
+
+  const withDiscount = priced.map((product, index) => {
+    const catalogPct = productCatalogDiscountPercent(product)
+    const merchPct = HOT_SALE_MERCH_TIERS[index % HOT_SALE_MERCH_TIERS.length]
+    const discountPercent = catalogPct > 0 ? catalogPct : merchPct
+    const card = withHotSaleDisplayDiscount(buildProductCardPayload(product), discountPercent)
+    return { card, discountPercent: card.discount ?? discountPercent }
+  })
+
+  withDiscount.sort((a, b) => {
+    if (b.discountPercent !== a.discountPercent) return b.discountPercent - a.discountPercent
+    return a.card.name.localeCompare(b.card.name, 'vi')
+  })
+
+  return withDiscount.map((row) => row.card)
+}
 
 export type StoreSearchSort = 'relevance' | 'price_asc' | 'price_desc' | 'popular'
 
@@ -291,4 +383,51 @@ export function sortOptionToStoreSearchSort(
   if (sort === 'price-high') return 'price_desc'
   if (sort === 'bestselling') return 'popular'
   return 'relevance'
+}
+
+/**
+ * Homepage hot-sale rail: priced products with per-card discount badge, sorted 30→25→20.
+ * On error/empty returns [] so the section can hide (no mock fill).
+ */
+export async function getHotSaleProductsSSG(
+  pageSize: number = HOT_SALE_PAGE_SIZE
+): Promise<ProductCardPayload[]> {
+  const qs = buildSearchQueryParams({
+    q: '',
+    page: 1,
+    page_size: Math.max(pageSize, HOT_SALE_FETCH_SIZE),
+    sort: 'popular',
+    include_facets: false,
+  }).toString()
+  const url = `${storeApiBase()}/search/?${qs}`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'vi',
+      },
+      next: { revalidate: 60 },
+    })
+
+    if (!response.ok) {
+      console.warn(
+        `[getHotSaleProductsSSG] BE returned ${response.status} ${response.statusText} for ${url}`
+      )
+      return []
+    }
+
+    const body = (await response.json()) as {
+      items?: Record<string, unknown>[]
+    }
+    const items = Array.isArray(body.items) ? body.items : []
+    return buildHotSaleProductCards(
+      items.map((item) => normalizeProduct(item)),
+      pageSize
+    )
+  } catch (error) {
+    console.warn('[getHotSaleProductsSSG] Fetch failed:', error)
+    return []
+  }
 }

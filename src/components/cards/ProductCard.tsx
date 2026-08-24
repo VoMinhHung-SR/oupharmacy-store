@@ -158,26 +158,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }
 
   return (
-    <Link
-      href={productLink}
-      onClick={() => markStoreNavIntent('product', productLink)}
-      className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
-    >
-      <div className="relative shrink-0">
-        {product.brand_country ? (
-          <CardBadge
-            country={product.brand_country}
-            variant="corner"
-            className={cardCornerTabLeftOverlayClass}
-          />
-        ) : null}
+    <div className="relative h-full">
+      {product.brand_country ? (
+        <CardBadge
+          country={product.brand_country}
+          variant="corner"
+          className={cardCornerTabLeftOverlayClass}
+        />
+      ) : null}
+      <Link
+        href={productLink}
+        onClick={() => markStoreNavIntent('product', productLink)}
+        className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
+      >
         {discount > 0 ? (
           <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
         ) : null}
 
-        <div
-          className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${hasCornerBadges ? CARD_CORNER_TAB_IMAGE_CLEARANCE : ''}`.trim()}
-        >
+        <div className="relative shrink-0">
+          <div
+            className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${hasCornerBadges ? CARD_CORNER_TAB_IMAGE_CLEARANCE : ''}`.trim()}
+          >
           <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
             {product.image_url ? (
               <Image
@@ -286,7 +287,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
       </div>
-    </Link>
+      </Link>
+    </div>
   )
 }
 
