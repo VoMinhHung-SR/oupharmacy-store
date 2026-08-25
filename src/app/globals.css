@@ -208,6 +208,37 @@ body {
   }
 
   /**
+   * Favorite brands rail — ~5 cards on lg, taller cards, no native scrollbar.
+   */
+  .favorite-brands-track {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.25rem;
+  }
+
+  .favorite-brands-track > * {
+    flex: 0 0 calc((100% - 1rem) / 2);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 640px) {
+    .favorite-brands-track > * {
+      flex-basis: calc((100% - 2rem) / 3);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .favorite-brands-track > * {
+      flex-basis: calc((100% - 4rem) / 5);
+    }
+  }
+
+  /**
    * Title tab — trapezoid, wider at the top, sits on the orange lid (home rail ref).
    */
   .hot-sale-tab {

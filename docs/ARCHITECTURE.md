@@ -76,7 +76,7 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 | Flash sale | `home/flash-sale.response.json` | D-23: `enabled` + hide if empty products; **not** price overwrite (D-01) |
 | Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; badge `%` góc phải theo SP (ưu tiên `compare_at`; thiếu → merch 30/25/20); sort giảm dần |
 | Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
-| Favorite brands | `home/favorite-brands.response.json` | Fixed section → later brand API |
+| Favorite brands | `getFavoriteBrandsSSG` (search facets) | Top 10 brands by product count; campaign display 10–35%; `bg-white`; fixture = offline reference |
 
 Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.
 

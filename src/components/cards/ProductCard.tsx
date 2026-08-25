@@ -79,7 +79,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return 0
   }, [product])
 
-  const hasCornerBadges = Boolean(product.brand_country?.trim()) || discount > 0
   const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
   const compareAt = selectedUnit?.compare_at_price || product.originalPrice
   const salePrice = selectedUnit?.price_value ?? product.price
@@ -158,7 +157,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }
 
   return (
-    <div className="relative h-full">
+    <Link
+      href={productLink}
+      onClick={() => markStoreNavIntent('product', productLink)}
+      className="group relative flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-gray-200 transition-all duration-200 hover:shadow-lg hover:ring-primary-400"
+    >
       {product.brand_country ? (
         <CardBadge
           country={product.brand_country}
@@ -166,129 +169,123 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className={cardCornerTabLeftOverlayClass}
         />
       ) : null}
-      <Link
-        href={productLink}
-        onClick={() => markStoreNavIntent('product', productLink)}
-        className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
-      >
-        {discount > 0 ? (
-          <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
-        ) : null}
+      {discount > 0 ? (
+        <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
+      ) : null}
 
+      <div className="flex min-h-0 flex-1 flex-col p-3 sm:p-4">
         <div className="relative shrink-0">
-          <div
-            className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${hasCornerBadges ? CARD_CORNER_TAB_IMAGE_CLEARANCE : ''}`.trim()}
-          >
-          <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
-            {product.image_url ? (
-              <Image
-                src={product.image_url}
-                alt={product.name}
-                width={300}
-                height={300}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
-                <ImagePlaceholderIcon className="h-12 w-12" />
+          <div className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}>
+            <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
+              {product.image_url ? (
+                <Image
+                  src={product.image_url}
+                  alt={product.name}
+                  width={300}
+                  height={300}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
+                  <ImagePlaceholderIcon className="h-12 w-12" />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700">
+            {product.name}
+          </div>
+
+            {isConsultPrice ? (
+              <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
+                <p className="text-xs text-amber-800">
+                  <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+                </p>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+            ) : (
+              <div className="mt-2 space-y-1">
+                <div className="min-w-0">
+                  <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                    <span className="text-base font-bold tabular-nums text-primary-700">
+                      {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                      {salePrice.toLocaleString('vi-VN')}₫
+                    </span>
+                    {unitLabel ? (
+                      <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                    ) : null}
+                  </div>
+                  {hasCompareAt ? (
+                    <div className="text-xs text-gray-400 line-through">
+                      {compareAt!.toLocaleString('vi-VN')}₫
+                    </div>
+                  ) : null}
+                </div>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900">
-          {product.name}
-        </div>
+                <div className="min-h-[1rem] truncate text-xs text-gray-500">
+                  {product.packaging || '\u00a0'}
+                </div>
 
-        {isConsultPrice ? (
-          <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
-            <p className="text-xs text-amber-800">
-              <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
-            </p>
-          </div>
-        ) : (
-          <div className="mt-2 space-y-1">
-            <div className="min-w-0">
-              <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
-                <span className="text-base font-bold tabular-nums text-primary-700">
-                  {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
-                  {salePrice.toLocaleString('vi-VN')}₫
-                </span>
-                {unitLabel ? (
-                  <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                {unitOptions.length > 1 ? (
+                  <div className={`grid w-full ${unitGridClassName} gap-1 pt-1`}>
+                    {unitOptions.map((unit) => (
+                      <button
+                        key={unit.unit_id}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setSelectedUnitId(unit.unit_id)
+                        }}
+                        className={`h-7 rounded-md border px-2 text-center text-xs transition-colors ${
+                          (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
+                            ? 'border-primary-600 bg-white text-primary-700'
+                            : 'border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {unit.unit_name}
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
               </div>
-              {hasCompareAt ? (
-                <div className="text-xs text-gray-400 line-through">
-                  {compareAt!.toLocaleString('vi-VN')}₫
-                </div>
-              ) : null}
-            </div>
+            )}
 
-            <div className="min-h-[1rem] truncate text-xs text-gray-500">
-              {product.packaging || '\u00a0'}
-            </div>
-
-            {unitOptions.length > 1 ? (
-              <div className={`grid w-full ${unitGridClassName} gap-1 pt-1`}>
-                {unitOptions.map((unit) => (
+            <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
+              {isConsultPrice ? (
+                <>
                   <button
-                    key={unit.unit_id}
                     type="button"
+                    className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                    onClick={handleNavigate}
+                  >
+                    Tư vấn ngay
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
                     onClick={(e) => {
                       e.preventDefault()
-                      e.stopPropagation()
-                      setSelectedUnitId(unit.unit_id)
                     }}
-                    className={`h-7 rounded-md border px-2 text-center text-xs ${
-                      (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
-                        ? 'border-primary-600 bg-white text-primary-700'
-                        : 'border-gray-300 bg-gray-100 text-gray-600'
-                    }`}
                   >
-                    {unit.unit_name}
+                    Tìm nhà thuốc
                   </button>
-                ))}
-              </div>
-            ) : null}
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                  onClick={handleAddToCart}
+                >
+                  Thêm vào giỏ
+                </button>
+              )}
+            </div>
           </div>
-        )}
-
-        <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
-          {isConsultPrice ? (
-            <>
-              <button
-                type="button"
-                className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
-                onClick={handleNavigate}
-              >
-                Tư vấn ngay
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700"
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
-              >
-                Tìm nhà thuốc
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
-              onClick={handleAddToCart}
-            >
-              Thêm vào giỏ
-            </button>
-          )}
         </div>
-      </div>
       </Link>
-    </div>
   )
 }
 

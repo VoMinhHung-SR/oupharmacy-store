@@ -15,9 +15,18 @@ import { getListingRequestUiFlags } from '@/lib/listing/getListingRequestUiFlags
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 
+function parsePromoPercent(raw: string | null): number | undefined {
+  if (!raw) return undefined
+  const n = Number.parseInt(raw, 10)
+  if (!Number.isFinite(n) || n < 10 || n > 35) return undefined
+  return n
+}
+
 export default function SearchPage() {
   const searchParams = useSearchParams()
   const q = (searchParams.get('q') || '').trim()
+  const brandFromUrl = (searchParams.get('brand') || '').trim()
+  const promoPercent = parsePromoPercent(searchParams.get('promo'))
 
   const [page, setPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
   const [sortOption, setSortOption] = useState<SortOption>('bestselling')
@@ -25,24 +34,28 @@ export default function SearchPage() {
   const [accumulatedProducts, setAccumulatedProducts] = useState<Product[]>([])
   const { data: popularTerms = [] } = usePopularSearchTerms(20)
 
+  const browseEnabled = Boolean(q) || Boolean(brandFromUrl)
+
   useEffect(() => {
     setPage(PAGINATION.DEFAULT_PAGE)
     setAccumulatedProducts([])
-    setActiveFilters({})
-  }, [q])
+    const nextFilters: ProductFilters = {}
+    if (brandFromUrl) nextFilters.brand = brandFromUrl
+    setActiveFilters(nextFilters)
+  }, [q, brandFromUrl])
 
   const facetParams = useMemo(() => pickFacetSearchParams(activeFilters), [activeFilters])
 
   const searchParamsApi = useMemo(
     () =>
-      q
+      browseEnabled
         ? {
-            q,
+            q: q || '',
             page,
             page_size: PAGINATION.DEFAULT_PAGE_SIZE,
             sort: sortOptionToStoreSearchSort(sortOption),
             category: facetParams.category,
-            brand: facetParams.brand,
+            brand: facetParams.brand || brandFromUrl || undefined,
             origin_country: facetParams.origin_country,
             price_range: facetParams.price_range,
             in_stock: facetParams.in_stock,
@@ -50,12 +63,12 @@ export default function SearchPage() {
             include_facets: true,
           }
         : undefined,
-    [q, page, sortOption, facetParams]
+    [browseEnabled, q, page, sortOption, facetParams, brandFromUrl]
   )
 
   const { data, isLoading, isFetching, isPlaceholderData, dataUpdatedAt, error } = useStoreSearch(
     searchParamsApi,
-    { enabled: !!q }
+    { enabled: browseEnabled }
   )
 
   useEffect(() => {
@@ -82,7 +95,7 @@ export default function SearchPage() {
     facetParams.attrs.length > 0
 
   const facetFilters = usePreservedSearchFacets(data?.facets, {
-    scopeKey: q,
+    scopeKey: `${q}|${brandFromUrl}`,
     hasActiveFacetFilters,
     isPlaceholderData,
     dataUpdatedAt,
@@ -95,7 +108,7 @@ export default function SearchPage() {
     isLoading,
     isFetching,
     isPlaceholderData,
-    enabled: !!q,
+    enabled: browseEnabled,
   })
 
   const handleFiltersChange = (next: ProductFilters) => {
@@ -105,9 +118,19 @@ export default function SearchPage() {
     setPage(PAGINATION.DEFAULT_PAGE)
   }
 
+  const displayQuery =
+    q ||
+    (brandFromUrl
+      ? facetFilters
+          ?.find((g) => g.id === 'brand')
+          ?.options.find((o) => String(o.value) === brandFromUrl)?.label || 'Thương hiệu'
+      : '')
+
   return (
     <SearchResultsContent
-      query={q}
+      query={displayQuery}
+      brandCampaignPromo={promoPercent}
+      allowEmptyQuery={Boolean(brandFromUrl)}
       products={accumulatedProducts}
       totalCount={data?.meta.total ?? 0}
       loading={isInitialLoad}

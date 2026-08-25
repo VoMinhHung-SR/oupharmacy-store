@@ -6,6 +6,7 @@ import FlashSaleProducts from '@/sections/FlashSaleProducts'
 import { CampaignHomeCluster, pickHomePlacement, pickHomeSlides } from '@/components/campaign'
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
+import { getFavoriteBrandsSSG } from '@/lib/services/brandCampaigns'
 import { getHotSaleProductsSSG } from '@/lib/services/search'
 import { HOME_QUICK_LINKS } from '@/lib/constant'
 
@@ -26,11 +27,12 @@ function withHeroThemeFallback(slides: PlacementWinner[]): PlacementWinner[] {
  * SoT: placements API; empty/error → static fallbacks (D-08).
  */
 export default async function Home() {
-  const [placementsPayload, hotSaleProducts] = await Promise.all([
+  const [placementsPayload, hotSaleProducts, favoriteBrands] = await Promise.all([
     getCampaignPlacementsSSG({
       slots: ['HOME_HERO', 'HOME_SECONDARY', 'HOME_NOTICE_TOP', 'HOME_NOTICE_BOTTOM'],
     }),
     getHotSaleProductsSSG(12),
+    getFavoriteBrandsSSG(10),
   ])
   const placements = placementsPayload?.placements ?? null
 
@@ -71,7 +73,7 @@ export default async function Home() {
       <div className="relative z-10 bg-white">
         <BestsellingProducts products={hotSaleProducts} />
         <FeaturedCategories />
-        <FavoriteBrands />
+        <FavoriteBrands title={favoriteBrands.title} brands={favoriteBrands.brands} />
       </div>
     </div>
   )
