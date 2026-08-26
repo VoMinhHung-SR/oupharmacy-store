@@ -47,6 +47,9 @@ export const PRODUCT_LISTING = {
   DEFAULT_SORT: 'bestselling' as const,
 } as const
 
+/** Shared orange for home merch rails (flash sale + bestsellers). */
+export const HOME_MERCH_ORANGE = '#f39800' as const
+
 // Sidebar
 export const SIDEBAR = {
   WIDTH: 256, // 64 * 4px = 256px (w-64) — desktop sticky column

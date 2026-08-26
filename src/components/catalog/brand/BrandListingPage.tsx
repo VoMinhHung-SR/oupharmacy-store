@@ -15,7 +15,7 @@ import {
   stripFacetFilters,
 } from '@/components/catalog/_shared/filters/ActiveFilters'
 import { BackdropLoading } from '@/components/BackdropLoading'
-import { ProductListingSkeleton } from '@/components/skeletons/ProductListingSkeleton'
+import { ProductGridSkeleton } from '@/components/skeletons/ProductGridSkeleton'
 import { PAGINATION } from '@/lib/constant'
 import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
 import { usePreservedSearchFacets } from '@/lib/hooks/usePreservedSearchFacets'
@@ -77,9 +77,10 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
     [page, sortOption, facetParams, meta.id]
   )
 
+  const searchEnabled = Boolean(meta.id)
   const { data, isLoading, isFetching, isPlaceholderData, dataUpdatedAt, error } = useStoreSearch(
     searchParamsApi,
-    { enabled: Boolean(meta.id) }
+    { enabled: searchEnabled }
   )
 
   useEffect(() => {
@@ -120,8 +121,11 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
     isLoading,
     isFetching,
     isPlaceholderData,
-    enabled: Boolean(meta.id),
+    enabled: searchEnabled,
   })
+
+  /** Avoid "Không có bộ lọc khả dụng" flash before first facets land. */
+  const filtersLoading = !data && (isLoading || isFetching || isInitialLoad)
 
   const totalCount = data?.meta.total ?? meta.productCount ?? accumulatedProducts.length
   const remainingCount = Math.max(0, totalCount - accumulatedProducts.length)
@@ -165,44 +169,58 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
           </ol>
         </nav>
 
-        <header className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-inset ring-gray-200">
-          <div className="grid gap-0 md:grid-cols-[minmax(0,300px)_1fr]">
-            <div className="relative min-h-[200px] bg-gray-50 md:min-h-[240px]">
-              {meta.productImage ? (
-                // eslint-disable-next-line @next/next/no-img-element -- catalog CDN
-                <img
-                  src={meta.productImage}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full min-h-[200px] items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 text-5xl font-bold text-primary-600">
-                  {meta.name.charAt(0)}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col justify-center gap-3 p-5 sm:p-6 md:p-8">
+        <header className="relative overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-primary-100">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-primary-50/40"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-16 top-0 h-full w-1/2 bg-gradient-to-l from-primary-100/70 to-transparent md:w-[42%]"
+            aria-hidden
+          />
+
+          <div className="relative z-10 grid md:grid-cols-[minmax(0,1fr)_minmax(160px,32%)]">
+            <div className="flex flex-col justify-center gap-2 px-5 py-4 sm:gap-2.5 sm:px-6 sm:py-5 md:px-7 md:py-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700">
+                <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700 ring-1 ring-inset ring-primary-200">
                   Thương hiệu
                 </span>
                 {meta.country ? (
-                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
                     {meta.country}
                   </span>
                 ) : null}
-                <span className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+                <span className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
                   Giảm đến {discountPercent}%
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{meta.name}</h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
-                Khám phá sản phẩm {meta.name}
+              <h1 className="text-2xl font-bold tracking-tight text-primary-900 sm:text-3xl">
+                {meta.name}
+              </h1>
+              <p className="max-w-xl text-sm leading-relaxed text-gray-600">
+                Sản phẩm {meta.name}
                 {meta.country ? ` từ ${meta.country}` : ''} đang ưu đãi trên OUPharmacy.
               </p>
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-semibold text-primary-700">
                 {totalCount.toLocaleString('vi-VN')} sản phẩm
               </p>
+            </div>
+
+            <div className="relative flex items-center justify-center px-4 pb-4 pt-0 md:px-5 md:py-4">
+              {meta.productImage ? (
+                <div className="flex w-full max-w-[220px] items-center justify-center rounded-xl bg-white p-2.5 ring-1 ring-inset ring-primary-100 sm:p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- catalog CDN */}
+                  <img
+                    src={meta.productImage}
+                    alt=""
+                    className="h-24 w-auto max-w-full object-contain sm:h-28 md:h-32"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-primary-600 text-3xl font-bold text-white sm:h-28 sm:w-28 sm:text-4xl">
+                  {meta.name.charAt(0)}
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -210,7 +228,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
         <div className="flex flex-col gap-6 lg:flex-row">
           <CategoryListingSidebar
             facetFilters={facetFilters}
-            filtersLoading={isLoading && !data}
+            filtersLoading={filtersLoading}
             categoryFilters={filtersForSidebar}
             onFiltersChange={handleFiltersChange}
           />
@@ -219,7 +237,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
             open={showMobileFilters}
             onClose={() => setShowMobileFilters(false)}
             facetFilters={facetFilters}
-            filtersLoading={isLoading && !data}
+            filtersLoading={filtersLoading}
             categoryFilters={filtersForSidebar}
             onFiltersChange={handleFiltersChange}
           />
@@ -258,7 +276,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
                 Không tải được sản phẩm. Thử lại sau.
               </p>
             ) : isInitialLoad ? (
-              <ProductListingSkeleton />
+              <ProductGridSkeleton count={8} columns="listing" />
             ) : accumulatedProducts.length === 0 ? (
               <p className="py-10 text-center text-sm text-gray-600">
                 Chưa có sản phẩm cho thương hiệu này.

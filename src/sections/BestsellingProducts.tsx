@@ -4,6 +4,7 @@ import React, { useCallback, useRef } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
+import { HOME_MERCH_ORANGE } from '@/lib/constant'
 import type { ProductCardPayload } from '@/lib/services/products'
 
 const DEFAULT_TITLE = 'Sản phẩm bán chạy'
@@ -35,7 +36,10 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
         <div className="relative">
           <h2 className="hot-sale-tab">{title}</h2>
 
-          <div className="relative rounded-2xl bg-[#f39800] px-4 pb-4 pt-6 sm:px-5 sm:pb-5 sm:pt-7">
+          <div
+            className="relative rounded-2xl px-4 pb-4 pt-6 sm:px-5 sm:pb-5 sm:pt-7"
+            style={{ backgroundColor: HOME_MERCH_ORANGE }}
+          >
             {rail.length > 1 ? (
               <>
                 <CarouselArrowButton

@@ -239,7 +239,7 @@ body {
   }
 
   /**
-   * Title tab — trapezoid, wider at the top, sits on the orange lid (home rail ref).
+   * Bestsellers title tab — trapezoid on the orange rail lid.
    */
   .hot-sale-tab {
     position: absolute;
@@ -262,6 +262,25 @@ body {
     .hot-sale-tab {
       padding: 0.55rem 3.25rem 0.7rem;
       font-size: 1.125rem;
+    }
+  }
+
+  /**
+   * Flash sale banner title — primary fill with white stroke.
+   */
+  .flash-sale-title {
+    color: #1d4ed8;
+    -webkit-text-stroke: 2px #fff;
+    paint-order: stroke fill;
+    text-shadow:
+      0 2px 0 rgb(0 0 0 / 0.18),
+      1px 1px 0 #fff,
+      -1px -1px 0 #fff;
+  }
+
+  @media (min-width: 640px) {
+    .flash-sale-title {
+      -webkit-text-stroke: 3px #fff;
     }
   }
 

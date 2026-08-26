@@ -160,44 +160,53 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Link
       href={productLink}
       onClick={() => markStoreNavIntent('product', productLink)}
-      className="group relative flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-gray-200 transition-all duration-200 hover:shadow-lg hover:ring-primary-400"
+      className="group relative flex h-full flex-col rounded-xl bg-white transition-shadow duration-200 hover:shadow-lg"
     >
-      {product.brand_country ? (
-        <CardBadge
-          country={product.brand_country}
-          variant="corner"
-          className={cardCornerTabLeftOverlayClass}
-        />
-      ) : null}
-      {discount > 0 ? (
-        <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
-      ) : null}
+      {/* Flush corner badges (z-10); border overlay (z-20) so edges stay visible idle + hover. */}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl">
+        {product.brand_country ? (
+          <CardBadge
+            country={product.brand_country}
+            variant="corner"
+            className={cardCornerTabLeftOverlayClass}
+          />
+        ) : null}
+        {discount > 0 ? (
+          <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
+        ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col p-3 sm:p-4">
-        <div className="relative shrink-0">
-          <div className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}>
-            <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
-              {product.image_url ? (
-                <Image
-                  src={product.image_url}
-                  alt={product.name}
-                  width={300}
-                  height={300}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
-                  <ImagePlaceholderIcon className="h-12 w-12" />
-                </div>
-              )}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 rounded-xl shadow-[inset_0_0_0_1px_theme(colors.gray.200)] transition-[box-shadow] duration-200 group-hover:shadow-[inset_0_0_0_2px_theme(colors.primary.400)]"
+        />
+
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+          <div className="relative shrink-0">
+            <div
+              className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}
+            >
+              <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
+                    <ImagePlaceholderIcon className="h-12 w-12" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700">
-            {product.name}
-          </div>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700">
+              {product.name}
+            </div>
 
             {isConsultPrice ? (
               <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
@@ -285,7 +294,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
+    </Link>
   )
 }
 
