@@ -7,6 +7,7 @@ import { CampaignHomeCluster, pickHomePlacement, pickHomeSlides } from '@/compon
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
 import { getFavoriteBrandsSSG } from '@/lib/services/brandCampaigns'
+import { getFlashSaleProductsSSG } from '@/lib/services/flashSale'
 import { getHotSaleProductsSSG } from '@/lib/services/search'
 import { HOME_QUICK_LINKS } from '@/lib/constant'
 
@@ -34,6 +35,10 @@ export default async function Home() {
     getHotSaleProductsSSG(12),
     getFavoriteBrandsSSG(10),
   ])
+  // After hot-sale IDs known — flash pool skips those to avoid duplicate rails on /
+  const flashSale = await getFlashSaleProductsSSG(48, {
+    excludeIds: hotSaleProducts.map((product) => product.id),
+  })
   const placements = placementsPayload?.placements ?? null
 
   const heroSlides = withHeroThemeFallback(pickHomeSlides(placements, 'HOME_HERO'))
@@ -68,7 +73,7 @@ export default async function Home() {
         footer={quickLinks}
       />
 
-      <FlashSaleProducts />
+      <FlashSaleProducts products={flashSale.products} dayKey={flashSale.dayKey} />
 
       <div className="relative z-10 bg-white">
         <BestsellingProducts products={hotSaleProducts} />

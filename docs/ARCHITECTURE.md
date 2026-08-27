@@ -73,7 +73,7 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 |---------|--------|--------|
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
 | Quick cate | `HOME_QUICK_LINKS` | FE constant |
-| Flash sale | `home/flash-sale.response.json` | D-23: `enabled` + hide if empty products; **not** price overwrite (D-01) |
+| Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: fixture = `enabled`/windows/CTA; pool ~40–60 priced via search, daily seed `Asia/Ho_Chi_Minh` (no cron/DB); rail ≤12; upcoming merch −10…35% display-only (D-01) |
 | Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; badge `%` góc phải theo SP (ưu tiên `compare_at`; thiếu → merch 30/25/20); sort giảm dần |
 | Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
 | Favorite brands | `getFavoriteBrandsSSG` (search facets) | Top 10 brands by product count; campaign display 10–35%; `bg-white`; fixture = offline reference |

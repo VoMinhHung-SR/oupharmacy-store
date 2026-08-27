@@ -24,6 +24,7 @@ export type FlashSaleWindow = {
   status: 'upcoming' | 'live' | 'ended' | string
 }
 
+/** Chrome only — products come from `getFlashSaleProductsSSG` (not this fixture). */
 export type FlashSaleResponse = {
   enabled?: boolean
   title: string
@@ -31,10 +32,6 @@ export type FlashSaleResponse = {
   cta_url: string
   windows: FlashSaleWindow[]
   active_window_id: string
-  /** Default / fallback product list. */
-  products: HomeRailProduct[]
-  /** Optional per-window products for UI mock switching. */
-  products_by_window?: Record<string, HomeRailProduct[]>
 }
 
 export type HotSaleResponse = {
