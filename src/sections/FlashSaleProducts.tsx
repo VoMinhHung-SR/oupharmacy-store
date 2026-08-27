@@ -12,8 +12,10 @@ import {
   FLASH_SALE_RAIL_SIZE,
   pickFlashSaleWindowProducts,
   withFlashMerchDisplay,
+  withFlashMerchTeaser,
   type FlashSaleRailProduct,
 } from '@/lib/services/flashSale'
+import { buildFlashSaleWindowsFromTemplates } from '@/lib/services/homeMerch'
 
 const ARROW_ON_ORANGE =
   '!bg-white !text-orange-700 shadow-md ring-1 ring-orange-200 hover:!bg-orange-50'
@@ -28,6 +30,14 @@ type FlashSaleProductsProps = {
 
 function pad2(n: number) {
   return String(Math.max(0, n)).padStart(2, '0')
+}
+
+function resolveFixtureWindows(meta: FlashSaleResponse, now: Date): FlashSaleWindow[] {
+  const templates = meta.window_templates
+  if (Array.isArray(templates) && templates.length > 0) {
+    return buildFlashSaleWindowsFromTemplates(templates, now)
+  }
+  return Array.isArray(meta.windows) ? meta.windows : []
 }
 
 function windowPhase(
@@ -109,8 +119,8 @@ function windowStatusLabel(phase: 'upcoming' | 'live'): string {
 }
 
 /**
- * Flash sale rail — catalog pool from SSG; windows chrome from fixture (D-23).
- * Ended windows are removed from tabs; selection jumps to next live/upcoming + new rail slice.
+ * Flash sale rail — catalog pool from SSG; windows from day-offset templates (D-23).
+ * Ended windows are removed; selection jumps to next live/upcoming + new rail slice.
  */
 export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
   products: pool,
@@ -120,14 +130,17 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
   const enabled = meta.enabled !== false
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [selectedWindowId, setSelectedWindowId] = useState<string | null>(
-    meta.active_window_id
+    meta.active_window_id ?? null
   )
 
   const now = useNowTicker(enabled && pool.length > 0)
-  const windows = useMemo(
-    () => visibleWindows(meta.windows ?? [], now),
-    [meta.windows, now]
+  const builtWindows = useMemo(
+    () => resolveFixtureWindows(meta, new Date(now)),
+    // Tick through midnight so day_offset windows refresh without hard-coded dates
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fixture meta is module-static
+    [now]
   )
+  const windows = useMemo(() => visibleWindows(builtWindows, now), [builtWindows, now])
 
   const activeWindowId = useMemo(
     () => pickWindowId(windows, now, selectedWindowId),
@@ -148,7 +161,8 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
   )
 
   const phase = selectedWindow ? windowPhase(selectedWindow, now) : 'ended'
-  const showMerchBadges = phase === 'upcoming'
+  const isUpcoming = phase === 'upcoming'
+  const isLive = phase === 'live'
   const targetMs = getCountdownTarget(selectedWindow, now)
   const countdown = countdownParts(targetMs, now)
   const label = countdownLabel(selectedWindow, now)
@@ -161,11 +175,16 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
       dayKey,
       FLASH_SALE_RAIL_SIZE
     )
-    if (!showMerchBadges) return slice
-    return slice.map((product) =>
-      withFlashMerchDisplay(product, product.flashMerchPercent)
-    )
-  }, [pool, activeWindowId, dayKey, showMerchBadges])
+    if (isUpcoming) {
+      return slice.map((product) => withFlashMerchTeaser(product))
+    }
+    if (isLive) {
+      return slice.map((product) =>
+        withFlashMerchDisplay(product, product.flashMerchPercent)
+      )
+    }
+    return slice
+  }, [pool, activeWindowId, dayKey, isUpcoming, isLive])
 
   const selectWindow = useCallback((windowId: string) => {
     setSelectedWindowId(windowId)
@@ -179,7 +198,6 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
     el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
   }, [])
 
-  // No open windows left → hide section (D-23 empty gate)
   if (!enabled || pool.length === 0 || windows.length === 0) return null
 
   return (
@@ -203,17 +221,12 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-base" aria-hidden>
-                  📢
-                </span>
-                <Link
-                  href={meta.cta_url}
-                  className="inline-flex items-center rounded-lg border-2 border-white bg-red-600 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
-                >
-                  {meta.cta_label}
-                </Link>
-              </div>
+              <Link
+                href={meta.cta_url}
+                className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
+              >
+                {meta.cta_label}
+              </Link>
             </div>
           </div>
 

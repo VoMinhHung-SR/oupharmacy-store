@@ -73,12 +73,25 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 |---------|--------|--------|
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
 | Quick cate | `HOME_QUICK_LINKS` | FE constant |
-| Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: fixture = `enabled`/windows/CTA; pool ~40–60 priced via search, daily seed `Asia/Ho_Chi_Minh` (no cron/DB); rail ≤12; upcoming merch −10…35% display-only (D-01) |
-| Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; badge `%` góc phải theo SP (ưu tiên `compare_at`; thiếu → merch 30/25/20); sort giảm dần |
+| Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: `window_templates` (VN day_offset); pool daily seed; rail ≤12; **upcoming** badge `-xx%` (no revealed %); **live** shows flash −10…35%; exclude Hot IDs; not checkout (D-01) |
+| Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; −% chỉ khi BE có `compare_at_price` / `discount_percent` **thật** (D-PRC-03); sort giảm dần theo % |
 | Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
 | Favorite brands | `getFavoriteBrandsSSG` (search facets) | Top 10 brands by product count; campaign display 10–35%; `bg-white`; fixture = offline reference |
 
 Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.
+
+### Catalog pricing & cart economics (Option 1 — D-PRC)
+
+SoT doc (BE): `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md`. Plan: `PersonalProject/plans/[UnDone] catalog-pricing-direct-discount-refactor.plan.md`.
+
+| Layer | FE behavior today | Target |
+|-------|-------------------|--------|
+| Card / PDP | Render `price_value`, `compare_at_price`, `discount_percent` from API only (Option A) | Unchanged |
+| Cart line | Price = unit snapshot (sale) | Unchanged |
+| **Giảm giá trực tiếp** | Banner Long Châu; code **mislabels** voucher slot pre-P3 | `catalog_direct_savings_total` from BE (P2) |
+| **Giảm giá voucher** | `discount_amount` + `shipping_discount_amount` | Unchanged |
+
+**Do not** send original price or `%` from FE on add-to-cart / checkout (D-PRC-01).
 
 ### Campaign landing preview (D-19)
 

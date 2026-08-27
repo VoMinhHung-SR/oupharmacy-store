@@ -5,6 +5,7 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.share
 import { Button } from '@/components/Button'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
 import { ProductUnitOptionButton } from '@/components/catalog/product-detail/parts/ProductUnitOptionButton'
+import { ProductDetailPriceDisplay } from '@/components/catalog/product-detail/parts/ProductDetailPriceDisplay'
 import { Product, ProductUnitOption } from '@/lib/services/products'
 import { buildProductPathWithVariant } from '@/lib/store-path'
 
@@ -17,6 +18,7 @@ interface ProductDetailPurchaseBlockProps {
   packagingVariants: Product['variants']
   effectivePriceValue: number
   effectiveCompareAtPrice: number | null
+  catalogDiscountPercent: number
   selectedUnitName: string
   unitOptions: ProductUnitOption[]
   selectedUnit: ProductUnitOption | null
@@ -37,6 +39,7 @@ export function ProductDetailPurchaseBlock({
   packagingVariants,
   effectivePriceValue,
   effectiveCompareAtPrice,
+  catalogDiscountPercent,
   selectedUnitName,
   unitOptions,
   selectedUnit,
@@ -105,22 +108,12 @@ export function ProductDetailPurchaseBlock({
         </div>
       ) : null}
 
-      <div>
-        <div className="text-xl font-bold text-primary-700 sm:text-2xl md:text-3xl">
-          {effectivePriceValue.toLocaleString('vi-VN')}₫
-          {selectedUnitName ? (
-            <span className="text-base font-semibold text-primary-700 sm:text-xl md:text-2xl">
-              {' '}
-              / {selectedUnitName}
-            </span>
-          ) : null}
-        </div>
-        {effectiveCompareAtPrice && effectiveCompareAtPrice > effectivePriceValue ? (
-          <div className="text-sm text-gray-400 line-through sm:text-base">
-            {effectiveCompareAtPrice.toLocaleString('vi-VN')}₫
-          </div>
-        ) : null}
-      </div>
+      <ProductDetailPriceDisplay
+        priceValue={effectivePriceValue}
+        compareAtPrice={effectiveCompareAtPrice}
+        discountPercent={catalogDiscountPercent}
+        unitName={selectedUnitName || undefined}
+      />
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="shrink-0 text-xs font-medium text-gray-700 sm:text-sm">Chọn đơn vị tính</span>

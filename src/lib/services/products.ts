@@ -30,6 +30,69 @@ export function mapProductUnitOptionsForCart(unitOptions?: ProductUnitOption[]):
     }))
 }
 
+export type CatalogPriceDisplay = {
+  compareAtPrice: number | null
+  discountPercent: number
+}
+
+/** PDP / catalog: compare_at first, else BE `discount_percent` (not home merch tiers). */
+export function resolveCatalogPriceDisplay(
+  priceValue: number,
+  compareAtPrice?: number | null,
+  catalogDiscountPercent?: number | null
+): CatalogPriceDisplay {
+  if (
+    typeof compareAtPrice === 'number' &&
+    Number.isFinite(compareAtPrice) &&
+    compareAtPrice > priceValue &&
+    priceValue > 0
+  ) {
+    return {
+      compareAtPrice,
+      discountPercent: Math.round(((compareAtPrice - priceValue) / compareAtPrice) * 100),
+    }
+  }
+  if (
+    typeof catalogDiscountPercent === 'number' &&
+    catalogDiscountPercent > 0 &&
+    priceValue > 0
+  ) {
+    const compareAt = Math.max(
+      priceValue + 1,
+      Math.round(priceValue / (1 - catalogDiscountPercent / 100))
+    )
+    return {
+      compareAtPrice: compareAt,
+      discountPercent: Math.round(catalogDiscountPercent),
+    }
+  }
+  return { compareAtPrice: null, discountPercent: 0 }
+}
+
+/** Selected sale unit + product-level catalog fields (default unit only). */
+export function resolveProductCatalogPriceDisplay(
+  product: Product,
+  selectedUnit: ProductUnitOption | null
+): CatalogPriceDisplay {
+  const unitOptions = product.unit_options ?? []
+  const defaultUnit =
+    unitOptions.find((unit) => unit.is_default) || unitOptions[0] || null
+  const price = selectedUnit?.price_value ?? product.price_value ?? 0
+
+  const fromUnitCompare = resolveCatalogPriceDisplay(price, selectedUnit?.compare_at_price ?? null)
+  if (fromUnitCompare.discountPercent > 0) return fromUnitCompare
+
+  const isDefaultUnit =
+    !selectedUnit || !defaultUnit || selectedUnit.unit_id === defaultUnit.unit_id
+  if (!isDefaultUnit) return { compareAtPrice: null, discountPercent: 0 }
+
+  return resolveCatalogPriceDisplay(
+    price,
+    product.compare_at_price ?? null,
+    product.discount_percent
+  )
+}
+
 export interface Product {
   id: number
   price_value: number
@@ -218,6 +281,8 @@ export interface ProductCardPayload {
   variant_count?: number
   brand_name?: string
   brand_country?: string | null
+  /** Flash upcoming: show `-xx%` badge without revealing merch % or compare_at. */
+  discountTeaser?: boolean
 }
 
 export function getProductEntity(product: Product) {

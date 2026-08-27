@@ -37,6 +37,8 @@ interface ProductCardProps {
     variant_count?: number
     brand_name?: string
     brand_country?: string | null
+    /** Flash upcoming: `-xx%` teaser (no revealed % or strikethrough). */
+    discountTeaser?: boolean
   }
 }
 
@@ -80,7 +82,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product])
 
   const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
-  const compareAt = selectedUnit?.compare_at_price || product.originalPrice
+  const compareAt = product.discountTeaser
+    ? selectedUnit?.compare_at_price
+    : selectedUnit?.compare_at_price || product.originalPrice
   const salePrice = selectedUnit?.price_value ?? product.price
   const hasCompareAt = Boolean(compareAt && compareAt > salePrice)
 
@@ -171,7 +175,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className={cardCornerTabLeftOverlayClass}
           />
         ) : null}
-        {discount > 0 ? (
+        {product.discountTeaser ? (
+          <span className={cardCornerTabRightPromoClass}>-xx%</span>
+        ) : discount > 0 ? (
           <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
         ) : null}
 
