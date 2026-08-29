@@ -6,6 +6,8 @@ import { Button } from '@/components/Button'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
 import { ProductUnitOptionButton } from '@/components/catalog/product-detail/parts/ProductUnitOptionButton'
 import { ProductDetailPriceDisplay } from '@/components/catalog/product-detail/parts/ProductDetailPriceDisplay'
+import { ProductDetailPromoAppliedSection } from '@/components/catalog/product-detail/parts/ProductDetailPromoAppliedSection'
+import { useHotSalePromoEndsAt } from '@/lib/hooks/useHotSalePromoEndsAt'
 import { Product, ProductUnitOption } from '@/lib/services/products'
 import { buildProductPathWithVariant } from '@/lib/store-path'
 
@@ -50,6 +52,14 @@ export function ProductDetailPurchaseBlock({
   onAddToCart,
   purchaseActionSectionRef,
 }: ProductDetailPurchaseBlockProps) {
+  const showCatalogPromo =
+    !isConsultPrice &&
+    catalogDiscountPercent > 0 &&
+    effectiveCompareAtPrice != null &&
+    effectiveCompareAtPrice > effectivePriceValue
+
+  const promoEndsAt = useHotSalePromoEndsAt(showCatalogPromo)
+
   if (isConsultPrice) {
     return (
       <>
@@ -81,6 +91,13 @@ export function ProductDetailPurchaseBlock({
             quantity_in_base: 1,
           },
         ]
+
+  const promoSection = showCatalogPromo ? (
+    <ProductDetailPromoAppliedSection
+      discountPercent={catalogDiscountPercent}
+      promoEndsAt={promoEndsAt}
+    />
+  ) : null
 
   return (
     <>
@@ -133,6 +150,8 @@ export function ProductDetailPurchaseBlock({
         </div>
       </div>
 
+      {promoSection ? <div className="md:hidden">{promoSection}</div> : null}
+
       {product.in_stock > 0 ? (
         <div>
           <label className="mb-2 block text-xs font-medium text-gray-700 sm:text-sm">Chọn số lượng</label>
@@ -156,6 +175,8 @@ export function ProductDetailPurchaseBlock({
           <div ref={purchaseActionSectionRef} className="h-px w-full" aria-hidden="true" />
         </div>
       ) : null}
+
+      {promoSection ? <div className="hidden md:block">{promoSection}</div> : null}
     </>
   )
 }

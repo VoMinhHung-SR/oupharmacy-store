@@ -105,6 +105,8 @@ export function ProductDetailPageContent({
         productName={state.productName}
         imageUrl={state.productImageUrl}
         priceValue={state.effectivePriceValue}
+        compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
+        discountPercent={state.catalogPriceDisplay.discountPercent}
         unitOptions={state.unitOptionsForSticky}
         selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
         onSelectUnit={state.setSelectedUnitId}

@@ -6,6 +6,7 @@ import { Container } from '@/components/Container'
 import { CheckCircleIcon } from '@/components/icons/CheckCircleIcon'
 import { ChevronDownIcon } from '@/components/icons/ChevronDownIcon'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
+import { ProductDetailPriceDisplay } from '@/components/catalog/product-detail/parts/ProductDetailPriceDisplay'
 import { ProductUnitOption } from '@/lib/services/products'
 
 interface ProductStickyAddToCartBarProps {
@@ -13,6 +14,8 @@ interface ProductStickyAddToCartBarProps {
   productName: string
   imageUrl?: string | null
   priceValue: number
+  compareAtPrice?: number | null
+  discountPercent?: number
   selectedUnitName?: string
   unitOptions: ProductUnitOption[]
   selectedUnitId: number | null
@@ -28,6 +31,8 @@ export function ProductStickyAddToCartBar({
   productName,
   imageUrl,
   priceValue,
+  compareAtPrice = null,
+  discountPercent = 0,
   unitOptions,
   selectedUnitId,
   onSelectUnit,
@@ -83,9 +88,12 @@ export function ProductStickyAddToCartBar({
             <p className="hidden min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-5 text-gray-900 md:block">
               {productName}
             </p>
-            <p className="shrink-0 text-sm font-bold tabular-nums text-primary-700 md:text-lg md:leading-6">
-              {priceValue.toLocaleString('vi-VN')}₫
-            </p>
+            <ProductDetailPriceDisplay
+              priceValue={priceValue}
+              compareAtPrice={compareAtPrice}
+              discountPercent={discountPercent}
+              compact
+            />
             <div ref={unitMenuRef} className="relative hidden md:block">
               <button
                 type="button"

@@ -1,4 +1,5 @@
 import { apiGet, ApiResponse } from '../api'
+import { catalogDiscountPercentFromListSale } from '../utils/cartPricing'
 
 export interface ProductUnitOption {
   unit_id: number
@@ -49,7 +50,7 @@ export function resolveCatalogPriceDisplay(
   ) {
     return {
       compareAtPrice,
-      discountPercent: Math.round(((compareAtPrice - priceValue) / compareAtPrice) * 100),
+      discountPercent: catalogDiscountPercentFromListSale(compareAtPrice, priceValue),
     }
   }
   if (
@@ -445,12 +446,6 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
   const productSlug = getProductSlug(product)
   const detailHref = getProductDetailHref(product, fallbackCategorySlug)
   const variantCount = product.variant_count ?? 1
-  const compare = product.compare_at_price
-  const hasCompare = typeof compare === 'number' && compare > (product.price_value || 0)
-  const discountPct =
-    typeof product.discount_percent === 'number' && product.discount_percent > 0
-      ? product.discount_percent
-      : undefined
   const unitOptions = Array.isArray(product.unit_options) ? product.unit_options : []
   const defaultUnit =
     unitOptions.find((unit) => unit.is_default) ||
@@ -466,11 +461,18 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
           is_default: true,
         }
       : undefined)
+  const salePrice = defaultUnit?.price_value ?? product.price_value ?? 0
+  const compare = defaultUnit?.compare_at_price ?? product.compare_at_price
+  const hasCompare = typeof compare === 'number' && compare > salePrice
+  const discountPct =
+    typeof product.discount_percent === 'number' && product.discount_percent > 0
+      ? product.discount_percent
+      : undefined
   return {
     id: String(product.product_entity_id ?? product.product?.id ?? product.id),
     name: getProductName(product),
     price_display: (defaultUnit?.price_display || product.price_display) || undefined,
-    price: defaultUnit?.price_value ?? product.price_value ?? 0,
+    price: salePrice,
     originalPrice: hasCompare ? compare : undefined,
     discount: discountPct,
     image_url: getProductImageUrl(product),

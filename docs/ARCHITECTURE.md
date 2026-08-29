@@ -82,14 +82,27 @@ Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08).
 
 ### Catalog pricing & cart economics (Option 1 — D-PRC)
 
-SoT doc (BE): `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md`. Plan: `PersonalProject/plans/[UnDone] catalog-pricing-direct-discount-refactor.plan.md`.
+SoT doc (BE): `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md` (§ Docker seed + **UAT checklist**).  
+**Product / variant / unit (card & list):** `Clinic-Oupharmacy-BE/docs/store-product-strategy.md`.  
+Plan: `PersonalProject/plans/[UnDone] catalog-pricing-direct-discount-refactor.plan.md`.
 
-| Layer | FE behavior today | Target |
-|-------|-------------------|--------|
-| Card / PDP | Render `price_value`, `compare_at_price`, `discount_percent` from API only (Option A) | Unchanged |
-| Cart line | Price = unit snapshot (sale) | Unchanged |
-| **Giảm giá trực tiếp** | Banner Long Châu; code **mislabels** voucher slot pre-P3 | `catalog_direct_savings_total` from BE (P2) |
-| **Giảm giá voucher** | `discount_amount` + `shipping_discount_amount` | Unchanged |
+**Tóm tắt quan trọng**
+
+| Khái niệm | Nghĩa |
+|-----------|--------|
+| `price_value` | Giá sale **thật** — giỏ & checkout |
+| `compare_at_price` | Giá list / gạch — chỉ hiển thị + tính “tiết kiệm” |
+| **Giảm giá trực tiếp** | `(list − sale) × qty` — **informational**, không trừ thêm subtotal |
+| **Voucher** | Mã đơn (`SALE20`, …) — trừ trên subtotal sale, **tách cột** với direct |
+
+Hot-sale BE (`seed_hot_sale_campaign`): 12 SP popular, tier 30/25/20, campaign `san-pham-ban-chay`. **Mỗi variant:** promo áp **tất cả unit published** (cùng tier %, list/sale theo từng unit). Card chỉ hiển thị compare của unit đang chọn.
+
+| Layer | FE behavior |
+|-------|-------------|
+| Card / PDP | `price_value`, `compare_at_price`, `discount_percent` from API (Option A) |
+| Cart line | Snapshot **sale** at add time |
+| **Giảm giá trực tiếp** | `catalog_direct_savings_total` / line `list_price_snapshot` (P3) |
+| **Giảm giá voucher** | `discount_amount` + `shipping_discount_amount` |
 
 **Do not** send original price or `%` from FE on add-to-cart / checkout (D-PRC-01).
 
