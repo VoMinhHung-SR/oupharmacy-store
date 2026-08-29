@@ -17,9 +17,6 @@ import {
 } from '@/lib/services/flashSale'
 import { buildFlashSaleWindowsFromTemplates } from '@/lib/services/homeMerch'
 
-const ARROW_ON_ORANGE =
-  '!bg-white !text-orange-700 shadow-md ring-1 ring-orange-200 hover:!bg-orange-50'
-
 type CountdownParts = { hours: string; minutes: string; seconds: string }
 
 type FlashSaleProductsProps = {
@@ -293,22 +290,24 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
               </div>
             ) : null}
 
-            <div className="relative">
+            <div className="relative overflow-visible">
               {railProducts.length > 1 ? (
                 <>
                   <CarouselArrowButton
+                    variant="merchRail"
                     direction="prev"
                     label="Sản phẩm trước"
-                    className={ARROW_ON_ORANGE}
+                    className="border-slate-200/90"
                     onClick={(e) => {
                       e.preventDefault()
                       scrollPage(-1)
                     }}
                   />
                   <CarouselArrowButton
+                    variant="merchRail"
                     direction="next"
                     label="Sản phẩm sau"
-                    className={ARROW_ON_ORANGE}
+                    className="border-slate-200/90"
                     onClick={(e) => {
                       e.preventDefault()
                       scrollPage(1)

@@ -1,5 +1,6 @@
 import { apiGet, ApiResponse } from '@/lib/api'
 import { PRICE_CONSULT } from '@/lib/constant'
+import { withMerchDisplayDiscount } from './homeMerch'
 import {
   buildProductCardPayload,
   normalizeProduct,
@@ -13,6 +14,8 @@ import {
 const HOT_SALE_PAGE_SIZE = 12
 /** Fetch extra rows so CONSULT / zero-price variants can be filtered out. */
 const HOT_SALE_FETCH_SIZE = 48
+/** Per-product merch tiers when catalog has no compare_at (rail display only, D-01). */
+const HOT_SALE_MERCH_TIERS = [30, 25, 20] as const
 
 function storeApiBase(): string {
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/store'
@@ -31,8 +34,9 @@ export function isPricedForHotSale(product: Product): boolean {
 }
 
 /**
- * Build hot-sale cards: catalog compare_at / discount_percent only (Option A — no synth tiers).
- * Sorted by real discount % descending; products without catalog discount show price only.
+ * Build hot-sale cards: prefer real catalog promo (compare_at + lowered price_value);
+ * fallback merch tiers 30/25/20 for rail badge/strikethrough when catalog has no discount.
+ * Sorted by effective discount % descending.
  */
 export function buildHotSaleProductCards(
   products: Product[],
@@ -41,17 +45,21 @@ export function buildHotSaleProductCards(
   const priced = products.filter(isPricedForHotSale).slice(0, pageSize)
   if (!priced.length) return []
 
-  const cards = priced.map((product) => {
+  const cards = priced.map((product, index) => {
     const defaultUnit =
       product.unit_options?.find((unit) => unit.is_default) || product.unit_options?.[0] || null
     const card = buildProductCardPayload(product)
     const catalog = resolveProductCatalogPriceDisplay(product, defaultUnit)
-    if (catalog.discountPercent <= 0 || catalog.compareAtPrice == null) return card
-    return {
-      ...card,
-      discount: catalog.discountPercent,
-      originalPrice: catalog.compareAtPrice,
+    if (catalog.discountPercent > 0 && catalog.compareAtPrice != null) {
+      return {
+        ...card,
+        price: defaultUnit?.price_value ?? card.price,
+        discount: catalog.discountPercent,
+        originalPrice: catalog.compareAtPrice,
+      }
     }
+    const tier = HOT_SALE_MERCH_TIERS[index % HOT_SALE_MERCH_TIERS.length]
+    return withMerchDisplayDiscount(card, tier)
   })
 
   cards.sort((a, b) => {
@@ -357,7 +365,7 @@ export function sortOptionToStoreSearchSort(
 }
 
 /**
- * Homepage hot-sale rail: popular priced products; −% badge only from catalog compare_at / discount_percent.
+ * Homepage hot-sale rail: popular priced products; −% badge from catalog promo or merch tiers 30/25/20.
  * On error/empty returns [] so the section can hide (no mock fill).
  */
 export async function getHotSaleProductsSSG(

@@ -92,7 +92,7 @@ export function withFlashMerchDisplay(
   return withMerchDisplayDiscount(card, percent)
 }
 
-/** Upcoming window: `-xx%` teaser — hide assigned % and synthetic compare_at. */
+/** Upcoming window: `-xx%` badge + masked upcoming price (`xxx.350đ`); list price strikethrough below. */
 export function withFlashMerchTeaser(card: ProductCardPayload): ProductCardPayload {
   return {
     ...card,

@@ -33,43 +33,47 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
   return (
     <section className="bg-white pb-8 pt-12 sm:pb-10 sm:pt-14" aria-label={title}>
       <Container>
-        <div className="relative">
-          <h2 className="hot-sale-tab">{title}</h2>
-
+        <div className="relative overflow-visible">
           <div
-            className="relative rounded-2xl px-4 pb-4 pt-6 sm:px-5 sm:pb-5 sm:pt-7"
+            className="relative overflow-visible rounded-2xl px-4 pb-4 pt-10 sm:px-5 sm:pb-5 sm:pt-11"
             style={{ backgroundColor: HOME_MERCH_ORANGE }}
           >
-            {rail.length > 1 ? (
-              <>
-                <CarouselArrowButton
-                  direction="prev"
-                  label="Sản phẩm trước"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    scrollPage(-1)
-                  }}
-                />
-                <CarouselArrowButton
-                  direction="next"
-                  label="Sản phẩm sau"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    scrollPage(1)
-                  }}
-                />
-              </>
-            ) : null}
+            <h2 className="hot-sale-tab">{title}</h2>
 
-            <div
-              ref={scrollerRef}
-              className="hot-sale-track scrollbar-hide scroll-smooth"
-            >
-              {rail.map((product) => (
-                <div key={product.id}>
-                  <ProductCard product={product} />
-                </div>
-              ))}
+            <div className="relative overflow-visible">
+              {rail.length > 1 ? (
+                <>
+                  <CarouselArrowButton
+                    variant="merchRail"
+                    direction="prev"
+                    label="Sản phẩm trước"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      scrollPage(-1)
+                    }}
+                  />
+                  <CarouselArrowButton
+                    variant="merchRail"
+                    direction="next"
+                    label="Sản phẩm sau"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      scrollPage(1)
+                    }}
+                  />
+                </>
+              ) : null}
+
+              <div
+                ref={scrollerRef}
+                className="hot-sale-track scrollbar-hide scroll-smooth"
+              >
+                {rail.map((product) => (
+                  <div key={product.id}>
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

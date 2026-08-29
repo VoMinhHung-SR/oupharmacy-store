@@ -14,6 +14,9 @@ import {
   cardCornerTabRightPromoClass,
 } from '@/components/badges/cardCornerStyles'
 import { mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
+import { formatUpcomingPriceTeaser } from '@/lib/services/homeMerch'
+import { catalogDiscountPercentFromListSale } from '@/lib/utils/cartPricing'
+import { formatVnd } from '@/lib/utils/currency'
 import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
 
 interface ProductCardProps {
@@ -73,20 +76,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (count === 4) return 'grid-cols-2'
     return 'grid-cols-3'
   }, [unitOptions.length])
+  const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
+  const salePrice = selectedUnit?.price_value ?? product.price
+  const catalogCompareAt = selectedUnit?.compare_at_price ?? null
+  const hasCatalogCompare =
+    catalogCompareAt != null && catalogCompareAt > salePrice
+  /** Home merch (flash live): synthetic compare on card when unit has no catalog compare_at. */
+  const merchAppliesToUnit =
+    !hasCatalogCompare &&
+    !product.discountTeaser &&
+    (product.discount ?? 0) > 0 &&
+    salePrice === product.price
+  const displayCompareAt = hasCatalogCompare
+    ? catalogCompareAt
+    : merchAppliesToUnit && product.originalPrice != null && product.originalPrice > salePrice
+      ? product.originalPrice
+      : null
   const discount = useMemo(() => {
-    if (product.discount) return product.discount
-    if (product.originalPrice && product.originalPrice > product.price) {
-      return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    if (product.discountTeaser) return 0
+    if (displayCompareAt != null && displayCompareAt > salePrice) {
+      return catalogDiscountPercentFromListSale(displayCompareAt, salePrice)
+    }
+    if (merchAppliesToUnit && product.discount != null && product.discount > 0) {
+      return Math.round(product.discount)
     }
     return 0
-  }, [product])
-
-  const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
-  const compareAt = product.discountTeaser
-    ? selectedUnit?.compare_at_price
-    : selectedUnit?.compare_at_price || product.originalPrice
-  const salePrice = selectedUnit?.price_value ?? product.price
-  const hasCompareAt = Boolean(compareAt && compareAt > salePrice)
+  }, [
+    displayCompareAt,
+    merchAppliesToUnit,
+    product.discount,
+    product.discountTeaser,
+    salePrice,
+  ])
 
   const isConsultPrice = useMemo(
     () =>
@@ -223,20 +244,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             ) : (
               <div className="mt-2 space-y-1">
                 <div className="min-w-0">
-                  <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
-                    <span className="text-base font-bold tabular-nums text-primary-700">
-                      {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
-                      {salePrice.toLocaleString('vi-VN')}₫
-                    </span>
-                    {unitLabel ? (
-                      <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
-                    ) : null}
-                  </div>
-                  {hasCompareAt ? (
-                    <div className="text-xs text-gray-400 line-through">
-                      {compareAt!.toLocaleString('vi-VN')}₫
-                    </div>
-                  ) : null}
+                  {product.discountTeaser ? (
+                    <>
+                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-base font-bold tabular-nums text-primary-700">
+                          {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                          {formatUpcomingPriceTeaser(salePrice)}
+                        </span>
+                        {unitLabel ? (
+                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                        ) : null}
+                      </div>
+                      <div className="text-xs tabular-nums text-gray-400 line-through">
+                        {formatVnd(salePrice)}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-base font-bold tabular-nums text-primary-700">
+                          {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                          {formatVnd(salePrice)}
+                        </span>
+                        {unitLabel ? (
+                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                        ) : null}
+                      </div>
+                      {displayCompareAt != null ? (
+                        <div className="text-xs tabular-nums text-gray-400 line-through">
+                          {formatVnd(displayCompareAt)}
+                        </div>
+                      ) : null}
+                    </>
+                  )}
                 </div>
 
                 <div className="min-h-[1rem] truncate text-xs text-gray-500">

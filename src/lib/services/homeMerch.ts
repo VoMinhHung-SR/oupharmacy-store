@@ -46,6 +46,21 @@ export function withMerchDisplayDiscount(
   }
 }
 
+/** Flash upcoming: mask sale price — max 3× `x`, reveal last 3 digits (e.g. 358350 → xxx.350đ). */
+export function formatUpcomingPriceTeaser(amount: number): string {
+  const n = Math.max(0, Math.round(amount))
+  if (n === 0) return 'xxx.000đ'
+  const raw = String(n)
+  if (raw.length <= 3) {
+    const xs = 'x'.repeat(Math.min(3, raw.length))
+    return `${xs}.000đ`
+  }
+  const tail = raw.slice(-3)
+  const hiddenCount = raw.length - 3
+  const xs = 'x'.repeat(Math.min(3, hiddenCount))
+  return `${xs}.${tail}đ`
+}
+
 export type FlashWindowTemplate = {
   /** Stable id suffix; final id = `win-d{day_offset}` if omitted. */
   id?: string
