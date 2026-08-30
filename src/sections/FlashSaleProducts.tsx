@@ -16,6 +16,7 @@ import {
   type FlashSaleRailProduct,
 } from '@/lib/services/flashSale'
 import { buildFlashSaleWindowsFromTemplates } from '@/lib/services/homeMerch'
+import { useHorizontalScrollEdges } from '@/lib/hooks/useHorizontalScrollEdges'
 
 type CountdownParts = { hours: string; minutes: string; seconds: string }
 
@@ -48,16 +49,13 @@ function windowPhase(
   return 'ended'
 }
 
-/** Drop ended windows — only live + upcoming stay on UI. */
+/** Drop ended windows — UI keeps live + upcoming only. */
 function visibleWindows(windows: FlashSaleWindow[], now: number): FlashSaleWindow[] {
   return windows
     .filter((win) => windowPhase(win, now) !== 'ended')
     .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
 }
 
-/**
- * Prefer live, else earliest upcoming. Keep `preferred` if still visible.
- */
 function pickWindowId(
   windows: FlashSaleWindow[],
   now: number,
@@ -115,10 +113,7 @@ function windowStatusLabel(phase: 'upcoming' | 'live'): string {
   return phase === 'live' ? 'Đang diễn ra' : 'Sắp diễn ra'
 }
 
-/**
- * Flash sale rail — catalog pool from SSG; windows from day-offset templates (D-23).
- * Ended windows are removed; selection jumps to next live/upcoming + new rail slice.
- */
+/** Flash sale rail — SSG pool + fixture windows (D-23). */
 export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
   products: pool,
   dayKey,
@@ -133,8 +128,7 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
   const now = useNowTicker(enabled && pool.length > 0)
   const builtWindows = useMemo(
     () => resolveFixtureWindows(meta, new Date(now)),
-    // Tick through midnight so day_offset windows refresh without hard-coded dates
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fixture meta is module-static
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh VN day_offset on tick
     [now]
   )
   const windows = useMemo(() => visibleWindows(builtWindows, now), [builtWindows, now])
@@ -183,16 +177,15 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
     return slice
   }, [pool, activeWindowId, dayKey, isUpcoming, isLive])
 
+  const { canScrollLeft, canScrollRight, scrollPage } = useHorizontalScrollEdges(scrollerRef, [
+    railProducts.length,
+    activeWindowId,
+  ])
+
   const selectWindow = useCallback((windowId: string) => {
     setSelectedWindowId(windowId)
     const el = scrollerRef.current
     if (el) el.scrollTo({ left: 0, behavior: 'smooth' })
-  }, [])
-
-  const scrollPage = useCallback((dir: -1 | 1) => {
-    const el = scrollerRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
   }, [])
 
   if (!enabled || pool.length === 0 || windows.length === 0) return null
@@ -291,35 +284,33 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
             ) : null}
 
             <div className="relative overflow-visible">
-              {railProducts.length > 1 ? (
-                <>
-                  <CarouselArrowButton
-                    variant="merchRail"
-                    direction="prev"
-                    label="Sản phẩm trước"
-                    className="border-slate-200/90"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      scrollPage(-1)
-                    }}
-                  />
-                  <CarouselArrowButton
-                    variant="merchRail"
-                    direction="next"
-                    label="Sản phẩm sau"
-                    className="border-slate-200/90"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      scrollPage(1)
-                    }}
-                  />
-                </>
+              {canScrollLeft ? (
+                <CarouselArrowButton
+                  variant="merchRail"
+                  direction="prev"
+                  label="Sản phẩm trước"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(-1)
+                  }}
+                />
+              ) : null}
+              {canScrollRight ? (
+                <CarouselArrowButton
+                  variant="merchRail"
+                  direction="next"
+                  label="Sản phẩm sau"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(1)
+                  }}
+                />
               ) : null}
 
               <div ref={scrollerRef} className="hot-sale-track scrollbar-hide scroll-smooth">
                 {railProducts.map((product) => (
                   <div key={`${activeWindowId}-${product.id}`} className="min-w-0">
-                    <ProductCard product={product} />
+                    <ProductCard product={product} ctaVariant="viewDetail" merchShockOffer="compact" />
                   </div>
                 ))}
               </div>

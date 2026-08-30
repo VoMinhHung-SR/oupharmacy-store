@@ -6,7 +6,6 @@ interface ProductDetailPriceDisplayProps {
   compareAtPrice: number | null
   discountPercent: number
   unitName?: string
-  /** Compact row for sticky bar. */
   compact?: boolean
 }
 
@@ -22,12 +21,12 @@ export function ProductDetailPriceDisplay({
 
   if (compact) {
     return (
-      <div className="min-w-0 shrink-0 text-right">
-        <p className="text-sm font-bold tabular-nums leading-tight text-primary-700 md:text-base">
+      <div className="min-w-0 max-w-[42%] shrink text-right sm:max-w-none">
+        <p className="truncate text-sm font-bold tabular-nums leading-tight text-primary-700 md:text-base">
           {formatVnd(priceValue)}
         </p>
         {showDiscount ? (
-          <p className="mt-0.5 text-[10px] tabular-nums text-gray-400 line-through md:text-xs">
+          <p className="mt-0.5 truncate text-[10px] tabular-nums text-gray-400 line-through md:text-xs">
             {formatVnd(compareAtPrice)}
           </p>
         ) : null}
@@ -36,19 +35,19 @@ export function ProductDetailPriceDisplay({
   }
 
   return (
-    <div>
-      <div className="text-xl font-bold tabular-nums text-primary-700 sm:text-2xl md:text-3xl">
-        {formatVnd(priceValue)}
+    <div className="min-w-0">
+      <div className="text-lg font-bold tabular-nums text-primary-700 sm:text-2xl md:text-3xl">
+        <span className="break-words">{formatVnd(priceValue)}</span>
         {unitName ? (
-          <span className="text-base font-semibold text-primary-700 sm:text-xl md:text-2xl">
+          <span className="mt-0.5 block text-sm font-semibold text-primary-700 sm:mt-0 sm:inline sm:text-xl md:text-2xl">
             {' '}
             / {unitName}
           </span>
         ) : null}
       </div>
       {showDiscount ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2.5">
-          <span className="text-sm tabular-nums text-gray-500 line-through sm:text-base">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-xs tabular-nums text-gray-500 line-through sm:text-sm md:text-base">
             {formatVnd(compareAtPrice)}
           </span>
           <CatalogDiscountBadge percent={discountPercent} />

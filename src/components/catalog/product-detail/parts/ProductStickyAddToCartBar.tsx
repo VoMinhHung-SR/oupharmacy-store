@@ -76,9 +76,8 @@ export function ProductStickyAddToCartBar({
       aria-hidden={!visible}
     >
       <Container className="py-1">
-        <div className="mx-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] md:max-w-none md:px-4 md:py-3">
-          {/* Mobile: price | qty | ATC always visible. Desktop: + image/name/unit. */}
-          <div className="flex min-w-0 items-center gap-2 md:gap-3">
+        <div className="mx-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white px-2.5 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] sm:max-w-none sm:px-3 md:px-4 md:py-3">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 md:gap-3">
             {imageUrl ? (
               <div className="hidden h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white md:block md:h-12 md:w-12">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -150,7 +149,7 @@ export function ProductStickyAddToCartBar({
             />
             <Button
               onClick={onAddToCart}
-              className="h-8 min-w-[7.5rem] flex-1 rounded-full px-3 text-xs whitespace-nowrap sm:h-9 sm:min-w-[9rem] sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
+              className="h-9 min-w-0 flex-1 rounded-full px-2.5 text-xs whitespace-nowrap sm:h-9 sm:min-w-[8.5rem] sm:px-3 sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
               size="md"
             >
               Thêm vào giỏ

@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { useRef } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import { HOME_MERCH_ORANGE } from '@/lib/constant'
+import { useHorizontalScrollEdges } from '@/lib/hooks/useHorizontalScrollEdges'
 import type { ProductCardPayload } from '@/lib/services/products'
 
 const DEFAULT_TITLE = 'Sản phẩm bán chạy'
@@ -14,19 +15,14 @@ type BestsellingProductsProps = {
   title?: string
 }
 
-/** Hot-sale / bestsellers rail — priced products with per-card discount badge (home SSG). */
+/** Hot-sale / bestsellers rail (home SSG). */
 export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
   products,
   title = DEFAULT_TITLE,
 }) => {
   const rail = (products || []).slice(0, 12)
   const scrollerRef = useRef<HTMLDivElement>(null)
-
-  const scrollPage = useCallback((dir: -1 | 1) => {
-    const el = scrollerRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
-  }, [])
+  const { canScrollLeft, canScrollRight, scrollPage } = useHorizontalScrollEdges(scrollerRef, [rail.length])
 
   if (rail.length === 0) return null
 
@@ -41,27 +37,27 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
             <h2 className="hot-sale-tab">{title}</h2>
 
             <div className="relative overflow-visible">
-              {rail.length > 1 ? (
-                <>
-                  <CarouselArrowButton
-                    variant="merchRail"
-                    direction="prev"
-                    label="Sản phẩm trước"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      scrollPage(-1)
-                    }}
-                  />
-                  <CarouselArrowButton
-                    variant="merchRail"
-                    direction="next"
-                    label="Sản phẩm sau"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      scrollPage(1)
-                    }}
-                  />
-                </>
+              {canScrollLeft ? (
+                <CarouselArrowButton
+                  variant="merchRail"
+                  direction="prev"
+                  label="Sản phẩm trước"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(-1)
+                  }}
+                />
+              ) : null}
+              {canScrollRight ? (
+                <CarouselArrowButton
+                  variant="merchRail"
+                  direction="next"
+                  label="Sản phẩm sau"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollPage(1)
+                  }}
+                />
               ) : null}
 
               <div

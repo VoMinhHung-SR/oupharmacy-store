@@ -7,7 +7,9 @@ import { QuantityStepper } from '@/components/catalog/product-detail/parts/Quant
 import { ProductUnitOptionButton } from '@/components/catalog/product-detail/parts/ProductUnitOptionButton'
 import { ProductDetailPriceDisplay } from '@/components/catalog/product-detail/parts/ProductDetailPriceDisplay'
 import { ProductDetailPromoAppliedSection } from '@/components/catalog/product-detail/parts/ProductDetailPromoAppliedSection'
+import { ProductDetailScheduledPromoBanner } from '@/components/catalog/product-detail/parts/ProductDetailScheduledPromoBanner'
 import { useHotSalePromoEndsAt } from '@/lib/hooks/useHotSalePromoEndsAt'
+import { usePdpUpcomingPromoTeaser } from '@/lib/hooks/usePdpUpcomingPromoTeaser'
 import { Product, ProductUnitOption } from '@/lib/services/products'
 import { buildProductPathWithVariant } from '@/lib/store-path'
 
@@ -59,6 +61,11 @@ export function ProductDetailPurchaseBlock({
     effectiveCompareAtPrice > effectivePriceValue
 
   const promoEndsAt = useHotSalePromoEndsAt(showCatalogPromo)
+  const upcomingTeaser = usePdpUpcomingPromoTeaser(
+    product,
+    effectivePriceValue,
+    !isConsultPrice && !showCatalogPromo
+  )
 
   if (isConsultPrice) {
     return (
@@ -99,8 +106,16 @@ export function ProductDetailPurchaseBlock({
     />
   ) : null
 
+  const scheduledPromoBanner =
+    upcomingTeaser && !showCatalogPromo ? (
+      <ProductDetailScheduledPromoBanner
+        {...upcomingTeaser}
+        unitName={selectedUnitName || undefined}
+      />
+    ) : null
+
   return (
-    <>
+    <div className="space-y-4 sm:space-y-5">
       {packagingVariants && packagingVariants.length > 1 ? (
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">Chọn quy cách</label>
@@ -112,7 +127,7 @@ export function ProductDetailPurchaseBlock({
                 onClick={() => {
                   router.replace(buildProductPathWithVariant(categorySlug, productSlug, variant.id))
                 }}
-                className={`rounded-lg border-2 px-4 py-2 text-sm font-medium ${
+                className={`rounded-lg border-2 px-3 py-2 text-sm font-medium sm:px-4 ${
                   product.id === variant.id
                     ? 'border-primary-600 bg-primary-50 text-primary-700'
                     : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
@@ -132,9 +147,11 @@ export function ProductDetailPurchaseBlock({
         unitName={selectedUnitName || undefined}
       />
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      {scheduledPromoBanner}
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
         <span className="shrink-0 text-xs font-medium text-gray-700 sm:text-sm">Chọn đơn vị tính</span>
-        <div className="ml-0 flex flex-wrap gap-2 sm:ml-2 md:ml-3">
+        <div className="flex flex-wrap gap-2">
           {displayUnitOptions.map((unit) => {
             const isSelected =
               (selectedUnit?.unit_id ?? product.default_unit_id ?? 0) === unit.unit_id
@@ -150,23 +167,23 @@ export function ProductDetailPurchaseBlock({
         </div>
       </div>
 
-      {promoSection ? <div className="md:hidden">{promoSection}</div> : null}
-
       {product.in_stock > 0 ? (
         <div>
           <label className="mb-2 block text-xs font-medium text-gray-700 sm:text-sm">Chọn số lượng</label>
-          <div className="flex min-w-0 flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-            <QuantityStepper
-              value={quantity}
-              max={maxSelectableQuantity}
-              onChange={onQuantityChange}
-              size="md"
-              className="self-start"
-            />
+          <div className="flex min-w-0 flex-col gap-2.5 md:flex-row md:items-stretch md:gap-3">
+            <div className="min-w-0 md:flex-1">
+              <QuantityStepper
+                value={quantity}
+                max={maxSelectableQuantity}
+                onChange={onQuantityChange}
+                size="lg"
+                fullWidth
+              />
+            </div>
             <Button
               onClick={onAddToCart}
               disabled={product.in_stock === 0}
-              className="h-10 w-full flex-1 rounded-xl text-sm sm:h-11 sm:w-auto sm:text-base"
+              className="h-11 w-full rounded-xl text-base md:h-12 md:flex-1"
               size="lg"
             >
               Thêm vào giỏ
@@ -176,7 +193,7 @@ export function ProductDetailPurchaseBlock({
         </div>
       ) : null}
 
-      {promoSection ? <div className="hidden md:block">{promoSection}</div> : null}
-    </>
+      {promoSection}
+    </div>
   )
 }

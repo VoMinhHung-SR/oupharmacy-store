@@ -92,7 +92,7 @@ export function withFlashMerchDisplay(
   return withMerchDisplayDiscount(card, percent)
 }
 
-/** Upcoming window: `-xx%` badge + masked upcoming price (`xxx.350đ`); list price strikethrough below. */
+/** Upcoming flash window — teaser badge + masked price only (D-01). */
 export function withFlashMerchTeaser(card: ProductCardPayload): ProductCardPayload {
   return {
     ...card,

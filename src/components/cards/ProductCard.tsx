@@ -18,6 +18,7 @@ import { formatUpcomingPriceTeaser } from '@/lib/services/homeMerch'
 import { catalogDiscountPercentFromListSale } from '@/lib/utils/cartPricing'
 import { formatVnd } from '@/lib/utils/currency'
 import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
+import { ProductCardMerchRailCta } from '@/components/cards/ProductCardMerchRailCta'
 
 interface ProductCardProps {
   product: {
@@ -40,9 +41,11 @@ interface ProductCardProps {
     variant_count?: number
     brand_name?: string
     brand_country?: string | null
-    /** Flash upcoming: `-xx%` teaser (no revealed % or strikethrough). */
+    /** Flash upcoming window — badge `-xx%`, masked price (D-01). */
     discountTeaser?: boolean
   }
+  ctaVariant?: 'addToCart' | 'viewDetail'
+  merchShockOffer?: 'off' | 'compact'
 }
 
 const getProductLink = (product: ProductCardProps['product']): string | null =>
@@ -56,7 +59,11 @@ function unitSaleLabel(unitName?: string, packaging?: string): string | undefine
   return first || undefined
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  ctaVariant = 'addToCart',
+  merchShockOffer = 'off',
+}) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
   const unitOptions = useMemo(() => product.unit_options || [], [product.unit_options])
@@ -328,6 +335,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     Tìm nhà thuốc
                   </button>
                 </>
+              ) : ctaVariant === 'viewDetail' ? (
+                <ProductCardMerchRailCta shockOffer={merchShockOffer} />
               ) : (
                 <button
                   type="button"

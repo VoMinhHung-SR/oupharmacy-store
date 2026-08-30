@@ -106,6 +106,17 @@ Hot-sale BE (`seed_hot_sale_campaign`): 12 SP popular, tier 30/25/20, campaign `
 
 **Do not** send original price or `%` from FE on add-to-cart / checkout (D-PRC-01).
 
+**Campaign membership (D-PRC-06 — locked 2026-08-30):**
+
+| Rule | FE implication |
+|------|----------------|
+| **P1** | Một unit = một promo giá catalog effective; card/PDP/giỏ đọc API + snapshot — không synth % checkout. |
+| **M1** | SKU có thể ở nhiều rail/landing; flash/hot **không** ghi đè `price_value`. |
+| **V1** | Voucher sheet = campaign-published offers; cart tách **direct savings** vs **voucher** columns. |
+| **UX1** | Flash **upcoming**: mask `-xx%` / `formatUpcomingPriceTeaser`; **live**: reveal cùng SoT. PDP có thể show % thật khi catalog promo đã live dù flash tab chưa onTime. |
+
+BE ADR: `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md` § D-PRC-06.
+
 ### Campaign landing preview (D-19)
 
 - Public: `/khuyen-mai`, `/khuyen-mai/[slug]` via `getCampaignBySlugSSG` / `getCampaignsSSG`.

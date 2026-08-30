@@ -46,19 +46,25 @@ export function withMerchDisplayDiscount(
   }
 }
 
-/** Flash upcoming: mask sale price — max 3× `x`, reveal last 3 digits (e.g. 358350 → xxx.350đ). */
+/**
+ * Mask flash upcoming price by digit groups only (no trailing-digit reveal).
+ * e.g. 471350 → xxx.xxxđ; 12500000 → xx.xxx.xxxđ
+ */
 export function formatUpcomingPriceTeaser(amount: number): string {
   const n = Math.max(0, Math.round(amount))
   if (n === 0) return 'xxx.000đ'
-  const raw = String(n)
-  if (raw.length <= 3) {
-    const xs = 'x'.repeat(Math.min(3, raw.length))
-    return `${xs}.000đ`
+
+  const digits = String(n).length
+  const groups: string[] = []
+  let head = ((digits - 1) % 3) + 1
+  groups.push('x'.repeat(Math.min(3, head)))
+
+  for (let pos = head; pos < digits; pos += 3) {
+    groups.push('x'.repeat(Math.min(3, digits - pos)))
   }
-  const tail = raw.slice(-3)
-  const hiddenCount = raw.length - 3
-  const xs = 'x'.repeat(Math.min(3, hiddenCount))
-  return `${xs}.${tail}đ`
+
+  if (groups.length === 1) return `${groups[0]}.000đ`
+  return `${groups.join('.')}đ`
 }
 
 export type FlashWindowTemplate = {
@@ -131,4 +137,12 @@ export function buildFlashSaleWindowsFromTemplates(
       }
     })
     .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
+}
+
+export function findNextUpcomingFlashWindow(
+  templates: FlashWindowTemplate[],
+  now: Date = new Date()
+): FlashSaleWindowBuilt | null {
+  const windows = buildFlashSaleWindowsFromTemplates(templates, now)
+  return windows.find((win) => Date.parse(win.starts_at) > now.getTime()) ?? null
 }
