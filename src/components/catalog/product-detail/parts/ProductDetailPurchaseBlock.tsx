@@ -12,6 +12,7 @@ import { useHotSalePromoEndsAt } from '@/lib/hooks/useHotSalePromoEndsAt'
 import { usePdpUpcomingPromoTeaser } from '@/lib/hooks/usePdpUpcomingPromoTeaser'
 import { Product, ProductUnitOption } from '@/lib/services/products'
 import { buildProductPathWithVariant } from '@/lib/store-path'
+import { STORE_SUPPORT } from '@/lib/constant'
 
 interface ProductDetailPurchaseBlockProps {
   product: Product
@@ -76,10 +77,15 @@ export function ProductDetailPurchaseBlock({
           </p>
         </div>
         <div className="flex flex-col gap-3">
-          <Button onClick={() => {}} className="w-full" size="lg">
+          <Button onClick={() => router.push(STORE_SUPPORT.CONSULT_HREF)} className="w-full" size="lg">
             Tư vấn ngay
           </Button>
-          <Button variant="outline" onClick={() => {}} className="w-full" size="lg">
+          <Button
+            variant="outline"
+            onClick={() => router.push(STORE_SUPPORT.PHARMACY_FINDER_HREF)}
+            className="w-full"
+            size="lg"
+          >
             Tìm nhà thuốc
           </Button>
         </div>

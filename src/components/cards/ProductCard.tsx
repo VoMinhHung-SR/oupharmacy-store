@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import React, { useMemo, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
-import { PRICE_CONSULT } from '@/lib/constant'
+import { PRICE_CONSULT, STORE_SUPPORT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
 import { CardBadge } from '@/components/badges/CardBadge'
@@ -170,12 +170,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     )
   }
 
-  const handleNavigate = (e: React.MouseEvent) => {
+  const handleConsult = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (productLink) {
-      window.location.href = productLink
-    }
+    e.stopPropagation()
+    window.location.href = STORE_SUPPORT.CONSULT_HREF
   }
+
+  const handleFindPharmacy = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.location.href = STORE_SUPPORT.PHARMACY_FINDER_HREF
+  }
+
   // Nếu không có link, hiển thị thông báo thay vì crash
   if (!productLink) {
     return (
@@ -321,16 +327,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <button
                     type="button"
                     className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
-                    onClick={handleNavigate}
+                    onClick={handleConsult}
                   >
                     Tư vấn ngay
                   </button>
                   <button
                     type="button"
                     className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
+                    onClick={handleFindPharmacy}
                   >
                     Tìm nhà thuốc
                   </button>

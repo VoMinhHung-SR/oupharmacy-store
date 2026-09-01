@@ -58,6 +58,11 @@ export default async function Home() {
             {link.icon}
           </span>
           <span className="mt-1.5 text-xs font-semibold text-gray-800 sm:text-sm">{link.title}</span>
+          {link.comingSoon ? (
+            <span className="mt-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-amber-800">
+              Sắp có
+            </span>
+          ) : null}
         </Link>
       ))}
     </div>
