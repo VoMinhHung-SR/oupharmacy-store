@@ -33,7 +33,8 @@ export function ProductDetailInfoColumn({ product, state }: ProductDetailInfoCol
         isConsultPrice={state.isConsultPrice}
         packagingVariants={state.packagingVariants}
         effectivePriceValue={state.effectivePriceValue}
-        effectiveCompareAtPrice={state.effectiveCompareAtPrice}
+        effectiveCompareAtPrice={state.catalogPriceDisplay.compareAtPrice}
+        catalogDiscountPercent={state.catalogPriceDisplay.discountPercent}
         selectedUnitName={state.selectedUnitName}
         unitOptions={state.unitOptions}
         selectedUnit={state.selectedUnit}

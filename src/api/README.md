@@ -15,8 +15,8 @@ Generated homepage CMS PNGs live under `public/mocks/home-cms/` (gitignored) —
 | Kind | Path | Role |
 |------|------|------|
 | **CMS / campaign placements** | `campaigns/placements.home.response.json` | D-21/D-22: HERO/SECONDARY arrays; NOTICE singles |
-| **Flash sale** (campaign-like) | `home/flash-sale.response.json` | Chrome only (`enabled`, windows, CTA) — D-23. Products: `getFlashSaleProductsSSG` (search → priced → seed-by-day, no cron); rail ≤12; upcoming −10…35% display (D-01). No BE Flash tables. |
-| **Hot sale** (fixed section) | `home/hot-sale.response.json` | Offline shape reference. Live: `getHotSaleProductsSSG` — per-card discount badge, sort 30→25→20 |
+| **Flash sale** (campaign-like) | `home/flash-sale.response.json` | Chrome + `window_templates`. Products: `getFlashSaleProductsSSG`. Upcoming: `-xx%` teaser; live: actual −10…35% via `homeMerch` (D-01). |
+| **Hot sale** (fixed section) | `home/hot-sale.response.json` | Offline shape. Live: `getHotSaleProductsSSG` + BE `seed_hot_sale_campaign` (12 SP, tier 30/25/20). −% / gạch từ `compare_at` + `price_value`; fallback merch chỉ khi BE chưa seed. UAT: BE doc § UAT checklist. |
 | **Featured categories** (fixed) | `home/featured-categories.response.json` | Category grid → later category API |
 | **Favorite brands** (fixed) | `home/favorite-brands.response.json` | Offline shape reference. Live: `getFavoriteBrandsSSG` — top 10 + campaign 10–35% → `/thuong-hieu/{slug}?bid=&promo=` |
 

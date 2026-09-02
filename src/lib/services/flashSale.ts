@@ -4,6 +4,10 @@
  * shuffle; new day → new set. No cron / no Flash DB tables (Option 1).
  */
 
+import {
+  homeMerchDayKey,
+  withMerchDisplayDiscount,
+} from './homeMerch'
 import { buildProductCardPayload, normalizeProduct, type Product, type ProductCardPayload } from './products'
 import { isPricedForHotSale } from './search'
 
@@ -31,14 +35,9 @@ function storeApiBase(): string {
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/store'
 }
 
-/** Calendar day in Asia/Ho_Chi_Minh → stable daily seed key. */
+/** @deprecated Prefer `homeMerchDayKey` — kept for existing imports. */
 export function flashSaleDayKey(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Ho_Chi_Minh',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now)
+  return homeMerchDayKey(now)
 }
 
 function hashString(input: string): number {
@@ -84,24 +83,27 @@ export function flashMerchPercentForProduct(product: Product, dayKey: string): n
   return FLASH_MERCH_TIERS[h % FLASH_MERCH_TIERS.length]
 }
 
-/** Apply display compare_at from flash merch % (does not change catalog engine). */
+/** Apply flash merch % when window is live (display only). */
 export function withFlashMerchDisplay(
   card: ProductCardPayload,
   percent: number
 ): ProductCardPayload {
   if (!(percent >= 10 && percent <= 35)) return card
-  const price = card.price
-  if (!(price > 0)) return card
-  const originalPrice = Math.max(price + 1, Math.round(price / (1 - percent / 100)))
+  return withMerchDisplayDiscount(card, percent)
+}
+
+/** Upcoming flash window — teaser badge + masked price only (D-01). */
+export function withFlashMerchTeaser(card: ProductCardPayload): ProductCardPayload {
   return {
     ...card,
-    discount: percent,
-    originalPrice,
+    discount: undefined,
+    originalPrice: undefined,
+    discountTeaser: true,
   }
 }
 
 /**
- * Slice up to `limit` products from the daily pool for a window (wraps).
+ * Slice up to `limit` products from the daily pool for a window (no wrap when pool >= limit).
  */
 export function pickFlashSaleWindowProducts(
   pool: FlashSaleRailProduct[],
@@ -111,12 +113,9 @@ export function pickFlashSaleWindowProducts(
 ): FlashSaleRailProduct[] {
   if (!pool.length || limit <= 0) return []
   if (pool.length <= limit) return pool
-  const start = hashString(`${dayKey}|window|${windowId}`) % pool.length
-  const out: FlashSaleRailProduct[] = []
-  for (let i = 0; i < limit; i += 1) {
-    out.push(pool[(start + i) % pool.length])
-  }
-  return out
+  const maxStart = pool.length - limit
+  const start = hashString(`${dayKey}|window|${windowId}`) % (maxStart + 1)
+  return pool.slice(start, start + limit)
 }
 
 function productPoolId(product: Product): string {
@@ -157,7 +156,7 @@ export async function getFlashSaleProductsSSG(
   poolSize: number = FLASH_POOL_TARGET,
   options?: GetFlashSaleProductsOptions
 ): Promise<FlashSaleProductsPayload> {
-  const dayKey = flashSaleDayKey()
+  const dayKey = homeMerchDayKey()
   const excludeIds = new Set(
     Array.from(options?.excludeIds ?? [], (id) => String(id)).filter(Boolean)
   )

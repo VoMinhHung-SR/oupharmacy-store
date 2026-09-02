@@ -1,4 +1,5 @@
 import { apiGet, ApiResponse } from '../api'
+import { catalogDiscountPercentFromListSale } from '../utils/cartPricing'
 
 export interface ProductUnitOption {
   unit_id: number
@@ -28,6 +29,69 @@ export function mapProductUnitOptionsForCart(unitOptions?: ProductUnitOption[]):
       is_default: u.is_default,
       price_value: u.price_value,
     }))
+}
+
+export type CatalogPriceDisplay = {
+  compareAtPrice: number | null
+  discountPercent: number
+}
+
+/** PDP / catalog: compare_at first, else BE `discount_percent` (not home merch tiers). */
+export function resolveCatalogPriceDisplay(
+  priceValue: number,
+  compareAtPrice?: number | null,
+  catalogDiscountPercent?: number | null
+): CatalogPriceDisplay {
+  if (
+    typeof compareAtPrice === 'number' &&
+    Number.isFinite(compareAtPrice) &&
+    compareAtPrice > priceValue &&
+    priceValue > 0
+  ) {
+    return {
+      compareAtPrice,
+      discountPercent: catalogDiscountPercentFromListSale(compareAtPrice, priceValue),
+    }
+  }
+  if (
+    typeof catalogDiscountPercent === 'number' &&
+    catalogDiscountPercent > 0 &&
+    priceValue > 0
+  ) {
+    const compareAt = Math.max(
+      priceValue + 1,
+      Math.round(priceValue / (1 - catalogDiscountPercent / 100))
+    )
+    return {
+      compareAtPrice: compareAt,
+      discountPercent: Math.round(catalogDiscountPercent),
+    }
+  }
+  return { compareAtPrice: null, discountPercent: 0 }
+}
+
+/** Selected sale unit + product-level catalog fields (default unit only). */
+export function resolveProductCatalogPriceDisplay(
+  product: Product,
+  selectedUnit: ProductUnitOption | null
+): CatalogPriceDisplay {
+  const unitOptions = product.unit_options ?? []
+  const defaultUnit =
+    unitOptions.find((unit) => unit.is_default) || unitOptions[0] || null
+  const price = selectedUnit?.price_value ?? product.price_value ?? 0
+
+  const fromUnitCompare = resolveCatalogPriceDisplay(price, selectedUnit?.compare_at_price ?? null)
+  if (fromUnitCompare.discountPercent > 0) return fromUnitCompare
+
+  const isDefaultUnit =
+    !selectedUnit || !defaultUnit || selectedUnit.unit_id === defaultUnit.unit_id
+  if (!isDefaultUnit) return { compareAtPrice: null, discountPercent: 0 }
+
+  return resolveCatalogPriceDisplay(
+    price,
+    product.compare_at_price ?? null,
+    product.discount_percent
+  )
 }
 
 export interface Product {
@@ -218,6 +282,8 @@ export interface ProductCardPayload {
   variant_count?: number
   brand_name?: string
   brand_country?: string | null
+  /** Flash upcoming: show `-xx%` badge without revealing merch % or compare_at. */
+  discountTeaser?: boolean
 }
 
 export function getProductEntity(product: Product) {
@@ -380,12 +446,6 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
   const productSlug = getProductSlug(product)
   const detailHref = getProductDetailHref(product, fallbackCategorySlug)
   const variantCount = product.variant_count ?? 1
-  const compare = product.compare_at_price
-  const hasCompare = typeof compare === 'number' && compare > (product.price_value || 0)
-  const discountPct =
-    typeof product.discount_percent === 'number' && product.discount_percent > 0
-      ? product.discount_percent
-      : undefined
   const unitOptions = Array.isArray(product.unit_options) ? product.unit_options : []
   const defaultUnit =
     unitOptions.find((unit) => unit.is_default) ||
@@ -401,11 +461,18 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
           is_default: true,
         }
       : undefined)
+  const salePrice = defaultUnit?.price_value ?? product.price_value ?? 0
+  const compare = defaultUnit?.compare_at_price ?? product.compare_at_price
+  const hasCompare = typeof compare === 'number' && compare > salePrice
+  const discountPct =
+    typeof product.discount_percent === 'number' && product.discount_percent > 0
+      ? product.discount_percent
+      : undefined
   return {
     id: String(product.product_entity_id ?? product.product?.id ?? product.id),
     name: getProductName(product),
     price_display: (defaultUnit?.price_display || product.price_display) || undefined,
-    price: defaultUnit?.price_value ?? product.price_value ?? 0,
+    price: salePrice,
     originalPrice: hasCompare ? compare : undefined,
     discount: discountPct,
     image_url: getProductImageUrl(product),

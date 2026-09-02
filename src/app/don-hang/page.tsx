@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
+import { useAutoApplyBestCartVoucher } from '@/lib/hooks/useCartVoucherOffers'
 import { getCampaignAttributionId } from '@/lib/utils/campaignAttribution'
 import { FREE_SHIPPING_THRESHOLD } from '@/lib/constant'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
@@ -56,14 +57,15 @@ export default function CheckoutPage() {
     subtotal,
     shippingFee: cartShippingFee,
     freeShippingApplied: cartFreeShippingApplied,
-    orderVoucherCode,
-    shippingVoucherCode,
+    catalogDirectSavingsTotal = 0,
     discountAmount = 0,
     shippingDiscountAmount = 0,
     version: cartVersion,
     shippingMethodId: serverShippingMethodId,
+    orderVoucherCode,
     isLoading: cartLoading,
   } = useCart()
+  useAutoApplyBestCartVoucher(!cartLoading && items.length > 0)
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
   const checkoutCartMutation = useCheckoutCart()
@@ -108,6 +110,7 @@ export default function CheckoutPage() {
         name: i.name,
         qty: i.qty,
         price: i.price,
+        listPrice: i.listPriceSnapshot,
         packaging: i.packaging,
         image_url: i.image_url,
       })),
@@ -139,10 +142,16 @@ export default function CheckoutPage() {
     [shippingMethods, qualifiesFreeShipping]
   )
 
+  const scopedCatalogDirectSavings = useMemo(() => {
+    if (!hasScopedSubset) {
+      return Math.max(0, catalogDirectSavingsTotal)
+    }
+    return summaryItems.reduce((s, i) => s + (i.catalogSavings ?? 0), 0)
+  }, [catalogDirectSavingsTotal, hasScopedSubset, summaryItems])
+
   const displayOrderDiscount = discountAmount * scopeRatio
   const displayShippingDiscount = shippingDiscountAmount * scopeRatio
-  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
-  const displayDirectDiscount = hasVoucherApplied ? 0 : Math.max(0, discountAmount) * scopeRatio
+  const displayDirectDiscount = scopedCatalogDirectSavings
   const orderTotal = Math.max(
     0,
     scopedLineSubtotal - displayOrderDiscount - displayShippingDiscount + displayShippingFee
@@ -471,6 +480,8 @@ export default function CheckoutPage() {
           >
             <div className="min-h-0 xl:max-h-[calc(100dvh-10rem)] xl:overflow-y-auto xl:overscroll-contain">
               <CheckoutReceiptBlock
+                cartVersion={cartVersion}
+                orderVoucherCode={orderVoucherCode}
                 subtotal={scopedLineSubtotal}
                 shippingFee={displayShippingFee}
                 total={orderTotal}
@@ -497,6 +508,8 @@ export default function CheckoutPage() {
           <CheckoutMobileReceiptDock
             targetRef={receiptInflowRef}
             onPinnedChange={setReceiptDockPinned}
+            cartVersion={cartVersion}
+            orderVoucherCode={orderVoucherCode}
             subtotal={scopedLineSubtotal}
             shippingFee={displayShippingFee}
             total={orderTotal}

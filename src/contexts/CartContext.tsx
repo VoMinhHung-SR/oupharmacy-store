@@ -6,6 +6,7 @@ import { useCurrentCart, useAddCartItem, useRemoveCartItem, useUpdateCartItem, C
 import { getCurrentCart, mergeGuestCart } from "@/lib/services/carts"
 import { clearGuestSessionId, ensureGuestSessionId, getGuestSessionId } from "@/lib/utils/guestSession"
 import type { CartLineUnitOption } from "@/lib/services/products"
+import { catalogSavingsFromSnapshots, parseMoney } from "@/lib/utils/cartPricing"
 import { useQueryClient } from "@tanstack/react-query"
 
 const LINE_SELECT_SESSION_KEY = "oupharmacy_cart_line_select_v1"
@@ -22,6 +23,9 @@ export interface CartItem {
   unit_options?: CartLineUnitOption[]
   name: string
   price: number
+  /** Catalog SP savings for this line (informational). */
+  catalogSavings?: number
+  listPriceSnapshot?: number | null
   image_url?: string
   packaging?: string
   qty: number
@@ -38,6 +42,8 @@ export interface CartSelectionTotals {
   estimatedShippingDiscount: number
   estimatedShippingFee: number
   estimatedTotal: number
+  /** Selected lines' catalog direct savings (Giảm giá trực tiếp). */
+  estimatedCatalogDirectSavings: number
 }
 
 interface CartContextValue {
@@ -54,6 +60,7 @@ interface CartContextValue {
   freeShippingApplied?: boolean
   discountAmount?: number
   shippingDiscountAmount?: number
+  catalogDirectSavingsTotal?: number
   shippingMethodId?: number | null
   orderVoucherCode?: string | null
   shippingVoucherCode?: string | null
@@ -189,6 +196,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         : [],
       name: item.name || "",
       price: Number(item.unit_price_snapshot) || 0,
+      listPriceSnapshot:
+        item.list_price_snapshot != null ? parseMoney(item.list_price_snapshot) : null,
+      catalogSavings:
+        item.catalog_savings != null && item.catalog_savings !== ''
+          ? parseMoney(item.catalog_savings)
+          : catalogSavingsFromSnapshots(
+              item.list_price_snapshot,
+              item.unit_price_snapshot,
+              item.quantity,
+            ),
       image_url: item.image_url || undefined,
       packaging: item.packing || undefined,
       qty: Number(item.quantity) || 1,
@@ -514,6 +531,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const estimatedOrderDiscount = discount * ratio
     const estimatedShippingDiscount = shipDisc * ratio
     const estimatedShippingFee = shipFee
+    const selectedCatalogSavings = selectedLines.reduce(
+      (s, i) => s + (i.catalogSavings ?? 0),
+      0,
+    )
     const estimatedTotal = Math.max(
       0,
       selectedSubtotal - estimatedOrderDiscount - estimatedShippingDiscount + estimatedShippingFee
@@ -526,6 +547,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       estimatedShippingDiscount,
       estimatedShippingFee,
       estimatedTotal,
+      estimatedCatalogDirectSavings: selectedCatalogSavings,
     }
   }, [resolvedItems, serverCart, serverCartEnabled, total])
 
@@ -546,6 +568,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       shippingVoucherCode: serverCartEnabled ? (serverCart?.shipping_voucher_code ?? null) : null,
       discountAmount: serverCartEnabled ? Number(serverCart?.discount_amount ?? 0) : 0,
       shippingDiscountAmount: serverCartEnabled ? Number(serverCart?.shipping_discount_amount ?? 0) : 0,
+      catalogDirectSavingsTotal: serverCartEnabled
+        ? Number(serverCart?.catalog_direct_savings_total ?? 0)
+        : 0,
       version: serverCartEnabled ? serverCart?.version : undefined,
       isLoading: serverCartEnabled ? serverCartLoading || !guestSessionReady : false,
       setItemSelected,

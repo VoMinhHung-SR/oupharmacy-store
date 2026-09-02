@@ -8,9 +8,6 @@ import type { FavoriteBrandCard } from '@/lib/services/brandCampaigns'
 
 const DEFAULT_TITLE = 'Thương hiệu yêu thích'
 
-const ARROW_ON_LIGHT =
-  '!bg-white !text-primary-700 shadow-md ring-1 ring-gray-200 hover:!bg-gray-50'
-
 type FavoriteBrandsProps = {
   brands: FavoriteBrandCard[]
   title?: string
@@ -55,7 +52,6 @@ export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
               <CarouselArrowButton
                 direction="prev"
                 label="Thương hiệu trước"
-                className={ARROW_ON_LIGHT}
                 onClick={(e) => {
                   e.preventDefault()
                   scrollPage(-1)
@@ -64,7 +60,6 @@ export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
               <CarouselArrowButton
                 direction="next"
                 label="Thương hiệu sau"
-                className={ARROW_ON_LIGHT}
                 onClick={(e) => {
                   e.preventDefault()
                   scrollPage(1)

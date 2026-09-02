@@ -35,6 +35,7 @@ export { EmptyOfferIllustration } from './EmptyOfferIllustration'
 export { InfoIcon } from './InfoIcon'
 export { MinusIcon } from './MinusIcon'
 export { PercentInCircleIcon } from './PercentInCircleIcon'
+export { PromoIcon } from './PromoIcon'
 export { PlusIcon } from './PlusIcon'
 export { TrashIcon } from './TrashIcon'
 

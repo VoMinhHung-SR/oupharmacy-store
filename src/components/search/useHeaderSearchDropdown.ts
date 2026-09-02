@@ -12,6 +12,7 @@ import {
   type Product,
   type ProductCardPayload,
 } from '@/lib/services/products'
+import { catalogDiscountPercentFromListSale } from '@/lib/utils/cartPricing'
 import { recordSearch } from '@/lib/services/searchTerms'
 
 export type HeaderSearchSuggestionItem = {
@@ -31,7 +32,7 @@ function headerSearchPickTopDeals(products: Product[], limit: number): Product[]
       let pct =
         typeof p.discount_percent === 'number' && p.discount_percent > 0 ? p.discount_percent : 0
       if (pct === 0 && p.compare_at_price != null && p.compare_at_price > (p.price_value || 0)) {
-        pct = Math.round(((p.compare_at_price - (p.price_value || 0)) / p.compare_at_price) * 100)
+        pct = catalogDiscountPercentFromListSale(p.compare_at_price, p.price_value || 0)
       }
       return { p, pct }
     })

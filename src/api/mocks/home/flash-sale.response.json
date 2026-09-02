@@ -3,28 +3,9 @@
   "title": "Flash sale giá tốt",
   "cta_label": "Xem ngay",
   "cta_url": "/khuyen-mai",
-  "active_window_id": "win-28",
-  "windows": [
-    {
-      "id": "win-28",
-      "label": "08:00 - 22:00, 28/08",
-      "starts_at": "2026-08-28T01:00:00.000Z",
-      "ends_at": "2026-08-28T15:00:00.000Z",
-      "status": "upcoming"
-    },
-    {
-      "id": "win-29",
-      "label": "08:00 - 22:00, 29/08",
-      "starts_at": "2026-08-29T01:00:00.000Z",
-      "ends_at": "2026-08-29T15:00:00.000Z",
-      "status": "upcoming"
-    },
-    {
-      "id": "win-30",
-      "label": "08:00 - 22:00, 30/08",
-      "starts_at": "2026-08-30T01:00:00.000Z",
-      "ends_at": "2026-08-30T15:00:00.000Z",
-      "status": "upcoming"
-    }
+  "window_templates": [
+    { "id": "win-d0", "day_offset": 0, "start_hour": 8, "end_hour": 22 },
+    { "id": "win-d1", "day_offset": 1, "start_hour": 8, "end_hour": 22 },
+    { "id": "win-d2", "day_offset": 2, "start_hour": 8, "end_hour": 22 }
   ]
 }

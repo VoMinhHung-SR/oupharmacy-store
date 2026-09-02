@@ -6,22 +6,29 @@ import { useCheckout } from "@/contexts/CheckoutContext"
 import Link from "next/link"
 import { Container } from "@/components/Container"
 import { useApplyVoucher } from "@/lib/hooks/useCarts"
+import { useAutoApplyBestCartVoucher, useEligibleCartVouchers } from "@/lib/hooks/useCartVoucherOffers"
 import { toastError, toastSuccess } from "@/lib/utils/toast"
 import {
   CartIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   InfoIcon,
-  PercentInCircleIcon,
+  PromoIcon,
   TrashIcon,
 } from "@/components/icons"
 import { CartLineThumb } from "@/components/cart/CartLineThumb"
+import {
+  CartLineDirectPromoBar,
+  cartLineHasDirectPromo,
+} from "@/components/cart/CartLineDirectPromoBar"
+import { useHotSalePromoEndsAt } from "@/lib/hooks/useHotSalePromoEndsAt"
+import { CartLinePriceDisplay } from "@/components/cart/CartLinePriceDisplay"
 import { CartMobileReceiptDock } from "@/components/cart/CartMobileReceiptDock"
 import { CartPwaInstallBanner } from "@/components/cart/CartPwaInstallBanner"
 import { CartQuantityStepper } from "@/components/cart/CartQuantityStepper"
 import { CartReceiptCard } from "@/components/cart/CartReceiptCard"
 import { CartUnitSelect } from "@/components/cart/CartUnitSelect"
-import { OfferSheet, SingleVoucherSheetBody } from "@/components/sheets"
+import { OfferSheet, CartVoucherOfferSheetBody } from "@/components/sheets"
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constant"
 import { formatVnd } from "@/lib/utils/currency"
 
@@ -40,17 +47,23 @@ export default function CartPage() {
     remove,
     updateQuantity,
     updateItemUnit,
-    discountAmount = 0,
-    orderVoucherCode,
-    shippingVoucherCode,
     version: cartVersion,
     setItemSelected,
     setAllItemsSelected,
     selectionTotals,
+    orderVoucherCode,
     isLoading: cartLoading,
   } = useCart()
+  useAutoApplyBestCartVoucher(!cartLoading && items.length > 0)
+  const {
+    data: eligibleVouchers,
+    isLoading: eligibleVouchersLoading,
+    error: eligibleVouchersError,
+    refetch: refetchEligibleVouchers,
+  } = useEligibleCartVouchers(!cartLoading && items.length > 0)
   const [offerModalOpen, setOfferModalOpen] = useState(false)
   const [voucherCode, setVoucherCode] = useState("")
+  const [selectedOfferCode, setSelectedOfferCode] = useState<string | null>(null)
   const [updatingUnitByItemId, setUpdatingUnitByItemId] = useState<Record<string, boolean>>({})
   const [pendingUnitChoiceByItemId, setPendingUnitChoiceByItemId] = useState<Record<string, number>>({})
   const unitChangeTimersRef = useRef<Record<string, number>>({})
@@ -65,18 +78,21 @@ export default function CartPage() {
   const allSelected = items.length > 0 && selectedCount === items.length
   const someSelected = selectedCount > 0 && !allSelected
   const isUnitMutating = Object.keys(updatingUnitByItemId).length > 0
+  const hasAnyCatalogPromo = items.some((item) =>
+    cartLineHasDirectPromo(item.price, item.listPriceSnapshot),
+  )
+  const catalogPromoEndsAt = useHotSalePromoEndsAt(hasAnyCatalogPromo)
 
   useEffect(() => {
     const el = selectAllRef.current
     if (el) el.indeterminate = someSelected
   }, [someSelected])
 
-  const ratio = selectionTotals.selectionRatio
-  const discount = Math.max(0, discountAmount) * ratio
-  const hasVoucherApplied = Boolean(orderVoucherCode || shippingVoucherCode)
-  const directDiscount = hasVoucherApplied ? 0 : discount
-  const voucherDiscount = hasVoucherApplied ? discount : 0
-  const hasSavings = discount > 0
+  const directDiscount = selectionTotals.estimatedCatalogDirectSavings
+  const voucherDiscount =
+    selectionTotals.estimatedOrderDiscount + selectionTotals.estimatedShippingDiscount
+  const hasSavings = directDiscount + voucherDiscount > 0
+  const listSubtotalApprox = selectionTotals.selectedSubtotal + directDiscount
 
   const goCheckout = () => {
     const chosen = items.filter((i) => i.selected)
@@ -153,9 +169,14 @@ export default function CartPage() {
   }, [])
 
   const submitCartVoucher = useCallback(async () => {
-    const code = voucherCode.trim()
+    const code = (selectedOfferCode ?? voucherCode).trim()
     if (!code) {
-      toastError("Vui lòng nhập mã giảm giá.")
+      toastError("Vui lòng chọn hoặc nhập mã giảm giá.")
+      return
+    }
+    const selectedOffer = eligibleVouchers?.order_vouchers.find((row) => row.code === code)
+    if (selectedOffer && !selectedOffer.is_eligible) {
+      toastError(selectedOffer.ineligible_reason ?? "Voucher chưa đủ điều kiện áp dụng.")
       return
     }
     if (cartVersion == null) {
@@ -170,10 +191,54 @@ export default function CartPage() {
       toastSuccess("Áp dụng mã giảm giá thành công.")
       setOfferModalOpen(false)
       setVoucherCode("")
+      setSelectedOfferCode(null)
+    } catch (e: unknown) {
+      toastError(e instanceof Error ? e.message : "Áp dụng mã giảm giá thất bại.")
+    }
+  }, [applyVoucherMutation, cartVersion, eligibleVouchers?.order_vouchers, selectedOfferCode, voucherCode])
+
+  const submitManualVoucherCode = useCallback(async () => {
+    const code = voucherCode.trim()
+    if (!code) {
+      toastError("Vui lòng nhập mã giảm giá.")
+      return
+    }
+    if (cartVersion == null) {
+      toastError("Giỏ hàng chưa sẵn sàng, vui lòng thử lại.")
+      return
+    }
+    setSelectedOfferCode(code.toUpperCase())
+    try {
+      await applyVoucherMutation.mutateAsync({
+        expected_version: cartVersion,
+        order_voucher_code: code,
+      })
+      toastSuccess("Áp dụng mã giảm giá thành công.")
+      setOfferModalOpen(false)
+      setVoucherCode("")
+      setSelectedOfferCode(null)
     } catch (e: unknown) {
       toastError(e instanceof Error ? e.message : "Áp dụng mã giảm giá thất bại.")
     }
   }, [applyVoucherMutation, cartVersion, voucherCode])
+
+  useEffect(() => {
+    if (!offerModalOpen) return
+    void refetchEligibleVouchers()
+  }, [offerModalOpen, refetchEligibleVouchers])
+
+  useEffect(() => {
+    if (!offerModalOpen || !eligibleVouchers) return
+    const applied = eligibleVouchers.order_vouchers.find((row) => row.is_applied)
+    const firstEligible = eligibleVouchers.order_vouchers.find((row) => row.is_eligible && !row.is_applied)
+    const preferred =
+      orderVoucherCode ??
+      applied?.code ??
+      eligibleVouchers.best_order_voucher_code ??
+      firstEligible?.code ??
+      null
+    setSelectedOfferCode(preferred)
+  }, [eligibleVouchers, offerModalOpen, orderVoucherCode])
 
   useEffect(() => {
     if (!offerModalOpen || cartVersion == null) return
@@ -285,6 +350,10 @@ export default function CartPage() {
                   {items.map((item) => {
                     const isSelected = item.selected
                     const lineTotal = item.price * item.qty
+                    const lineListTotal =
+                      item.listPriceSnapshot != null && item.listPriceSnapshot > item.price
+                        ? item.listPriceSnapshot * item.qty
+                        : null
                     const unitLabel = item.packaging?.trim() || "Gói"
                     const unitOptions =
                       item.unit_options && item.unit_options.length > 0
@@ -315,9 +384,11 @@ export default function CartPage() {
 
                           <div className="flex min-w-0 flex-1 flex-col gap-2">
                             <div className="flex min-w-0 items-start gap-2">
-                              <h3 className="min-w-0 flex-1 border-0 text-sm font-normal leading-snug text-slate-900 line-clamp-2 outline-none">
-                                {item.name}
-                              </h3>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="border-0 text-sm font-normal leading-snug text-slate-900 line-clamp-2 outline-none">
+                                  {item.name}
+                                </h3>
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => remove(item.id)}
@@ -329,9 +400,11 @@ export default function CartPage() {
                             </div>
 
                             <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
-                              <p className="text-base font-bold leading-none text-primary-700">
-                                {formatVnd(lineTotal)}
-                              </p>
+                              <CartLinePriceDisplay
+                                saleAmount={lineTotal}
+                                listAmount={lineListTotal}
+                                size="md"
+                              />
                               <div className="flex flex-wrap items-center justify-end gap-2">
                                 <CartQuantityStepper
                                   qty={item.qty}
@@ -353,6 +426,12 @@ export default function CartPage() {
                                 </div>
                               </div>
                             </div>
+
+                            <CartLineDirectPromoBar
+                              unitPrice={item.price}
+                              listPriceSnapshot={item.listPriceSnapshot}
+                              promoEndsAt={catalogPromoEndsAt}
+                            />
                           </div>
                         </div>
 
@@ -373,10 +452,12 @@ export default function CartPage() {
                             </h3>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-bold text-primary-700">{formatVnd(lineTotal)}</p>
-                            <p className="text-xs text-slate-400">
-                              {item.qty} × {formatVnd(item.price)}
-                            </p>
+                            <CartLinePriceDisplay
+                              saleAmount={lineTotal}
+                              listAmount={lineListTotal}
+                              size="sm"
+                              className="items-end text-right"
+                            />
                           </div>
                           <div className="flex justify-center">
                             <CartQuantityStepper
@@ -406,21 +487,31 @@ export default function CartPage() {
                           </button>
                         </div>
 
+                        <div className={`hidden xl:mt-2 xl:grid ${CART_DESKTOP_GRID}`}>
+                          <div aria-hidden />
+                          <div aria-hidden />
+                          <div className="min-w-0 xl:col-span-4 xl:col-start-3">
+                            <CartLineDirectPromoBar
+                              unitPrice={item.price}
+                              listPriceSnapshot={item.listPriceSnapshot}
+                              promoEndsAt={catalogPromoEndsAt}
+                            />
+                          </div>
+                        </div>
                       </div>
                     )
                   })}
                 </div>
 
-                <div className="flex items-start gap-3 border-t border-primary-100 bg-primary-50 px-3 py-3 sm:px-4 sm:py-3.5 md:px-5">
-                  <span className="mt-0.5 shrink-0 text-primary-600" aria-hidden>
-                    <PercentInCircleIcon />
-                  </span>
-                  <p className="text-xs leading-relaxed text-primary-900 sm:text-sm">
-                    <span className="font-semibold">Ưu đãi sản phẩm:</span> giảm giá trực tiếp theo chương
-                    trình (nếu có) đã được tính trong giá hiển thị và phần &quot;Giảm giá trực tiếp&quot; ở
-                    cột phải.
-                  </p>
-                </div>
+                {hasAnyCatalogPromo ? (
+                  <div className="flex items-start gap-2.5 border-t border-primary-100/80 bg-primary-50/60 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 md:px-5">
+                    <PromoIcon size="sm" tone="soft" className="mt-px" />
+                    <p className="text-[11px] leading-snug text-primary-900 sm:text-xs">
+                      <span className="font-semibold">Giảm giá trực tiếp</span> đã tính vào giá bán và
+                      mục &quot;Giảm giá trực tiếp&quot; bên phải — khác với mã voucher.
+                    </p>
+                  </div>
+                ) : null}
               </div>
 
               {/* Right: summary */}
@@ -477,7 +568,7 @@ export default function CartPage() {
                       <div className="flex justify-between gap-3 border-t border-dashed border-slate-200 pt-3">
                         <dt className="font-medium text-slate-700">Tiết kiệm được</dt>
                         <dd className="font-semibold text-orange-600">
-                          {hasSavings ? formatVnd(discount) : "0₫"}
+                          {hasSavings ? formatVnd(directDiscount + voucherDiscount) : "0₫"}
                         </dd>
                       </div>
                     </dl>
@@ -486,9 +577,9 @@ export default function CartPage() {
                       <div className="mb-4 flex items-end justify-between gap-3">
                         <span className="text-base font-bold text-slate-900">Thành tiền</span>
                         <div className="text-right">
-                          {hasSavings && (
+                          {hasSavings && directDiscount > 0 && (
                             <p className="text-sm text-slate-400 line-through">
-                              {formatVnd(selectionTotals.selectedSubtotal)}
+                              {formatVnd(listSubtotalApprox)}
                             </p>
                           )}
                           <p className="text-2xl font-bold leading-tight text-primary-700">
@@ -547,11 +638,14 @@ export default function CartPage() {
         title="Ưu đãi dành cho bạn"
         footer={
           cartVersion != null ? (
-            <div className="border-t border-slate-100 p-4">
+            <div className="space-y-2 border-t border-slate-100 p-4">
+              {selectedOfferCode ? (
+                <p className="text-center text-sm text-slate-600">Đã chọn 1 ưu đãi</p>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void submitCartVoucher()}
-                disabled={applyVoucherMutation.isPending}
+                disabled={applyVoucherMutation.isPending || !selectedOfferCode}
                 className="w-full rounded-xl bg-primary-600 py-3.5 text-center text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 disabled:opacity-60"
               >
                 {applyVoucherMutation.isPending ? "Đang áp dụng…" : "Áp dụng"}
@@ -565,12 +659,22 @@ export default function CartPage() {
             <p>Đang tải giỏ hàng… Vui lòng thử lại sau giây lát.</p>
           </div>
         ) : (
-          <SingleVoucherSheetBody
-            code={voucherCode}
-            onCodeChange={setVoucherCode}
+          <CartVoucherOfferSheetBody
+            manualCode={voucherCode}
+            onManualCodeChange={setVoucherCode}
             inputRef={voucherInputRef}
             isApplying={applyVoucherMutation.isPending}
-            onSubmit={() => void submitCartVoucher()}
+            offers={eligibleVouchers?.order_vouchers ?? []}
+            unavailableOffers={eligibleVouchers?.order_vouchers_unavailable ?? []}
+            selectedCode={selectedOfferCode}
+            onSelectOffer={setSelectedOfferCode}
+            onSubmitManual={() => void submitManualVoucherCode()}
+            isLoadingOffers={eligibleVouchersLoading && !eligibleVouchers}
+            offersError={
+              eligibleVouchersError
+                ? "Không tải được danh sách ưu đãi. Vui lòng cập nhật backend hoặc thử lại."
+                : null
+            }
           />
         )}
       </OfferSheet>

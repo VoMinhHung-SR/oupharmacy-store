@@ -48,6 +48,13 @@
       "clearInput": "Clear search"
     }
   },
+  "header": {
+    "bookAppointment": "Book appointment",
+    "downloadApp": "Download app",
+    "downloadAppQrAlt": "OUPharmacy store QR code",
+    "downloadAppQrHint": "Scan to open the store on your phone",
+    "consultNow": "Consult now"
+  },
   "product": {
     "title": "Product",
     "addToCart": "Add to Cart",
