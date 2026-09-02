@@ -8,6 +8,7 @@ import {
   isStandaloneDisplay,
   type BeforeInstallPromptEvent,
 } from '@/lib/pwa/install'
+import { buildAppInstallQrUrl } from '@/lib/pwa/appInstallQr'
 import { isPwaEnabled } from '@/lib/pwa/config'
 
 type BannerMode = 'standalone' | 'android' | 'ios' | 'desktop' | 'hint'
@@ -68,11 +69,7 @@ export function CartPwaInstallBanner() {
     }
   }, [])
 
-  const qrSrc = useMemo(() => {
-    if (!origin) return ''
-    const data = encodeURIComponent(origin)
-    return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=6&data=${data}`
-  }, [origin])
+  const qrSrc = useMemo(() => (origin ? buildAppInstallQrUrl(origin, 120) : ''), [origin])
 
   const onInstall = useCallback(async () => {
     if (!deferred) return

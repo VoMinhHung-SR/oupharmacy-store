@@ -1,10 +1,75 @@
 {
   "title": "Thương hiệu yêu thích",
   "brands": [
-    { "id": "b1", "name": "OU Care", "href": "/brands/ou-care", "productImage": "/mocks/brand.svg", "discountPercent": 35 },
-    { "id": "b2", "name": "Pharma Plus", "href": "/brands/pharma-plus", "productImage": "/mocks/brand.svg", "discountPercent": 28 },
-    { "id": "b3", "name": "Skin Lab", "href": "/brands/skin-lab", "productImage": "/mocks/brand.svg", "discountPercent": 25 },
-    { "id": "b4", "name": "Vita Daily", "href": "/brands/vita-daily", "productImage": "/mocks/brand.svg", "discountPercent": 20 },
-    { "id": "b5", "name": "MediHome", "href": "/brands/medihome", "productImage": "/mocks/brand.svg", "discountPercent": 18 }
+    {
+      "id": "1200",
+      "name": "Stella Pharm",
+      "href": "/thuong-hieu/stella-pharm?bid=1200&promo=35",
+      "discountPercent": 35,
+      "slug": "stella-pharm"
+    },
+    {
+      "id": "1065",
+      "name": "Dhg",
+      "href": "/thuong-hieu/dhg?bid=1065&promo=32",
+      "discountPercent": 32,
+      "slug": "dhg"
+    },
+    {
+      "id": "1215",
+      "name": "Davipharm",
+      "href": "/thuong-hieu/davipharm?bid=1215&promo=30",
+      "discountPercent": 30,
+      "slug": "davipharm"
+    },
+    {
+      "id": "896",
+      "name": "Agimexpharm",
+      "href": "/thuong-hieu/agimexpharm?bid=896&promo=28",
+      "discountPercent": 28,
+      "slug": "agimexpharm"
+    },
+    {
+      "id": "1193",
+      "name": "Hasan",
+      "href": "/thuong-hieu/hasan?bid=1193&promo=25",
+      "discountPercent": 25,
+      "slug": "hasan"
+    },
+    {
+      "id": "1199",
+      "name": "Mekophar",
+      "href": "/thuong-hieu/mekophar?bid=1199&promo=22",
+      "discountPercent": 22,
+      "slug": "mekophar"
+    },
+    {
+      "id": "1207",
+      "name": "An Thiên",
+      "href": "/thuong-hieu/an-thien?bid=1207&promo=20",
+      "discountPercent": 20,
+      "slug": "an-thien"
+    },
+    {
+      "id": "1171",
+      "name": "Domesco",
+      "href": "/thuong-hieu/domesco?bid=1171&promo=18",
+      "discountPercent": 18,
+      "slug": "domesco"
+    },
+    {
+      "id": "1092",
+      "name": "Abbott",
+      "href": "/thuong-hieu/abbott?bid=1092&promo=15",
+      "discountPercent": 15,
+      "slug": "abbott"
+    },
+    {
+      "id": "1219",
+      "name": "Hà Tây",
+      "href": "/thuong-hieu/ha-tay?bid=1219&promo=10",
+      "discountPercent": 10,
+      "slug": "ha-tay"
+    }
   ]
 }

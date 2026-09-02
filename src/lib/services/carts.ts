@@ -7,6 +7,9 @@ export interface CartItem {
   product_variant_unit?: number | null
   quantity: number
   unit_price_snapshot: number
+  list_price_snapshot?: number | null
+  /** Derived per line from BE (list − sale) × qty — informational. */
+  catalog_savings?: number | string | null
   name?: string | null
   packing?: string | null
   unit_options?: {
@@ -31,6 +34,8 @@ export interface Cart {
   shipping_fee: number
   discount_amount: number
   shipping_discount_amount: number
+  /** Sum of catalog (list − sale) × qty — informational, already in subtotal (P2). */
+  catalog_direct_savings_total?: number
   total: number
   version: number
   order_voucher_code?: string | null
@@ -73,6 +78,31 @@ export interface ApplyVoucherPayload extends CartMutationBase {
 
 export interface RemoveVoucherPayload extends CartMutationBase {
   target?: 'order' | 'shipping' | 'all'
+}
+
+export interface CartVoucherOffer {
+  code: string
+  description?: string | null
+  type: 'FIXED' | 'PERCENT'
+  value: string
+  scope: 'ORDER_DISCOUNT' | 'SHIPPING_DISCOUNT'
+  estimated_discount: string
+  end_at?: string | null
+  is_applied: boolean
+  is_eligible: boolean
+  ineligible_reason?: string | null
+}
+
+export interface CartEligibleVouchersResponse {
+  order_vouchers: CartVoucherOffer[]
+  order_vouchers_unavailable?: CartVoucherOffer[]
+  shipping_vouchers: CartVoucherOffer[]
+  shipping_vouchers_unavailable?: CartVoucherOffer[]
+  best_order_voucher_code: string | null
+  best_shipping_voucher_code: string | null
+  applied_order_voucher_code: string | null
+  applied_shipping_voucher_code: string | null
+  evaluated_at?: string
 }
 
 import type { CheckoutDeliveryPayload } from '../validations/checkout'
@@ -118,6 +148,14 @@ export async function selectShippingMethod(payload: SelectShippingPayload) {
 
 export async function applyVoucher(payload: ApplyVoucherPayload) {
   return apiPost<Cart>('/carts/apply-voucher/', payload)
+}
+
+export async function getEligibleCartVouchers(cartItemIds?: number[]) {
+  const path =
+    cartItemIds && cartItemIds.length > 0
+      ? `/carts/eligible-vouchers/?cart_item_ids=${cartItemIds.join(',')}`
+      : '/carts/eligible-vouchers/'
+  return apiGet<CartEligibleVouchersResponse>(path)
 }
 
 export async function removeVoucher(payload: RemoveVoucherPayload) {

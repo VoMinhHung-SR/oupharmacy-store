@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import React, { useMemo, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
-import { PRICE_CONSULT } from '@/lib/constant'
+import { PRICE_CONSULT, STORE_SUPPORT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
 import { toastWarning } from '@/lib/utils/toast'
 import { CardBadge } from '@/components/badges/CardBadge'
@@ -14,7 +14,11 @@ import {
   cardCornerTabRightPromoClass,
 } from '@/components/badges/cardCornerStyles'
 import { mapProductUnitOptionsForCart, type ProductUnitOption } from '@/lib/services/products'
+import { formatUpcomingPriceTeaser } from '@/lib/services/homeMerch'
+import { catalogDiscountPercentFromListSale } from '@/lib/utils/cartPricing'
+import { formatVnd } from '@/lib/utils/currency'
 import { markStoreNavIntent } from '@/lib/store-path/nav-intent'
+import { ProductCardMerchRailCta } from '@/components/cards/ProductCardMerchRailCta'
 
 interface ProductCardProps {
   product: {
@@ -37,7 +41,11 @@ interface ProductCardProps {
     variant_count?: number
     brand_name?: string
     brand_country?: string | null
+    /** Flash upcoming window — badge `-xx%`, masked price (D-01). */
+    discountTeaser?: boolean
   }
+  ctaVariant?: 'addToCart' | 'viewDetail'
+  merchShockOffer?: 'off' | 'compact'
 }
 
 const getProductLink = (product: ProductCardProps['product']): string | null =>
@@ -51,7 +59,11 @@ function unitSaleLabel(unitName?: string, packaging?: string): string | undefine
   return first || undefined
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  ctaVariant = 'addToCart',
+  merchShockOffer = 'off',
+}) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
   const unitOptions = useMemo(() => product.unit_options || [], [product.unit_options])
@@ -71,19 +83,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (count === 4) return 'grid-cols-2'
     return 'grid-cols-3'
   }, [unitOptions.length])
+  const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
+  const salePrice = selectedUnit?.price_value ?? product.price
+  const catalogCompareAt = selectedUnit?.compare_at_price ?? null
+  const hasCatalogCompare =
+    catalogCompareAt != null && catalogCompareAt > salePrice
+  /** Home merch (flash live): synthetic compare on card when unit has no catalog compare_at. */
+  const merchAppliesToUnit =
+    !hasCatalogCompare &&
+    !product.discountTeaser &&
+    (product.discount ?? 0) > 0 &&
+    salePrice === product.price
+  const displayCompareAt = hasCatalogCompare
+    ? catalogCompareAt
+    : merchAppliesToUnit && product.originalPrice != null && product.originalPrice > salePrice
+      ? product.originalPrice
+      : null
   const discount = useMemo(() => {
-    if (product.discount) return product.discount
-    if (product.originalPrice && product.originalPrice > product.price) {
-      return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    if (product.discountTeaser) return 0
+    if (displayCompareAt != null && displayCompareAt > salePrice) {
+      return catalogDiscountPercentFromListSale(displayCompareAt, salePrice)
+    }
+    if (merchAppliesToUnit && product.discount != null && product.discount > 0) {
+      return Math.round(product.discount)
     }
     return 0
-  }, [product])
-
-  const hasCornerBadges = Boolean(product.brand_country?.trim()) || discount > 0
-  const unitLabel = unitSaleLabel(selectedUnit?.unit_name || product.default_unit_name, product.packaging)
-  const compareAt = selectedUnit?.compare_at_price || product.originalPrice
-  const salePrice = selectedUnit?.price_value ?? product.price
-  const hasCompareAt = Boolean(compareAt && compareAt > salePrice)
+  }, [
+    displayCompareAt,
+    merchAppliesToUnit,
+    product.discount,
+    product.discountTeaser,
+    salePrice,
+  ])
 
   const isConsultPrice = useMemo(
     () =>
@@ -139,12 +170,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     )
   }
 
-  const handleNavigate = (e: React.MouseEvent) => {
+  const handleConsult = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (productLink) {
-      window.location.href = productLink
-    }
+    e.stopPropagation()
+    window.location.href = STORE_SUPPORT.CONSULT_HREF
   }
+
+  const handleFindPharmacy = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.location.href = STORE_SUPPORT.PHARMACY_FINDER_HREF
+  }
+
   // Nếu không có link, hiển thị thông báo thay vì crash
   if (!productLink) {
     return (
@@ -161,9 +198,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Link
       href={productLink}
       onClick={() => markStoreNavIntent('product', productLink)}
-      className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
+      className="group relative flex h-full flex-col rounded-xl bg-white transition-shadow duration-200 hover:shadow-lg"
     >
-      <div className="relative shrink-0">
+      {/* Flush corner badges (z-10); border overlay (z-20) so edges stay visible idle + hover. */}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl">
         {product.brand_country ? (
           <CardBadge
             country={product.brand_country}
@@ -171,119 +209,149 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className={cardCornerTabLeftOverlayClass}
           />
         ) : null}
-        {discount > 0 ? (
+        {product.discountTeaser ? (
+          <span className={cardCornerTabRightPromoClass}>-xx%</span>
+        ) : discount > 0 ? (
           <span className={cardCornerTabRightPromoClass}>-{discount}%</span>
         ) : null}
 
-        <div
-          className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${hasCornerBadges ? CARD_CORNER_TAB_IMAGE_CLEARANCE : ''}`.trim()}
-        >
-          <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
-            {product.image_url ? (
-              <Image
-                src={product.image_url}
-                alt={product.name}
-                width={300}
-                height={300}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
-                <ImagePlaceholderIcon className="h-12 w-12" />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 rounded-xl shadow-[inset_0_0_0_1px_theme(colors.gray.200)] transition-[box-shadow] duration-200 group-hover:shadow-[inset_0_0_0_2px_theme(colors.primary.400)]"
+        />
+
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+          <div className="relative shrink-0">
+            <div
+              className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}
+            >
+              <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
+                    <ImagePlaceholderIcon className="h-12 w-12" />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900">
-          {product.name}
-        </div>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700">
+              {product.name}
+            </div>
 
-        {isConsultPrice ? (
-          <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
-            <p className="text-xs text-amber-800">
-              <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
-            </p>
-          </div>
-        ) : (
-          <div className="mt-2 space-y-1">
-            <div className="min-w-0">
-              <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
-                <span className="text-base font-bold tabular-nums text-primary-700">
-                  {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
-                  {salePrice.toLocaleString('vi-VN')}₫
-                </span>
-                {unitLabel ? (
-                  <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+            {isConsultPrice ? (
+              <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
+                <p className="text-xs text-amber-800">
+                  <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
+                </p>
+              </div>
+            ) : (
+              <div className="mt-2 space-y-1">
+                <div className="min-w-0">
+                  {product.discountTeaser ? (
+                    <>
+                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-base font-bold tabular-nums text-primary-700">
+                          {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                          {formatUpcomingPriceTeaser(salePrice)}
+                        </span>
+                        {unitLabel ? (
+                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                        ) : null}
+                      </div>
+                      <div className="text-xs tabular-nums text-gray-400 line-through">
+                        {formatVnd(salePrice)}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-base font-bold tabular-nums text-primary-700">
+                          {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
+                          {formatVnd(salePrice)}
+                        </span>
+                        {unitLabel ? (
+                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                        ) : null}
+                      </div>
+                      {displayCompareAt != null ? (
+                        <div className="text-xs tabular-nums text-gray-400 line-through">
+                          {formatVnd(displayCompareAt)}
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </div>
+
+                <div className="min-h-[1rem] truncate text-xs text-gray-500">
+                  {product.packaging || '\u00a0'}
+                </div>
+
+                {unitOptions.length > 1 ? (
+                  <div className={`grid w-full ${unitGridClassName} gap-1 pt-1`}>
+                    {unitOptions.map((unit) => (
+                      <button
+                        key={unit.unit_id}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setSelectedUnitId(unit.unit_id)
+                        }}
+                        className={`h-7 rounded-md border px-2 text-center text-xs transition-colors ${
+                          (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
+                            ? 'border-primary-600 bg-white text-primary-700'
+                            : 'border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {unit.unit_name}
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
               </div>
-              {hasCompareAt ? (
-                <div className="text-xs text-gray-400 line-through">
-                  {compareAt!.toLocaleString('vi-VN')}₫
-                </div>
-              ) : null}
-            </div>
+            )}
 
-            <div className="min-h-[1rem] truncate text-xs text-gray-500">
-              {product.packaging || '\u00a0'}
-            </div>
-
-            {unitOptions.length > 1 ? (
-              <div className={`grid w-full ${unitGridClassName} gap-1 pt-1`}>
-                {unitOptions.map((unit) => (
+            <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
+              {isConsultPrice ? (
+                <>
                   <button
-                    key={unit.unit_id}
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      setSelectedUnitId(unit.unit_id)
-                    }}
-                    className={`h-7 rounded-md border px-2 text-center text-xs ${
-                      (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
-                        ? 'border-primary-600 bg-white text-primary-700'
-                        : 'border-gray-300 bg-gray-100 text-gray-600'
-                    }`}
+                    className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                    onClick={handleConsult}
                   >
-                    {unit.unit_name}
+                    Tư vấn ngay
                   </button>
-                ))}
-              </div>
-            ) : null}
+                  <button
+                    type="button"
+                    className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                    onClick={handleFindPharmacy}
+                  >
+                    Tìm nhà thuốc
+                  </button>
+                </>
+              ) : ctaVariant === 'viewDetail' ? (
+                <ProductCardMerchRailCta shockOffer={merchShockOffer} />
+              ) : (
+                <button
+                  type="button"
+                  className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                  onClick={handleAddToCart}
+                >
+                  Thêm vào giỏ
+                </button>
+              )}
+            </div>
           </div>
-        )}
-
-        <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
-          {isConsultPrice ? (
-            <>
-              <button
-                type="button"
-                className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
-                onClick={handleNavigate}
-              >
-                Tư vấn ngay
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700"
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
-              >
-                Tìm nhà thuốc
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white"
-              onClick={handleAddToCart}
-            >
-              Thêm vào giỏ
-            </button>
-          )}
         </div>
       </div>
     </Link>

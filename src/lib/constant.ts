@@ -47,6 +47,9 @@ export const PRODUCT_LISTING = {
   DEFAULT_SORT: 'bestselling' as const,
 } as const
 
+/** Shared orange for home merch rails (flash sale + bestsellers). */
+export const HOME_MERCH_ORANGE = '#f39800' as const
+
 // Sidebar
 export const SIDEBAR = {
   WIDTH: 256, // 64 * 4px = 256px (w-64) — desktop sticky column
@@ -114,12 +117,41 @@ export const CHECKOUT_LEGACY_STEP_PATHS = [
 
 export const FREE_SHIPPING_THRESHOLD = 300000 as const
 
+/** Hotline / liên hệ — đồng bộ header top bar. */
+export const STORE_SUPPORT = {
+  HOTLINE_DISPLAY: '+84 123 456 789',
+  HOTLINE_TEL: '+84123456789',
+  CONSULT_HREF: '/tu-van-duoc-si',
+  /** Tạm thời tới liên hệ cho đến khi /tim-nha-thuoc có bản đồ. */
+  PHARMACY_FINDER_HREF: '/lien-he',
+  CONTACT_HREF: '/lien-he',
+} as const
+
+export type PlaceholderPageAction = {
+  label: string
+  href: string
+  variant?: 'primary' | 'outline'
+}
+
+/** CTA mặc định cho trang tính năng chưa ship. */
+export const PLACEHOLDER_PAGE_ACTIONS: PlaceholderPageAction[] = [
+  { label: 'Liên hệ hỗ trợ', href: STORE_SUPPORT.CONTACT_HREF, variant: 'primary' },
+  { label: 'Tiếp tục mua sắm', href: '/tim-kiem', variant: 'outline' },
+]
+
+export type HomeQuickLink = {
+  icon: string
+  title: string
+  href: string
+  comingSoon?: boolean
+}
+
 /** Trang chủ — lối tắt */
-export const HOME_QUICK_LINKS = [
+export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { icon: '💊', title: 'Cần mua thuốc', href: '/tim-kiem' },
-  { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si' },
+  { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
   { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
-  { icon: '📍', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc' },
-  { icon: '💉', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin' },
-  { icon: '🔍', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang' },
-] as const
+  { icon: '📍', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
+  { icon: '💉', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },
+  { icon: '🔍', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang', comingSoon: true },
+]

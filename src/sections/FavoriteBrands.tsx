@@ -1,56 +1,118 @@
 'use client'
 
 import Link from 'next/link'
-import React from 'react'
+import React, { useCallback, useRef } from 'react'
 import Container from '@/components/Container'
-import favoriteBrands from '@/api/mocks/home/favorite-brands.response.json'
-import type { FavoriteBrandsResponse } from '@/api/mocks/home/types'
+import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
+import type { FavoriteBrandCard } from '@/lib/services/brandCampaigns'
 
-/** Favorite brands — fixed section; data from `home/favorite-brands.response.json`. */
-export const FavoriteBrands: React.FC = () => {
-  const data = favoriteBrands as FavoriteBrandsResponse
-  const brands = [...data.brands].sort((a, b) => b.discountPercent - a.discountPercent)
+const DEFAULT_TITLE = 'Thương hiệu yêu thích'
+
+type FavoriteBrandsProps = {
+  brands: FavoriteBrandCard[]
+  title?: string
+}
+
+/** Favorite brands — classic card: product image → logo frame → promo line. */
+export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
+  brands,
+  title = DEFAULT_TITLE,
+}) => {
+  const rail = [...(brands || [])].sort((a, b) => b.discountPercent - a.discountPercent)
+  const scrollerRef = useRef<HTMLDivElement>(null)
+
+  const scrollPage = useCallback((dir: -1 | 1) => {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
+  }, [])
+
+  if (rail.length === 0) return null
 
   return (
-    <section className="bg-primary-50 py-10 sm:py-12" aria-label={data.title}>
+    <section className="bg-gray-50 py-12 sm:py-14" aria-label={title}>
       <Container>
-        <div className="mb-8 flex items-center gap-2">
+        <div className="mb-8 flex items-center gap-2 sm:mb-10">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600">
             <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">{data.title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {brands.map((brand) => (
-            <Link
-              key={brand.id}
-              href={brand.href}
-              className="w-48 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-primary-500 hover:shadow-lg"
-            >
-              <div className="aspect-[4/3] bg-gray-50">
-                {brand.productImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- first-party /mocks asset
-                  <img src={brand.productImage} alt="" className="h-full w-full object-contain p-3" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-3xl text-gray-400">
-                    {brand.name.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="border-t border-gray-100 p-3 text-center">
-                <div className="mx-auto mb-2 flex h-10 w-16 items-center justify-center rounded border border-gray-200 text-xs font-bold text-gray-700">
-                  {brand.name.slice(0, 2).toUpperCase()}
+        <div className="relative">
+          {rail.length > 1 ? (
+            <>
+              <CarouselArrowButton
+                direction="prev"
+                label="Thương hiệu trước"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollPage(-1)
+                }}
+              />
+              <CarouselArrowButton
+                direction="next"
+                label="Thương hiệu sau"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollPage(1)
+                }}
+              />
+            </>
+          ) : null}
+
+          <div ref={scrollerRef} className="favorite-brands-track scrollbar-hide scroll-smooth">
+            {rail.map((brand) => (
+              <Link
+                key={brand.id}
+                href={brand.href}
+                className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-3 transition-all duration-200 hover:border-primary-500 hover:shadow-lg sm:p-4"
+              >
+                {/* Product image — padded, object-contain (classic rail). */}
+                <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-white">
+                  {brand.productImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- catalog CDN hosts vary
+                    <img
+                      src={brand.productImage}
+                      alt=""
+                      className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gray-50 text-4xl font-bold text-gray-300">
+                      {brand.name.charAt(0)}
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm font-semibold text-gray-900">{brand.name}</div>
-                <div className="mt-1 text-sm font-medium text-primary-600">
+
+                {/* Logo frame — logo when present, else brand name as placeholder. */}
+                <div className="mb-2.5 flex h-12 w-full items-center justify-center rounded-md border border-gray-200 bg-white px-2 sm:h-14">
+                  {brand.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- brand CDN hosts vary
+                    <img
+                      src={brand.logoUrl}
+                      alt={brand.name}
+                      className="max-h-9 w-auto max-w-full object-contain sm:max-h-10"
+                    />
+                  ) : (
+                    <span className="line-clamp-2 text-center text-xs font-semibold leading-tight text-gray-800 sm:text-sm">
+                      {brand.name}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-center text-sm font-medium text-primary-600">
                   Giảm đến {brand.discountPercent}%
-                </div>
-              </div>
-            </Link>
-          ))}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </Container>
     </section>

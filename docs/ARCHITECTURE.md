@@ -73,12 +73,49 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 |---------|--------|--------|
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
 | Quick cate | `HOME_QUICK_LINKS` | FE constant |
-| Flash sale | `home/flash-sale.response.json` | D-23: `enabled` + hide if empty products; **not** price overwrite (D-01) |
-| Hot sale | `home/hot-sale.response.json` | Fixed section → later catalog/search |
+| Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: `window_templates` (VN day_offset); pool daily seed; rail ≤12; **upcoming** badge `-xx%` (no revealed %); **live** shows flash −10…35%; exclude Hot IDs; not checkout (D-01) |
+| Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; −% chỉ khi BE có `compare_at_price` / `discount_percent` **thật** (D-PRC-03); sort giảm dần theo % |
 | Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
-| Favorite brands | `home/favorite-brands.response.json` | Fixed section → later brand API |
+| Favorite brands | `getFavoriteBrandsSSG` (search facets) | Top 10 brands by product count; campaign display 10–35%; `bg-white`; fixture = offline reference |
 
 Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.
+
+### Catalog pricing & cart economics (Option 1 — D-PRC)
+
+SoT doc (BE): `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md` (§ Docker seed + **UAT checklist**).  
+**Product / variant / unit (card & list):** `Clinic-Oupharmacy-BE/docs/store-product-strategy.md`.  
+Plan: `PersonalProject/plans/[UnDone] catalog-pricing-direct-discount-refactor.plan.md`.
+
+**Tóm tắt quan trọng**
+
+| Khái niệm | Nghĩa |
+|-----------|--------|
+| `price_value` | Giá sale **thật** — giỏ & checkout |
+| `compare_at_price` | Giá list / gạch — chỉ hiển thị + tính “tiết kiệm” |
+| **Giảm giá trực tiếp** | `(list − sale) × qty` — **informational**, không trừ thêm subtotal |
+| **Voucher** | Mã đơn (`SALE20`, …) — trừ trên subtotal sale, **tách cột** với direct |
+
+Hot-sale BE (`seed_hot_sale_campaign`): 12 SP popular, tier 30/25/20, campaign `san-pham-ban-chay`. **Mỗi variant:** promo áp **tất cả unit published** (cùng tier %, list/sale theo từng unit). Card chỉ hiển thị compare của unit đang chọn.
+
+| Layer | FE behavior |
+|-------|-------------|
+| Card / PDP | `price_value`, `compare_at_price`, `discount_percent` from API (Option A) |
+| Cart line | Snapshot **sale** at add time |
+| **Giảm giá trực tiếp** | `catalog_direct_savings_total` / line `list_price_snapshot` (P3) |
+| **Giảm giá voucher** | `discount_amount` + `shipping_discount_amount` |
+
+**Do not** send original price or `%` from FE on add-to-cart / checkout (D-PRC-01).
+
+**Campaign membership (D-PRC-06 — locked 2026-08-30):**
+
+| Rule | FE implication |
+|------|----------------|
+| **P1** | Một unit = một promo giá catalog effective; card/PDP/giỏ đọc API + snapshot — không synth % checkout. |
+| **M1** | SKU có thể ở nhiều rail/landing; flash/hot **không** ghi đè `price_value`. |
+| **V1** | Voucher sheet = campaign-published offers; cart tách **direct savings** vs **voucher** columns. |
+| **UX1** | Flash **upcoming**: mask `-xx%` / `formatUpcomingPriceTeaser`; **live**: reveal cùng SoT. PDP có thể show % thật khi catalog promo đã live dù flash tab chưa onTime. |
+
+BE ADR: `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md` § D-PRC-06.
 
 ### Campaign landing preview (D-19)
 

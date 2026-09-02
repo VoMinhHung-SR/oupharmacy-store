@@ -9,8 +9,8 @@ import {
 import { HEADER_SEARCH } from '@/lib/constant'
 
 /**
- * Store search / category-browse via GET /api/store/search/.
- * Enabled when `q` is non-empty **or** `category` is set (search-first category page).
+ * Store search / category / brand browse via GET /api/store/search/.
+ * Enabled when `q` is non-empty, or `category` / `brand` is set.
  */
 export function useStoreSearch(
   params: StoreSearchParams | undefined,
@@ -18,7 +18,9 @@ export function useStoreSearch(
 ) {
   const hasQuery = !!params?.q?.trim()
   const hasCategory = params?.category != null && params.category !== ''
-  const enabled = options?.enabled !== false && (!!params && (hasQuery || hasCategory))
+  const hasBrand = params?.brand != null && String(params.brand).trim() !== ''
+  const enabled =
+    options?.enabled !== false && (!!params && (hasQuery || hasCategory || hasBrand))
 
   return useQuery<StoreSearchResponse | undefined, Error>({
     queryKey: ['store-search', params],
@@ -28,8 +30,9 @@ export function useStoreSearch(
       }
       const qOk = !!params.q?.trim()
       const catOk = params.category != null && params.category !== ''
-      if (!qOk && !catOk) {
-        throw new Error('Search query or category is required')
+      const brandOk = params.brand != null && String(params.brand).trim() !== ''
+      if (!qOk && !catOk && !brandOk) {
+        throw new Error('Search query, category, or brand is required')
       }
       const response = await searchStoreProducts(params)
       if (response.error) {

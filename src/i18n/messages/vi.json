@@ -48,6 +48,13 @@
       "clearInput": "Xóa nội dung tìm kiếm"
     }
   },
+  "header": {
+    "bookAppointment": "Đặt lịch khám",
+    "downloadApp": "Tải ứng dụng",
+    "downloadAppQrAlt": "Mã QR tải ứng dụng OUPharmacy",
+    "downloadAppQrHint": "Quét mã để mở cửa hàng trên điện thoại",
+    "consultNow": "Tư vấn ngay"
+  },
   "product": {
     "title": "Sản phẩm",
     "addToCart": "Thêm vào giỏ",

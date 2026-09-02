@@ -1,5 +1,76 @@
 import { apiGet, ApiResponse } from '@/lib/api'
-import { normalizeProduct, type FilterGroup, type FilterOption, type Product } from './products'
+import { PRICE_CONSULT } from '@/lib/constant'
+import { withMerchDisplayDiscount } from './homeMerch'
+import {
+  buildProductCardPayload,
+  normalizeProduct,
+  resolveProductCatalogPriceDisplay,
+  type FilterGroup,
+  type FilterOption,
+  type Product,
+  type ProductCardPayload,
+} from './products'
+
+const HOT_SALE_PAGE_SIZE = 12
+/** Fetch extra rows so CONSULT / zero-price variants can be filtered out. */
+const HOT_SALE_FETCH_SIZE = 48
+/** Per-product merch tiers when catalog has no compare_at (rail display only, D-01). */
+const HOT_SALE_MERCH_TIERS = [30, 25, 20] as const
+
+function storeApiBase(): string {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/store'
+}
+
+/** Storefront listable price (exclude pharmacist-consult products). */
+export function isPricedForHotSale(product: Product): boolean {
+  const defaultUnit =
+    product.unit_options?.find((unit) => unit.is_default) || product.unit_options?.[0]
+  const display = String(defaultUnit?.price_display || product.price_display || '')
+    .trim()
+    .toUpperCase()
+  if (display === PRICE_CONSULT) return false
+  const price = defaultUnit?.price_value ?? product.price_value ?? 0
+  return typeof price === 'number' && Number.isFinite(price) && price > 0
+}
+
+/**
+ * Build hot-sale cards: prefer real catalog promo (compare_at + lowered price_value);
+ * fallback merch tiers 30/25/20 for rail badge/strikethrough when catalog has no discount.
+ * Sorted by effective discount % descending.
+ */
+export function buildHotSaleProductCards(
+  products: Product[],
+  pageSize: number = HOT_SALE_PAGE_SIZE
+): ProductCardPayload[] {
+  const priced = products.filter(isPricedForHotSale).slice(0, pageSize)
+  if (!priced.length) return []
+
+  const cards = priced.map((product, index) => {
+    const defaultUnit =
+      product.unit_options?.find((unit) => unit.is_default) || product.unit_options?.[0] || null
+    const card = buildProductCardPayload(product)
+    const catalog = resolveProductCatalogPriceDisplay(product, defaultUnit)
+    if (catalog.discountPercent > 0 && catalog.compareAtPrice != null) {
+      return {
+        ...card,
+        price: defaultUnit?.price_value ?? card.price,
+        discount: catalog.discountPercent,
+        originalPrice: catalog.compareAtPrice,
+      }
+    }
+    const tier = HOT_SALE_MERCH_TIERS[index % HOT_SALE_MERCH_TIERS.length]
+    return withMerchDisplayDiscount(card, tier)
+  })
+
+  cards.sort((a, b) => {
+    const aPct = a.discount ?? 0
+    const bPct = b.discount ?? 0
+    if (bPct !== aPct) return bPct - aPct
+    return a.name.localeCompare(b.name, 'vi')
+  })
+
+  return cards
+}
 
 export type StoreSearchSort = 'relevance' | 'price_asc' | 'price_desc' | 'popular'
 
@@ -291,4 +362,51 @@ export function sortOptionToStoreSearchSort(
   if (sort === 'price-high') return 'price_desc'
   if (sort === 'bestselling') return 'popular'
   return 'relevance'
+}
+
+/**
+ * Homepage hot-sale rail: popular priced products; −% badge from catalog promo or merch tiers 30/25/20.
+ * On error/empty returns [] so the section can hide (no mock fill).
+ */
+export async function getHotSaleProductsSSG(
+  pageSize: number = HOT_SALE_PAGE_SIZE
+): Promise<ProductCardPayload[]> {
+  const qs = buildSearchQueryParams({
+    q: '',
+    page: 1,
+    page_size: Math.max(pageSize, HOT_SALE_FETCH_SIZE),
+    sort: 'popular',
+    include_facets: false,
+  }).toString()
+  const url = `${storeApiBase()}/search/?${qs}`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'vi',
+      },
+      next: { revalidate: 60 },
+    })
+
+    if (!response.ok) {
+      console.warn(
+        `[getHotSaleProductsSSG] BE returned ${response.status} ${response.statusText} for ${url}`
+      )
+      return []
+    }
+
+    const body = (await response.json()) as {
+      items?: Record<string, unknown>[]
+    }
+    const items = Array.isArray(body.items) ? body.items : []
+    return buildHotSaleProductCards(
+      items.map((item) => normalizeProduct(item)),
+      pageSize
+    )
+  } catch (error) {
+    console.warn('[getHotSaleProductsSSG] Fetch failed:', error)
+    return []
+  }
 }

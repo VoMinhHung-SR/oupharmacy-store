@@ -9,6 +9,7 @@ import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
 import { HeaderSearchDropdown } from '@/components/search/HeaderSearchDropdown'
 import { MenuIcon, UserIcon } from '@/components/icons'
+import { HeaderTopBar } from '@/components/header/HeaderTopBar'
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
 import { HeaderCartDropdown } from '@/layouts/HeaderCartDropdown'
 import { MobileNavDrawer } from '@/layouts/MobileNavDrawer'
@@ -59,20 +60,7 @@ export const Header: React.FC = () => {
       <PwaInstallPrompt />
       <MobileNavDrawer />
 
-      <div className="hidden border-b border-white/10 bg-primary-700/80 py-1.5 text-xs text-white lg:block">
-        <Container>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="cursor-pointer transition-colors hover:text-primary-100">Đặt lịch khám</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="font-medium">
-                Hotline: <span className="font-bold">Tại đây</span>
-              </span>
-            </div>
-          </div>
-        </Container>
-      </div>
+      <HeaderTopBar />
 
       <div className={`lg:py-3 ${HEADER_MOTION} transition-[padding] ${compact ? 'py-2' : 'py-2.5'}`}>
         <Container>

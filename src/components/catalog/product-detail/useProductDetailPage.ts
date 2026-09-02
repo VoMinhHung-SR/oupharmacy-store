@@ -16,6 +16,7 @@ import {
   getProductName,
   getProductPackaging,
   mapProductUnitOptionsForCart,
+  resolveProductCatalogPriceDisplay,
 } from '@/lib/services/products'
 import { saveToRecentlyViewed } from '@/components/catalog/product-detail/parts/RecentlyViewed'
 
@@ -56,7 +57,14 @@ export function useProductDetailPage({
     null
   const effectivePriceValue = selectedUnit?.price_value ?? product?.price_value ?? 0
   const effectivePriceDisplay = selectedUnit?.price_display ?? product?.price_display
-  const effectiveCompareAtPrice = selectedUnit?.compare_at_price ?? product?.compare_at_price ?? null
+  const catalogPriceDisplay = useMemo(
+    () =>
+      product
+        ? resolveProductCatalogPriceDisplay(product, selectedUnit)
+        : { compareAtPrice: null, discountPercent: 0 },
+    [product, selectedUnit]
+  )
+  const effectiveCompareAtPrice = catalogPriceDisplay.compareAtPrice
   const selectedUnitName = selectedUnit?.unit_name || productPackaging
   const isConsultPrice =
     effectivePriceDisplay === PRICE_CONSULT || String(effectivePriceValue) === PRICE_CONSULT
@@ -231,6 +239,7 @@ export function useProductDetailPage({
     selectedUnitName,
     effectivePriceValue,
     effectiveCompareAtPrice,
+    catalogPriceDisplay,
     isConsultPrice,
     quantity,
     maxSelectableQuantity,

@@ -10,6 +10,7 @@ import {
   buildProductCardPayload,
   getListProductKey,
 } from '@/lib/services/products'
+import { applyBrandCampaignDiscount } from '@/lib/services/brandCampaigns'
 import { Container } from '@/components/Container'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
 import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
@@ -44,6 +45,10 @@ interface SearchResultsContentProps {
   onFiltersChange: (filters: ProductFilters) => void
   onLoadMore: () => void
   popularTerms?: SearchKeywordItem[]
+  /** Brand campaign display % from home rail (?promo=10..35). */
+  brandCampaignPromo?: number
+  /** Allow listing when q is empty but brand filter is active. */
+  allowEmptyQuery?: boolean
 }
 
 export function SearchResultsContent({
@@ -62,6 +67,8 @@ export function SearchResultsContent({
   onFiltersChange,
   onLoadMore,
   popularTerms = [],
+  brandCampaignPromo,
+  allowEmptyQuery = false,
 }: SearchResultsContentProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
@@ -75,7 +82,7 @@ export function SearchResultsContent({
   const hasMore = remainingCount > 0 && products.length > 0
   const activeFacetCount = countActiveFacetFilters(activeFilters)
 
-  if (!query.trim()) {
+  if (!query.trim() && !allowEmptyQuery) {
     return (
       <Container className="py-8">
         <Breadcrumb items={breadcrumbItems} />
@@ -190,12 +197,16 @@ export function SearchResultsContent({
             </div>
           ) : (
             <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard
-                  key={getListProductKey(product)}
-                  product={buildProductCardPayload(product)}
-                />
-              ))}
+              {products.map((product) => {
+                const card = buildProductCardPayload(product)
+                const withPromo =
+                  brandCampaignPromo != null
+                    ? applyBrandCampaignDiscount(card, brandCampaignPromo)
+                    : card
+                return (
+                  <ProductCard key={getListProductKey(product)} product={withPromo} />
+                )
+              })}
             </div>
           )}
 

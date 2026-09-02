@@ -6,6 +6,7 @@ import { Container } from '@/components/Container'
 import { CheckCircleIcon } from '@/components/icons/CheckCircleIcon'
 import { ChevronDownIcon } from '@/components/icons/ChevronDownIcon'
 import { QuantityStepper } from '@/components/catalog/product-detail/parts/QuantityStepper'
+import { ProductDetailPriceDisplay } from '@/components/catalog/product-detail/parts/ProductDetailPriceDisplay'
 import { ProductUnitOption } from '@/lib/services/products'
 
 interface ProductStickyAddToCartBarProps {
@@ -13,6 +14,8 @@ interface ProductStickyAddToCartBarProps {
   productName: string
   imageUrl?: string | null
   priceValue: number
+  compareAtPrice?: number | null
+  discountPercent?: number
   selectedUnitName?: string
   unitOptions: ProductUnitOption[]
   selectedUnitId: number | null
@@ -28,6 +31,8 @@ export function ProductStickyAddToCartBar({
   productName,
   imageUrl,
   priceValue,
+  compareAtPrice = null,
+  discountPercent = 0,
   unitOptions,
   selectedUnitId,
   onSelectUnit,
@@ -71,9 +76,8 @@ export function ProductStickyAddToCartBar({
       aria-hidden={!visible}
     >
       <Container className="py-1">
-        <div className="mx-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] md:max-w-none md:px-4 md:py-3">
-          {/* Mobile: price | qty | ATC always visible. Desktop: + image/name/unit. */}
-          <div className="flex min-w-0 items-center gap-2 md:gap-3">
+        <div className="mx-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white px-2.5 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.10)] sm:max-w-none sm:px-3 md:px-4 md:py-3">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 md:gap-3">
             {imageUrl ? (
               <div className="hidden h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white md:block md:h-12 md:w-12">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -83,9 +87,12 @@ export function ProductStickyAddToCartBar({
             <p className="hidden min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-5 text-gray-900 md:block">
               {productName}
             </p>
-            <p className="shrink-0 text-sm font-bold tabular-nums text-primary-700 md:text-lg md:leading-6">
-              {priceValue.toLocaleString('vi-VN')}₫
-            </p>
+            <ProductDetailPriceDisplay
+              priceValue={priceValue}
+              compareAtPrice={compareAtPrice}
+              discountPercent={discountPercent}
+              compact
+            />
             <div ref={unitMenuRef} className="relative hidden md:block">
               <button
                 type="button"
@@ -142,7 +149,7 @@ export function ProductStickyAddToCartBar({
             />
             <Button
               onClick={onAddToCart}
-              className="h-8 min-w-[7.5rem] flex-1 rounded-full px-3 text-xs whitespace-nowrap sm:h-9 sm:min-w-[9rem] sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
+              className="h-9 min-w-0 flex-1 rounded-full px-2.5 text-xs whitespace-nowrap sm:h-9 sm:min-w-[8.5rem] sm:px-3 sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
               size="md"
             >
               Thêm vào giỏ

@@ -10,6 +10,7 @@
 | `/{category-path}` | Category listing (1 card = 1 **Product**) |
 | `/{category-path}/{product-slug}` | Product detail (chọn **Variant** quy cách, rồi **Unit** đơn vị) |
 | `/{category-path}/{product-slug}?v={variantId}` | Deep link tới variant (Túi / Chai) |
+| `/thuong-hieu/{brand-slug}?bid=&promo=` | Brand listing (campaign display % 10–35) |
 
 - **Product**: một mặt hàng logic (`store_product`), một `slug`, một canonical URL.
 - **ProductVariant**: quy cách đóng gói (Túi 400ml, Chai 400ml).

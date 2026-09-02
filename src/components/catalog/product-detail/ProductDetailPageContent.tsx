@@ -82,8 +82,8 @@ export function ProductDetailPageContent({
         maxItemLength={20}
       />
 
-      <div className="space-y-6 rounded-lg bg-white p-4 sm:p-6">
-        <div className="grid gap-8 md:grid-cols-2">
+      <div className="space-y-4 rounded-lg bg-white p-3 sm:space-y-6 sm:p-6">
+        <div className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2">
           <ProductImageGallery
             mainImage={state.productImageUrl ?? undefined}
             images={state.productImages}
@@ -105,6 +105,8 @@ export function ProductDetailPageContent({
         productName={state.productName}
         imageUrl={state.productImageUrl}
         priceValue={state.effectivePriceValue}
+        compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
+        discountPercent={state.catalogPriceDisplay.discountPercent}
         unitOptions={state.unitOptionsForSticky}
         selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
         onSelectUnit={state.setSelectedUnitId}

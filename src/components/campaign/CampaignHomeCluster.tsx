@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
+import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import HeroBanner from '@/sections/HeroBanner'
 import PromotionalBanners from '@/sections/PromotionalBanners'
 import type { PlacementWinner } from '@/lib/services/campaign'
@@ -130,30 +131,26 @@ function SecondaryCarousel({ slides }: { slides: PlacementWinner[] }) {
       onMouseLeave={() => setPaused(false)}
     >
       {stage}
-      <button
-        type="button"
-        aria-label="Banner phụ trước"
-        className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80"
+      <CarouselArrowButton
+        direction="prev"
+        label="Banner phụ trước"
+        zClassName="z-30"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
           go(index - 1)
         }}
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        aria-label="Banner phụ sau"
-        className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80"
+      />
+      <CarouselArrowButton
+        direction="next"
+        label="Banner phụ sau"
+        zClassName="z-30"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
           go(index + 1)
         }}
-      >
-        ›
-      </button>
+      />
       <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-30 flex justify-center gap-1.5">
         {list.map((_, i) => (
           <button

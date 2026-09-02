@@ -34,6 +34,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 |------|------------|
 | Trang / routing | `src/app/.../page.tsx`, `layout.tsx` |
 | Đặt hàng / checkout | `src/app/don-hang/`, `src/components/checkout/` |
+| Giá catalog / giảm giá SP vs voucher | BE ADR `Clinic-Oupharmacy-BE/docs/product-pricing-promotions.md`; plan `plans/[UnDone] catalog-pricing-direct-discount-refactor.plan.md` |
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
 | Smart Medicine Cabinet | `src/app/tai-khoan/tu-thuoc/`, `src/components/cabinet/`, `docs/smart-medicine-cabinet.md` |

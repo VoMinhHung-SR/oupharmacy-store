@@ -21,6 +21,8 @@ export type CheckoutReceiptTotals = {
 }
 
 type CheckoutReceiptBlockProps = CheckoutReceiptTotals & {
+  cartVersion?: number
+  orderVoucherCode?: string | null
   hideLineDetail: boolean
   onHideLineDetailChange: (checked: boolean) => void
   onApplyVoucher: (payload: {
@@ -138,6 +140,8 @@ export function CheckoutReceiptBlock({
   onHideLineDetailChange,
   onApplyVoucher,
   isApplyingVoucher,
+  cartVersion,
+  orderVoucherCode,
   onPlaceOrder,
   isSubmitting,
   canSubmit,
@@ -151,7 +155,12 @@ export function CheckoutReceiptBlock({
       {showHideToggle ? (
         <HideLineDetailRow checked={hideLineDetail} onChange={onHideLineDetailChange} />
       ) : null}
-      <CheckoutVoucherSection onApplyVoucher={onApplyVoucher} isApplying={isApplyingVoucher} />
+      <CheckoutVoucherSection
+        cartVersion={cartVersion}
+        orderVoucherCode={orderVoucherCode ?? null}
+        onApplyVoucher={onApplyVoucher}
+        isApplying={isApplyingVoucher}
+      />
       <CheckoutOrderSummary
         embedded
         subtotal={totals.subtotal}
@@ -172,6 +181,8 @@ export function CheckoutReceiptBlock({
 }
 
 type CheckoutMobileReceiptDockProps = CheckoutReceiptTotals & {
+  cartVersion?: number
+  orderVoucherCode?: string | null
   targetRef: RefObject<HTMLElement | null>
   hideLineDetail: boolean
   onHideLineDetailChange: (checked: boolean) => void
@@ -192,6 +203,8 @@ export function CheckoutMobileReceiptDock({
   onHideLineDetailChange,
   onApplyVoucher,
   isApplyingVoucher,
+  cartVersion,
+  orderVoucherCode,
   onPlaceOrder,
   isSubmitting,
   canSubmit,
@@ -209,7 +222,12 @@ export function CheckoutMobileReceiptDock({
     <ReceiptDockShell dockRef={dockRef}>
       <HideLineDetailRow checked={hideLineDetail} onChange={onHideLineDetailChange} compact />
       <div className="mt-3">
-        <CheckoutVoucherSection onApplyVoucher={onApplyVoucher} isApplying={isApplyingVoucher} />
+        <CheckoutVoucherSection
+        cartVersion={cartVersion}
+        orderVoucherCode={orderVoucherCode ?? null}
+        onApplyVoucher={onApplyVoucher}
+        isApplying={isApplyingVoucher}
+      />
       </div>
       {expanded ? (
         <div className="mt-1">
