@@ -73,6 +73,9 @@ export function OfferSheet({
       ? 'relative z-10 flex max-h-[min(92dvh,44rem)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl'
       : 'relative z-10 flex max-h-[min(90dvh,44rem)] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl'
 
+  // panelClassName may override width (e.g. !max-w-*); keep base after so layout utilities still apply unless overridden with !.
+  const panelClass = `${panelBase} ${panelClassName}`.trim()
+
   return createPortal(
     <div className={`${shellAlign} ${rootClassName}`.trim()} role="presentation">
       <button
@@ -85,7 +88,7 @@ export function OfferSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`${panelBase} ${panelClassName}`.trim()}
+        className={panelClass}
       >
         {placement === 'bottom' ? (
           <div className="flex shrink-0 justify-center pt-2" aria-hidden>

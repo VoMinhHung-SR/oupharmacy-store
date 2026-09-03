@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Container } from '@/components/Container'
-import { ConsultationInfoPanel } from '@/components/medicine-request/ConsultationInfoPanel'
-import { MedicineRequestForm } from '@/components/medicine-request/MedicineRequestForm'
+import { DatThuocWorkspace } from '@/components/medicine-request/DatThuocWorkspace'
 
 export const metadata: Metadata = {
   title: 'Cần mua thuốc | OUPharmacy',
@@ -10,18 +9,10 @@ export const metadata: Metadata = {
 
 export default function DatThuocPage() {
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <Container className="py-6 sm:py-8">
-        <h1 className="mb-5 text-2xl font-bold text-gray-900 sm:text-3xl">Cần mua thuốc</h1>
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <MedicineRequestForm />
-          </div>
-          <div className="lg:col-span-5">
-            <ConsultationInfoPanel />
-          </div>
-        </div>
+    <div className="bg-slate-50">
+      <Container className="py-4 pb-8 sm:py-6 sm:pb-10">
+        <DatThuocWorkspace />
       </Container>
-    </main>
+    </div>
   )
 }
