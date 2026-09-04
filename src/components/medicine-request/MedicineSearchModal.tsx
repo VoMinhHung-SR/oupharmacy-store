@@ -8,7 +8,6 @@ import { useStoreSearch } from '@/lib/hooks/useStoreSearch'
 import { getProductImageUrl, getProductPackaging } from '@/lib/services/products'
 import type { SelectedMedicine } from '@/components/medicine-request/types'
 
-/** Fixed width/height so search results do not resize the dialog. */
 const MODAL_PANEL_CLASS =
   '!w-full !max-w-none sm:!w-[32rem] sm:!max-w-[32rem] sm:rounded-2xl'
 const RESULTS_HEIGHT_CLASS = 'h-[16rem] overflow-y-auto sm:h-[18rem]'

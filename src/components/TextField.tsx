@@ -126,7 +126,6 @@ function outlineInputClasses(
   return cn(
     'peer relative z-0 w-full appearance-none rounded-lg border bg-white px-3.5 pb-2.5 text-sm text-slate-900 transition-all duration-200',
     multiline && visiblePlaceholder ? 'pt-5' : 'pt-4',
-    // Interior placeholder (outline + label): hide on focus so the field stays clean while typing.
     visiblePlaceholder
       ? 'placeholder:text-slate-400 focus:placeholder:text-transparent'
       : 'placeholder-transparent',

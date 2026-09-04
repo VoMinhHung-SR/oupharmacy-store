@@ -47,22 +47,24 @@ export default async function Home() {
   const noticeBottom = pickHomePlacement(placements, 'HOME_NOTICE_BOTTOM')
 
   const quickLinks = (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-6" aria-label="Lối tắt dịch vụ">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5" aria-label="Lối tắt dịch vụ">
       {HOME_QUICK_LINKS.map((link) => (
         <Link
           key={link.href}
           href={link.href}
-          className="flex flex-col items-center rounded-xl border border-white/70 bg-white px-2 py-3 text-center shadow-md transition-all hover:border-primary-400 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          className="relative flex flex-col items-center justify-center rounded-lg border border-slate-200/90 bg-white px-1.5 py-2 text-center shadow-sm transition-all hover:border-primary-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 sm:py-2.5"
         >
-          <span className="text-2xl sm:text-3xl" aria-hidden>
-            {link.icon}
-          </span>
-          <span className="mt-1.5 text-xs font-semibold text-gray-800 sm:text-sm">{link.title}</span>
           {link.comingSoon ? (
-            <span className="mt-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-amber-800">
+            <span className="absolute right-1 top-1 rounded bg-amber-100 px-1 py-px text-[9px] font-semibold leading-none text-amber-800">
               Sắp có
             </span>
           ) : null}
+          <span className="text-xl leading-none sm:text-2xl" aria-hidden>
+            {link.icon}
+          </span>
+          <span className="mt-1 line-clamp-2 min-h-[2rem] text-[11px] font-medium leading-tight text-slate-800 sm:mt-1.5 sm:min-h-[2.25rem] sm:text-xs">
+            {link.title}
+          </span>
         </Link>
       ))}
     </div>

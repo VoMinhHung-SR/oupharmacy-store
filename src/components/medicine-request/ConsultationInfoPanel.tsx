@@ -8,9 +8,15 @@ function OrdersLink({ className = '' }: { className?: string }) {
   return (
     <Link
       href="/tai-khoan/don-hang"
-      className={`inline-flex items-center justify-center gap-2 text-sm font-medium text-primary-700 hover:underline ${className}`.trim()}
+      className={`flex items-center justify-center gap-2 text-sm font-medium leading-none text-primary-700 ${className}`.trim()}
     >
-      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+      <svg
+        className="block h-5 w-5 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden
+      >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -18,7 +24,7 @@ function OrdersLink({ className = '' }: { className?: string }) {
           d="M9 12h6m-6 4h6M7 4h7l3 3v13a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
         />
       </svg>
-      Xem lại đơn hàng của tôi
+      <span className="leading-none">Xem lại đơn hàng của tôi</span>
     </Link>
   )
 }
@@ -31,7 +37,6 @@ function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
   )
 }
 
-/** Mobile: submit + orders in one white section. */
 export function MedicineRequestMobileActions({ isSubmitting }: { isSubmitting: boolean }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
@@ -43,7 +48,6 @@ export function MedicineRequestMobileActions({ isSubmitting }: { isSubmitting: b
   )
 }
 
-/** Desktop sidebar: CTA + process + orders (process body shared with guide sheet). */
 export function ConsultationInfoPanel({ isSubmitting }: { isSubmitting: boolean }) {
   return (
     <aside className="space-y-3">
@@ -56,7 +60,7 @@ export function ConsultationInfoPanel({ isSubmitting }: { isSubmitting: boolean 
         <ConsultationProcessBody />
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div className="flex items-center rounded-lg border border-slate-200 bg-white px-4 py-3.5 shadow-sm">
         <OrdersLink className="w-full justify-start" />
       </div>
     </aside>

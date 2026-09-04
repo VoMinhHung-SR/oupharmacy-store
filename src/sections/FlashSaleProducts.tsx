@@ -220,9 +220,9 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
             </div>
           </div>
 
-          <div className="mx-2 mb-2 rounded-xl bg-white px-3 pb-4 pt-3 sm:mx-3 sm:mb-3 sm:px-4 sm:pb-5 sm:pt-4">
+          <div className="mx-2 mb-2 rounded-xl bg-white px-2.5 pb-3 pt-2.5 sm:mx-3 sm:mb-3 sm:px-3.5 sm:pb-4 sm:pt-3">
             <div
-              className="mb-3 flex gap-2 overflow-x-auto scrollbar-hide"
+              className="mb-2.5 flex gap-2 overflow-x-auto scrollbar-hide"
               role="tablist"
               aria-label="Khung giờ flash sale"
             >
@@ -263,7 +263,7 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
 
             {countdown ? (
               <div
-                className="mb-4 flex flex-wrap items-center gap-2 text-sm"
+                className="mb-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm"
                 aria-live="polite"
               >
                 <span className="font-medium text-gray-700">{label}</span>
@@ -316,10 +316,10 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
               </div>
             </div>
 
-            <div className="mt-4 flex justify-center">
+            <div className="mt-3 flex justify-center">
               <Link
                 href={meta.cta_url}
-                className="text-sm font-semibold text-primary-700 transition hover:text-primary-800"
+                className="text-xs font-semibold text-primary-700 transition hover:text-primary-800 sm:text-sm"
               >
                 Xem tất cả <span aria-hidden>›</span>
               </Link>

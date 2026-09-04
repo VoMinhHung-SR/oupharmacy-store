@@ -9,7 +9,6 @@ export const CONSULTATION_NOTES = [
   'Dược sĩ vẫn tư vấn khi quý khách chưa có đơn.',
 ] as const
 
-/** Shared process + notes body (sidebar + guide sheet). */
 export function ConsultationProcessBody() {
   return (
     <div className="space-y-5">

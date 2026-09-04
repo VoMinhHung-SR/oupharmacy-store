@@ -220,10 +220,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="pointer-events-none absolute inset-0 z-20 rounded-xl shadow-[inset_0_0_0_1px_theme(colors.gray.200)] transition-[box-shadow] duration-200 group-hover:shadow-[inset_0_0_0_2px_theme(colors.primary.400)]"
         />
 
-        <div className="relative z-0 flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col p-2.5 sm:p-3">
           <div className="relative shrink-0">
             <div
-              className={`mb-2.5 aspect-square w-full rounded-lg bg-white p-1 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}
+              className={`mb-2 aspect-square w-full rounded-lg bg-white p-0.5 ${CARD_CORNER_TAB_IMAGE_CLEARANCE}`.trim()}
             >
               <div className="relative h-full w-full overflow-hidden rounded-md bg-white">
                 {product.image_url ? (
@@ -236,7 +236,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
-                    <ImagePlaceholderIcon className="h-12 w-12" />
+                    <ImagePlaceholderIcon className="h-10 w-10" />
                   </div>
                 )}
               </div>
@@ -244,47 +244,47 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700">
+            <div className="line-clamp-2 min-h-[2.25rem] text-xs font-medium leading-snug text-gray-900 transition-colors group-hover:text-primary-700 sm:text-[13px]">
               {product.name}
             </div>
 
             {isConsultPrice ? (
-              <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
-                <p className="text-xs text-amber-800">
+              <div className="mt-1.5 rounded-md border border-amber-200 bg-amber-50 p-1.5">
+                <p className="text-[11px] leading-snug text-amber-800">
                   <strong>Sản phẩm cần tư vấn từ dược sĩ.</strong>
                 </p>
               </div>
             ) : (
-              <div className="mt-2 space-y-1">
+              <div className="mt-1.5 space-y-0.5">
                 <div className="min-w-0">
                   {product.discountTeaser ? (
                     <>
-                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
-                        <span className="text-base font-bold tabular-nums text-primary-700">
+                      <div className="flex min-h-[1.25rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-sm font-bold tabular-nums text-primary-700 sm:text-[15px]">
                           {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
                           {formatUpcomingPriceTeaser(salePrice)}
                         </span>
                         {unitLabel ? (
-                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                          <span className="text-xs font-semibold text-primary-700">/ {unitLabel}</span>
                         ) : null}
                       </div>
-                      <div className="text-xs tabular-nums text-gray-400 line-through">
+                      <div className="text-[11px] tabular-nums text-gray-400 line-through">
                         {formatVnd(salePrice)}
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="flex min-h-[1.5rem] flex-wrap items-baseline gap-x-1">
-                        <span className="text-base font-bold tabular-nums text-primary-700">
+                      <div className="flex min-h-[1.25rem] flex-wrap items-baseline gap-x-1">
+                        <span className="text-sm font-bold tabular-nums text-primary-700 sm:text-[15px]">
                           {product.variant_count && product.variant_count > 1 ? 'Từ ' : ''}
                           {formatVnd(salePrice)}
                         </span>
                         {unitLabel ? (
-                          <span className="text-sm font-semibold text-primary-700">/ {unitLabel}</span>
+                          <span className="text-xs font-semibold text-primary-700">/ {unitLabel}</span>
                         ) : null}
                       </div>
                       {displayCompareAt != null ? (
-                        <div className="text-xs tabular-nums text-gray-400 line-through">
+                        <div className="text-[11px] tabular-nums text-gray-400 line-through">
                           {formatVnd(displayCompareAt)}
                         </div>
                       ) : null}
@@ -292,7 +292,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   )}
                 </div>
 
-                <div className="min-h-[1rem] truncate text-xs text-gray-500">
+                <div className="min-h-[0.875rem] truncate text-[11px] text-gray-500">
                   {product.packaging || '\u00a0'}
                 </div>
 
@@ -307,7 +307,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                           e.stopPropagation()
                           setSelectedUnitId(unit.unit_id)
                         }}
-                        className={`h-7 rounded-md border px-2 text-center text-xs transition-colors ${
+                        className={`h-6 rounded-md border px-1.5 text-center text-[11px] transition-colors ${
                           (selectedUnit?.unit_id ?? defaultUnitId) === unit.unit_id
                             ? 'border-primary-600 bg-white text-primary-700'
                             : 'border-gray-300 bg-gray-100 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
@@ -321,19 +321,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             )}
 
-            <div className={`mt-auto pt-3 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
+            <div className={`mt-auto pt-2 ${isConsultPrice ? 'flex flex-col gap-1.5' : ''}`}>
               {isConsultPrice ? (
                 <>
                   <button
                     type="button"
-                    className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                    className="w-full rounded-lg bg-primary-600 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:text-sm"
                     onClick={handleConsult}
                   >
                     Tư vấn ngay
                   </button>
                   <button
                     type="button"
-                    className="w-full rounded-xl bg-gray-100 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                    className="w-full rounded-lg bg-gray-100 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 sm:text-sm"
                     onClick={handleFindPharmacy}
                   >
                     Tìm nhà thuốc
@@ -344,7 +344,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               ) : (
                 <button
                   type="button"
-                  className="w-full rounded-xl bg-primary-600 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+                  className="w-full rounded-lg bg-primary-600 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:text-sm"
                   onClick={handleAddToCart}
                 >
                   Thêm vào giỏ
