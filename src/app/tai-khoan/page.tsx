@@ -80,6 +80,12 @@ export default function AccountPage() {
       href: '/tai-khoan/don-hang',
       icon: <OrderIcon className="w-6 h-6" />,
     },
+    {
+      title: 'Yêu cầu mua thuốc',
+      description: 'Xem lịch sử yêu cầu tư vấn mua thuốc',
+      href: '/tai-khoan/don-thuoc',
+      icon: <OrderIcon className="w-6 h-6" />,
+    },
   ]
 
   return (
