@@ -27,11 +27,11 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
   if (rail.length === 0) return null
 
   return (
-    <section className="bg-white pb-8 pt-12 sm:pb-10 sm:pt-14" aria-label={title}>
+    <section className="bg-white pb-6 pt-8 sm:pb-8 sm:pt-10" aria-label={title}>
       <Container>
         <div className="relative overflow-visible">
           <div
-            className="relative overflow-visible rounded-2xl px-4 pb-4 pt-10 sm:px-5 sm:pb-5 sm:pt-11"
+            className="relative overflow-visible rounded-2xl px-3 pb-3 pt-9 sm:px-4 sm:pb-4 sm:pt-10"
             style={{ backgroundColor: HOME_MERCH_ORANGE }}
           >
             <h2 className="hot-sale-tab">{title}</h2>

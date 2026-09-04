@@ -126,7 +126,9 @@ function outlineInputClasses(
   return cn(
     'peer relative z-0 w-full appearance-none rounded-lg border bg-white px-3.5 pb-2.5 text-sm text-slate-900 transition-all duration-200',
     multiline && visiblePlaceholder ? 'pt-5' : 'pt-4',
-    visiblePlaceholder ? 'placeholder:text-slate-400' : 'placeholder-transparent',
+    visiblePlaceholder
+      ? 'placeholder:text-slate-400 focus:placeholder:text-transparent'
+      : 'placeholder-transparent',
     'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
     error ? 'border-red-300 focus:ring-red-500' : 'border-slate-200',
     disabled && 'cursor-not-allowed bg-slate-50 text-slate-500',

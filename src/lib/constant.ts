@@ -148,7 +148,7 @@ export type HomeQuickLink = {
 
 /** Trang chủ — lối tắt */
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
-  { icon: '💊', title: 'Cần mua thuốc', href: '/tim-kiem' },
+  { icon: '💊', title: 'Cần mua thuốc', href: '/dat-thuoc' },
   { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
   { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
   { icon: '📍', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },

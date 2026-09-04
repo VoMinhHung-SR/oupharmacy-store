@@ -338,7 +338,7 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
           )}
         </div>
 
-        {footer ? <div className="mt-4 sm:mt-5">{footer}</div> : null}
+        {footer ? <div className="mt-3 sm:mt-4">{footer}</div> : null}
       </div>
     </section>
   )
