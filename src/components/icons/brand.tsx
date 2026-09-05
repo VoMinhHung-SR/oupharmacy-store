@@ -23,3 +23,21 @@ export function GoogleIcon({ className = 'h-5 w-5', size, ...rest }: SvgIconProp
     </svg>
   )
 }
+
+/** Facebook brand glyph — fill via currentColor / text-* class. */
+export function FacebookIcon({ className = 'h-5 w-5', size, ...rest }: SvgIconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="currentColor"
+      aria-hidden="true"
+      data-icon="tabler:brand-facebook"
+      {...rest}
+    >
+      <path d="M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2z" />
+    </svg>
+  )
+}

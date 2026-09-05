@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useMemo } from 'react'
 import Image from 'next/image'
-import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
-import { ImagePlaceholderIcon } from '@/components/icons'
+import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ImagePlaceholderIcon } from '@/components/icons'
 
 interface ImageZoomModalProps {
   image: string
@@ -38,9 +37,7 @@ const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
         className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
         aria-label="Close zoom"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <CloseIcon className="w-6 h-6" />
       </button>
 
       {hasPrev && (

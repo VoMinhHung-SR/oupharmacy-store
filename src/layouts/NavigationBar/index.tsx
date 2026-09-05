@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 import Link from 'next/link'
 import React, {
   useRef,
@@ -225,20 +226,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                 className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-l-lg transition-colors h-full flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 aria-label="Scroll left"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
+                <ChevronLeftIcon className="w-5 h-5" />
               </button>
             )}
 
@@ -280,22 +268,10 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                         {category.name}
                       </span>
                       {hasChildren && desktopMegaEnabled && (
-                        <svg
-                          className={`hidden h-4 w-4 transition-transform lg:block ${
-                            isHovered ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
+                        <ChevronDownIcon
+                          className="hidden h-4 w-4 lg:block"
+                          rotated={isHovered}
+                        />
                       )}
                     </Link>
                   </div>
@@ -325,20 +301,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ categories = [] })
                 className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 p-2.5 rounded-r-lg transition-colors h-full flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 aria-label="Scroll right"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                <ChevronRightIcon className="w-5 h-5" />
               </button>
             )}
           </div>

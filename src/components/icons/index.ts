@@ -22,6 +22,10 @@ export {
   InfoIcon,
   PlusIcon,
   MinusIcon,
+  ShareIcon,
+  CopyIcon,
+  BoltIcon,
+  FileTextIcon,
   SpinnerIcon,
 } from './ui'
 
@@ -43,9 +47,14 @@ export {
   KeyIcon,
   EyeIcon,
   EyeOffIcon,
+  PhoneIcon,
+  MailIcon,
+  ClockIcon,
 } from './account'
 
-export { GoogleIcon } from './brand'
+export { HeartIcon, ShieldCheckIcon, ShieldIcon } from './medical'
+
+export { GoogleIcon, FacebookIcon } from './brand'
 
 export { CategoryIcon } from './CategoryIcon'
 export { EmptyOfferIllustration } from './EmptyOfferIllustration'

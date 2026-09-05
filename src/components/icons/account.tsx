@@ -23,3 +23,12 @@ export const EyeIcon = createOutlineIcon('eye', ['M10 12a2 2 0 1 0 4 0a2 2 0 0 0
 
 /** Tabler: eye-off (MIT) */
 export const EyeOffIcon = createOutlineIcon('eye-off', ['M10.585 10.587a2 2 0 0 0 2.829 2.828', 'M16.681 16.673A8.7 8.7 0 0 1 12 18q-5.4 0-9-6q1.908-3.18 4.32-4.674m2.86-1.146A9 9 0 0 1 12 6q5.4 0 9 6q-1 1.665-2.138 2.87M3 3l18 18'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: phone (MIT) */
+export const PhoneIcon = createOutlineIcon('phone', ['M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: mail (MIT) */
+export const MailIcon = createOutlineIcon('mail', ['M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'm3 7l9 6l9-6'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: clock (MIT) */
+export const ClockIcon = createOutlineIcon('clock', ['M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0', 'M12 7v5l3 3'], { className: 'w-6 h-6', strokeWidth: 2 })

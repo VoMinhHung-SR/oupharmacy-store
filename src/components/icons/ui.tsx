@@ -91,6 +91,18 @@ export const PlusIcon = createOutlineIcon('plus', ['M12 5v14m-7-7h14'], { classN
 /** Tabler: minus (MIT) */
 export const MinusIcon = createOutlineIcon('minus', ['M5 12h14'], { className: 'w-6 h-6', strokeWidth: 2 })
 
+/** Tabler: share (MIT) */
+export const ShareIcon = createOutlineIcon('share', ['M3 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0m12-6a3 3 0 1 0 6 0a3 3 0 1 0-6 0m0 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0m-6.3-7.3l6.6-3.4m-6.6 6l6.6 3.4'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: copy (MIT) */
+export const CopyIcon = createOutlineIcon('copy', ['M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z', 'M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: bolt (MIT) */
+export const BoltIcon = createOutlineIcon('bolt', ['M13 3v7h6l-8 11v-7H5z'], { className: 'w-6 h-6', strokeWidth: 2 })
+
+/** Tabler: file-text (MIT) */
+export const FileTextIcon = createOutlineIcon('file-text', ['M14 3v4a1 1 0 0 0 1 1h4', 'M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2M9 9h1m-1 4h6m-6 4h6'], { className: 'w-6 h-6', strokeWidth: 2 })
+
 /** Tabler: loader-2 (MIT) — add `animate-spin` via className at call site. */
 export function SpinnerIcon({
   className = 'w-5 h-5',
