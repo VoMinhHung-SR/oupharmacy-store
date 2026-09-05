@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { Button } from '@/components/Button'
 import { ConsultationProcessBody } from '@/components/medicine-request/consultationContent'
 
-function OrdersLink({ className = '' }: { className?: string }) {
+function RequestsLink({ className = '' }: { className?: string }) {
   return (
     <Link
-      href="/tai-khoan/don-hang"
+      href="/tai-khoan/don-thuoc"
       className={`flex items-center justify-center gap-2 text-sm font-medium leading-none text-primary-700 ${className}`.trim()}
     >
       <svg
@@ -24,7 +24,7 @@ function OrdersLink({ className = '' }: { className?: string }) {
           d="M9 12h6m-6 4h6M7 4h7l3 3v13a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
         />
       </svg>
-      <span className="leading-none">Xem lại đơn hàng của tôi</span>
+      <span className="leading-none">Xem lại yêu cầu mua thuốc</span>
     </Link>
   )
 }
@@ -42,7 +42,7 @@ export function MedicineRequestMobileActions({ isSubmitting }: { isSubmitting: b
     <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
       <SubmitButton isSubmitting={isSubmitting} />
       <div className="mt-3 flex justify-center">
-        <OrdersLink />
+        <RequestsLink />
       </div>
     </div>
   )
@@ -61,7 +61,7 @@ export function ConsultationInfoPanel({ isSubmitting }: { isSubmitting: boolean 
       </div>
 
       <div className="flex items-center rounded-lg border border-slate-200 bg-white px-4 py-3.5 shadow-sm">
-        <OrdersLink className="w-full justify-start" />
+        <RequestsLink className="w-full justify-start" />
       </div>
     </aside>
   )

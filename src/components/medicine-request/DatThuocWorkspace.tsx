@@ -11,14 +11,15 @@ import {
 import { ConsultationGuideSheet } from '@/components/medicine-request/ConsultationGuideSheet'
 import { MedicineRequestActionRow } from '@/components/medicine-request/MedicineRequestActionRow'
 import { MedicineSearchModal } from '@/components/medicine-request/MedicineSearchModal'
+import { PrescriptionImageRow } from '@/components/medicine-request/PrescriptionImageRow'
 import { SelectedMedicineList } from '@/components/medicine-request/SelectedMedicineList'
 import type { SelectedMedicine } from '@/components/medicine-request/types'
 import { useAuth } from '@/contexts/AuthContext'
-import { submitContactMessage } from '@/lib/services/contact'
 import {
-  buildMedicineRequestMessage,
-  medicineRequestDisplayName,
-} from '@/lib/utils/medicineRequestMessage'
+  createMedicineRequest,
+  validatePrescriptionImage,
+} from '@/lib/services/medicineRequests'
+import { medicineRequestDisplayName } from '@/lib/utils/medicineRequestMessage'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 import {
   medicineRequestSchema,
@@ -30,6 +31,9 @@ export function DatThuocWorkspace() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [items, setItems] = useState<SelectedMedicine[]>([])
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null)
+  const [prescriptionPreview, setPrescriptionPreview] = useState<string | null>(null)
+  const [prescriptionError, setPrescriptionError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -51,16 +55,49 @@ export function DatThuocWorkspace() {
     })
   }, [user, reset])
 
+  useEffect(() => {
+    if (!prescriptionFile) {
+      setPrescriptionPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(prescriptionFile)
+    setPrescriptionPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [prescriptionFile])
+
+  const handlePickPrescription = (file: File | null) => {
+    if (!file) {
+      setPrescriptionFile(null)
+      setPrescriptionError(null)
+      return
+    }
+    const err = validatePrescriptionImage(file)
+    if (err) {
+      setPrescriptionError(err)
+      setPrescriptionFile(null)
+      return
+    }
+    setPrescriptionError(null)
+    setPrescriptionFile(file)
+  }
+
   const onSubmit = async (values: MedicineRequestFormData) => {
+    if (prescriptionFile) {
+      const err = validatePrescriptionImage(prescriptionFile)
+      if (err) {
+        setPrescriptionError(err)
+        return
+      }
+    }
     setIsSubmitting(true)
     try {
-      const result = await submitContactMessage({
-        name: values.fullName.trim(),
+      const result = await createMedicineRequest({
+        fullName: values.fullName.trim(),
         phone: values.phone.trim(),
         email: user?.email?.trim() || undefined,
-        subject: 'Cần mua thuốc',
-        request_type: 'medicine',
-        message: buildMedicineRequestMessage(values.note, items),
+        note: values.note,
+        items,
+        prescriptionImage: prescriptionFile,
       })
       if (result.error) {
         toastError(result.error)
@@ -73,6 +110,8 @@ export function DatThuocWorkspace() {
         note: '',
       })
       setItems([])
+      setPrescriptionFile(null)
+      setPrescriptionError(null)
     } finally {
       setIsSubmitting(false)
     }
@@ -157,6 +196,13 @@ export function DatThuocWorkspace() {
                 />
               ) : null}
             </div>
+
+            <PrescriptionImageRow
+              file={prescriptionFile}
+              previewUrl={prescriptionPreview}
+              error={prescriptionError}
+              onPick={handlePickPrescription}
+            />
 
             <MedicineRequestMobileActions isSubmitting={isSubmitting} />
           </div>
