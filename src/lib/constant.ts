@@ -139,19 +139,23 @@ export const PLACEHOLDER_PAGE_ACTIONS: PlaceholderPageAction[] = [
   { label: 'Tiếp tục mua sắm', href: '/tim-kiem', variant: 'outline' },
 ]
 
+import type { HomeQuickLinkIconId } from '@/components/icons/categoryIconMap'
+
+export type { HomeQuickLinkIconId }
+
 export type HomeQuickLink = {
-  icon: string
+  iconId: HomeQuickLinkIconId
   title: string
   href: string
   comingSoon?: boolean
 }
 
-/** Trang chủ — lối tắt */
+/** Trang chủ — lối tắt dịch vụ. */
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
-  { icon: '💊', title: 'Cần mua thuốc', href: '/dat-thuoc' },
-  { icon: '👨‍⚕️', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
-  { icon: '📄', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
-  { icon: '📍', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
-  { icon: '💉', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },
-  { icon: '🔍', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang', comingSoon: true },
+  { iconId: 'pill-plus', title: 'Cần mua thuốc', href: '/dat-thuoc' },
+  { iconId: 'user', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
+  { iconId: 'file-text', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
+  { iconId: 'map-pin', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
+  { iconId: 'vaccine', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },
+  { iconId: 'shield-search', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang', comingSoon: true },
 ]

@@ -9,6 +9,7 @@ import { RelatedProducts } from '@/components/catalog/product-detail/parts/Relat
 import { RecentlyViewed } from '@/components/catalog/product-detail/parts/RecentlyViewed'
 import { useProductDetailPage } from '@/components/catalog/product-detail/useProductDetailPage'
 import { ProductDetailInfoColumn } from '@/components/catalog/product-detail/parts/ProductDetailInfoColumn'
+import { ProductDetailPoliciesBox } from '@/components/catalog/product-detail/parts/ProductDetailPoliciesBox'
 import { ProductStickyAddToCartBar } from '@/components/catalog/product-detail/parts/ProductStickyAddToCartBar'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
 
@@ -84,11 +85,14 @@ export function ProductDetailPageContent({
 
       <div className="space-y-4 rounded-lg bg-white p-3 sm:space-y-6 sm:p-6">
         <div className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2">
-          <ProductImageGallery
-            mainImage={state.productImageUrl ?? undefined}
-            images={state.productImages}
-            productName={state.productName}
-          />
+          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+            <ProductImageGallery
+              mainImage={state.productImageUrl ?? undefined}
+              images={state.productImages}
+              productName={state.productName}
+            />
+            <ProductDetailPoliciesBox />
+          </div>
           <ProductDetailInfoColumn product={product} state={state} />
         </div>
       </div>

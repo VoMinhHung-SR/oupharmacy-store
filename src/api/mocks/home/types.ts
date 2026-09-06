@@ -52,7 +52,13 @@ export type HotSaleResponse = {
 
 export type FeaturedCategoriesResponse = {
   title: string
-  categories: Array<{ name: string; icon: string; count: number; href: string }>
+  categories: Array<{
+    name: string
+    /** @deprecated Prefer CategoryIcon via href slug; kept for mock compatibility. */
+    icon?: string
+    count: number
+    href: string
+  }>
 }
 
 export type FavoriteBrandsResponse = {

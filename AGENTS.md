@@ -42,7 +42,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
 | HTTP client & env | `src/lib/api.ts`, `src/lib/services/*.ts` |
-| Icons (UI SVG) | `src/components/icons/` — import barrel `@/components/icons`; path Tabler tự host theo module (`ui` / `commerce` / `account` / `pharmacy` / `medical`); **không** npm iconify/tabler/lucide |
+| Icons (UI SVG) | `src/components/icons/` — barrel `@/components/icons`; outline paths tự host theo module (`ui` / `commerce` / `account` / `pharmacy` / `medical`); **không** thêm npm icon pack |
 
 ## Components: `common` vs `catalog/`
 

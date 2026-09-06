@@ -30,7 +30,7 @@ export function ProductDetailPromoAppliedSection({
         </span>
         <h3 className="text-sm font-semibold text-orange-600">Khuyến mại được áp dụng</h3>
       </div>
-      <div className="flex items-center gap-3 px-3 py-3 sm:px-4">
+      <div className="flex items-center gap-2 px-3 py-3 sm:px-4">
         <PromoIcon size="lg" tone="soft" />
         <p className="text-sm leading-snug text-gray-800">{message}</p>
       </div>

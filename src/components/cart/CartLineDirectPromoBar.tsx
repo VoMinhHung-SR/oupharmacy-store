@@ -61,7 +61,7 @@ export function CartLineDirectPromoBar({
 
   return (
     <div
-      className={`flex w-full min-h-[1.625rem] items-center gap-1.5 rounded-md bg-slate-100/90 px-2 py-1 ${className}`.trim()}
+      className={`flex w-full min-h-[1.625rem] items-center gap-1 rounded-md bg-slate-100/90 px-2 py-1 ${className}`.trim()}
       role="note"
       aria-label={ariaLabel}
     >

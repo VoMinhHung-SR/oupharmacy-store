@@ -3,33 +3,41 @@ import type { SvgIconProps } from './types'
 type OutlineDefaults = {
   className?: string
   strokeWidth?: number
+  /** Override `data-icon` (defaults to icon id). */
+  dataIcon?: string
 }
 
-/** Factory for self-hosted Tabler outline icons (MIT). */
+function mergeIconClass(base: string, override?: string) {
+  // Always kill SVG baseline gap (inline svg otherwise leaves space under the glyph).
+  return ['block', 'shrink-0', override || base].filter(Boolean).join(' ')
+}
+
+/** Factory for self-hosted outline icons. */
 export function createOutlineIcon(
-  tablerId: string,
+  iconId: string,
   paths: readonly string[],
   defaults: OutlineDefaults = {},
 ) {
-  const defaultClassName = defaults.className ?? 'w-6 h-6'
+  const defaultClassName = defaults.className ?? 'h-6 w-6'
   const defaultStrokeWidth = defaults.strokeWidth ?? 2
+  const dataIcon = defaults.dataIcon || iconId
 
   function OutlineIcon({
-    className = defaultClassName,
+    className,
     size,
     strokeWidth = defaultStrokeWidth,
     ...rest
   }: SvgIconProps) {
     return (
       <svg
-        className={className}
+        className={mergeIconClass(defaultClassName, className)}
         width={size}
         height={size}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
-        data-icon={`tabler:${tablerId}`}
+        data-icon={dataIcon}
         {...rest}
       >
         {paths.map((d) => (
@@ -45,7 +53,7 @@ export function createOutlineIcon(
     )
   }
 
-  OutlineIcon.displayName = `${tablerId}Icon`
+  OutlineIcon.displayName = `${iconId}Icon`
 
   return OutlineIcon
 }

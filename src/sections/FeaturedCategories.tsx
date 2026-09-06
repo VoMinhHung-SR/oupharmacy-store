@@ -1,11 +1,18 @@
 'use client'
 
-import { ShieldCheckIcon } from '@/components/icons'
+import { CategoryIcon, ShieldCheckIcon } from '@/components/icons'
 import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
 import featuredCategories from '@/api/mocks/home/featured-categories.response.json'
 import type { FeaturedCategoriesResponse } from '@/api/mocks/home/types'
+
+function slugFromCategoryHref(href: string): string {
+  const cleaned = href.replace(/^\/+/, '')
+  const parts = cleaned.split('/')
+  // /categories/than-kinh-nao → than-kinh-nao
+  return parts[parts.length - 1] || cleaned
+}
 
 /** Featured categories — fixed section; data from `home/featured-categories.response.json`. */
 export const FeaturedCategories: React.FC = () => {
@@ -28,7 +35,12 @@ export const FeaturedCategories: React.FC = () => {
               href={category.href}
               className="group rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary-500 hover:bg-primary-50 hover:shadow-lg"
             >
-              <div className="mb-3 text-center text-4xl">{category.icon}</div>
+              <div className="mb-2 flex justify-center leading-none text-primary-600">
+                <CategoryIcon
+                  categorySlug={slugFromCategoryHref(category.href)}
+                  className="h-10 w-10"
+                />
+              </div>
               <div className="mb-1 min-h-[2.5rem] text-center text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-primary-700">
                 {category.name}
               </div>
