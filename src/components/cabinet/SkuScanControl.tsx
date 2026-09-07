@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/Button'
-import { QrScanIcon } from '@/components/icons/QrScanIcon'
+import { QrScanIcon } from '@/components/icons'
 
 type BarcodeDetectorLike = {
   detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue?: string }>>

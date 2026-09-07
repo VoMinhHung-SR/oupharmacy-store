@@ -1,8 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ChevronLeftIcon } from '@/components/icons/ChevronLeftIcon'
-import { ChevronRightIcon } from '@/components/icons/ChevronRightIcon'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 
 export const CAROUSEL_ARROW_BASE_CLASS =
   'absolute top-1/2 -translate-y-1/2 rounded-full bg-white/45 px-3 py-2 text-xl leading-none text-slate-800 shadow-sm backdrop-blur-sm hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2'

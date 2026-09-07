@@ -5,7 +5,7 @@ import { CartReceiptCard } from '@/components/cart/CartReceiptCard'
 import { ReceiptDockShell, ReceiptDockTotalRow } from '@/components/cart/ReceiptDockShell'
 import { CheckoutOrderSummary } from '@/components/checkout/CheckoutOrderSummary'
 import { CheckoutVoucherSection } from '@/components/checkout/CheckoutVoucherSection'
-import { InfoIcon } from '@/components/icons'
+import { InfoIcon, ShieldIcon } from '@/components/icons'
 import { useStickyReceiptHandoff } from '@/lib/hooks/useStickyReceiptHandoff'
 import { formatVnd } from '@/lib/utils/currency'
 
@@ -59,9 +59,7 @@ function HideLineDetailRow({
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600"
           aria-hidden
         >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2 4 5v6c0 5 3.4 9.4 8 10.7C16.6 20.4 20 16 20 11V5l-8-3Zm0 4.2 5 1.9v3.9c0 3.4-2.2 6.5-5 7.5-2.8-1-5-4.1-5-7.5V8.1l5-1.9Z" />
-          </svg>
+          <ShieldIcon className="h-4 w-4" />
         </span>
         <span className="min-w-0 text-sm leading-snug text-slate-800">
           Ẩn tên sản phẩm khi giao hàng

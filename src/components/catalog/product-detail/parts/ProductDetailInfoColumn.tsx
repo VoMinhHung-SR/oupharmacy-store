@@ -5,7 +5,6 @@ import { useProductDetailPage } from '@/components/catalog/product-detail/usePro
 import { ProductDetailInfoHeader } from '@/components/catalog/product-detail/parts/ProductDetailInfoHeader'
 import { ProductDetailPurchaseBlock } from '@/components/catalog/product-detail/parts/ProductDetailPurchaseBlock'
 import { ProductDetailSpecsPanel } from '@/components/catalog/product-detail/parts/ProductDetailSpecsPanel'
-import { ProductDetailPoliciesBox } from '@/components/catalog/product-detail/parts/ProductDetailPoliciesBox'
 
 type ProductDetailPageState = ReturnType<typeof useProductDetailPage>
 
@@ -52,8 +51,6 @@ export function ProductDetailInfoColumn({ product, state }: ProductDetailInfoCol
         productPackaging={state.productPackaging}
         categorySlug={state.categorySlug}
       />
-
-      <ProductDetailPoliciesBox />
     </div>
   )
 }

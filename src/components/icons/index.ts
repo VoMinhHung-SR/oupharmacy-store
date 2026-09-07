@@ -1,41 +1,106 @@
-export { GridIcon } from './GridIcon'
-export { ListIcon } from './ListIcon'
-export { ChevronDownIcon } from './ChevronDownIcon'
-export { ChevronUpIcon } from './ChevronUpIcon'
-export { ChevronLeftIcon } from './ChevronLeftIcon'
-export { ChevronRightIcon } from './ChevronRightIcon'
-export { ChevronDoubleDownIcon } from './ChevronDoubleDownIcon'
-export { SearchIcon } from './SearchIcon'
-export { CheckIcon } from './CheckIcon'
-export { CheckCircleIcon } from './CheckCircleIcon'
-export { XCircleIcon } from './XCircleIcon'
-export { MicIcon } from './MicIcon'
-export { QrScanIcon } from './QrScanIcon'
-export { ImagePlaceholderIcon } from './ImagePlaceholderIcon'
-export { CloseIcon } from './CloseIcon'
-export { MenuIcon } from './MenuIcon'
-export { FilterIcon } from './FilterIcon'
-export { ArrowLeftIcon } from './ArrowLeftIcon'
-export { UserIcon } from './UserIcon'
-export { LocationIcon } from './LocationIcon'
-export { CreditCardIcon } from './CreditCardIcon'
-export { BellIcon } from './BellIcon'
-export { SettingsIcon } from './SettingsIcon'
-export { LockIcon } from './LockIcon'
-export { KeyIcon } from './KeyIcon'
-export { OrderIcon } from './OrderIcon'
-export { EyeIcon } from './EyeIcon'
-export { EyeOffIcon } from './EyeOffIcon'
-export { XIcon } from './XIcon'
-export { GoogleIcon } from './GoogleIcon'
-export { CategoryIcon } from './CategoryIcon'
-export { CartIcon } from './CartIcon'
-export { SpinnerIcon } from './SpinnerIcon'
-export { EmptyOfferIllustration } from './EmptyOfferIllustration'
-export { InfoIcon } from './InfoIcon'
-export { MinusIcon } from './MinusIcon'
-export { PercentInCircleIcon } from './PercentInCircleIcon'
-export { PromoIcon } from './PromoIcon'
-export { PlusIcon } from './PlusIcon'
-export { TrashIcon } from './TrashIcon'
+export type { SvgIconProps } from './types'
 
+export {
+  SearchIcon,
+  GridIcon,
+  ListIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronDoubleDownIcon,
+  CheckIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  MicIcon,
+  QrScanIcon,
+  CloseIcon,
+  XIcon,
+  MenuIcon,
+  FilterIcon,
+  ArrowLeftIcon,
+  InfoIcon,
+  PlusIcon,
+  MinusIcon,
+  ShareIcon,
+  CopyIcon,
+  BoltIcon,
+  FileTextIcon,
+  SpinnerIcon,
+} from './ui'
+
+export {
+  CartIcon,
+  ImagePlaceholderIcon,
+  CreditCardIcon,
+  OrderIcon,
+  PackageIcon,
+  TrashIcon,
+  PercentInCircleIcon,
+  TicketIcon,
+  TicketPercentIcon,
+  CouponIcon,
+  DiscountIcon,
+  ReceiptRefundIcon,
+  ArrowsExchangeIcon,
+  TruckDeliveryIcon,
+  PackageExportIcon,
+} from './commerce'
+
+export {
+  UserIcon,
+  LocationIcon,
+  BellIcon,
+  SettingsIcon,
+  LockIcon,
+  KeyIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PhoneIcon,
+  MailIcon,
+  ClockIcon,
+} from './account'
+
+export {
+  HeartIcon,
+  HeartbeatIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  LungsIcon,
+  BrainIcon,
+  BoneIcon,
+  DropletIcon,
+  EarIcon,
+  VirusIcon,
+  DnaIcon,
+  ActivityIcon,
+  PlantIcon,
+  ScissorsIcon,
+  MedicalCrossIcon,
+  StethoscopeIcon,
+  BodyScanIcon,
+} from './medical'
+
+export {
+  PillIcon,
+  PillPlusIcon,
+  CapsuleIcon,
+  MilkIcon,
+  MedicineSyrupIcon,
+  VaccineIcon,
+  NeedleIcon,
+  FirstAidKitIcon,
+  BottleIcon,
+  BandageIcon,
+  PerfumeIcon,
+  SprayIcon,
+  JarOfPillsIcon,
+} from './pharmacy'
+
+export { GoogleIcon, FacebookIcon } from './brand'
+
+export { CategoryIcon } from './CategoryIcon'
+export type { HomeQuickLinkIconId } from './categoryIconMap'
+export { resolveHomeQuickLinkIcon, resolveCategoryIcon } from './categoryIconMap'
+export { EmptyOfferIllustration } from './EmptyOfferIllustration'
+export { PromoIcon } from './PromoIcon'

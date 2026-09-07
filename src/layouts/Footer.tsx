@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import React from 'react'
+import Container from '@/components/Container'
 
 export const Footer: React.FC = () => {
   return (
     <footer className="border-t border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <Container className="py-10">
         <div className="grid gap-6 text-sm text-gray-600 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <div className="font-semibold text-gray-800">Nhà thuốc OUPharmacy</div>
@@ -31,7 +32,7 @@ export const Footer: React.FC = () => {
         <div className="mt-8 pb-[env(safe-area-inset-bottom)] text-center text-xs text-gray-500">
           © {new Date().getFullYear()} OUPharmacy. All rights reserved.
         </div>
-      </div>
+      </Container>
     </footer>
   )
 }

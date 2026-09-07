@@ -1,5 +1,6 @@
 'use client'
 
+import { FileTextIcon } from '@/components/icons'
 import Link from 'next/link'
 import { Button } from '@/components/Button'
 import { ConsultationProcessBody } from '@/components/medicine-request/consultationContent'
@@ -10,20 +11,7 @@ function RequestsLink({ className = '' }: { className?: string }) {
       href="/tai-khoan/don-thuoc"
       className={`flex items-center justify-center gap-2 text-sm font-medium leading-none text-primary-700 ${className}`.trim()}
     >
-      <svg
-        className="block h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.8}
-          d="M9 12h6m-6 4h6M7 4h7l3 3v13a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
-        />
-      </svg>
+      <FileTextIcon className="block h-5 w-5 shrink-0" strokeWidth={1.8} />
       <span className="leading-none">Xem lại yêu cầu mua thuốc</span>
     </Link>
   )
