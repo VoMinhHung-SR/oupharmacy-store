@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronRightIcon } from '@/components/icons'
 import Link from 'next/link'
 import React from 'react'
 import type { ProductMinimal } from './types'
@@ -29,20 +30,7 @@ export const TopProducts: React.FC<TopProductsProps> = ({
             className="text-xs text-primary-600 font-medium hover:text-primary-700 flex items-center gap-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
           >
             Xem tất cả
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRightIcon className="w-3 h-3" />
           </Link>
         </div>
       </div>

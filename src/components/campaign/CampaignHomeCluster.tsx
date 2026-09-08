@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
+import Container from '@/components/Container'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import HeroBanner from '@/sections/HeroBanner'
 import PromotionalBanners from '@/sections/PromotionalBanners'
@@ -302,8 +303,7 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
         className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-40 bg-gradient-to-b from-transparent via-white/80 to-white sm:h-52"
       />
 
-      {/* Same max-w as header; slightly less padding so the hero band reads a bit wider. */}
-      <div className="relative z-10 mx-auto max-w-7xl px-2 pb-3 pt-3 sm:px-3 sm:pb-4 sm:pt-4 lg:px-4">
+      <Container className="relative z-10 pb-3 pt-3 sm:pb-4 sm:pt-4">
         {hasHero ? (
           <CampaignHeroSlot
             slides={slides}
@@ -338,8 +338,8 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
           )}
         </div>
 
-        {footer ? <div className="mt-4 sm:mt-5">{footer}</div> : null}
-      </div>
+        {footer ? <div className="mt-3 sm:mt-4">{footer}</div> : null}
+      </Container>
     </section>
   )
 }

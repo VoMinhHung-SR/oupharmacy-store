@@ -1,5 +1,6 @@
 'use client'
 
+import { CheckCircleIcon } from '@/components/icons'
 import Link from 'next/link'
 import React, { useCallback, useRef } from 'react'
 import Container from '@/components/Container'
@@ -34,14 +35,7 @@ export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
       <Container>
         <div className="mb-8 flex items-center gap-2 sm:mb-10">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600">
-            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <CheckCircleIcon className="h-5 w-5 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
         </div>

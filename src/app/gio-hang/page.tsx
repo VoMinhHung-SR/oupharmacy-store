@@ -504,8 +504,8 @@ export default function CartPage() {
                 </div>
 
                 {hasAnyCatalogPromo ? (
-                  <div className="flex items-start gap-2.5 border-t border-primary-100/80 bg-primary-50/60 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 md:px-5">
-                    <PromoIcon size="sm" tone="soft" className="mt-px" />
+                  <div className="flex items-start gap-1.5 border-t border-primary-100/80 bg-primary-50/60 px-3 py-2.5 sm:gap-2 sm:px-4 sm:py-3 md:px-5">
+                    <PromoIcon size="sm" tone="brand" className="mt-0.5" />
                     <p className="text-[11px] leading-snug text-primary-900 sm:text-xs">
                       <span className="font-semibold">Giảm giá trực tiếp</span> đã tính vào giá bán và
                       mục &quot;Giảm giá trực tiếp&quot; bên phải — khác với mã voucher.

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Container from '@/components/Container'
 
 export interface CampaignEmptyProductsProps {
   message: string
@@ -12,7 +13,7 @@ export function CampaignEmptyProducts({
 }: CampaignEmptyProductsProps) {
   return (
     <section className="py-12" aria-label={message}>
-      <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <Container className="text-center">
         <p className="text-base text-gray-600">{message}</p>
         <Link
           href="/"
@@ -20,7 +21,7 @@ export function CampaignEmptyProducts({
         >
           {browseLabel}
         </Link>
-      </div>
+      </Container>
     </section>
   )
 }

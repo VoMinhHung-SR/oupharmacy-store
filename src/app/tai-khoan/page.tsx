@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
-import { UserIcon, CreditCardIcon, BellIcon, SettingsIcon, LockIcon, KeyIcon, OrderIcon, GridIcon } from '@/components/icons'
+import { BellIcon, ChevronRightIcon, CreditCardIcon, JarOfPillsIcon, KeyIcon, LockIcon, OrderIcon, SettingsIcon, UserIcon } from '@/components/icons'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountHubSkeleton } from '@/components/skeletons'
 
@@ -72,12 +72,18 @@ export default function AccountPage() {
       title: 'Tủ thuốc thông minh',
       description: 'Theo dõi thuốc tại nhà và hạn sử dụng',
       href: '/tai-khoan/tu-thuoc',
-      icon: <GridIcon className="w-6 h-6" />,
+      icon: <JarOfPillsIcon className="w-6 h-6" />,
     },
     {
       title: 'Đơn hàng của tôi',
       description: 'Xem lịch sử đơn hàng',
       href: '/tai-khoan/don-hang',
+      icon: <OrderIcon className="w-6 h-6" />,
+    },
+    {
+      title: 'Yêu cầu mua thuốc',
+      description: 'Xem lịch sử yêu cầu tư vấn mua thuốc',
+      href: '/tai-khoan/don-thuoc',
       icon: <OrderIcon className="w-6 h-6" />,
     },
   ]
@@ -108,14 +114,7 @@ export default function AccountPage() {
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">{item.description}</p>
               </div>
-              <svg
-                className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0 mt-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0 mt-1" />
             </Link>
           ))}
         </div>

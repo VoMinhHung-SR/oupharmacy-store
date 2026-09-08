@@ -143,8 +143,13 @@ export async function apiPost<T>(
   options?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> {
   try {
+    const headers: Record<string, string | undefined> = { ...options?.headers }
+    // Let the browser/axios set multipart boundary when posting FormData.
+    if (typeof FormData !== 'undefined' && body instanceof FormData) {
+      headers['Content-Type'] = undefined
+    }
     const config: AxiosRequestConfig = {
-      headers: options?.headers,
+      headers,
     }
     const response = await axiosInstance.post<T>(path, body, config)
     return handleAxiosResponse<T>(response)

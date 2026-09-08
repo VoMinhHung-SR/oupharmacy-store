@@ -5,11 +5,11 @@ export const CONTACT_SUBMIT_PATH = '/contact/'
 
 export interface ContactSubmissionPayload {
   name: string
-  email: string
+  email?: string
   phone?: string
   subject?: string
   message: string
-  request_type?: 'support' | 'policy' | 'other'
+  request_type?: 'support' | 'policy' | 'other' | 'medicine'
 }
 
 export type ContactSubmitResult =
