@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Product, buildProductCardPayload } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { Container } from '@/components/Container'
+import { PAGE_Y_SECTION } from '@/lib/layout/pageLayout'
 
 const STORAGE_KEY = 'oupharmacy_recently_viewed'
 const MAX_ITEMS = 6
@@ -89,9 +89,9 @@ export const RecentlyViewed: React.FC = () => {
   }
 
   return (
-    <Container className="py-8">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sản phẩm đã xem gần đây</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <section className={PAGE_Y_SECTION} aria-label="Sản phẩm đã xem gần đây">
+      <h2 className="mb-6 text-2xl font-semibold text-gray-900">Sản phẩm đã xem gần đây</h2>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {items.map((item) => (
           <ProductCard
             key={item.id}
@@ -110,6 +110,6 @@ export const RecentlyViewed: React.FC = () => {
           />
         ))}
       </div>
-    </Container>
+    </section>
   )
 }

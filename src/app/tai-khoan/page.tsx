@@ -90,8 +90,8 @@ export default function AccountPage() {
 
   return (
     <AccountPageShell>
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <div className="space-y-4 sm:space-y-5">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
           <h1 className="text-2xl font-semibold text-gray-900">Tài khoản của tôi</h1>
           <p className="text-sm text-gray-600 mt-1">
             Xin chào, {user?.name || user?.email}
@@ -103,7 +103,7 @@ export default function AccountPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-start gap-4 p-6 rounded-lg border border-gray-200 bg-white hover:border-primary-500 hover:shadow-md transition-all group"
+              className="group flex items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary-500 hover:shadow-md sm:p-5"
             >
               <div className="flex-shrink-0 p-3 rounded-lg bg-primary-50 text-primary-600 group-hover:bg-primary-100 transition-colors">
                 {item.icon}

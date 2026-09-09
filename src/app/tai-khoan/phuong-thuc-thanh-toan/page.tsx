@@ -100,7 +100,7 @@ export default function PaymentMethodsPage() {
         <AccountPageHeader title="Phương thức thanh toán" rightSlot={<Button variant="primary">Thêm phương thức</Button>} />
 
         {methods.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 text-center">
             <div className="text-gray-400 mb-4">
               <CreditCardIcon className="w-16 h-16 mx-auto" />
             </div>

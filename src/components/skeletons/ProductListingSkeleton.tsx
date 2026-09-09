@@ -4,6 +4,7 @@ import { FacetsSidebarSkeleton } from '@/components/skeletons/FacetsSidebarSkele
 import { ListingToolbarSkeleton } from '@/components/skeletons/ListingToolbarSkeleton'
 import { ProductGridSkeleton } from '@/components/skeletons/ProductGridSkeleton'
 import { SkeletonPulse } from '@/components/skeletons/SkeletonPulse'
+import { PAGE_Y } from '@/lib/layout/pageLayout'
 
 export type ProductListingSkeletonVariant = 'category' | 'search'
 
@@ -23,7 +24,7 @@ export function ProductListingSkeleton({
   const isCategory = variant === 'category'
 
   return (
-    <Container className="py-4">
+    <Container className={PAGE_Y}>
       {breadcrumbItems ? (
         <div className="mb-4">
           <Breadcrumb items={breadcrumbItems} />
@@ -35,7 +36,7 @@ export function ProductListingSkeleton({
       )}
 
       {isCategory ? (
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2 sm:mb-5">
           <SkeletonPulse className="hidden h-10 w-10 shrink-0 rounded-full sm:block" />
           <div className="flex min-w-0 flex-1 gap-2 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -51,9 +52,7 @@ export function ProductListingSkeleton({
 
         <main className="min-w-0 flex-1 space-y-3">
           <ListingToolbarSkeleton showMobileFilter />
-
           <ProductGridSkeleton count={cardCount} columns="listing" />
-
           <div className="flex flex-col items-center gap-1 pt-4">
             <SkeletonPulse className="h-5 w-5 rounded" />
             <SkeletonPulse className="h-4 w-40" />

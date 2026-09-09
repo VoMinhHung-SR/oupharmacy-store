@@ -1,4 +1,5 @@
 'use client'
+import { PageShell } from '@/components/layout/PageShell'
 import { SpinnerIcon } from '@/components/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -77,11 +78,15 @@ export default function RegisterPage() {
   const isLoading = loading || openBackdrop || isLoadingUserRole
 
   if (isLoadingUserRole) {
-    return <FormPageSkeleton />
+    return (
+      <PageShell>
+        <FormPageSkeleton />
+      </PageShell>
+    )
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-8 px-4">
+    <PageShell>
       <BackdropLoading isOpen={openBackdrop} loadingText="Đang xử lý..." />
 
       <div className="text-center">
@@ -156,6 +161,6 @@ export default function RegisterPage() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

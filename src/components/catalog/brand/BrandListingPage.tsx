@@ -22,18 +22,18 @@ import { usePreservedSearchFacets } from '@/lib/hooks/usePreservedSearchFacets'
 import { pickFacetSearchParams } from '@/lib/listing/facetSearchParams'
 import { getListingRequestUiFlags } from '@/lib/listing/getListingRequestUiFlags'
 import {
-  applyBrandCampaignDiscount,
+  scatterBrandCampaignDiscounts,
   parseBrandPromoParam,
   type BrandPageMeta,
 } from '@/lib/services/brandCampaigns'
 import { sortOptionToStoreSearchSort } from '@/lib/services/search'
 import {
   buildProductCardPayload,
-  getListProductKey,
   mergeUniqueProducts,
   type Product,
   type ProductFilters,
 } from '@/lib/services/products'
+import { PAGE_Y_SECTION } from '@/lib/layout/pageLayout'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 
@@ -145,8 +145,8 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#ededed]">
-      <Container className="space-y-5 py-4 sm:space-y-6 sm:py-6">
+    <div className="bg-[#ededed]">
+      <Container className={`space-y-5 sm:space-y-6 ${PAGE_Y_SECTION}`}>
         <nav className="text-sm text-gray-500" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
@@ -242,7 +242,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
             onFiltersChange={handleFiltersChange}
           />
 
-          <main className="min-w-0 flex-1 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-inset ring-gray-200 sm:p-5">
+          <main className="min-w-0 flex-1">
             <ProductSortAndView
               sortOption={sortOption}
               onSortChange={handleSortChange}
@@ -283,13 +283,14 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
               </p>
             ) : (
               <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-                {accumulatedProducts.map((product) => {
-                  const card = applyBrandCampaignDiscount(
-                    buildProductCardPayload(product),
-                    discountPercent
-                  )
-                  return <ProductCard key={getListProductKey(product)} product={card} />
-                })}
+                {scatterBrandCampaignDiscounts(
+                  accumulatedProducts.map((product) => buildProductCardPayload(product)),
+                  discountPercent,
+                  meta.id,
+                  totalCount
+                ).map((card) => (
+                  <ProductCard key={card.id} product={card} />
+                ))}
               </div>
             )}
 

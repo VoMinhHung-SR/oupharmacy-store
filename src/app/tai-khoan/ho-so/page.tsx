@@ -350,7 +350,7 @@ export default function ProfilePage() {
 
           {/* Addresses List */}
           {addresses.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="py-6 text-center sm:py-8">
               <div className="text-gray-400 mb-4">
                 <LocationIcon className="w-16 h-16 mx-auto" />
               </div>

@@ -9,6 +9,7 @@ import { useCategoryListingPage } from '@/components/catalog/category-listing/us
 import { CategoryListingSidebar } from '@/components/catalog/category-listing/parts/CategoryListingSidebar'
 import { CategoryListingMobileFilters } from '@/components/catalog/category-listing/parts/CategoryListingMobileFilters'
 import { CategoryProductGrid } from '@/components/catalog/category-listing/parts/CategoryProductGrid'
+import { PAGE_Y } from '@/lib/layout/pageLayout'
 
 interface CategoryListingPageContentProps {
   categorySlug: string
@@ -55,7 +56,7 @@ export function CategoryListingPageContent({
 
   if (error) {
     return (
-      <Container className="py-8">
+      <Container className={PAGE_Y}>
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
           <p className="mb-2 font-medium text-amber-800">Không thể tải danh sách sản phẩm</p>
           <p className="mb-4 text-sm text-amber-700">
@@ -74,7 +75,7 @@ export function CategoryListingPageContent({
   }
 
   return (
-    <Container className="py-4">
+    <Container className={PAGE_Y}>
       <div className="mb-4">
         <Breadcrumb items={listing.breadcrumbItems} />
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PageShell } from '@/components/layout/PageShell'
 
 export const metadata: Metadata = {
   title: 'Trung tâm trợ giúp | OUPharmacy',
@@ -7,9 +8,8 @@ export const metadata: Metadata = {
 
 export default function HelpCenterPage() {
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8">
+    <PageShell>
+        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
           <h1 className="mb-6 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
             Trung tâm trợ giúp
           </h1>
@@ -76,7 +76,6 @@ export default function HelpCenterPage() {
             hỗ trợ. Đội ngũ OUPharmacy sẽ phản hồi trong thời gian sớm nhất.
           </p>
         </div>
-      </section>
-    </main>
+    </PageShell>
   )
 }
