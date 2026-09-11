@@ -108,7 +108,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
     dataUpdatedAt,
   })
 
-  /** Sidebar chips exclude locked page brand (always applied). */
+  /** Sidebar chip count excludes locked page brand (always applied). */
   const filtersForSidebar = useMemo(() => {
     const { brand: _brand, ...rest } = activeFilters
     return rest
@@ -133,8 +133,8 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
   const activeFacetCount = countActiveFacetFilters(filtersForSidebar)
 
   const handleFiltersChange = (next: ProductFilters) => {
-    const { category: _c, page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } =
-      next
+    const { page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } = next
+    // Keep category / attrs / etc.; always re-lock page brand.
     setActiveFilters({ ...rest, brand: meta.id })
     setPage(PAGINATION.DEFAULT_PAGE)
   }
@@ -229,7 +229,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
           <CategoryListingSidebar
             facetFilters={facetFilters}
             filtersLoading={filtersLoading}
-            categoryFilters={filtersForSidebar}
+            categoryFilters={activeFilters}
             onFiltersChange={handleFiltersChange}
           />
 
