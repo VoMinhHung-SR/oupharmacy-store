@@ -5,11 +5,12 @@ import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
 import Button from '@/components/Button'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 
 export const PromotionalBanners: React.FC = () => {
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className={`bg-gray-50 ${SECTION_Y}`}>
       <Container>
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left banner */}

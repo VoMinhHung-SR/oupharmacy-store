@@ -1,5 +1,6 @@
 'use client'
 
+import { PageShell } from '@/components/layout/PageShell'
 import { ClockIcon, LocationIcon, MailIcon, PhoneIcon } from '@/components/icons'
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/Button'
@@ -95,9 +96,8 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
+    <PageShell innerClassName="sm:space-y-5">
+        <div className="text-center">
           <h1 className="mb-3 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Liên hệ với chúng tôi</h1>
           <p className="mx-auto max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
               Chúng tôi luôn sẵn sàng hỗ trợ và tư vấn cho bạn về giải pháp OUPharmacy System
@@ -260,7 +260,6 @@ export default function ContactPage() {
                 </div>
           </div>
         </div>
-      </section>
-    </main>
+    </PageShell>
   )
 }

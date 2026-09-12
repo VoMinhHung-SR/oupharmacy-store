@@ -4,6 +4,7 @@ import { CategoryIcon, ShieldCheckIcon } from '@/components/icons'
 import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 import featuredCategories from '@/api/mocks/home/featured-categories.response.json'
 import type { FeaturedCategoriesResponse } from '@/api/mocks/home/types'
 
@@ -19,7 +20,7 @@ export const FeaturedCategories: React.FC = () => {
   const data = featuredCategories as FeaturedCategoriesResponse
 
   return (
-    <section className="bg-white py-10 sm:py-12" aria-label={data.title}>
+    <section className={`bg-white ${SECTION_Y}`} aria-label={data.title}>
       <Container>
         <div className="mb-8 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded bg-primary-600">

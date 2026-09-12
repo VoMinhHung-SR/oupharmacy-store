@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { Container } from '@/components/Container'
+import { PageShell } from '@/components/layout/PageShell'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeftIcon, CloseIcon, HeartIcon, ImagePlaceholderIcon, ShareIcon } from '@/components/icons'
@@ -131,13 +131,13 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <Container className="py-6">
-        <div className="mb-6 space-y-2">
+      <PageShell>
+        <div className="space-y-2">
           <SkeletonPulse className="h-7 w-48" />
           <SkeletonPulse className="h-4 w-32" />
         </div>
         <ProductGridSkeleton count={8} />
-      </Container>
+      </PageShell>
     )
   }
 
@@ -146,8 +146,8 @@ export default function WishlistPage() {
   }
 
   return (
-    <Container className="py-6">
-      <div className="space-y-6">
+    <PageShell innerClassName="sm:space-y-5">
+      <>
         {/* Header */}
         <div className="flex items-center justify-between">
           <Link 
@@ -338,7 +338,7 @@ export default function WishlistPage() {
             </div>
           </>
         )}
-      </div>
-    </Container>
+      </>
+    </PageShell>
   )
 }

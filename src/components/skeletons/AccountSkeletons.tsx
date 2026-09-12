@@ -1,4 +1,6 @@
+import { Container } from '@/components/Container'
 import { SkeletonPulse } from '@/components/skeletons/SkeletonPulse'
+import { PAGE_Y } from '@/lib/layout/pageLayout'
 
 /** Account hub menu grid while auth resolves. */
 export function AccountHubSkeleton() {
@@ -106,7 +108,7 @@ export function OrderDetailSkeleton() {
 export function FormPageSkeleton() {
   return (
     <div
-      className="mx-auto max-w-4xl space-y-6 px-4 py-8"
+      className="w-full space-y-4 py-3 sm:space-y-5 sm:py-4"
       aria-busy="true"
       aria-label="Đang tải biểu mẫu"
     >
@@ -130,29 +132,27 @@ export function FormPageSkeleton() {
 /** Over-limit category chooser. */
 export function OverLimitCategorySkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8" aria-busy="true">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SkeletonPulse className="mb-6 h-4 w-40 sm:w-56" />
-        <div className="mb-8 space-y-3">
-          <SkeletonPulse className="h-8 w-48 sm:h-10 sm:w-64" />
-          <SkeletonPulse className="h-4 w-72 max-w-full sm:w-96" />
-        </div>
-        <div className="mb-4">
-          <SkeletonPulse className="mb-6 h-7 w-44" />
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4"
-            >
-              <SkeletonPulse className="mb-3 h-12 w-12 rounded-lg" />
-              <SkeletonPulse className="mb-2 h-4 w-16" />
-              <SkeletonPulse className="h-3 w-12" />
-            </div>
-          ))}
-        </div>
+    <Container className={PAGE_Y} aria-busy="true">
+      <SkeletonPulse className="mb-6 h-4 w-40 sm:w-56" />
+      <div className="mb-8 space-y-3">
+        <SkeletonPulse className="h-8 w-48 sm:h-10 sm:w-64" />
+        <SkeletonPulse className="h-4 w-72 max-w-full sm:w-96" />
       </div>
-    </div>
+      <div className="mb-4">
+        <SkeletonPulse className="mb-6 h-7 w-44" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4"
+          >
+            <SkeletonPulse className="mb-3 h-12 w-12 rounded-lg" />
+            <SkeletonPulse className="mb-2 h-4 w-16" />
+            <SkeletonPulse className="h-3 w-12" />
+          </div>
+        ))}
+      </div>
+    </Container>
   )
 }

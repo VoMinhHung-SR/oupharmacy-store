@@ -22,18 +22,18 @@ import { usePreservedSearchFacets } from '@/lib/hooks/usePreservedSearchFacets'
 import { pickFacetSearchParams } from '@/lib/listing/facetSearchParams'
 import { getListingRequestUiFlags } from '@/lib/listing/getListingRequestUiFlags'
 import {
-  applyBrandCampaignDiscount,
+  scatterBrandCampaignDiscounts,
   parseBrandPromoParam,
   type BrandPageMeta,
 } from '@/lib/services/brandCampaigns'
 import { sortOptionToStoreSearchSort } from '@/lib/services/search'
 import {
   buildProductCardPayload,
-  getListProductKey,
   mergeUniqueProducts,
   type Product,
   type ProductFilters,
 } from '@/lib/services/products'
+import { PAGE_Y_SECTION } from '@/lib/layout/pageLayout'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 
@@ -108,7 +108,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
     dataUpdatedAt,
   })
 
-  /** Sidebar chips exclude locked page brand (always applied). */
+  /** Sidebar chip count excludes locked page brand (always applied). */
   const filtersForSidebar = useMemo(() => {
     const { brand: _brand, ...rest } = activeFilters
     return rest
@@ -133,8 +133,8 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
   const activeFacetCount = countActiveFacetFilters(filtersForSidebar)
 
   const handleFiltersChange = (next: ProductFilters) => {
-    const { category: _c, page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } =
-      next
+    const { page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } = next
+    // Keep category / attrs / etc.; always re-lock page brand.
     setActiveFilters({ ...rest, brand: meta.id })
     setPage(PAGINATION.DEFAULT_PAGE)
   }
@@ -145,8 +145,8 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#ededed]">
-      <Container className="space-y-5 py-4 sm:space-y-6 sm:py-6">
+    <div className="bg-[#ededed]">
+      <Container className={`space-y-5 sm:space-y-6 ${PAGE_Y_SECTION}`}>
         <nav className="text-sm text-gray-500" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
@@ -229,7 +229,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
           <CategoryListingSidebar
             facetFilters={facetFilters}
             filtersLoading={filtersLoading}
-            categoryFilters={filtersForSidebar}
+            categoryFilters={activeFilters}
             onFiltersChange={handleFiltersChange}
           />
 
@@ -242,7 +242,7 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
             onFiltersChange={handleFiltersChange}
           />
 
-          <main className="min-w-0 flex-1 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-inset ring-gray-200 sm:p-5">
+          <main className="min-w-0 flex-1">
             <ProductSortAndView
               sortOption={sortOption}
               onSortChange={handleSortChange}
@@ -283,13 +283,14 @@ export function BrandListingPage({ meta }: BrandListingPageProps) {
               </p>
             ) : (
               <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-                {accumulatedProducts.map((product) => {
-                  const card = applyBrandCampaignDiscount(
-                    buildProductCardPayload(product),
-                    discountPercent
-                  )
-                  return <ProductCard key={getListProductKey(product)} product={card} />
-                })}
+                {scatterBrandCampaignDiscounts(
+                  accumulatedProducts.map((product) => buildProductCardPayload(product)),
+                  discountPercent,
+                  meta.id,
+                  totalCount
+                ).map((card) => (
+                  <ProductCard key={card.id} product={card} />
+                ))}
               </div>
             )}
 

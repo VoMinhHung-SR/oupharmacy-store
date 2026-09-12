@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 
 export const Footer: React.FC = () => {
   return (
     <footer className="border-t border-gray-200 bg-white">
-      <Container className="py-10">
+      <Container className={SECTION_Y}>
         <div className="grid gap-6 text-sm text-gray-600 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <div className="font-semibold text-gray-800">Nhà thuốc OUPharmacy</div>

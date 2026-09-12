@@ -31,7 +31,7 @@ export default function OrderConfirmationPage() {
 
   if (!orderIdentifier) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
@@ -57,7 +57,7 @@ export default function OrderConfirmationPage() {
 
   if (isLoading) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <OrderDetailSkeleton />
       </Container>
@@ -66,7 +66,7 @@ export default function OrderConfirmationPage() {
 
   if (error || !order) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
@@ -128,7 +128,7 @@ export default function OrderConfirmationPage() {
   const formatVnd = (value?: number) => `${Math.round(Number(value ?? 0)).toLocaleString('vi-VN')}đ`
 
   return (
-    <Container className="space-y-6 py-6 sm:py-8">
+    <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },

@@ -7,6 +7,7 @@ import Button from '@/components/Button'
 import PromotionalBanners from '@/sections/PromotionalBanners'
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { setCampaignAttributionId } from '@/lib/utils/campaignAttribution'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 import { safeCampaignHref } from './campaignPlacementUtils'
 
 export interface CampaignPromoSlotsProps {
@@ -59,7 +60,7 @@ export const CampaignPromoSlots: React.FC<CampaignPromoSlotsProps> = ({ left, ri
   }
 
   return (
-    <section className="bg-gray-50 py-12">
+    <section className={`bg-gray-50 ${SECTION_Y}`}>
       <Container>
         <div className="grid gap-6 md:grid-cols-2">
           {left ? (

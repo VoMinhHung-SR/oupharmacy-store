@@ -92,6 +92,66 @@ export function applyBrandCampaignDiscount(
   }
 }
 
+/** Catalog small enough → every card can share the campaign ceiling %. */
+export const BRAND_CAMPAIGN_FULL_CATALOG_MAX = 4
+
+/** ~share of products that get a display campaign badge when catalog is large. */
+const BRAND_CAMPAIGN_INCLUSION_PCT = 40
+
+function hashSeed(input: string): number {
+  let h = 2166136261
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+/**
+ * "Giảm đến XX%" = campaign ceiling (top-1 / banner).
+ * Large catalogs: only a seeded subset gets a badge; one card always gets exactly XX%;
+ * others that qualify get a lower tier. Small catalogs (≤4): all get XX%.
+ */
+export function scatterBrandCampaignDiscounts(
+  cards: ProductCardPayload[],
+  maxDiscountPercent: number,
+  brandSeed: string,
+  catalogSize?: number
+): ProductCardPayload[] {
+  const maxPct = clampCampaignPercent(maxDiscountPercent)
+  if (!cards.length || maxPct <= 0) return cards
+
+  const size = catalogSize ?? cards.length
+  if (size <= BRAND_CAMPAIGN_FULL_CATALOG_MAX) {
+    return cards.map((card) => applyBrandCampaignDiscount(card, maxPct))
+  }
+
+  const lowerTiers = BRAND_CAMPAIGN_DISCOUNT_TIERS.filter((t) => t < maxPct)
+  const tierPool = lowerTiers.length > 0 ? lowerTiers : ([Math.max(10, maxPct - 5)] as const)
+
+  let champIdx = 0
+  let champScore = Number.POSITIVE_INFINITY
+  cards.forEach((card, index) => {
+    const score = hashSeed(`${brandSeed}:champ:${card.id}`)
+    if (score < champScore) {
+      champScore = score
+      champIdx = index
+    }
+  })
+
+  return cards.map((card, index) => {
+    if (index === champIdx) {
+      return applyBrandCampaignDiscount(card, maxPct)
+    }
+    const roll = hashSeed(`${brandSeed}:in:${card.id}`) % 100
+    if (roll >= BRAND_CAMPAIGN_INCLUSION_PCT) {
+      return card
+    }
+    const tier = tierPool[hashSeed(`${brandSeed}:pct:${card.id}`) % tierPool.length]
+    return applyBrandCampaignDiscount(card, tier)
+  })
+}
+
 export function brandPageHref(
   brandId: string | number,
   brandName: string,
@@ -281,13 +341,12 @@ export async function getBrandPageMetaSSG(options: {
   }
 }
 
-/** Build product cards with a fixed brand campaign % (search ?promo=). */
+/** Build product cards with scattered brand campaign % (ceiling = `discountPercent`). */
 export function buildBrandCampaignProductCards(
   products: Product[],
-  discountPercent: number
+  discountPercent: number,
+  brandSeed = 'brand'
 ): ProductCardPayload[] {
-  const pct = clampCampaignPercent(discountPercent)
-  return products.map((product) =>
-    applyBrandCampaignDiscount(buildProductCardPayload(product), pct)
-  )
+  const cards = products.map((product) => buildProductCardPayload(product))
+  return scatterBrandCampaignDiscounts(cards, discountPercent, brandSeed, products.length)
 }

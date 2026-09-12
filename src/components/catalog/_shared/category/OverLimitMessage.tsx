@@ -3,7 +3,9 @@ import React from 'react'
 import { SubcategoriesGrid } from './SubcategoriesGrid'
 import { Subcategory } from '@/lib/services/products'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
+import { Container } from '@/components/Container'
 import { OverLimitCategorySkeleton } from '@/components/skeletons'
+import { PAGE_Y } from '@/lib/layout/pageLayout'
 
 interface OverLimitMessageProps {
   categoryName: string
@@ -15,12 +17,10 @@ interface OverLimitMessageProps {
 
 export function OverLimitMessage({
   categoryName,
-  productCount,
   subcategories,
   categorySlug,
   loading = false,
 }: OverLimitMessageProps) {
-  // Build breadcrumbs from category slug
   const breadcrumbs: CrumbItem[] = [
     { label: 'Trang chủ', href: '/' },
     { label: categoryName, href: `/${categorySlug}` },
@@ -31,28 +31,19 @@ export function OverLimitMessage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <Breadcrumb items={breadcrumbs} className="mb-6" />
-        
-        {/* Category Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {categoryName}
-          </h1>
-          <p className="text-gray-600">
-            Vui lòng chọn danh mục con để xem sản phẩm cụ thể.
-          </p>
-        </div>
-        
-        {/* Subcategories Grid */}
-        <SubcategoriesGrid
-          subcategories={subcategories}
-          currentCategorySlug={categorySlug}
-          loading={false}
-        />
+    <Container className={PAGE_Y}>
+      <Breadcrumb items={breadcrumbs} className="mb-6" />
+
+      <div className="mb-8">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{categoryName}</h1>
+        <p className="text-gray-600">Vui lòng chọn danh mục con để xem sản phẩm cụ thể.</p>
       </div>
-    </div>
+
+      <SubcategoriesGrid
+        subcategories={subcategories}
+        currentCategorySlug={categorySlug}
+        loading={false}
+      />
+    </Container>
   )
 }

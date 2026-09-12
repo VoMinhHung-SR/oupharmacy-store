@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function DatThuocPage() {
   return (
     <div className="bg-slate-50">
-      <Container className="py-4 pb-8 sm:py-6 sm:pb-10">
+      <Container className="py-3 sm:py-4">
         <DatThuocWorkspace />
       </Container>
     </div>

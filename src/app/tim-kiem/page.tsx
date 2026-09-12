@@ -112,8 +112,7 @@ export default function SearchPage() {
   })
 
   const handleFiltersChange = (next: ProductFilters) => {
-    const { category: _c, page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } =
-      next
+    const { page: _p, page_size: _ps, ordering: _o, price_sort: _psort, ...rest } = next
     setActiveFilters(rest)
     setPage(PAGINATION.DEFAULT_PAGE)
   }
