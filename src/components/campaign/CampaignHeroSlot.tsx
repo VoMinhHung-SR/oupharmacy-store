@@ -5,8 +5,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Container from '@/components/Container'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import type { PlacementWinner } from '@/lib/services/campaign'
-import { setCampaignAttributionId } from '@/lib/utils/campaignAttribution'
 import { safeCampaignHref } from './campaignPlacementUtils'
+import { useCampaignCtaClick } from './useCampaignCtaClick'
 
 export interface CampaignHeroSlotProps {
   slides: PlacementWinner[]
@@ -62,6 +62,7 @@ function HeroSlideLink({
   style?: React.CSSProperties
   inert?: boolean
 }) {
+  const onCtaClick = useCampaignCtaClick()
   const href = safeCampaignHref(placement.cta_url)
   const alt = placement.image_alt?.trim() || placement.title || 'Campaign banner'
   const inner = <HeroSlideMedia placement={placement} />
@@ -81,7 +82,7 @@ function HeroSlideLink({
       aria-hidden={inert || undefined}
       className={`block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${className || ''}`}
       style={style}
-      onClick={() => setCampaignAttributionId(placement.campaign_id)}
+      onClick={(e) => onCtaClick(e, placement.campaign_id, href)}
       aria-label={alt}
     >
       {inner}

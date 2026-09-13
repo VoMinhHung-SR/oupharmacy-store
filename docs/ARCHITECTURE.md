@@ -23,9 +23,9 @@ flowchart LR
 
 - **Middleware** (`src/middleware.ts`): redirect, matcher cho `/don-hang`, `/tai-khoan`; không còn ép redirect login server-side toàn phần — modal login phía client.
 - **Trang** (`src/app/...`): compose sections/components; data qua hooks hoặc gọi service trực tiếp / React Query (tuỳ chỗ).
-- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI.
+- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI, **ConsultUi** (FAB chat hub).
 - **Services** (`src/lib/services/`): biến đổi request/response, URL từ `NEXT_PUBLIC_*`.
-
+- **Consultation hub (P1):** `ConsultChatbox` FAB popup + deterministic FSM — menu 1/2/3. CTA tư vấn gọi `useConsultUi().open()` (không page riêng). Deep-link tùy chọn `/?consult=open`.
 ## Hai “cổng” HTTP chính
 
 | Cổng | File / pattern | Env |

@@ -36,7 +36,7 @@
         "title": "Tư vấn trực tuyến cùng Dược sĩ chuyên sâu 24/7",
         "subtitle": "Giải đáp mọi thắc mắc về liều dùng, triệu chứng bệnh và đơn thuốc an toàn.",
         "cta_label": "Kết nối ngay",
-        "cta_url": "/tu-van-duoc-si",
+        "cta_url": "/?consult=open",
         "image_desktop_url": "/mocks/home-cms/secondary-1.png",
         "image_mobile_url": "/mocks/home-cms/secondary-1.png",
         "image_alt": "Tư vấn dược sĩ trực tuyến",

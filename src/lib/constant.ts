@@ -121,7 +121,8 @@ export const FREE_SHIPPING_THRESHOLD = 300000 as const
 export const STORE_SUPPORT = {
   HOTLINE_DISPLAY: '+84 123 456 789',
   HOTLINE_TEL: '+84123456789',
-  CONSULT_HREF: '/tu-van-duoc-si',
+  /** Deep-link fallback (?consult=open). Prefer useConsultUi().open() in client CTAs. */
+  CONSULT_HREF: '/?consult=open',
   /** Tạm thời tới liên hệ cho đến khi /tim-nha-thuoc có bản đồ. */
   PHARMACY_FINDER_HREF: '/lien-he',
   CONTACT_HREF: '/lien-he',
@@ -148,12 +149,14 @@ export type HomeQuickLink = {
   title: string
   href: string
   comingSoon?: boolean
+  /** Open ConsultChatbox popup instead of navigating. */
+  openConsult?: boolean
 }
 
 /** Trang chủ — lối tắt dịch vụ. */
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { iconId: 'pill-plus', title: 'Cần mua thuốc', href: '/dat-thuoc' },
-  { iconId: 'user', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
+  { iconId: 'user', title: 'Tư vấn với Dược Sỹ', href: STORE_SUPPORT.CONSULT_HREF, openConsult: true },
   { iconId: 'file-text', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
   { iconId: 'map-pin', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
   { iconId: 'vaccine', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },

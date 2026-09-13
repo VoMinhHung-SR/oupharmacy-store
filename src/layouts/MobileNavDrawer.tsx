@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { CloseIcon, ChevronDownIcon } from '@/components/icons'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
+import { useConsultUi } from '@/contexts/ConsultUiContext'
 import { useMobileNavUi, useNavCategories } from '@/layouts/nav/NavProviders'
 import type { NavigationCategory } from '@/layouts/NavigationBar/types'
 
@@ -108,6 +109,7 @@ export function MobileNavDrawer() {
   const categories = useNavCategories()
   const { isAuthenticated, user } = useAuth()
   const { openModal } = useLoginModal()
+  const { open: openConsult } = useConsultUi()
   const pathname = usePathname()
   const titleId = useId()
   const [mounted, setMounted] = useState(false)
@@ -222,13 +224,16 @@ export function MobileNavDrawer() {
 
         <div className="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-3">
           <p className="text-xs text-gray-500">Trải nghiệm tốt hơn khi thêm lối tắt ra màn hình chính.</p>
-          <Link
-            href="/tu-van-duoc-si"
-            onClick={closeNav}
+          <button
+            type="button"
+            onClick={() => {
+              closeNav()
+              openConsult()
+            }}
             className="flex w-full items-center justify-center rounded-lg bg-primary-50 px-3 py-2.5 text-sm font-semibold text-primary-700"
           >
             Tư vấn dược sĩ
-          </Link>
+          </button>
         </div>
       </aside>
     </div>,

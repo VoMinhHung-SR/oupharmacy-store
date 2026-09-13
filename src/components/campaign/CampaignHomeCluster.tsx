@@ -7,9 +7,9 @@ import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
 import HeroBanner from '@/sections/HeroBanner'
 import PromotionalBanners from '@/sections/PromotionalBanners'
 import type { PlacementWinner } from '@/lib/services/campaign'
-import { setCampaignAttributionId } from '@/lib/utils/campaignAttribution'
 import { safeCampaignHref } from './campaignPlacementUtils'
 import CampaignHeroSlot from './CampaignHeroSlot'
+import { useCampaignCtaClick } from './useCampaignCtaClick'
 
 const THEME_FADE_MS = 500
 
@@ -32,6 +32,7 @@ const SECONDARY_ASPECT = 'aspect-[13/4]'
 const NOTICE_ASPECT = 'aspect-[17/5]'
 
 function SecondarySlide({ placement }: { placement: PlacementWinner }) {
+  const onCtaClick = useCampaignCtaClick()
   const href = safeCampaignHref(placement.cta_url)
   const ctaLabel = placement.cta_label?.trim() || 'Mua ngay'
   const imageSrc =
@@ -66,7 +67,7 @@ function SecondarySlide({ placement }: { placement: PlacementWinner }) {
     <Link
       href={href}
       className="block h-full w-full"
-      onClick={() => setCampaignAttributionId(placement.campaign_id)}
+      onClick={(e) => onCtaClick(e, placement.campaign_id, href)}
     >
       {body}
     </Link>
@@ -178,6 +179,7 @@ function NoticeBanner({
   placement: PlacementWinner
   tone: 'primary' | 'muted'
 }) {
+  const onCtaClick = useCampaignCtaClick()
   const href = safeCampaignHref(placement.cta_url)
   const ctaLabel = placement.cta_label?.trim() || 'Xem ngay'
   const imageSrc =
@@ -229,7 +231,7 @@ function NoticeBanner({
     <Link
       href={href}
       className="flex flex-1"
-      onClick={() => setCampaignAttributionId(placement.campaign_id)}
+      onClick={(e) => onCtaClick(e, placement.campaign_id, href)}
     >
       {body}
     </Link>

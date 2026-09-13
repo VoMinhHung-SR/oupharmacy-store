@@ -78,6 +78,12 @@ export const BoltIcon = createOutlineIcon('bolt', ['M13 3v7h6l-8 11v-7H5z'], { c
 
 export const FileTextIcon = createOutlineIcon('file-text', ['M14 3v4a1 1 0 0 0 1 1h4', 'M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2M9 9h1m-1 4h6m-6 4h6'], { className: 'w-6 h-6', strokeWidth: 2 })
 
+export const MessageCircleIcon = createOutlineIcon(
+  'message-circle',
+  ['M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20', 'M8 9h8', 'M8 13h6'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
 export function SpinnerIcon({
   className = 'w-5 h-5',
   size,

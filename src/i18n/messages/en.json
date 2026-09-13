@@ -329,6 +329,45 @@
       "warehouseOutOfStock": "This item is out of stock in the warehouse. Cabinet quantity is unchanged.",
       "cartNotReady": "Cart is still loading. Please try again."
     }
+  },
+  "consultation": {
+    "fabOpenAria": "Open consultation chat",
+    "fabCloseAria": "Close consultation chat",
+    "panelTitle": "OUPharmacy Consult",
+    "panelSubtitle": "Choose what you need",
+    "welcome": "Hi! How can we help?",
+    "disclaimer": "This chat does not replace medical care. Do not take medicines based on suggestions alone without professional guidance.",
+    "backToMenu": "Back to menu",
+    "menu": {
+      "aria": "Choose consultation type",
+      "prompt": "Pick one of the options below:",
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "desc": "Live chat with a pharmacist"
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "desc": "Guided clinic appointment booking"
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "desc": "Product suggestions and add to cart"
+      }
+    },
+    "branch": {
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "stub": "Live pharmacist chat is coming next. You can return to the menu."
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "stub": "Booking form comes in a later step. You can return to the menu."
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "stub": "Product search comes in a later step. You can return to the menu."
+      }
+    }
   }
 }
 

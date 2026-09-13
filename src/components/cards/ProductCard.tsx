@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT, STORE_SUPPORT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
+import { useConsultUi } from '@/contexts/ConsultUiContext'
 import { toastWarning } from '@/lib/utils/toast'
 import { CardBadge } from '@/components/badges/CardBadge'
 import {
@@ -66,6 +67,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
+  const { open: openConsult } = useConsultUi()
   const unitOptions = useMemo(() => product.unit_options || [], [product.unit_options])
   const defaultUnitId = useMemo(() => {
     if (!unitOptions.length) return product.product_variant_unit_id
@@ -173,7 +175,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleConsult = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.location.href = STORE_SUPPORT.CONSULT_HREF
+    openConsult()
   }
 
   const handleFindPharmacy = (e: React.MouseEvent) => {
