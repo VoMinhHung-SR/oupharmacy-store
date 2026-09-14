@@ -357,7 +357,14 @@
     "branch": {
       "pharmacist": {
         "title": "Pharmacist consult",
-        "stub": "Live pharmacist chat is coming next. You can return to the menu."
+        "stub": "Live pharmacist chat is coming next. You can return to the menu.",
+        "connecting": "Starting consultation…",
+        "waiting": "Waiting for a pharmacist",
+        "connected": "Connected with a pharmacist",
+        "empty": "Describe what you need. A pharmacist will reply soon.",
+        "inputPlaceholder": "Type a message…",
+        "send": "Send",
+        "error": "Could not start consultation. Please try again."
       },
       "doctor": {
         "title": "Book a doctor",

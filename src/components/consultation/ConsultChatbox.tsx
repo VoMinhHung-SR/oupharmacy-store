@@ -8,6 +8,7 @@ import { MessageCircleIcon, XIcon } from '@/components/icons'
 import { useConsultUi } from '@/contexts/ConsultUiContext'
 import { ConsultMessageList, type ConsultMessage } from './ConsultMessageList'
 import { IntentMenuBubble } from './IntentMenuBubble'
+import { PharmacistThreadPanel } from './PharmacistThreadPanel'
 import {
   useConsultStateMachine,
   type ConsultStep,
@@ -20,12 +21,11 @@ function BranchStub({
   step,
   onBack,
 }: {
-  step: Exclude<ConsultStep, 'idle' | 'menu'>
+  step: Extract<ConsultStep, 'doctor_guide' | 'medicine_query'>
   onBack: () => void
 }) {
   const t = useTranslations('consultation')
-  const titleKey =
-    step === 'pharmacist' ? 'branch.pharmacist' : step === 'doctor_guide' ? 'branch.doctor' : 'branch.medicine'
+  const titleKey = step === 'doctor_guide' ? 'branch.doctor' : 'branch.medicine'
 
   return (
     <div className="flex flex-col gap-3">
@@ -74,11 +74,13 @@ export function ConsultChatbox() {
         role: 'assistant',
         body: <IntentMenuBubble onSelect={selectIntent} />,
       })
-    } else if (
-      activeStep === 'pharmacist' ||
-      activeStep === 'doctor_guide' ||
-      activeStep === 'medicine_query'
-    ) {
+    } else if (activeStep === 'pharmacist') {
+      list.push({
+        id: 'branch-pharmacist',
+        role: 'assistant',
+        body: <PharmacistThreadPanel onBack={backToMenu} />,
+      })
+    } else if (activeStep === 'doctor_guide' || activeStep === 'medicine_query') {
       list.push({
         id: `branch-${activeStep}`,
         role: 'assistant',

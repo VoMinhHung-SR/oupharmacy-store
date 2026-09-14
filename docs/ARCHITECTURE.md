@@ -25,7 +25,7 @@ flowchart LR
 - **Trang** (`src/app/...`): compose sections/components; data qua hooks hoặc gọi service trực tiếp / React Query (tuỳ chỗ).
 - **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI, **ConsultUi** (FAB chat hub).
 - **Services** (`src/lib/services/`): biến đổi request/response, URL từ `NEXT_PUBLIC_*`.
-- **Consultation hub (P1):** `ConsultChatbox` FAB popup + deterministic FSM — menu 1/2/3. CTA tư vấn gọi `useConsultUi().open()` (không page riêng). Deep-link tùy chọn `/?consult=open`.
+- **Consultation hub (P1–P2):** `ConsultChatbox` FAB + FSM menu; pharmacist branch → `ConsultationSession` API + Firestore (`${APP_ENV}_messages`). Clinic FE: `ROLE_PHARMACIST` queue/claim/complete trong SidebarInbox. CTA mở popup (`useConsultUi`). Deep-link `/?consult=open`. Collections share `NEXT_PUBLIC_APP_ENV` ≡ `VITE_APP_ENV`.
 ## Hai “cổng” HTTP chính
 
 | Cổng | File / pattern | Env |

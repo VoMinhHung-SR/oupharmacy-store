@@ -357,7 +357,14 @@
     "branch": {
       "pharmacist": {
         "title": "Tư vấn dược sĩ",
-        "stub": "Sắp kết nối chat với dược sĩ. Bạn có thể quay lại menu để chọn nhu cầu khác."
+        "stub": "Sắp kết nối chat với dược sĩ. Bạn có thể quay lại menu để chọn nhu cầu khác.",
+        "connecting": "Đang tạo phiên tư vấn…",
+        "waiting": "Đang chờ dược sĩ nhận tư vấn",
+        "connected": "Đã kết nối với dược sĩ",
+        "empty": "Hãy mô tả nhu cầu của bạn. Dược sĩ sẽ phản hồi sớm.",
+        "inputPlaceholder": "Nhập tin nhắn…",
+        "send": "Gửi",
+        "error": "Không kết nối được tư vấn. Vui lòng thử lại."
       },
       "doctor": {
         "title": "Đặt lịch bác sĩ",
