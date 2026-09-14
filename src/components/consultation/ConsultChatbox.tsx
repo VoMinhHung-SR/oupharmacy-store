@@ -7,6 +7,7 @@ import { Button } from '@/components/Button'
 import { MessageCircleIcon, XIcon } from '@/components/icons'
 import { useConsultUi } from '@/contexts/ConsultUiContext'
 import { ConsultMessageList, type ConsultMessage } from './ConsultMessageList'
+import { BookingActionBubble } from './BookingActionBubble'
 import { IntentMenuBubble } from './IntentMenuBubble'
 import { PharmacistThreadPanel } from './PharmacistThreadPanel'
 import {
@@ -17,20 +18,13 @@ import {
 const OPEN_QUERY = 'consult'
 const OPEN_VALUE = 'open'
 
-function BranchStub({
-  step,
-  onBack,
-}: {
-  step: Extract<ConsultStep, 'doctor_guide' | 'medicine_query'>
-  onBack: () => void
-}) {
+function MedicineBranchStub({ onBack }: { onBack: () => void }) {
   const t = useTranslations('consultation')
-  const titleKey = step === 'doctor_guide' ? 'branch.doctor' : 'branch.medicine'
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm font-semibold text-slate-900">{t(`${titleKey}.title`)}</p>
-      <p className="text-sm text-slate-600">{t(`${titleKey}.stub`)}</p>
+      <p className="text-sm font-semibold text-slate-900">{t('branch.medicine.title')}</p>
+      <p className="text-sm text-slate-600">{t('branch.medicine.stub')}</p>
       <Button type="button" variant="outline" size="sm" onClick={onBack} className="self-start">
         {t('backToMenu')}
       </Button>
@@ -80,11 +74,17 @@ export function ConsultChatbox() {
         role: 'assistant',
         body: <PharmacistThreadPanel onBack={backToMenu} />,
       })
-    } else if (activeStep === 'doctor_guide' || activeStep === 'medicine_query') {
+    } else if (activeStep === 'doctor_guide') {
       list.push({
-        id: `branch-${activeStep}`,
+        id: 'branch-doctor',
         role: 'assistant',
-        body: <BranchStub step={activeStep} onBack={backToMenu} />,
+        body: <BookingActionBubble onBack={backToMenu} />,
+      })
+    } else if (activeStep === 'medicine_query') {
+      list.push({
+        id: 'branch-medicine',
+        role: 'assistant',
+        body: <MedicineBranchStub onBack={backToMenu} />,
       })
     }
     return list

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import {
@@ -28,11 +28,9 @@ export function usePharmacistThread(enabled: boolean) {
   const [messages, setMessages] = useState<ConsultFirestoreMessage[]>([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
-  const startedRef = useRef(false)
 
   useEffect(() => {
     if (!enabled) {
-      startedRef.current = false
       setStatus('idle')
       setError(null)
       setSession(null)
@@ -44,17 +42,19 @@ export function usePharmacistThread(enabled: boolean) {
     if (authLoading) return
     if (!isAuthenticated || !user) {
       openModal()
+      setStatus('idle')
       return
     }
-    if (startedRef.current) return
-    startedRef.current = true
 
     let cancelled = false
+    setStatus('starting')
+    setError(null)
+
     ;(async () => {
-      setStatus('starting')
-      setError(null)
       try {
         await upsertConsultUserProfile(user)
+        if (cancelled) return
+
         const created = await createConsultationSession({
           need_text: '',
           context_json: { source: 'consult_chatbox' },
@@ -63,22 +63,25 @@ export function usePharmacistThread(enabled: boolean) {
           throw new Error(created.error || 'Không tạo được phiên tư vấn.')
         }
         if (cancelled) return
+
         const sessionRow = created.data
         const fsId = await createPharmacistConversation({
           userId: user.id,
           sessionId: sessionRow.id,
           needText: sessionRow.need_text,
         })
+        if (cancelled) return
+
         const patched = await patchConsultationSession(sessionRow.id, {
           firestore_conversation_id: fsId,
         })
         if (cancelled) return
+
         setSession(patched.data || { ...sessionRow, firestore_conversation_id: fsId })
         setConversationId(fsId)
         setStatus('ready')
       } catch (err) {
         if (cancelled) return
-        startedRef.current = false
         setStatus('error')
         setError(err instanceof Error ? err.message : 'Không kết nối được tư vấn dược sĩ.')
       }
@@ -115,6 +118,10 @@ export function usePharmacistThread(enabled: boolean) {
     }
   }, [user, conversationId, draft, sending])
 
+  const waitingForPharmacist =
+    status === 'ready' &&
+    (session?.status === 'WAITING_FOR_PROFESSIONAL' || session?.pharmacist_id == null)
+
   return {
     status,
     error,
@@ -126,8 +133,6 @@ export function usePharmacistThread(enabled: boolean) {
     send,
     sending,
     userId: user?.id ?? null,
-    waitingForPharmacist:
-      session?.status === 'WAITING_FOR_PROFESSIONAL' ||
-      (session != null && session.pharmacist_id == null),
+    waitingForPharmacist,
   }
 }

@@ -29,7 +29,13 @@ export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
         <div>
           <p className="text-sm font-semibold text-slate-900">{t('branch.pharmacist.title')}</p>
           <p className="text-xs text-slate-500">
-            {waitingForPharmacist ? t('branch.pharmacist.waiting') : t('branch.pharmacist.connected')}
+            {status === 'starting' || status === 'idle'
+              ? t('branch.pharmacist.connecting')
+              : status === 'error'
+                ? t('branch.pharmacist.error')
+                : waitingForPharmacist
+                  ? t('branch.pharmacist.waiting')
+                  : t('branch.pharmacist.connected')}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={onBack}>
@@ -38,7 +44,7 @@ export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
       </div>
 
       {status === 'starting' || status === 'idle' ? (
-        <p className="text-sm text-slate-600">{t('branch.pharmacist.connecting')}</p>
+        <p className="text-sm text-slate-600">{t('branch.pharmacist.connectingHint')}</p>
       ) : null}
 
       {status === 'error' ? (
