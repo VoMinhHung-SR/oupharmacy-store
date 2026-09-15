@@ -77,19 +77,27 @@ export function usePharmacistThread(enabled: boolean, seed: PharmacistSeed | nul
         if (cancelled) return
 
         const sessionRow = created.data
-        const fsId = await createPharmacistConversation({
-          userId: user.id,
-          sessionId: sessionRow.id,
-          needText: sessionRow.need_text || seedNeedText,
-        })
+        const existingFsId = (sessionRow.firestore_conversation_id || '').trim()
+        let fsId = existingFsId
+        if (!fsId) {
+          fsId = await createPharmacistConversation({
+            userId: user.id,
+            sessionId: sessionRow.id,
+            needText: sessionRow.need_text || seedNeedText,
+          })
+          if (cancelled) return
+
+          const patched = await patchConsultationSession(sessionRow.id, {
+            firestore_conversation_id: fsId,
+          })
+          if (cancelled) return
+
+          setSession(patched.data || { ...sessionRow, firestore_conversation_id: fsId })
+        } else {
+          setSession(sessionRow)
+        }
         if (cancelled) return
 
-        const patched = await patchConsultationSession(sessionRow.id, {
-          firestore_conversation_id: fsId,
-        })
-        if (cancelled) return
-
-        setSession(patched.data || { ...sessionRow, firestore_conversation_id: fsId })
         setConversationId(fsId)
         setStatus('ready')
 
