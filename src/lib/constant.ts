@@ -156,7 +156,7 @@ export type HomeQuickLink = {
 /** Trang chủ — lối tắt dịch vụ. */
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { iconId: 'pill-plus', title: 'Cần mua thuốc', href: '/dat-thuoc' },
-  { iconId: 'user', title: 'Tư vấn với Dược Sỹ', href: STORE_SUPPORT.CONSULT_HREF, openConsult: true },
+  { iconId: 'user', title: 'Tư vấn với Dược Sĩ', href: STORE_SUPPORT.CONSULT_HREF, openConsult: true },
   { iconId: 'file-text', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
   { iconId: 'map-pin', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
   { iconId: 'vaccine', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },

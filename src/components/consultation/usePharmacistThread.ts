@@ -15,10 +15,11 @@ import {
   upsertConsultUserProfile,
   type ConsultFirestoreMessage,
 } from '@/lib/consultation/firestore'
+import type { PharmacistSeed } from './useConsultStateMachine'
 
 type ThreadStatus = 'idle' | 'starting' | 'ready' | 'error'
 
-export function usePharmacistThread(enabled: boolean) {
+export function usePharmacistThread(enabled: boolean, seed: PharmacistSeed | null = null) {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { openModal } = useLoginModal()
   const [status, setStatus] = useState<ThreadStatus>('idle')
@@ -28,6 +29,12 @@ export function usePharmacistThread(enabled: boolean) {
   const [messages, setMessages] = useState<ConsultFirestoreMessage[]>([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
+
+  const seedNeedText = seed?.need_text?.trim() || ''
+  const seedSource =
+    typeof seed?.context_json?.source === 'string'
+      ? seed.context_json.source
+      : 'consult_chatbox'
 
   useEffect(() => {
     if (!enabled) {
@@ -55,9 +62,14 @@ export function usePharmacistThread(enabled: boolean) {
         await upsertConsultUserProfile(user)
         if (cancelled) return
 
+        const context_json: Record<string, unknown> = {
+          source: seedSource,
+          ...(seed?.context_json || {}),
+        }
+
         const created = await createConsultationSession({
-          need_text: '',
-          context_json: { source: 'consult_chatbox' },
+          need_text: seedNeedText,
+          context_json,
         })
         if (created.error || !created.data) {
           throw new Error(created.error || 'Không tạo được phiên tư vấn.')
@@ -68,7 +80,7 @@ export function usePharmacistThread(enabled: boolean) {
         const fsId = await createPharmacistConversation({
           userId: user.id,
           sessionId: sessionRow.id,
-          needText: sessionRow.need_text,
+          needText: sessionRow.need_text || seedNeedText,
         })
         if (cancelled) return
 
@@ -80,6 +92,18 @@ export function usePharmacistThread(enabled: boolean) {
         setSession(patched.data || { ...sessionRow, firestore_conversation_id: fsId })
         setConversationId(fsId)
         setStatus('ready')
+
+        if (seedNeedText) {
+          try {
+            await sendConsultMessage({
+              conversationId: fsId,
+              userId: user.id,
+              text: seedNeedText,
+            })
+          } catch {
+            // Session is usable even if seed message fails.
+          }
+        }
       } catch (err) {
         if (cancelled) return
         setStatus('error')
@@ -90,7 +114,9 @@ export function usePharmacistThread(enabled: boolean) {
     return () => {
       cancelled = true
     }
-  }, [enabled, authLoading, isAuthenticated, user, openModal])
+    // Seed fields only — avoid recreating when parent passes a new object identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seedNeedText/seedSource capture escalate payload
+  }, [enabled, authLoading, isAuthenticated, user, openModal, seedNeedText, seedSource])
 
   useEffect(() => {
     if (!conversationId || !enabled) return

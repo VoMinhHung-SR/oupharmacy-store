@@ -17,9 +17,11 @@ import {
   type BookingPatient,
   type BookingSlotOption,
 } from '@/lib/services/booking'
+import { ConsultBackIconButton } from './ConsultIconButtons'
 
 type BookingActionBubbleProps = {
   onBack: () => void
+  onLoadingChange?: (loading: boolean, label?: string) => void
 }
 
 type Phase = 'form' | 'submitting' | 'success' | 'error'
@@ -37,7 +39,7 @@ function todayIsoDate(): string {
   return `${y}-${m}-${day}`
 }
 
-export function BookingActionBubble({ onBack }: BookingActionBubbleProps) {
+export function BookingActionBubble({ onBack, onLoadingChange }: BookingActionBubbleProps) {
   const t = useTranslations('consultation.branch.doctor')
   const tRoot = useTranslations('consultation')
   const { user, isAuthenticated, loading: authLoading } = useAuth()
@@ -52,6 +54,17 @@ export function BookingActionBubble({ onBack }: BookingActionBubbleProps) {
   const [slots, setSlots] = useState<BookingSlotOption[]>([])
   const [loadingMeta, setLoadingMeta] = useState(false)
   const [loadingSlots, setLoadingSlots] = useState(false)
+
+  useEffect(() => {
+    if (authLoading || loadingMeta) {
+      onLoadingChange?.(true, tRoot('connectingWithDoctor'))
+    } else if (phase === 'submitting') {
+      onLoadingChange?.(true, t('submitting'))
+    } else {
+      onLoadingChange?.(false)
+    }
+    return () => onLoadingChange?.(false)
+  }, [authLoading, loadingMeta, phase, onLoadingChange, t, tRoot])
 
   const [description, setDescription] = useState('')
   const [doctorUserId, setDoctorUserId] = useState<number | ''>('')
@@ -201,17 +214,15 @@ export function BookingActionBubble({ onBack }: BookingActionBubbleProps) {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-slate-900">{t('title')}</p>
-        <p className="text-sm text-slate-600">{t('loginRequired')}</p>
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" size="sm" onClick={() => openModal()}>
-            {t('loginCta')}
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={onBack}>
-            {tRoot('backToMenu')}
-          </Button>
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
+          <ConsultBackIconButton onClick={onBack} />
         </div>
+        <p className="text-sm leading-snug text-slate-600">{t('loginRequired')}</p>
+        <Button type="button" size="sm" onClick={() => openModal()} className="self-start">
+          {t('loginCta')}
+        </Button>
         <a
           href={bookingFallbackUrl}
           target="_blank"
@@ -226,28 +237,26 @@ export function BookingActionBubble({ onBack }: BookingActionBubbleProps) {
 
   if (phase === 'success') {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-slate-900">{t('title')}</p>
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
+          <ConsultBackIconButton onClick={onBack} />
+        </div>
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-sm leading-snug text-emerald-900">
           {examId ? t('successWithId', { id: examId }) : t('success')}
         </p>
-        <Button type="button" variant="outline" size="sm" onClick={onBack} className="self-start">
-          {tRoot('backToMenu')}
-        </Button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{t('title')}</p>
-          <p className="text-xs text-slate-500">{t('hint')}</p>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
+          <p className="mt-0.5 text-xs leading-snug text-slate-500">{t('hint')}</p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={onBack}>
-          {tRoot('backToMenu')}
-        </Button>
+        <ConsultBackIconButton onClick={onBack} />
       </div>
 
       {(phase === 'error' || error) && (

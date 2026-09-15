@@ -1,16 +1,24 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { Button } from '@/components/Button'
+import { ConsultBackIconButton, ConsultSendIconButton } from './ConsultIconButtons'
 import { usePharmacistThread } from './usePharmacistThread'
+import type { PharmacistSeed } from './useConsultStateMachine'
 
 type PharmacistThreadPanelProps = {
   onBack: () => void
+  seed?: PharmacistSeed | null
+  onLoadingChange?: (loading: boolean, label?: string) => void
 }
 
-export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
+export function PharmacistThreadPanel({
+  onBack,
+  seed = null,
+  onLoadingChange,
+}: PharmacistThreadPanelProps) {
   const t = useTranslations('consultation')
+  const threadScrollRef = useRef<HTMLDivElement>(null)
   const {
     status,
     error,
@@ -21,51 +29,91 @@ export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
     sending,
     userId,
     waitingForPharmacist,
-  } = usePharmacistThread(true)
+  } = usePharmacistThread(true, seed)
+
+  useEffect(() => {
+    if (status === 'starting' || status === 'idle') {
+      onLoadingChange?.(true, t('connectingWithPharmacist'))
+    } else if (sending) {
+      onLoadingChange?.(true, t('typing'))
+    } else {
+      onLoadingChange?.(false)
+    }
+    return () => onLoadingChange?.(false)
+  }, [status, sending, onLoadingChange, t])
+
+  useEffect(() => {
+    if (status !== 'ready') return
+    const el = threadScrollRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, [messages, status, sending])
+
+  if (status === 'starting' || status === 'idle') {
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 flex-1 text-xs leading-snug text-slate-500">
+          {t('branch.pharmacist.connectingHint')}
+        </p>
+        <ConsultBackIconButton onClick={onBack} />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex min-h-[280px] flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{t('branch.pharmacist.title')}</p>
-          <p className="text-xs text-slate-500">
-            {status === 'starting' || status === 'idle'
-              ? t('branch.pharmacist.connecting')
-              : status === 'error'
-                ? t('branch.pharmacist.error')
-                : waitingForPharmacist
-                  ? t('branch.pharmacist.waiting')
-                  : t('branch.pharmacist.connected')}
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-snug text-slate-900">
+            {t('branch.pharmacist.title')}
+          </p>
+          <p className="mt-0.5 text-xs leading-snug text-slate-500">
+            {status === 'error'
+              ? t('branch.pharmacist.error')
+              : waitingForPharmacist
+                ? t('branch.pharmacist.waiting')
+                : t('branch.pharmacist.connected')}
           </p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={onBack}>
-          {t('backToMenu')}
-        </Button>
+        <ConsultBackIconButton onClick={onBack} />
       </div>
 
-      {status === 'starting' || status === 'idle' ? (
-        <p className="text-sm text-slate-600">{t('branch.pharmacist.connectingHint')}</p>
-      ) : null}
-
       {status === 'error' ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-2 text-sm leading-snug text-red-800">
           {error || t('branch.pharmacist.error')}
         </p>
       ) : null}
 
       {status === 'ready' ? (
         <>
-          <div className="flex max-h-56 min-h-[140px] flex-col gap-2 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2">
+          <div
+            ref={threadScrollRef}
+            className="flex max-h-52 min-h-[120px] flex-col gap-2 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 p-2"
+          >
             {messages.length === 0 ? (
-              <p className="px-1 py-2 text-xs text-slate-500">{t('branch.pharmacist.empty')}</p>
+              <p className="px-1 py-1.5 text-xs leading-snug text-slate-500">
+                {t('branch.pharmacist.empty')}
+              </p>
             ) : (
               messages.map((msg) => {
                 const mine = userId != null && msg.user === userId
                 return (
-                  <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col gap-0.5 ${mine ? 'items-end' : 'items-start'}`}
+                  >
+                    <p
+                      className={`px-0.5 text-[10px] font-medium uppercase tracking-wide ${
+                        mine ? 'text-primary-600' : 'text-slate-500'
+                      }`}
+                    >
+                      {mine ? t('roleUser') : t('rolePharmacist')}
+                    </p>
                     <div
-                      className={`max-w-[85%] rounded-2xl px-3 py-1.5 text-sm ${
-                        mine ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-800'
+                      className={`max-w-[85%] rounded-2xl px-2.5 py-1.5 text-sm leading-snug shadow-sm ${
+                        mine
+                          ? 'rounded-br-md bg-primary-600 text-white'
+                          : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
                       }`}
                     >
                       {msg.text}
@@ -77,7 +125,7 @@ export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
           </div>
 
           <form
-            className="flex gap-2"
+            className="flex items-center gap-2"
             onSubmit={(e) => {
               e.preventDefault()
               void send()
@@ -88,12 +136,10 @@ export function PharmacistThreadPanel({ onBack }: PharmacistThreadPanelProps) {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={t('branch.pharmacist.inputPlaceholder')}
-              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm leading-snug focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               disabled={sending}
             />
-            <Button type="submit" size="sm" disabled={sending || !draft.trim()}>
-              {t('branch.pharmacist.send')}
-            </Button>
+            <ConsultSendIconButton disabled={!draft.trim()} loading={sending} />
           </form>
         </>
       ) : null}

@@ -62,7 +62,12 @@ export const MenuIcon = createOutlineIcon('menu-2', ['M4 6h16M4 12h16M4 18h16'],
 
 export const FilterIcon = createOutlineIcon('filter', ['M4 4h16v2.172a2 2 0 0 1-.586 1.414L15 12v7l-6 2v-8.5L4.52 7.572A2 2 0 0 1 4 6.227z'], { className: 'w-6 h-6', strokeWidth: 2 })
 
-export const ArrowLeftIcon = createOutlineIcon('arrow-left', ['M5 12h14M5 12l6 6m-6-6l6-6'], { className: 'w-6 h-6', strokeWidth: 2 })
+/** Tabler: arrow-left — https://icon-sets.iconify.design/tabler/arrow-left/ */
+export const ArrowLeftIcon = createOutlineIcon(
+  'arrow-left',
+  ['M5 12h14M5 12l6 6m-6-6l6-6'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
 
 export const InfoIcon = createOutlineIcon('info-circle', ['M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-3h.01', 'M11 12h1v4h1'], { className: 'w-6 h-6', strokeWidth: 2 })
 
@@ -82,6 +87,13 @@ export const MessageCircleIcon = createOutlineIcon(
   'message-circle',
   ['M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20', 'M8 9h8', 'M8 13h6'],
   { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: send — https://icon-sets.iconify.design/tabler/send/ */
+export const SendIcon = createOutlineIcon(
+  'send',
+  ['M10 14L21 3m0 0l-6.5 18a.55.55 0 0 1-1 0L10 14l-7-3.5a.55.55 0 0 1 0-1z'],
+  { className: 'w-5 h-5', strokeWidth: 2 },
 )
 
 export function SpinnerIcon({
