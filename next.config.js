@@ -68,6 +68,16 @@ const nextConfig = {
         destination: '/tai-khoan/tu-thuoc',
         permanent: false,
       },
+      {
+        source: '/tim-nha-thuoc',
+        destination: '/nhac-uong-thuoc',
+        permanent: false,
+      },
+      {
+        source: '/tiem-vac-xin',
+        destination: '/tai-khoan/tu-thuoc',
+        permanent: false,
+      },
     ]
   },
   // LAN / phone preview: scripts ship with crossorigin="anonymous" and need ACAO

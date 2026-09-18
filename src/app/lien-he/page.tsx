@@ -237,7 +237,7 @@ export default function ContactPage() {
                     <PhoneIcon className="w-6 h-6 text-primary-600 mt-1 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">Điện thoại</p>
-                      <p className="text-gray-600">+84 123 456 789</p>
+                      <p className="text-gray-600">1800 6868</p>
                     </div>
                   </div>
 

@@ -178,10 +178,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     openConsult()
   }
 
-  const handleFindPharmacy = (e: React.MouseEvent) => {
+  const handleContactSupport = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.location.href = STORE_SUPPORT.PHARMACY_FINDER_HREF
+    window.location.href = STORE_SUPPORT.CONTACT_HREF
   }
 
   // Nếu không có link, hiển thị thông báo thay vì crash
@@ -336,9 +336,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <button
                     type="button"
                     className="w-full rounded-lg bg-gray-100 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 sm:text-sm"
-                    onClick={handleFindPharmacy}
+                    onClick={handleContactSupport}
                   >
-                    Tìm nhà thuốc
+                    Liên hệ hỗ trợ
                   </button>
                 </>
               ) : ctaVariant === 'viewDetail' ? (

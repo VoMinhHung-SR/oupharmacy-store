@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { EyeIcon, LocationIcon, UserIcon } from './account'
+import { ClockIcon, EyeIcon, LocationIcon, UserIcon } from './account'
 import { PackageIcon } from './commerce'
 import {
   ActivityIcon,
@@ -52,6 +52,7 @@ import {
   FaceMaskIcon,
   FirstAidKitIcon,
   HandSanitizerIcon,
+  JarOfPillsIcon,
   MilkIcon,
   PillIcon,
   PillPlusIcon,
@@ -265,20 +266,26 @@ export function resolveCategoryIcon(categorySlug: string): CategoryGlyph {
 export type HomeQuickLinkIconId =
   | 'pill-plus'
   | 'bottle'
+  | 'jar-of-pills'
   | 'user'
   | 'file-text'
+  | 'package'
   | 'map-pin'
   | 'vaccine'
   | 'shield-search'
+  | 'clock'
 
 const HOME_QUICK_LINK_ICONS: Record<HomeQuickLinkIconId, CategoryGlyph> = {
   'pill-plus': PillPlusIcon,
   bottle: BottleIcon,
+  'jar-of-pills': JarOfPillsIcon,
   user: UserIcon,
   'file-text': FileTextIcon,
+  package: PackageIcon,
   'map-pin': LocationIcon,
   vaccine: VaccineIcon,
   'shield-search': ShieldCheckIcon,
+  clock: ClockIcon,
 }
 
 export function resolveHomeQuickLinkIcon(iconId: HomeQuickLinkIconId): CategoryGlyph {
