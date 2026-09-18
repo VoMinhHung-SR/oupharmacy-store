@@ -80,15 +80,15 @@ export function ProductDetailPurchaseBlock({
         </div>
         <div className="flex flex-col gap-3">
           <Button onClick={openConsult} className="w-full" size="lg">
-            Tư vấn ngay
+            Tư vấn dược sĩ
           </Button>
           <Button
             variant="outline"
-            onClick={() => router.push(STORE_SUPPORT.PHARMACY_FINDER_HREF)}
+            onClick={() => router.push(STORE_SUPPORT.CONTACT_HREF)}
             className="w-full"
             size="lg"
           >
-            Tìm nhà thuốc
+            Liên hệ hỗ trợ
           </Button>
         </div>
       </>

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
-import { BellIcon, ChevronRightIcon, CreditCardIcon, JarOfPillsIcon, KeyIcon, LockIcon, OrderIcon, SettingsIcon, UserIcon } from '@/components/icons'
+import { BellIcon, ChevronRightIcon, CreditCardIcon, FileTextIcon, JarOfPillsIcon, KeyIcon, LockIcon, OrderIcon, SettingsIcon, UserIcon } from '@/components/icons'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountHubSkeleton } from '@/components/skeletons'
 
@@ -84,7 +84,7 @@ export default function AccountPage() {
       title: 'Yêu cầu mua thuốc',
       description: 'Xem lịch sử yêu cầu tư vấn mua thuốc',
       href: '/tai-khoan/don-thuoc',
-      icon: <OrderIcon className="w-6 h-6" />,
+      icon: <FileTextIcon className="w-6 h-6" />,
     },
   ]
 

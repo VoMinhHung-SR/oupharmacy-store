@@ -97,15 +97,24 @@ export default function PaymentMethodsPage() {
   return (
     <AccountPageShell>
       <div className="space-y-6">
-        <AccountPageHeader title="Phương thức thanh toán" rightSlot={<Button variant="primary">Thêm phương thức</Button>} />
+        <AccountPageHeader
+          title="Phương thức thanh toán"
+          rightSlot={
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+              Sắp có
+            </span>
+          }
+        />
 
         {methods.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 text-center">
             <div className="text-gray-400 mb-4">
               <CreditCardIcon className="w-16 h-16 mx-auto" />
             </div>
-            <p className="text-gray-600 mb-4">Chưa có phương thức thanh toán nào</p>
-            <Button variant="primary">Thêm phương thức đầu tiên</Button>
+            <p className="text-gray-600 mb-2">Chưa có phương thức thanh toán đã lưu</p>
+            <p className="text-sm text-gray-500">
+              Quý khách chọn phương thức khi thanh toán đơn hàng. Lưu thẻ / ví trên tài khoản sẽ sớm được hỗ trợ.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
