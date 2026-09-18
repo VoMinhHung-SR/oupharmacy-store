@@ -329,6 +329,108 @@
       "warehouseOutOfStock": "Kho đang hết hàng. Số lượng trong tủ không đổi.",
       "cartNotReady": "Đang tải giỏ hàng, vui lòng thử lại."
     }
+  },
+  "consultation": {
+    "fabOpenAria": "Mở hộp thoại tư vấn",
+    "fabCloseAria": "Đóng hộp thoại tư vấn",
+    "panelTitle": "Tư vấn OUPharmacy",
+    "panelSubtitle": "Chọn nhu cầu của bạn",
+    "welcome": "Xin chào! Bạn cần hỗ trợ về điều gì?",
+    "disclaimer": "Hộp thoại này không thay thế khám chữa bệnh. Không tự ý dùng thuốc theo gợi ý nếu chưa được chuyên môn hướng dẫn.",
+    "backToMenu": "Quay lại menu",
+    "backTooltip": "Quay lại",
+    "roleUser": "Bạn",
+    "roleAssistant": "OUPharmacy",
+    "rolePharmacist": "Dược sĩ",
+    "roleSystem": "Lưu ý",
+    "typing": "Đang xử lý…",
+    "connectingWithPharmacist": "Đang kết nối với Dược sĩ…",
+    "connectingWithDoctor": "Đang kết nối với Bác sĩ…",
+    "menu": {
+      "aria": "Chọn loại tư vấn",
+      "prompt": "Chọn một trong các lựa chọn sau:",
+      "pharmacist": {
+        "title": "Tư vấn dược sĩ",
+        "desc": "Chat trực tiếp với dược sĩ"
+      },
+      "doctor": {
+        "title": "Đặt lịch bác sĩ",
+        "desc": "Hướng dẫn đặt khám tại phòng khám"
+      },
+      "medicine": {
+        "title": "Tìm thuốc",
+        "desc": "Gợi ý sản phẩm và thêm vào giỏ"
+      }
+    },
+    "branch": {
+      "pharmacist": {
+        "title": "Tư vấn dược sĩ",
+        "stub": "Sắp kết nối chat với dược sĩ. Bạn có thể quay lại menu để chọn nhu cầu khác.",
+        "connecting": "Đang kết nối với Dược sĩ…",
+        "connectingHint": "Vui lòng chờ — chúng tôi đang kết nối bạn với dược sĩ phụ trách.",
+        "waiting": "Đã kết nối hàng đợi — đang chờ dược sĩ nhận tư vấn",
+        "connected": "Đã kết nối với dược sĩ",
+        "empty": "Hãy mô tả nhu cầu của bạn. Dược sĩ sẽ phản hồi sớm.",
+        "inputPlaceholder": "Nhập tin nhắn…",
+        "send": "Gửi",
+        "error": "Không kết nối được tư vấn. Vui lòng thử lại."
+      },
+      "doctor": {
+        "title": "Đặt lịch bác sĩ",
+        "stub": "Biểu mẫu đặt lịch sẽ có ở bước tiếp theo. Bạn có thể quay lại menu.",
+        "hint": "Chọn bác sĩ, ngày và khung giờ — dùng API phòng khám hiện có.",
+        "loading": "Đang kết nối với Bác sĩ…",
+        "loadingSlots": "Đang tải khung giờ của bác sĩ…",
+        "loginRequired": "Đăng nhập để đặt lịch khám.",
+        "loginCta": "Đăng nhập",
+        "descriptionLabel": "Lý do khám (tuỳ chọn)",
+        "descriptionPlaceholder": "Mô tả ngắn triệu chứng hoặc nhu cầu…",
+        "doctorLabel": "Bác sĩ",
+        "doctorPlaceholder": "Chọn bác sĩ",
+        "dateLabel": "Ngày khám",
+        "slotLabel": "Khung giờ",
+        "pickDoctorFirst": "Chọn bác sĩ trước để xem lịch trống.",
+        "noSlots": "Không còn khung giờ trống ngày này.",
+        "patientLabel": "Bệnh nhân",
+        "patientPlaceholder": "Chọn hồ sơ bệnh nhân",
+        "patientNew": "Thêm hồ sơ mới",
+        "patientRequired": "Vui lòng chọn hoặc tạo hồ sơ bệnh nhân.",
+        "slotRequired": "Vui lòng chọn bác sĩ, ngày và khung giờ.",
+        "firstName": "Họ",
+        "lastName": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "submit": "Đặt lịch",
+        "submitting": "Đang gửi yêu cầu đặt lịch với Bác sĩ…",
+        "success": "Đã tạo phiếu khám thành công.",
+        "successWithId": "Đã tạo phiếu khám #{id}.",
+        "errorGeneric": "Không đặt được lịch. Thử lại hoặc dùng trang phòng khám.",
+        "fallbackLink": "Mở trang đặt lịch phòng khám"
+      },
+      "medicine": {
+        "title": "Tìm thuốc",
+        "stub": "Tìm kiếm và gợi ý sản phẩm sẽ có ở bước tiếp theo. Bạn có thể quay lại menu.",
+        "hint": "Tìm theo từ khóa hoặc chọn danh mục — tối đa 5 gợi ý.",
+        "queryLabel": "Từ khóa",
+        "queryPlaceholder": "Ví dụ: paracetamol, vitamin C…",
+        "queryRequired": "Nhập từ khóa hoặc chọn danh mục để tìm.",
+        "clearCategory": "Bỏ danh mục",
+        "search": "Tìm",
+        "searching": "Đang tìm…",
+        "empty": "Không tìm thấy sản phẩm phù hợp.",
+        "errorGeneric": "Không tìm được sản phẩm. Vui lòng thử lại.",
+        "consultPrice": "Cần tư vấn",
+        "escalateCta": "Tư vấn dược sĩ",
+        "escalateNeedText": "Tôi cần tư vấn về sản phẩm: {name}",
+        "addToCart": "Thêm giỏ",
+        "adding": "Đang thêm…",
+        "added": "Đã thêm vào giỏ",
+        "addFailed": "Không thêm được vào giỏ",
+        "addUnavailable": "Sản phẩm chưa sẵn sàng thêm giỏ",
+        "outOfStock": "Sản phẩm đã hết hàng",
+        "stockExceeded": "Vượt tồn kho ({stock}). Đã có {inCart} trong giỏ."
+      }
+    }
   }
 }
 

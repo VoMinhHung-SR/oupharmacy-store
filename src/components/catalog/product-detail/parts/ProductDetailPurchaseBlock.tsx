@@ -13,6 +13,7 @@ import { usePdpUpcomingPromoTeaser } from '@/lib/hooks/usePdpUpcomingPromoTeaser
 import { Product, ProductUnitOption } from '@/lib/services/products'
 import { buildProductPathWithVariant } from '@/lib/store-path'
 import { STORE_SUPPORT } from '@/lib/constant'
+import { useConsultUi } from '@/contexts/ConsultUiContext'
 
 interface ProductDetailPurchaseBlockProps {
   product: Product
@@ -55,6 +56,7 @@ export function ProductDetailPurchaseBlock({
   onAddToCart,
   purchaseActionSectionRef,
 }: ProductDetailPurchaseBlockProps) {
+  const { open: openConsult } = useConsultUi()
   const showCatalogPromo =
     !isConsultPrice &&
     catalogDiscountPercent > 0 &&
@@ -77,7 +79,7 @@ export function ProductDetailPurchaseBlock({
           </p>
         </div>
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push(STORE_SUPPORT.CONSULT_HREF)} className="w-full" size="lg">
+          <Button onClick={openConsult} className="w-full" size="lg">
             Tư vấn ngay
           </Button>
           <Button

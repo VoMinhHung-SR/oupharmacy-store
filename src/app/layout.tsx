@@ -12,7 +12,9 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { CheckoutProvider } from '@/contexts/CheckoutContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
+import { ConsultUiProvider } from '@/contexts/ConsultUiContext'
 import { LoginModal } from '@/components/modals/LoginModal'
+import { ConsultChatbox } from '@/components/consultation/ConsultChatbox'
 import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegister'
 import { ChunkLoadRecovery } from '@/components/pwa/ChunkLoadRecovery'
 import { Providers } from './providers'
@@ -68,22 +70,27 @@ export default async function RootLayout({
           <Providers initialCities={initialCities} initialCitiesError={initialCitiesError}>
             <AuthProvider>
               <LoginModalProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <CheckoutProvider>
-                    <ChunkLoadRecovery />
-                    <Suspense fallback={<StoreNavFallback />}>
-                      <StoreNavShell />
-                    </Suspense>
-                    <main className="relative z-0 flex min-h-0 w-full flex-1 flex-col border-0 bg-[#ededed]">
-                      {children}
-                    </main>
-                    <Footer />
-                      <LoginModal />
-                      <PwaServiceWorkerRegister />
-                  </CheckoutProvider>
-                </WishlistProvider>
-              </CartProvider>
+                <ConsultUiProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <CheckoutProvider>
+                        <ChunkLoadRecovery />
+                        <Suspense fallback={<StoreNavFallback />}>
+                          <StoreNavShell />
+                        </Suspense>
+                        <main className="relative z-0 flex min-h-0 w-full flex-1 flex-col border-0 bg-[#ededed]">
+                          {children}
+                        </main>
+                        <Footer />
+                        <LoginModal />
+                        <Suspense fallback={null}>
+                          <ConsultChatbox />
+                        </Suspense>
+                        <PwaServiceWorkerRegister />
+                      </CheckoutProvider>
+                    </WishlistProvider>
+                  </CartProvider>
+                </ConsultUiProvider>
               </LoginModalProvider>
             </AuthProvider>
           </Providers>

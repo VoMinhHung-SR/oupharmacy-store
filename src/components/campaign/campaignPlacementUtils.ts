@@ -62,6 +62,17 @@ export function safeCampaignHref(ctaUrl: string | null | undefined): string | nu
   return trimmed
 }
 
+/** Campaign / deep-link that should open ConsultChatbox instead of navigating. */
+export function isConsultOpenHref(href: string | null | undefined): boolean {
+  if (!href) return false
+  try {
+    const url = new URL(href, 'http://local.invalid')
+    return url.searchParams.get('consult') === 'open'
+  } catch {
+    return /[?&]consult=open(?:&|$)/.test(href)
+  }
+}
+
 function asSlideList(value: PlacementSlotValue | undefined): PlacementWinner[] {
   if (value == null) return []
   if (Array.isArray(value)) return value.filter(Boolean)

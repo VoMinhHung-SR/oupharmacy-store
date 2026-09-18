@@ -329,6 +329,108 @@
       "warehouseOutOfStock": "This item is out of stock in the warehouse. Cabinet quantity is unchanged.",
       "cartNotReady": "Cart is still loading. Please try again."
     }
+  },
+  "consultation": {
+    "fabOpenAria": "Open consultation chat",
+    "fabCloseAria": "Close consultation chat",
+    "panelTitle": "OUPharmacy Consult",
+    "panelSubtitle": "Choose what you need",
+    "welcome": "Hi! How can we help?",
+    "disclaimer": "This chat does not replace medical care. Do not take medicines based on suggestions alone without professional guidance.",
+    "backToMenu": "Back to menu",
+    "backTooltip": "Back",
+    "roleUser": "You",
+    "roleAssistant": "OUPharmacy",
+    "rolePharmacist": "Pharmacist",
+    "roleSystem": "Notice",
+    "typing": "Working on it…",
+    "connectingWithPharmacist": "Connecting you with a Pharmacist…",
+    "connectingWithDoctor": "Connecting you with a Doctor…",
+    "menu": {
+      "aria": "Choose consultation type",
+      "prompt": "Pick one of the options below:",
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "desc": "Live chat with a pharmacist"
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "desc": "Guided clinic appointment booking"
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "desc": "Product suggestions and add to cart"
+      }
+    },
+    "branch": {
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "stub": "Live pharmacist chat is coming next. You can return to the menu.",
+        "connecting": "Connecting you with a Pharmacist…",
+        "connectingHint": "Please wait — we’re connecting you with the pharmacist on duty.",
+        "waiting": "In queue — waiting for a pharmacist to accept",
+        "connected": "Connected with a pharmacist",
+        "empty": "Describe what you need. A pharmacist will reply soon.",
+        "inputPlaceholder": "Type a message…",
+        "send": "Send",
+        "error": "Could not start consultation. Please try again."
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "stub": "Booking form comes in a later step. You can return to the menu.",
+        "hint": "Pick a doctor, date, and time slot via the existing clinic API.",
+        "loading": "Connecting you with a Doctor…",
+        "loadingSlots": "Loading the doctor’s time slots…",
+        "loginRequired": "Sign in to book an appointment.",
+        "loginCta": "Sign in",
+        "descriptionLabel": "Reason (optional)",
+        "descriptionPlaceholder": "Brief symptoms or request…",
+        "doctorLabel": "Doctor",
+        "doctorPlaceholder": "Select a doctor",
+        "dateLabel": "Date",
+        "slotLabel": "Time slot",
+        "pickDoctorFirst": "Select a doctor first to see open slots.",
+        "noSlots": "No open slots on this date.",
+        "patientLabel": "Patient",
+        "patientPlaceholder": "Select a patient profile",
+        "patientNew": "Add new profile",
+        "patientRequired": "Please select or create a patient profile.",
+        "slotRequired": "Please choose a doctor, date, and time slot.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "submit": "Book",
+        "submitting": "Sending your booking request to the Doctor…",
+        "success": "Appointment created successfully.",
+        "successWithId": "Appointment #{id} created.",
+        "errorGeneric": "Could not book. Try again or use the clinic booking page.",
+        "fallbackLink": "Open clinic booking page"
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "stub": "Product search comes in a later step. You can return to the menu.",
+        "hint": "Search by keyword or pick a category — up to 5 suggestions.",
+        "queryLabel": "Keyword",
+        "queryPlaceholder": "e.g. paracetamol, vitamin C…",
+        "queryRequired": "Enter a keyword or pick a category to search.",
+        "clearCategory": "Clear category",
+        "search": "Search",
+        "searching": "Searching…",
+        "empty": "No matching products.",
+        "errorGeneric": "Could not search products. Please try again.",
+        "consultPrice": "Needs consult",
+        "escalateCta": "Ask pharmacist",
+        "escalateNeedText": "I need advice about: {name}",
+        "addToCart": "Add to cart",
+        "adding": "Adding…",
+        "added": "Added to cart",
+        "addFailed": "Could not add to cart",
+        "addUnavailable": "Product is not ready to add",
+        "outOfStock": "Out of stock",
+        "stockExceeded": "Over stock ({stock}). Already {inCart} in cart."
+      }
+    }
   }
 }
 

@@ -23,9 +23,9 @@ flowchart LR
 
 - **Middleware** (`src/middleware.ts`): redirect, matcher cho `/don-hang`, `/tai-khoan`; không còn ép redirect login server-side toàn phần — modal login phía client.
 - **Trang** (`src/app/...`): compose sections/components; data qua hooks hoặc gọi service trực tiếp / React Query (tuỳ chỗ).
-- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI.
+- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI, **ConsultUi** (FAB chat hub).
 - **Services** (`src/lib/services/`): biến đổi request/response, URL từ `NEXT_PUBLIC_*`.
-
+- **Consultation hub (MVP Done):** FAB chat — pharmacist (session + Firestore), doctor (MAIN_API book), medicine (search ≤5 + cart; `CONSULT` escalate). Doc: [`docs/consultation-hub.md`](consultation-hub.md). Deep-link `/?consult=open`. Firestore env: `NEXT_PUBLIC_APP_ENV` ≡ Clinic `VITE_APP_ENV`.
 ## Hai “cổng” HTTP chính
 
 | Cổng | File / pattern | Env |
@@ -59,6 +59,12 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 - **Adjacent:** inbox HSD `/cabinet-alerts/` + panel; seed toa `/cabinet-prescription-lines/` + sheet (HSD tay, owner-only).
 - BE API SoT: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 - Plans: `PersonalProject/plans/[Done] smart-medicine-cabinet.plan.md`, `[Done] smart-cabinet-adjacent-domains.plan.md`.
+
+### Consultation hub
+
+- **Doc:** [`docs/consultation-hub.md`](consultation-hub.md) — FSM, branches, files, env.
+- Mount: `ConsultChatbox` in layout; open via `useConsultUi` / `/?consult=open`.
+- Plan: `PersonalProject/plans/[Done] consultation-hub-mvp.plan.md`.
 
 ### Faceted search / advanced filters
 

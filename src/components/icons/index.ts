@@ -26,6 +26,8 @@ export {
   CopyIcon,
   BoltIcon,
   FileTextIcon,
+  MessageCircleIcon,
+  SendIcon,
   SpinnerIcon,
 } from './ui'
 
