@@ -32,7 +32,7 @@ Menu / buttons / fixed FSM only. Free text in pharmacist thread is human chat, n
 | Pharmacist | `PharmacistThreadPanel.tsx`, `usePharmacistThread.ts`, `src/lib/consultation/firestore.ts`, `src/lib/services/consultation.ts` |
 | Doctor | `BookingActionBubble.tsx`, `src/lib/services/booking.ts` |
 | Medicine | `ProductSuggestBubble.tsx` → `searchStoreProducts` + `useCart().add` |
-| UI chrome | `ConsultMessageList.tsx`, `ConsultIconButtons.tsx` (Tabler `arrow-left` / `send`), `ConsultTypingIndicator.tsx` |
+| UI chrome | `ConsultMessageList.tsx`, `ConsultMiniBox.tsx` (header + inner surface + right CTA), `ConsultIconButtons.tsx` (Tabler `arrow-left` / `send`), `ConsultTypingIndicator.tsx` |
 | Open popup | `src/contexts/ConsultUiContext.tsx` |
 
 ## Env
@@ -51,6 +51,7 @@ Menu / buttons / fixed FSM only. Free text in pharmacist thread is human chat, n
 - Loading copy names the role: “Đang kết nối với Dược sĩ… / Bác sĩ…”.
 - Panel scrolls to bottom on step / message / loading changes.
 - Back / send = icon buttons + tooltip (“Quay lại”, “Gửi”).
+- Branch mini-boxes (`ConsultMiniBox`): title + back only (no hint); inner `slate-50` surface; primary CTAs align right.
 
 ## Plans
 

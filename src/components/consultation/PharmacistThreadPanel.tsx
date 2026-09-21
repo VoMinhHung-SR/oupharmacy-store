@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { ConsultBackIconButton, ConsultSendIconButton } from './ConsultIconButtons'
+import { ConsultSendIconButton } from './ConsultIconButtons'
+import { ConsultBranchHeader, ConsultMiniSurface, consultFieldClassName } from './ConsultMiniBox'
 import { usePharmacistThread } from './usePharmacistThread'
 import type { PharmacistSeed } from './useConsultStateMachine'
 
@@ -28,7 +29,6 @@ export function PharmacistThreadPanel({
     send,
     sending,
     userId,
-    waitingForPharmacist,
   } = usePharmacistThread(true, seed)
 
   useEffect(() => {
@@ -50,45 +50,24 @@ export function PharmacistThreadPanel({
   }, [messages, status, sending])
 
   if (status === 'starting' || status === 'idle') {
-    return (
-      <div className="flex items-center justify-between gap-3">
-        <p className="min-w-0 flex-1 text-xs leading-snug text-slate-500">
-          {t('branch.pharmacist.connectingHint')}
-        </p>
-        <ConsultBackIconButton onClick={onBack} />
-      </div>
-    )
+    return <ConsultBranchHeader title={t('branch.pharmacist.title')} onBack={onBack} />
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-snug text-slate-900">
-            {t('branch.pharmacist.title')}
-          </p>
-          <p className="mt-0.5 text-xs leading-snug text-slate-500">
-            {status === 'error'
-              ? t('branch.pharmacist.error')
-              : waitingForPharmacist
-                ? t('branch.pharmacist.waiting')
-                : t('branch.pharmacist.connected')}
-          </p>
-        </div>
-        <ConsultBackIconButton onClick={onBack} />
-      </div>
+    <div className="flex flex-col gap-2">
+      <ConsultBranchHeader title={t('branch.pharmacist.title')} onBack={onBack} />
 
       {status === 'error' ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-2 text-sm leading-snug text-red-800">
+        <p className="rounded-xl border border-red-200 bg-red-50 px-2.5 py-2 text-sm leading-snug text-red-800">
           {error || t('branch.pharmacist.error')}
         </p>
       ) : null}
 
       {status === 'ready' ? (
-        <>
+        <ConsultMiniSurface className="flex flex-col gap-2">
           <div
             ref={threadScrollRef}
-            className="flex max-h-52 min-h-[120px] flex-col gap-2 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 p-2"
+            className="flex max-h-52 min-h-[120px] flex-col gap-2 overflow-y-auto px-0.5"
           >
             {messages.length === 0 ? (
               <p className="px-1 py-1.5 text-xs leading-snug text-slate-500">
@@ -136,12 +115,12 @@ export function PharmacistThreadPanel({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={t('branch.pharmacist.inputPlaceholder')}
-              className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm leading-snug focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className={`min-w-0 flex-1 ${consultFieldClassName}`}
               disabled={sending}
             />
             <ConsultSendIconButton disabled={!draft.trim()} loading={sending} />
           </form>
-        </>
+        </ConsultMiniSurface>
       ) : null}
     </div>
   )

@@ -365,11 +365,6 @@
     "branch": {
       "pharmacist": {
         "title": "Tư vấn dược sĩ",
-        "stub": "Sắp kết nối chat với dược sĩ. Bạn có thể quay lại menu để chọn nhu cầu khác.",
-        "connecting": "Đang kết nối với Dược sĩ…",
-        "connectingHint": "Vui lòng chờ — chúng tôi đang kết nối bạn với dược sĩ phụ trách.",
-        "waiting": "Đã kết nối hàng đợi — đang chờ dược sĩ nhận tư vấn",
-        "connected": "Đã kết nối với dược sĩ",
         "empty": "Hãy mô tả nhu cầu của bạn. Dược sĩ sẽ phản hồi sớm.",
         "inputPlaceholder": "Nhập tin nhắn…",
         "send": "Gửi",
@@ -377,8 +372,6 @@
       },
       "doctor": {
         "title": "Đặt lịch bác sĩ",
-        "stub": "Biểu mẫu đặt lịch sẽ có ở bước tiếp theo. Bạn có thể quay lại menu.",
-        "hint": "Chọn bác sĩ, ngày và khung giờ — dùng API phòng khám hiện có.",
         "loading": "Đang kết nối với Bác sĩ…",
         "loadingSlots": "Đang tải khung giờ của bác sĩ…",
         "loginRequired": "Đăng nhập để đặt lịch khám.",
@@ -409,8 +402,6 @@
       },
       "medicine": {
         "title": "Tìm thuốc",
-        "stub": "Tìm kiếm và gợi ý sản phẩm sẽ có ở bước tiếp theo. Bạn có thể quay lại menu.",
-        "hint": "Tìm theo từ khóa hoặc chọn danh mục — tối đa 5 gợi ý.",
         "queryLabel": "Từ khóa",
         "queryPlaceholder": "Ví dụ: paracetamol, vitamin C…",
         "queryRequired": "Nhập từ khóa hoặc chọn danh mục để tìm.",

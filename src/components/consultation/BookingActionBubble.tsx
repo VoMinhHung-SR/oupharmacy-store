@@ -17,7 +17,7 @@ import {
   type BookingPatient,
   type BookingSlotOption,
 } from '@/lib/services/booking'
-import { ConsultBackIconButton } from './ConsultIconButtons'
+import { ConsultBranchHeader, ConsultCtaRow, ConsultMiniSurface, consultFieldClassName } from './ConsultMiniBox'
 
 type BookingActionBubbleProps = {
   onBack: () => void
@@ -214,35 +214,33 @@ export function BookingActionBubble({ onBack, onLoadingChange }: BookingActionBu
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <p className="min-w-0 text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
-          <ConsultBackIconButton onClick={onBack} />
-        </div>
-        <p className="text-sm leading-snug text-slate-600">{t('loginRequired')}</p>
-        <Button type="button" size="sm" onClick={() => openModal()} className="self-start">
-          {t('loginCta')}
-        </Button>
-        <a
-          href={bookingFallbackUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-primary-700 underline"
-        >
-          {t('fallbackLink')}
-        </a>
+      <div className="flex flex-col gap-2">
+        <ConsultBranchHeader title={t('title')} onBack={onBack} />
+        <ConsultMiniSurface className="flex flex-col gap-1.5">
+          <p className="text-sm leading-snug text-slate-600">{t('loginRequired')}</p>
+          <ConsultCtaRow>
+            <Button type="button" size="sm" onClick={() => openModal()}>
+              {t('loginCta')}
+            </Button>
+          </ConsultCtaRow>
+          <a
+            href={bookingFallbackUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="self-end text-xs text-primary-700 underline"
+          >
+            {t('fallbackLink')}
+          </a>
+        </ConsultMiniSurface>
       </div>
     )
   }
 
   if (phase === 'success') {
     return (
-      <div className="flex flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <p className="min-w-0 text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
-          <ConsultBackIconButton onClick={onBack} />
-        </div>
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-sm leading-snug text-emerald-900">
+      <div className="flex flex-col gap-2">
+        <ConsultBranchHeader title={t('title')} onBack={onBack} />
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-sm leading-snug text-emerald-900">
           {examId ? t('successWithId', { id: examId }) : t('success')}
         </p>
       </div>
@@ -250,17 +248,11 @@ export function BookingActionBubble({ onBack, onLoadingChange }: BookingActionBu
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
-          <p className="mt-0.5 text-xs leading-snug text-slate-500">{t('hint')}</p>
-        </div>
-        <ConsultBackIconButton onClick={onBack} />
-      </div>
+    <div className="flex flex-col gap-2">
+      <ConsultBranchHeader title={t('title')} onBack={onBack} />
 
       {(phase === 'error' || error) && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-2.5 py-2 text-sm text-red-800">
           <p>{error || t('errorGeneric')}</p>
           <a
             href={bookingFallbackUrl}
@@ -273,146 +265,149 @@ export function BookingActionBubble({ onBack, onLoadingChange }: BookingActionBu
         </div>
       )}
 
-      <form className="flex flex-col gap-2.5" onSubmit={onSubmit}>
-        <label className="flex flex-col gap-1 text-xs text-slate-600">
-          {t('descriptionLabel')}
-          <textarea
-            value={description}
-            onChange={(ev) => setDescription(ev.target.value)}
-            rows={2}
-            maxLength={254}
-            placeholder={t('descriptionPlaceholder')}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          />
-        </label>
+      <form className="flex flex-col" onSubmit={onSubmit}>
+        <ConsultMiniSurface className="flex flex-col gap-2">
+          <label className="flex flex-col gap-0.5 text-xs text-slate-600">
+            {t('descriptionLabel')}
+            <textarea
+              value={description}
+              onChange={(ev) => setDescription(ev.target.value)}
+              rows={2}
+              maxLength={254}
+              placeholder={t('descriptionPlaceholder')}
+              className={consultFieldClassName}
+            />
+          </label>
 
-        <label className="flex flex-col gap-1 text-xs text-slate-600">
-          {t('doctorLabel')}
-          <select
-            value={doctorUserId === '' ? '' : String(doctorUserId)}
-            onChange={(ev) =>
-              setDoctorUserId(ev.target.value ? Number(ev.target.value) : '')
-            }
-            disabled={loadingMeta || doctors.length === 0}
-            required
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          >
-            <option value="">{loadingMeta ? t('loading') : t('doctorPlaceholder')}</option>
-            {doctors.map((d) => (
-              <option key={d.userId} value={d.userId}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className="flex flex-col gap-0.5 text-xs text-slate-600">
+            {t('doctorLabel')}
+            <select
+              value={doctorUserId === '' ? '' : String(doctorUserId)}
+              onChange={(ev) =>
+                setDoctorUserId(ev.target.value ? Number(ev.target.value) : '')
+              }
+              disabled={loadingMeta || doctors.length === 0}
+              required
+              className={consultFieldClassName}
+            >
+              <option value="">{loadingMeta ? t('loading') : t('doctorPlaceholder')}</option>
+              {doctors.map((d) => (
+                <option key={d.userId} value={d.userId}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label className="flex flex-col gap-1 text-xs text-slate-600">
-          {t('dateLabel')}
-          <input
-            type="date"
-            value={date}
-            min={todayIsoDate()}
-            onChange={(ev) => setDate(ev.target.value)}
-            required
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          />
-        </label>
+          <label className="flex flex-col gap-0.5 text-xs text-slate-600">
+            {t('dateLabel')}
+            <input
+              type="date"
+              value={date}
+              min={todayIsoDate()}
+              onChange={(ev) => setDate(ev.target.value)}
+              required
+              className={consultFieldClassName}
+            />
+          </label>
 
-        <fieldset className="flex flex-col gap-1.5">
-          <legend className="text-xs text-slate-600">{t('slotLabel')}</legend>
-          {loadingSlots ? (
-            <p className="text-xs text-slate-500">{t('loadingSlots')}</p>
-          ) : !doctorUserId ? (
-            <p className="text-xs text-slate-500">{t('pickDoctorFirst')}</p>
-          ) : slots.length === 0 ? (
-            <p className="text-xs text-slate-500">{t('noSlots')}</p>
-          ) : (
-            <div className="grid max-h-36 grid-cols-2 gap-1.5 overflow-y-auto">
-              {slots.map((s) => {
-                const selected = s.key === slotKey
-                return (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => setSlotKey(s.key)}
-                    className={`rounded-lg border px-2 py-1.5 text-left text-xs ${
-                      selected
-                        ? 'border-primary-600 bg-primary-50 text-primary-800'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-primary-300'
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                )
-              })}
+          <fieldset className="flex flex-col gap-1">
+            <legend className="text-xs text-slate-600">{t('slotLabel')}</legend>
+            {loadingSlots ? (
+              <p className="text-xs text-slate-500">{t('loadingSlots')}</p>
+            ) : !doctorUserId ? (
+              <p className="text-xs text-slate-500">{t('pickDoctorFirst')}</p>
+            ) : slots.length === 0 ? (
+              <p className="text-xs text-slate-500">{t('noSlots')}</p>
+            ) : (
+              <div className="grid max-h-36 grid-cols-2 gap-1.5 overflow-y-auto">
+                {slots.map((s) => {
+                  const selected = s.key === slotKey
+                  return (
+                    <button
+                      key={s.key}
+                      type="button"
+                      onClick={() => setSlotKey(s.key)}
+                      className={`rounded-lg border px-2 py-1.5 text-left text-xs ${
+                        selected
+                          ? 'border-primary-600 bg-primary-50 text-primary-800'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-primary-300'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </fieldset>
+
+          <label className="flex flex-col gap-0.5 text-xs text-slate-600">
+            {t('patientLabel')}
+            <select
+              value={patientId === '' ? '' : String(patientId)}
+              onChange={(ev) => {
+                const v = ev.target.value
+                if (v === 'new') setPatientId('new')
+                else if (v) setPatientId(Number(v))
+                else setPatientId('')
+              }}
+              required
+              className={consultFieldClassName}
+            >
+              <option value="">{t('patientPlaceholder')}</option>
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {patientLabel(p)}
+                </option>
+              ))}
+              <option value="new">{t('patientNew')}</option>
+            </select>
+          </label>
+
+          {patientId === 'new' ? (
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                value={newPatient.first_name}
+                onChange={(ev) => setNewPatient((p) => ({ ...p, first_name: ev.target.value }))}
+                placeholder={t('firstName')}
+                required
+                className={consultFieldClassName}
+              />
+              <input
+                value={newPatient.last_name}
+                onChange={(ev) => setNewPatient((p) => ({ ...p, last_name: ev.target.value }))}
+                placeholder={t('lastName')}
+                className={consultFieldClassName}
+              />
+              <input
+                type="email"
+                value={newPatient.email}
+                onChange={(ev) => setNewPatient((p) => ({ ...p, email: ev.target.value }))}
+                placeholder={t('email')}
+                required
+                className={`col-span-2 ${consultFieldClassName}`}
+              />
+              <input
+                value={newPatient.phone_number}
+                onChange={(ev) => setNewPatient((p) => ({ ...p, phone_number: ev.target.value }))}
+                placeholder={t('phone')}
+                required
+                className={`col-span-2 ${consultFieldClassName}`}
+              />
             </div>
-          )}
-        </fieldset>
+          ) : null}
 
-        <label className="flex flex-col gap-1 text-xs text-slate-600">
-          {t('patientLabel')}
-          <select
-            value={patientId === '' ? '' : String(patientId)}
-            onChange={(ev) => {
-              const v = ev.target.value
-              if (v === 'new') setPatientId('new')
-              else if (v) setPatientId(Number(v))
-              else setPatientId('')
-            }}
-            required
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          >
-            <option value="">{t('patientPlaceholder')}</option>
-            {patients.map((p) => (
-              <option key={p.id} value={p.id}>
-                {patientLabel(p)}
-              </option>
-            ))}
-            <option value="new">{t('patientNew')}</option>
-          </select>
-        </label>
-
-        {patientId === 'new' ? (
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              value={newPatient.first_name}
-              onChange={(ev) => setNewPatient((p) => ({ ...p, first_name: ev.target.value }))}
-              placeholder={t('firstName')}
-              required
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm"
-            />
-            <input
-              value={newPatient.last_name}
-              onChange={(ev) => setNewPatient((p) => ({ ...p, last_name: ev.target.value }))}
-              placeholder={t('lastName')}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm"
-            />
-            <input
-              type="email"
-              value={newPatient.email}
-              onChange={(ev) => setNewPatient((p) => ({ ...p, email: ev.target.value }))}
-              placeholder={t('email')}
-              required
-              className="col-span-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm"
-            />
-            <input
-              value={newPatient.phone_number}
-              onChange={(ev) => setNewPatient((p) => ({ ...p, phone_number: ev.target.value }))}
-              placeholder={t('phone')}
-              required
-              className="col-span-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm"
-            />
-          </div>
-        ) : null}
-
-        <Button
-          type="submit"
-          size="sm"
-          disabled={phase === 'submitting' || loadingMeta || !selectedSlot}
-          className="self-start"
-        >
-          {phase === 'submitting' ? t('submitting') : t('submit')}
-        </Button>
+          <ConsultCtaRow>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={phase === 'submitting' || loadingMeta || !selectedSlot}
+            >
+              {phase === 'submitting' ? t('submitting') : t('submit')}
+            </Button>
+          </ConsultCtaRow>
+        </ConsultMiniSurface>
       </form>
     </div>
   )

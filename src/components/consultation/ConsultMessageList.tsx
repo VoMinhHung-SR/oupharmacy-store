@@ -59,7 +59,7 @@ export function ConsultMessageList({
               {isUser ? t('roleUser') : t('roleAssistant')}
             </p>
             <div
-              className={`${wide ? 'w-full max-w-full' : 'max-w-[88%]'} rounded-2xl px-3 py-2 text-sm leading-snug shadow-sm ${
+              className={`${wide ? 'w-full max-w-full' : 'max-w-[88%]'} rounded-2xl px-2.5 py-2 text-sm leading-snug shadow-sm ${
                 isUser
                   ? 'rounded-br-md bg-primary-600 text-white'
                   : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
