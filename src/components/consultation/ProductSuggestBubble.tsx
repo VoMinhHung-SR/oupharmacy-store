@@ -18,7 +18,11 @@ import { searchStoreProducts } from '@/lib/services/search'
 import { formatVnd } from '@/lib/utils/currency'
 import { toastSuccess, toastWarning } from '@/lib/utils/toast'
 import type { PharmacistSeed } from './useConsultStateMachine'
-import { ConsultBackIconButton } from './ConsultIconButtons'
+import {
+  ConsultBranchHeader,
+  ConsultMiniSurface,
+  consultFieldClassName,
+} from './ConsultMiniBox'
 
 const MAX_RESULTS = 5
 
@@ -178,64 +182,61 @@ export function ProductSuggestBubble({
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-snug text-slate-900">{t('title')}</p>
-          <p className="mt-0.5 text-xs leading-snug text-slate-500">{t('hint')}</p>
-        </div>
-        <ConsultBackIconButton onClick={onBack} />
-      </div>
+    <div className="flex flex-col gap-2">
+      <ConsultBranchHeader title={t('title')} onBack={onBack} />
 
-      <form className="flex flex-col gap-2" onSubmit={onSubmit}>
-        <label className="flex flex-col gap-1 text-xs text-slate-600">
-          {t('queryLabel')}
-          <input
-            value={q}
-            onChange={(ev) => setQ(ev.target.value)}
-            placeholder={t('queryPlaceholder')}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          />
-        </label>
-
-        {categoryChips.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {categoryChips.map((chip) => {
-              const active = categoryId === chip.id
-              return (
-                <button
-                  key={chip.id}
-                  type="button"
-                  onClick={() => onPickCategory(chip.id)}
-                  className={`rounded-lg border px-2 py-1 text-xs ${
-                    active
-                      ? 'border-primary-600 bg-primary-50 text-primary-800'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-primary-300'
-                  }`}
-                >
-                  {chip.name}
-                </button>
-              )
-            })}
-            {categoryId !== '' ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setCategoryId('')
-                  void runSearch(q, '')
-                }}
-                className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50"
-              >
-                {t('clearCategory')}
-              </button>
-            ) : null}
+      <ConsultMiniSurface>
+        <form className="flex flex-col gap-1.5" onSubmit={onSubmit}>
+          <div className="flex items-center gap-2">
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">{t('queryLabel')}</span>
+              <input
+                value={q}
+                onChange={(ev) => setQ(ev.target.value)}
+                placeholder={t('queryPlaceholder')}
+                className={consultFieldClassName}
+              />
+            </label>
+            <Button type="submit" size="sm" disabled={loading} className="shrink-0">
+              {loading ? t('searching') : t('search')}
+            </Button>
           </div>
-        ) : null}
 
-        <Button type="submit" size="sm" disabled={loading} className="self-start">
-          {loading ? t('searching') : t('search')}
-        </Button>
-      </form>
+          {categoryChips.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {categoryChips.map((chip) => {
+                const active = categoryId === chip.id
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => onPickCategory(chip.id)}
+                    className={`rounded-full border px-2.5 py-1 text-xs ${
+                      active
+                        ? 'border-primary-600 bg-primary-50 text-primary-800'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-primary-300'
+                    }`}
+                  >
+                    {chip.name}
+                  </button>
+                )
+              })}
+              {categoryId !== '' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoryId('')
+                    void runSearch(q, '')
+                  }}
+                  className="rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-500 hover:bg-white"
+                >
+                  {t('clearCategory')}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </form>
+      </ConsultMiniSurface>
 
       {lastQueryLabel ? (
         <div className="flex flex-col items-end">
@@ -292,29 +293,26 @@ export function ProductSuggestBubble({
                     ) : (
                       <p className="line-clamp-2 text-xs font-medium text-slate-900">{product.name}</p>
                     )}
-                    <p className="mt-0.5 text-xs font-semibold text-primary-700">
-                      {consult ? t('consultPrice') : formatVnd(product.price)}
-                    </p>
-                    {consult ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="mt-1.5"
-                        onClick={() => handleEscalate(product)}
-                      >
-                        {t('escalateCta')}
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="mt-1.5"
-                        disabled={addingId === product.id}
-                        onClick={() => void handleAdd(product)}
-                      >
-                        {addingId === product.id ? t('adding') : t('addToCart')}
-                      </Button>
-                    )}
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <p className="min-w-0 text-xs font-semibold text-primary-700">
+                        {consult ? t('consultPrice') : formatVnd(product.price)}
+                      </p>
+                      {consult ? (
+                        <Button type="button" size="sm" className="shrink-0" onClick={() => handleEscalate(product)}>
+                          {t('escalateCta')}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="shrink-0"
+                          disabled={addingId === product.id}
+                          onClick={() => void handleAdd(product)}
+                        >
+                          {addingId === product.id ? t('adding') : t('addToCart')}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </li>
               )
