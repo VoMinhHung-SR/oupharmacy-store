@@ -31,7 +31,7 @@ flowchart LR
 | Cổng | File / pattern | Env |
 |------|----------------|-----|
 | Store API (catalog, cart-shaped store endpoints, …) | `src/lib/api.ts`, nhiều service dùng `fetch` hoặc instance | `NEXT_PUBLIC_API_URL` |
-| Main API (user, OAuth, địa chỉ, …) | `src/lib/services/auth.ts`, `location.ts`, … | `NEXT_PUBLIC_MAIN_API_URL` |
+| Main API (user, OAuth, địa chỉ, …) | `src/lib/services/auth.ts`, `location.ts`, `userAddresses.ts` (`/users/me/addresses/`) | `NEXT_PUBLIC_MAIN_API_URL` |
 
 Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL không có chủ đích.
 

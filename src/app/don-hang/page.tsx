@@ -11,6 +11,8 @@ import { useCheckout } from '@/contexts/CheckoutContext'
 import { useCart } from '@/contexts/CartContext'
 import { usePaymentMethods } from '@/lib/hooks/usePayment'
 import { useShippingMethods } from '@/lib/hooks/useShipping'
+import { useUserAddresses } from '@/lib/hooks/useUserAddresses'
+import { pickDefaultUserAddress, userAddressToCheckoutFields } from '@/lib/services/userAddresses'
 import { useApplyVoucher, useCheckoutCart, useSelectShippingMethod } from '@/lib/hooks/useCarts'
 import { useAutoApplyBestCartVoucher } from '@/lib/hooks/useCartVoucherOffers'
 import { getCampaignAttributionId } from '@/lib/utils/campaignAttribution'
@@ -68,6 +70,7 @@ export default function CheckoutPage() {
   useAutoApplyBestCartVoucher(!cartLoading && items.length > 0)
   const { data: paymentMethodsData, isLoading: methodsLoadingPayment, error: methodsErrorPayment } = usePaymentMethods()
   const { data: shippingMethodsData, isLoading: methodsLoadingShipping, error: methodsErrorShipping } = useShippingMethods()
+  const { data: savedAddresses } = useUserAddresses(Boolean(isAuthenticated))
   const checkoutCartMutation = useCheckoutCart()
   const selectShippingMutation = useSelectShippingMethod()
   const applyVoucherMutation = useApplyVoucher()
@@ -231,6 +234,20 @@ export default function CheckoutPage() {
       setValue('recipient_phone', user.phone_number)
     }
   }, [isAuthenticated, user, information, setValue])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (information?.city_id || information?.address) return
+    if (getValues('city_id') || getValues('address')) return
+    const defaultAddress = pickDefaultUserAddress(savedAddresses ?? [])
+    if (!defaultAddress) return
+    const mapped = userAddressToCheckoutFields(defaultAddress)
+    if (mapped.city_id) setValue('city_id', String(mapped.city_id))
+    if (mapped.commune_id) setValue('commune_id', String(mapped.commune_id))
+    if (mapped.province) setValue('province', mapped.province)
+    if (mapped.ward) setValue('ward', mapped.ward)
+    if (mapped.address) setValue('address', mapped.address)
+  }, [getValues, information, isAuthenticated, savedAddresses, setValue])
 
   useEffect(() => {
     if (methodsLoadingShipping || shippingMethods.length === 0 || cartVersion == null) return

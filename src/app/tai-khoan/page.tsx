@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
-import { BellIcon, ChevronRightIcon, CreditCardIcon, FileTextIcon, JarOfPillsIcon, KeyIcon, LockIcon, OrderIcon, SettingsIcon, UserIcon } from '@/components/icons'
+import { ChevronRightIcon, CreditCardIcon, FileTextIcon, JarOfPillsIcon, KeyIcon, LocationIcon, OrderIcon, UserIcon } from '@/components/icons'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountHubSkeleton } from '@/components/skeletons'
 
@@ -39,28 +39,16 @@ export default function AccountPage() {
       icon: <UserIcon className="w-6 h-6" />,
     },
     {
+      title: 'Sổ địa chỉ',
+      description: 'Địa chỉ giao hàng đã lưu',
+      href: '/tai-khoan/dia-chi',
+      icon: <LocationIcon className="w-6 h-6" />,
+    },
+    {
       title: 'Phương thức thanh toán',
-      description: 'Quản lý thẻ và phương thức thanh toán',
+      description: 'Xem phương thức khi đặt hàng',
       href: '/tai-khoan/phuong-thuc-thanh-toan',
       icon: <CreditCardIcon className="w-6 h-6" />,
-    },
-    {
-      title: 'Thông báo',
-      description: 'Tùy chọn thông báo',
-      href: '/tai-khoan/thong-bao',
-      icon: <BellIcon className="w-6 h-6" />,
-    },
-    {
-      title: 'Cài đặt tài khoản',
-      description: 'Cài đặt và tùy chọn tài khoản',
-      href: '/tai-khoan/cai-dat',
-      icon: <SettingsIcon className="w-6 h-6" />,
-    },
-    {
-      title: 'Quyền riêng tư',
-      description: 'Cài đặt quyền riêng tư và bảo mật',
-      href: '/tai-khoan/quyen-rieng-tu',
-      icon: <LockIcon className="w-6 h-6" />,
     },
     {
       title: 'Đổi mật khẩu',
