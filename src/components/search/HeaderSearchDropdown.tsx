@@ -7,10 +7,21 @@ import { useHeaderSearchDropdown } from './useHeaderSearchDropdown'
 
 export interface HeaderSearchDropdownProps {
   popularTerms: string[]
+  /** Mobile/tablet sticky header bar — stable height, no sm:py-3 jump. */
+  stickyBar?: boolean
+  /** Collapsed sticky bar — slightly tighter padding (animated). */
+  compact?: boolean
 }
 
-export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popularTerms }) => {
+const PAD_MOTION = 'duration-400 ease-[cubic-bezier(0.33,1,0.68,1)]'
+
+export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({
+  popularTerms,
+  stickyBar = false,
+  compact = false,
+}) => {
   const s = useHeaderSearchDropdown()
+  const dense = stickyBar && compact
 
   return (
     <div ref={s.rootRef} className="relative w-full min-w-0 lg:max-w-2xl">
@@ -32,43 +43,59 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({ popu
           aria-expanded={s.open}
           aria-controls={s.panelId}
           aria-autocomplete="list"
-          className="min-w-0 flex-1 bg-transparent px-3 py-2.5 pl-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none sm:px-4 sm:py-3 sm:pl-5"
+          className={[
+            'min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none',
+            stickyBar ? `transition-[padding] ${PAD_MOTION}` : '',
+            dense
+              ? 'px-3 py-2 pl-3.5'
+              : stickyBar
+                ? 'px-3 py-2.5 pl-3.5'
+                : 'px-3 py-2.5 pl-3.5 sm:px-4 sm:py-3 sm:pl-5',
+          ].join(' ')}
         />
         {s.query ? (
           <button
             type="button"
             onClick={s.clearQuery}
-            className="mr-0.5 shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 sm:p-2"
+            className={`mr-0.5 shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 ${
+              stickyBar ? '' : 'sm:p-2'
+            }`}
             aria-label={s.t('headerSearch.clearInput')}
           >
             <XCircleIcon className="h-4 w-4" />
           </button>
         ) : null}
-        <div className="flex shrink-0 items-center gap-0.5 pr-1 sm:pr-1.5">
+        <div className={`flex shrink-0 items-center gap-0.5 pr-1 ${stickyBar ? '' : 'sm:pr-1.5'}`}>
           <button
             type="button"
             disabled
-            className="hidden cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50 sm:inline-flex"
+            className={`hidden cursor-not-allowed rounded-full text-gray-400 opacity-50 sm:inline-flex ${
+              stickyBar ? 'p-1.5' : 'p-2'
+            }`}
             aria-disabled="true"
             title={s.t('headerSearch.voiceDisabled')}
           >
-            <MicIcon className="h-5 w-5" />
+            <MicIcon className={stickyBar ? 'h-4 w-4' : 'h-5 w-5'} />
           </button>
           <button
             type="button"
             disabled
-            className="hidden cursor-not-allowed rounded-full p-2 text-gray-400 opacity-50 sm:inline-flex"
+            className={`hidden cursor-not-allowed rounded-full text-gray-400 opacity-50 sm:inline-flex ${
+              stickyBar ? 'p-1.5' : 'p-2'
+            }`}
             aria-disabled="true"
             title={s.t('headerSearch.scanDisabled')}
           >
-            <QrScanIcon className="h-5 w-5" />
+            <QrScanIcon className={stickyBar ? 'h-4 w-4' : 'h-5 w-5'} />
           </button>
           <button
             type="submit"
-            className="rounded-full p-1.5 text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-600 sm:p-2"
+            className={`rounded-full p-1.5 text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-600 ${
+              stickyBar ? '' : 'sm:p-2'
+            }`}
             aria-label={s.t('headerSearch.submitAria')}
           >
-            <SearchIcon className="h-5 w-5" />
+            <SearchIcon className={stickyBar ? 'h-4 w-4' : 'h-5 w-5'} />
           </button>
         </div>
       </form>

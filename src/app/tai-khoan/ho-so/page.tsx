@@ -11,7 +11,7 @@ import { useLoginModal } from '@/contexts/LoginModalContext'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
 import { REGEX_EMAIL, REGEX_PHONE_NUMBER } from '@/lib/constant'
 import { updateProfile } from '@/lib/services/auth'
-import { LocationIcon, UserIcon, XIcon } from '@/components/icons'
+import { LocationIcon, UserIcon } from '@/components/icons'
 import Image from 'next/image'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
@@ -34,25 +34,10 @@ const profileSchema = Yup.object().shape({
 
 type ProfileFormData = Yup.InferType<typeof profileSchema>
 
-interface Address {
-  id: string
-  name: string
-  phone: string
-  address: string
-  city: string
-  district: string
-  ward?: string
-  isDefault: boolean
-}
-
 export default function ProfilePage() {
   const { user, refreshUser, isAuthenticated, token } = useAuth()
   const { openModal, isOpen } = useLoginModal()
   const [loading, setLoading] = useState(false)
-  const [addresses, setAddresses] = useState<Address[]>([])
-  const [addressLoading, setAddressLoading] = useState(false)
-  const [showAddressForm, setShowAddressForm] = useState(false)
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null)
 
   useEffect(() => {
     // Only open modal if not loading, not authenticated, and modal is not already open
@@ -84,16 +69,6 @@ export default function ProfilePage() {
     }
   }, [user, reset])
 
-  useEffect(() => {
-    // Load addresses from localStorage
-    const saved = localStorage.getItem('user_addresses')
-    if (saved) {
-      try {
-        setAddresses(JSON.parse(saved))
-      } catch { }
-    }
-  }, [])
-
   const onSubmit = async (data: ProfileFormData) => {
     if (!user || !token) {
       toastError('Vui lòng đăng nhập để cập nhật thông tin')
@@ -121,59 +96,6 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleDeleteAddress = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return
-
-    setAddressLoading(true)
-    try {
-      // TODO: Call API to delete address
-      const updated = addresses.filter(a => a.id !== id)
-      setAddresses(updated)
-      localStorage.setItem('user_addresses', JSON.stringify(updated))
-      toastSuccess('Đã xóa địa chỉ')
-    } catch (error: any) {
-      toastError(error.message || 'Xóa địa chỉ thất bại')
-    } finally {
-      setAddressLoading(false)
-    }
-  }
-
-  const handleSetDefaultAddress = async (id: string) => {
-    setAddressLoading(true)
-    try {
-      // TODO: Call API to set default address
-      const updated = addresses.map(a => ({
-        ...a,
-        isDefault: a.id === id,
-      }))
-      setAddresses(updated)
-      localStorage.setItem('user_addresses', JSON.stringify(updated))
-      toastSuccess('Đã đặt làm địa chỉ mặc định')
-    } catch (error: any) {
-      toastError(error.message || 'Cập nhật thất bại')
-    } finally {
-      setAddressLoading(false)
-    }
-  }
-
-  const handleSaveAddress = (address: Address) => {
-    if (editingAddress) {
-      // Update existing
-      const updated = addresses.map(a => a.id === editingAddress.id ? address : a)
-      setAddresses(updated)
-      localStorage.setItem('user_addresses', JSON.stringify(updated))
-      toastSuccess('Đã cập nhật địa chỉ')
-    } else {
-      // Add new
-      const updated = [...addresses, address]
-      setAddresses(updated)
-      localStorage.setItem('user_addresses', JSON.stringify(updated))
-      toastSuccess('Đã thêm địa chỉ mới')
-    }
-    setShowAddressForm(false)
-    setEditingAddress(null)
   }
 
   if (!isAuthenticated || !user) {
@@ -330,274 +252,17 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {/* Section 2: Address Management - Independent Section */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Sổ địa chỉ</h2>
-              <p className="text-sm text-gray-600 mt-1">Quản lý địa chỉ giao hàng của bạn</p>
-            </div>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setEditingAddress(null)
-                setShowAddressForm(true)
-              }}
-            >
-              Thêm địa chỉ mới
-            </Button>
+        <Link
+          href="/tai-khoan/dia-chi"
+          className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-5 hover:border-primary-500"
+        >
+          <LocationIcon className="h-8 w-8 shrink-0 text-primary-600" />
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Sổ địa chỉ</h2>
+            <p className="mt-1 text-sm text-gray-600">Quản lý địa chỉ giao hàng đã lưu trên tài khoản.</p>
           </div>
-
-          {/* Addresses List */}
-          {addresses.length === 0 ? (
-            <div className="py-6 text-center sm:py-8">
-              <div className="text-gray-400 mb-4">
-                <LocationIcon className="w-16 h-16 mx-auto" />
-              </div>
-              <p className="text-gray-600 mb-4">Chưa có địa chỉ nào được lưu</p>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setEditingAddress(null)
-                  setShowAddressForm(true)
-                }}
-              >
-                Thêm địa chỉ đầu tiên
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {addresses.map((address) => (
-                <div
-                  key={address.id}
-                  className="relative rounded-lg border border-gray-200 bg-white p-6 hover:border-primary-500 transition-colors"
-                >
-                  {address.isDefault && (
-                    <div className="absolute top-4 right-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                        Mặc định
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{address.name}</h3>
-                      <p className="text-sm text-gray-600">{address.phone}</p>
-                    </div>
-
-                    <div className="text-sm text-gray-700">
-                      <p>{address.address}</p>
-                      <p>
-                        {address.ward && `${address.ward}, `}
-                        {address.district}, {address.city}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2 pt-2 border-t border-gray-200">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingAddress(address)
-                          setShowAddressForm(true)
-                        }}
-                      >
-                        Chỉnh sửa
-                      </Button>
-                      {!address.isDefault && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSetDefaultAddress(address.id)}
-                          disabled={addressLoading}
-                        >
-                          Đặt mặc định
-                        </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteAddress(address.id)}
-                        disabled={addressLoading}
-                        className="text-red-600 hover:text-red-700 hover:border-red-300"
-                      >
-                        Xóa
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Add/Edit Address Form Modal */}
-        {showAddressForm && (
-          <AddressFormModal
-            address={editingAddress}
-            onClose={() => {
-              setShowAddressForm(false)
-              setEditingAddress(null)
-            }}
-            onSave={handleSaveAddress}
-          />
-        )}
+        </Link>
       </div>
     </AccountPageShell>
-  )
-}
-
-function AddressFormModal({
-  address,
-  onClose,
-  onSave,
-}: {
-  address: Address | null
-  onClose: () => void
-  onSave: (address: Address) => void
-}) {
-  const [formData, setFormData] = useState({
-    name: address?.name || '',
-    phone: address?.phone || '',
-    address: address?.address || '',
-    city: address?.city || '',
-    district: address?.district || '',
-    ward: address?.ward || '',
-    isDefault: address?.isDefault || false,
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave({
-      id: address?.id || Date.now().toString(),
-      ...formData,
-    })
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {address ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <XIcon className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Họ tên <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Số điện thoại <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              required
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Địa chỉ <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tỉnh/Thành phố <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quận/Huyện <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phường/Xã
-            </label>
-            <input
-              type="text"
-              value={formData.ward}
-              onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isDefault"
-              checked={formData.isDefault}
-              onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label htmlFor="isDefault" className="ml-2 text-sm text-gray-700">
-              Đặt làm địa chỉ mặc định
-            </label>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              Hủy
-            </Button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              {address ? 'Cập nhật' : 'Thêm địa chỉ'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   )
 }

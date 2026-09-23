@@ -65,6 +65,7 @@ export const Header: React.FC = () => {
       <div className={`lg:py-3 ${HEADER_MOTION} transition-[padding] ${compact ? 'py-2' : 'py-2.5'}`}>
         <Container>
           <div className="relative lg:hidden">
+            {/* Single tree + CSS transitions — compact overlays search into the logo row. */}
             <div className="grid w-full grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center gap-x-2">
               <button
                 type="button"
@@ -79,7 +80,7 @@ export const Header: React.FC = () => {
                 className={`justify-self-center self-center ${HEADER_MOTION} transition-[opacity,transform] ${
                   compact
                     ? 'pointer-events-none -translate-y-1 scale-[0.96] opacity-0'
-                    : 'scale-100 opacity-100'
+                    : 'translate-y-0 scale-100 opacity-100'
                 }`}
                 aria-hidden={compact}
               >
@@ -93,10 +94,12 @@ export const Header: React.FC = () => {
 
             <div
               className={`relative z-10 min-w-0 ${HEADER_MOTION} transition-[margin] ${
-                compact ? 'mt-[calc(-2.65rem)] ml-[3.15rem] mr-[3.15rem]' : 'mt-2.5 ml-0 mr-0'
+                compact
+                  ? 'mt-[calc(-2.75rem)] ml-[3.15rem] mr-[3.15rem] sm:mt-[calc(-2.85rem)] sm:ml-[3.35rem] sm:mr-[3.35rem]'
+                  : 'mt-2.5 ml-0 mr-0'
               }`}
             >
-              <HeaderSearchDropdown popularTerms={displayTerms} />
+              <HeaderSearchDropdown popularTerms={displayTerms} stickyBar compact={compact} />
             </div>
           </div>
 

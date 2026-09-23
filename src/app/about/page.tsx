@@ -1,130 +1,78 @@
-import { BoltIcon, CheckCircleIcon, HeartIcon, ShieldCheckIcon } from '@/components/icons'
-import { Card } from '@/components/cards/Card'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Button } from '@/components/Button'
+import { HeartIcon, ShieldCheckIcon, TruckDeliveryIcon } from '@/components/icons'
+import {
+  SupportDoc,
+  SupportPanel,
+  supportBodyClass,
+  supportSectionClass,
+  supportTitleClass,
+} from '@/components/support/SupportDoc'
+import { STORE_SUPPORT } from '@/lib/constant'
 
-export default function About() {
+export const metadata: Metadata = {
+  title: 'Giới thiệu | OUPharmacy',
+  description:
+    'Nhà thuốc OUPharmacy — mua thuốc và sản phẩm sức khỏe trực tuyến, giao hàng nhanh, tư vấn dược sĩ.',
+}
+
+export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary-600">OUPharmacy</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Trang chủ
-              </a>
-              <a href="/about" className="text-primary-600 font-semibold">
-                Giới thiệu
-              </a>
-              <a href="/lien-he" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Liên hệ
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
+    <SupportDoc activeHref="/about">
+      <SupportPanel>
+        <h1 className={`mb-2 ${supportTitleClass}`}>Về Nhà thuốc OUPharmacy</h1>
+        <p className={`mb-6 ${supportBodyClass}`}>
+          OUPharmacy là nhà thuốc trực tuyến độc lập — giúp bạn tìm thuốc, thực phẩm chức năng và
+          thiết bị y tế, đặt hàng giao tận nơi và được hỗ trợ tư vấn khi cần.
+        </p>
 
-      {/* About Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Về chúng tôi
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              OUPharmacy System là giải pháp quản lý nhà thuốc hiện đại, 
-              được phát triển để đáp ứng nhu cầu quản lý toàn diện của các nhà thuốc.
+        <h2 className={`mb-3 ${supportSectionClass}`}>Chúng tôi mang đến</h2>
+        <ul className="mb-8 grid gap-3 sm:grid-cols-3">
+          <li className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5">
+            <ShieldCheckIcon className="mb-2 h-6 w-6 text-primary-600" />
+            <h3 className="mb-1 text-sm font-semibold text-slate-900">Hàng chính hãng</h3>
+            <p className="text-sm leading-6 text-slate-600">
+              Quy cách và giá rõ trên trang sản phẩm.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Sứ mệnh của chúng tôi
-              </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                Chúng tôi cam kết cung cấp những giải pháp công nghệ tiên tiến 
-                để giúp các nhà thuốc vận hành hiệu quả hơn, phục vụ bệnh nhân tốt hơn 
-                và đóng góp vào sự phát triển của ngành y tế Việt Nam.
-              </p>
-              <p className="text-lg text-gray-600">
-                Với đội ngũ phát triển giàu kinh nghiệm và hiểu biết sâu sắc về 
-                ngành dược phẩm, chúng tôi tự tin mang đến những sản phẩm chất lượng cao.
-              </p>
-            </div>
-            <div className="bg-primary-100 rounded-lg p-8">
-              <div className="text-center">
-                <div className="w-24 h-24 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircleIcon className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Chất lượng hàng đầu</h3>
-                <p className="text-gray-600">
-                  Sản phẩm được phát triển với tiêu chuẩn chất lượng cao nhất
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Values Section */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              Giá trị cốt lõi
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BoltIcon className="w-8 h-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Đổi mới</h3>
-                <p className="text-gray-600">
-                  Luôn tìm kiếm và áp dụng những công nghệ mới nhất để cải thiện sản phẩm.
-                </p>
-              </Card>
-
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <HeartIcon className="w-8 h-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Tận tâm</h3>
-                <p className="text-gray-600">
-                  Đặt lợi ích của khách hàng lên hàng đầu trong mọi quyết định.
-                </p>
-              </Card>
-
-              <Card hover className="text-center">
-                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ShieldCheckIcon className="w-8 h-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Tin cậy</h3>
-                <p className="text-gray-600">
-                  Xây dựng mối quan hệ dài hạn dựa trên sự tin tưởng và minh bạch.
-                </p>
-              </Card>
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Sẵn sàng bắt đầu?
-            </h2>
-            <p className="text-lg text-gray-600 mb-8">
-              Liên hệ với chúng tôi để tìm hiểu thêm về giải pháp OUPharmacy System
+          </li>
+          <li className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5">
+            <TruckDeliveryIcon className="mb-2 h-6 w-6 text-primary-600" />
+            <h3 className="mb-1 text-sm font-semibold text-slate-900">Giao hàng nhanh</h3>
+            <p className="text-sm leading-6 text-slate-600">
+              Theo dõi đơn trong tài khoản theo phương thức đã chọn.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg">
-                Liên hệ ngay
-              </Button>
-              <Button variant="outline" size="lg">
-                Xem demo
-              </Button>
-            </div>
-          </div>
+          </li>
+          <li className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5">
+            <HeartIcon className="mb-2 h-6 w-6 text-primary-600" />
+            <h3 className="mb-1 text-sm font-semibold text-slate-900">Tư vấn tận tâm</h3>
+            <p className="text-sm leading-6 text-slate-600">
+              Tư vấn dược sĩ, đặt lịch khám hoặc gửi yêu cầu mua thuốc.
+            </p>
+          </li>
+        </ul>
+
+        <h2 className={`mb-2 ${supportSectionClass}`}>Liên hệ hỗ trợ</h2>
+        <p className={`mb-5 ${supportBodyClass}`}>
+          Hotline{' '}
+          <a
+            href={`tel:${STORE_SUPPORT.HOTLINE_TEL}`}
+            className="font-medium text-primary-700 hover:underline"
+          >
+            {STORE_SUPPORT.HOTLINE_DISPLAY}
+          </a>
+          , hoặc gửi tin qua trang liên hệ.
+        </p>
+
+        <div className="flex flex-col gap-2.5 sm:flex-row">
+          <Link href={STORE_SUPPORT.CONTACT_HREF}>
+            <Button>Liên hệ</Button>
+          </Link>
+          <Link href="/tim-kiem">
+            <Button variant="outline">Tiếp tục mua sắm</Button>
+          </Link>
         </div>
-      </section>
-    </main>
+      </SupportPanel>
+    </SupportDoc>
   )
 }

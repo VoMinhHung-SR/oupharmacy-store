@@ -1,4 +1,4 @@
-/** Red −% pill for catalog promo (PDP — Long Châu style). */
+/** Red −% pill for catalog promo (PDP). */
 
 type CatalogDiscountBadgeProps = {
   percent: number
