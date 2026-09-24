@@ -139,11 +139,6 @@ export const PLACEHOLDER_PAGE_ACTIONS: PlaceholderPageAction[] = [
   { label: 'Tiếp tục mua sắm', href: '/tim-kiem', variant: 'outline' },
 ]
 
-export const MED_REMINDER_PLACEHOLDER_ACTIONS: PlaceholderPageAction[] = [
-  { label: 'Xem tủ thuốc', href: STORE_SUPPORT.CABINET_HREF, variant: 'primary' },
-  { label: 'Tư vấn dược sĩ', href: STORE_SUPPORT.CONSULT_HREF, variant: 'outline' },
-]
-
 import type { HomeQuickLinkIconId } from '@/components/icons/categoryIconMap'
 
 export type { HomeQuickLinkIconId }
@@ -166,7 +161,6 @@ export const HOME_QUICK_LINKS: HomeQuickLink[] = [
     iconId: 'clock',
     title: 'Nhắc uống thuốc',
     href: STORE_SUPPORT.MED_REMINDER_HREF,
-    comingSoon: true,
   },
   { iconId: 'jar-of-pills', title: 'Tủ thuốc', href: STORE_SUPPORT.CABINET_HREF },
   {

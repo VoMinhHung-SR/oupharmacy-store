@@ -78,7 +78,7 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 | Section | Source | Notes |
 |---------|--------|--------|
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
-| Quick cate | `HOME_QUICK_LINKS` | Live: mua thuốc / tư vấn / đơn / tủ thuốc; **Sắp có:** nhắc uống (`/nhac-uong-thuoc`), tra cứu. Hotline demo `STORE_SUPPORT` `1800 6868`. |
+| Quick cate | `HOME_QUICK_LINKS` | Live: mua thuốc / tư vấn / đơn / nhắc uống (`/nhac-uong-thuoc`, cabinet alerts) / tủ thuốc; **Sắp có:** tra cứu. Hotline demo `STORE_SUPPORT` `1800 6868`. |
 | Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: `window_templates` (VN day_offset); pool daily seed; rail ≤12; **upcoming** badge `-xx%` (no revealed %); **live** shows flash −10…35%; exclude Hot IDs; not checkout (D-01) |
 | Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; −% chỉ khi BE có `compare_at_price` / `discount_percent` **thật** (D-PRC-03); sort giảm dần theo % |
 | Featured categories | `home/featured-categories.response.json` | Href `/{slug}` (không `/categories/…`); later category API |
