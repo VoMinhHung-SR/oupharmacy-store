@@ -1,13 +1,16 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useCart } from '@/contexts/CartContext'
 import { useOrder, useCancelOrder } from '@/lib/hooks/useOrders'
 import Link from 'next/link'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import Image from 'next/image'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { toastSuccess, toastError } from '@/lib/utils/toast'
+import { reorderOrderToCart } from '@/lib/utils/reorderOrderToCart'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
 import { AccountPageHeader } from '@/components/account/AccountPageHeader'
 import { ShippingAddressDisplay } from '@/components/checkout/ShippingAddressDisplay'
@@ -19,6 +22,7 @@ interface Props {
 
 const statusMap: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Đang chờ xử lý', color: 'bg-yellow-100 text-yellow-800' },
+  PREORDER_PENDING_STOCK: { label: 'Đặt trước — chờ hàng', color: 'bg-amber-100 text-amber-900' },
   CONFIRMED: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800' },
   SHIPPING: { label: 'Đang giao hàng', color: 'bg-purple-100 text-purple-800' },
   DELIVERED: { label: 'Đã giao', color: 'bg-green-100 text-green-800' },
@@ -26,13 +30,17 @@ const statusMap: Record<string, { label: string; color: string }> = {
 }
 
 const trackingFlow = ['PENDING', 'CONFIRMED', 'SHIPPING', 'DELIVERED']
+const preorderTrackingFlow = ['PREORDER_PENDING_STOCK', 'CONFIRMED', 'SHIPPING', 'DELIVERED']
 
 export default function OrderDetailPage({ params }: Props) {
+  const router = useRouter()
   const { isAuthenticated, loading } = useAuth()
+  const { add: addToCart } = useCart()
   const { openModal, isOpen } = useLoginModal()
   const orderNumber = params.orderNumber
   const { data: order, isLoading, error } = useOrder(orderNumber)
   const cancelOrderMutation = useCancelOrder()
+  const [isReordering, setIsReordering] = useState(false)
   const trackingCode = (order as any)?.tracking_code as string | undefined
   const trackingTimeline = ((order as any)?.tracking_timeline || []) as Array<{
     status: string
@@ -40,10 +48,33 @@ export default function OrderDetailPage({ params }: Props) {
     note?: string
   }>
   const shouldShowTracking = !!trackingCode || trackingTimeline.length > 0
-  const canCancelOrder = order?.status === 'PENDING'
+  const canCancelOrder =
+    order?.status === 'PENDING' || order?.status === 'PREORDER_PENDING_STOCK'
+
+  const handleReorder = async () => {
+    if (!order || isReordering) return
+    setIsReordering(true)
+    try {
+      const result = await reorderOrderToCart(order, addToCart)
+      if (result.added === 0) {
+        toastError('Không thêm được sản phẩm nào vào giỏ. Vui lòng thử lại hoặc chọn sản phẩm khác.')
+        return
+      }
+      if (result.skipped > 0) {
+        toastSuccess(`Đã thêm ${result.added}/${result.total} sản phẩm vào giỏ hàng.`)
+      } else {
+        toastSuccess(`Đã thêm ${result.added} sản phẩm vào giỏ hàng.`)
+      }
+      router.push('/gio-hang')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Không thể mua lại đơn này. Vui lòng thử lại.')
+    } finally {
+      setIsReordering(false)
+    }
+  }
 
   const handleCancelOrder = async () => {
-    if (!order || order.status !== 'PENDING') return
+    if (!order || (order.status !== 'PENDING' && order.status !== 'PREORDER_PENDING_STOCK')) return
     const confirmed = typeof window !== 'undefined' && window.confirm('Bạn có chắc muốn hủy đơn hàng này?')
     if (!confirmed) return
     try {
@@ -88,8 +119,10 @@ export default function OrderDetailPage({ params }: Props) {
 
   const getTrackingSteps = () => {
     const currentStatus = order?.status || 'PENDING'
-    const currentIndex = trackingFlow.indexOf(currentStatus)
-    return trackingFlow.map((status, index) => {
+    const flow =
+      currentStatus === 'PREORDER_PENDING_STOCK' ? preorderTrackingFlow : trackingFlow
+    const currentIndex = flow.indexOf(currentStatus)
+    return flow.map((status, index) => {
       const timelineNode = trackingTimeline.find((item) => item.status === status)
       const done = currentIndex >= index
       const isCurrent = currentStatus === status
@@ -331,9 +364,17 @@ export default function OrderDetailPage({ params }: Props) {
                     {cancelOrderMutation.isPending ? 'Đang xử lý...' : 'Hủy đơn hàng'}
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleReorder}
+                  disabled={isReordering || !(order.items?.length > 0)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isReordering ? 'Đang thêm vào giỏ...' : 'Mua lại'}
+                </button>
                 <Link
                   href="/tai-khoan/don-hang"
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
                 >
                   Về danh sách đơn
                 </Link>

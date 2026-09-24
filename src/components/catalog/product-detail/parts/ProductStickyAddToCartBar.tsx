@@ -23,6 +23,8 @@ interface ProductStickyAddToCartBarProps {
   maxQuantity: number
   onQuantityChange: (value: number) => void
   onAddToCart: () => void
+  /** OOS + allow_preorder — sticky CTA shows “Đặt trước”. */
+  addToCartLabel?: string
 }
 
 export function ProductStickyAddToCartBar({
@@ -39,6 +41,7 @@ export function ProductStickyAddToCartBar({
   maxQuantity,
   onQuantityChange,
   onAddToCart,
+  addToCartLabel = 'Thêm vào giỏ',
 }: ProductStickyAddToCartBarProps) {
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false)
   const unitMenuRef = useRef<HTMLDivElement | null>(null)
@@ -151,7 +154,7 @@ export function ProductStickyAddToCartBar({
               className="h-9 min-w-0 flex-1 rounded-full px-2.5 text-xs whitespace-nowrap sm:h-9 sm:min-w-[8.5rem] sm:px-3 sm:text-sm md:h-10 md:min-w-[150px] md:flex-none md:px-4 md:text-base"
               size="md"
             >
-              Thêm vào giỏ
+              {addToCartLabel}
             </Button>
           </div>
         </div>

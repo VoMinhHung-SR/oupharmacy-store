@@ -175,8 +175,17 @@ export function ProductDetailPurchaseBlock({
         </div>
       </div>
 
-      {product.in_stock > 0 ? (
+      {product.in_stock > 0 || product.allow_preorder ? (
         <div>
+          {product.in_stock <= 0 && product.allow_preorder ? (
+            <p className="mb-2 text-sm text-amber-800">
+              Hết hàng — có thể đặt trước
+              {product.preorder_eta_days
+                ? ` (dự kiến ~${product.preorder_eta_days} ngày)`
+                : ''}
+              .
+            </p>
+          ) : null}
           <label className="mb-2 block text-xs font-medium text-gray-700 sm:text-sm">Chọn số lượng</label>
           <div className="flex min-w-0 flex-col gap-2.5 md:flex-row md:items-stretch md:gap-3">
             <div className="min-w-0 md:flex-1">
@@ -190,11 +199,10 @@ export function ProductDetailPurchaseBlock({
             </div>
             <Button
               onClick={onAddToCart}
-              disabled={product.in_stock === 0}
               className="h-11 w-full rounded-xl text-base md:h-12 md:flex-1"
               size="lg"
             >
-              Thêm vào giỏ
+              {product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'}
             </Button>
           </div>
           <div ref={purchaseActionSectionRef} className="h-px w-full" aria-hidden="true" />

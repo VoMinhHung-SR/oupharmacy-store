@@ -39,6 +39,8 @@ interface ProductCardProps {
     product_slug?: string
     href?: string
     in_stock?: number
+    allow_preorder?: boolean
+    preorder_eta_days?: number | null
     variant_count?: number
     brand_name?: string
     brand_country?: string | null
@@ -136,6 +138,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (!product.variant_unit_id) return
 
     const inStock = product.in_stock ?? 0
+    const canPreorder = Boolean(product.allow_preorder)
     const selectedUnitIdForCart = selectedUnit?.unit_id ?? product.product_variant_unit_id ?? null
     const existingItem = items.find(
       (i) =>
@@ -145,12 +148,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
-    if (inStock === 0) {
+    if (inStock === 0 && !canPreorder) {
       toastWarning('Sản phẩm đã hết hàng')
       return
     }
 
-    if (totalQty > inStock) {
+    if (totalQty > inStock && !canPreorder) {
       toastWarning(
         `Số lượng vượt quá tồn kho. Hiện có ${inStock} sản phẩm trong kho. Bạn đã có ${currentQtyInCart} sản phẩm trong giỏ hàng.`
       )
@@ -349,7 +352,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   className="w-full rounded-lg bg-primary-600 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:text-sm"
                   onClick={handleAddToCart}
                 >
-                  Thêm vào giỏ
+                  {(product.in_stock ?? 0) <= 0 && product.allow_preorder
+                    ? 'Đặt trước'
+                    : 'Thêm vào giỏ'}
                 </button>
               )}
             </div>

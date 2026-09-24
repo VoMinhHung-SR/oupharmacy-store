@@ -69,13 +69,20 @@ export function useProductDetailPage({
   const isConsultPrice =
     effectivePriceDisplay === PRICE_CONSULT || String(effectivePriceValue) === PRICE_CONSULT
 
+  const canPreorder = Boolean(product?.allow_preorder)
   const maxSelectableQuantity = product
-    ? Math.min(product.in_stock, MAX_PURCHASE_QUANTITY)
+    ? canPreorder
+      ? MAX_PURCHASE_QUANTITY
+      : Math.min(Math.max(product.in_stock, 0), MAX_PURCHASE_QUANTITY)
     : MAX_PURCHASE_QUANTITY
 
   const showStickyPurchaseBar = useSectionStickyVisibility({
     targetRef: purchaseActionSectionRef,
-    enabled: !loading && Boolean(product) && !isConsultPrice && (product?.in_stock ?? 0) > 0,
+    enabled:
+      !loading &&
+      Boolean(product) &&
+      !isConsultPrice &&
+      ((product?.in_stock ?? 0) > 0 || canPreorder),
   })
 
   const getCartItem = () => {
@@ -109,12 +116,12 @@ export function useProductDetailPage({
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + quantity
 
-    if (product.in_stock === 0) {
+    if (product.in_stock === 0 && !product.allow_preorder) {
       toastWarning('Sản phẩm đã hết hàng')
       return false
     }
 
-    if (totalQty > product.in_stock) {
+    if (totalQty > product.in_stock && !product.allow_preorder) {
       toastWarning(
         `Số lượng vượt quá tồn kho. Hiện có ${product.in_stock} sản phẩm trong kho. Bạn đã có ${currentQtyInCart} sản phẩm trong giỏ hàng.`
       )
