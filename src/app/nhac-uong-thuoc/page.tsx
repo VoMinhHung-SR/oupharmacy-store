@@ -1,19 +1,38 @@
-import type { Metadata } from 'next'
-import { StaticFeaturePlaceholder } from '@/components/common/StaticFeaturePlaceholder'
-import { MED_REMINDER_PLACEHOLDER_ACTIONS } from '@/lib/constant'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Nhắc uống thuốc | OUPharmacy',
-  description: 'Nhắc lịch uống thuốc theo tủ thuốc cá nhân — sắp ra mắt.',
-}
+import React from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useLoginModal } from '@/contexts/LoginModalContext'
+import { AccountPageShell } from '@/components/account/AccountPageShell'
+import { AccountHubSkeleton } from '@/components/skeletons'
+import { MedicationReminderWorkspace } from '@/components/cabinet/MedicationReminderWorkspace'
+import { STORE_SUPPORT } from '@/lib/constant'
 
 export default function MedicationReminderPage() {
+  const { isAuthenticated, loading } = useAuth()
+  const { openModal, isOpen } = useLoginModal()
+
+  React.useEffect(() => {
+    if (!loading && !isAuthenticated && !isOpen) {
+      openModal(STORE_SUPPORT.MED_REMINDER_HREF)
+    }
+  }, [isAuthenticated, loading, openModal, isOpen])
+
+  if (loading) {
+    return (
+      <AccountPageShell>
+        <AccountHubSkeleton />
+      </AccountPageShell>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
-    <StaticFeaturePlaceholder
-      icon={<span aria-hidden="true">⏰</span>}
-      title="Nhắc uống thuốc"
-      description="Tính năng nhắc lịch uống theo giờ đang được hoàn thiện, gắn với tủ thuốc của bạn. Hiện tại quý khách có thể quản lý thuốc trong tủ thuốc hoặc chat với dược sĩ."
-      actions={MED_REMINDER_PLACEHOLDER_ACTIONS}
-    />
+    <AccountPageShell>
+      <MedicationReminderWorkspace />
+    </AccountPageShell>
   )
 }
