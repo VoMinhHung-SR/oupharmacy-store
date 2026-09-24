@@ -27,7 +27,7 @@ export interface Order {
   subtotal: number
   shipping_fee: number
   total: number
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
+  status: 'PENDING' | 'PREORDER_PENDING_STOCK' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
   notes?: string
   shipping_method: number
   payment_method: number

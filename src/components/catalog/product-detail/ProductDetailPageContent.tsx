@@ -118,6 +118,9 @@ export function ProductDetailPageContent({
         maxQuantity={state.maxSelectableQuantity}
         onQuantityChange={state.handleQuantityChange}
         onAddToCart={state.handleAddToCart}
+        addToCartLabel={
+          product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'
+        }
       />
     </Container>
   )

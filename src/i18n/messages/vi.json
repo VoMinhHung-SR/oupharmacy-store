@@ -286,6 +286,7 @@
       "missingUnit": "Không xác định được đơn vị bán của sản phẩm này. Hãy thử Thêm thuốc.",
       "status": {
         "PENDING": "Chờ xử lý",
+        "PREORDER_PENDING_STOCK": "Đặt trước — chờ hàng",
         "CONFIRMED": "Đã xác nhận",
         "SHIPPING": "Đang giao",
         "DELIVERED": "Đã nhận",

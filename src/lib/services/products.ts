@@ -99,6 +99,9 @@ export interface Product {
   price_value: number
   price_display?: string
   in_stock: number
+  /** When true, OOS variants can still be added to cart / checked out as preorder. */
+  allow_preorder?: boolean
+  preorder_eta_days?: number | null
   image?: string
   image_url?: string
   images?: string[]
@@ -279,6 +282,8 @@ export interface ProductCardPayload {
   product_slug?: string
   href?: string
   in_stock?: number
+  allow_preorder?: boolean
+  preorder_eta_days?: number | null
   variant_count?: number
   brand_name?: string
   brand_country?: string | null
@@ -485,6 +490,8 @@ export function buildProductCardPayload(product: Product, fallbackCategorySlug?:
     product_slug: productSlug,
     href: detailHref ?? undefined,
     in_stock: product.in_stock,
+    allow_preorder: Boolean(product.allow_preorder),
+    preorder_eta_days: product.preorder_eta_days ?? null,
     variant_count: variantCount > 1 ? variantCount : undefined,
     brand_name: product.brand?.name,
     brand_country: product.brand?.country ?? undefined,
@@ -510,6 +517,11 @@ export function normalizeProduct(raw: RawProduct): Product {
     packing,
     price_value: Number(raw.price_value ?? 0) || 0,
     in_stock: Number(raw.in_stock ?? 0) || 0,
+    allow_preorder: Boolean(raw.allow_preorder),
+    preorder_eta_days:
+      raw.preorder_eta_days == null || raw.preorder_eta_days === ''
+        ? null
+        : Number(raw.preorder_eta_days) || null,
     compare_at_price: compareAt !== undefined && !Number.isNaN(compareAt) ? compareAt : undefined,
     discount_percent: Number(raw.discount_percent ?? 0) || 0,
     default_unit_id:

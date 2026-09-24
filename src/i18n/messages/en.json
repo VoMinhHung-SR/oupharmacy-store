@@ -286,6 +286,7 @@
       "missingUnit": "Could not resolve a sell unit for this product. Try Add medicine instead.",
       "status": {
         "PENDING": "Pending",
+        "PREORDER_PENDING_STOCK": "Preorder — awaiting stock",
         "CONFIRMED": "Confirmed",
         "SHIPPING": "Shipping",
         "DELIVERED": "Delivered",

@@ -104,6 +104,7 @@ export default function OrderConfirmationPage() {
     : null
   const statusText: Record<string, string> = {
     PENDING: 'Đang chờ xử lý',
+    PREORDER_PENDING_STOCK: 'Đặt trước — chờ hàng',
     CONFIRMED: 'Đã xác nhận',
     SHIPPING: 'Đang giao hàng',
     DELIVERED: 'Đã giao',
@@ -111,6 +112,7 @@ export default function OrderConfirmationPage() {
   }
   const statusColor: Record<string, string> = {
     PENDING: 'bg-yellow-100 text-yellow-800',
+    PREORDER_PENDING_STOCK: 'bg-amber-100 text-amber-900',
     CONFIRMED: 'bg-blue-100 text-blue-800',
     SHIPPING: 'bg-purple-100 text-purple-800',
     DELIVERED: 'bg-green-100 text-green-800',
@@ -150,6 +152,11 @@ export default function OrderConfirmationPage() {
                 Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn:{' '}
                 <span className="font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</span>
               </p>
+              {order.status === 'PREORDER_PENDING_STOCK' ? (
+                <p className="mt-2 text-sm text-amber-900">
+                  Đơn đặt trước — cửa hàng sẽ liên hệ / giao khi có hàng.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>

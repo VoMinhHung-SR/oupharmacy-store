@@ -47,7 +47,7 @@ type LineDraft = {
 type ListFilter = 'received' | 'incoming' | 'all'
 
 const RECEIVED: Order['status'][] = ['DELIVERED']
-const INCOMING: Order['status'][] = ['PENDING', 'CONFIRMED', 'SHIPPING']
+const INCOMING: Order['status'][] = ['PENDING', 'PREORDER_PENDING_STOCK', 'CONFIRMED', 'SHIPPING']
 
 function ordersFromQuery(data: Order[] | OrderListResponse | undefined): Order[] {
   if (!data) return []
