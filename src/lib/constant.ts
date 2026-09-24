@@ -125,7 +125,8 @@ export const STORE_SUPPORT = {
   CONSULT_HREF: '/?consult=open',
   CONTACT_HREF: '/lien-he',
   CABINET_HREF: '/tai-khoan/tu-thuoc',
-  MED_REMINDER_HREF: '/nhac-uong-thuoc',
+  /** Home “Nhắc uống” → tủ thuốc, tab nhắc hạn. */
+  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=reminders',
 } as const
 
 export type PlaceholderPageAction = {
