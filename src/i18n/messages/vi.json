@@ -140,8 +140,36 @@
   },
   "cabinet": {
     "title": "Tủ thuốc thông minh",
+    "productEyebrow": "OUPharmacy Care",
+    "productTagline": "Quản lý thuốc tại nhà · nhắc hạn dùng · lịch uống (sắp có)",
     "titleHint": "Quản lý thuốc tại nhà và hạn sử dụng",
     "subtitle": "{name} · {count} loại thuốc",
+    "tabs": {
+      "meds": "Thuốc",
+      "medsHint": "Thêm & quản lý",
+      "reminders": "Nhắc hạn",
+      "remindersHint": "Hết hạn / sắp hết",
+      "schedule": "Lịch uống",
+      "scheduleHint": "Theo giờ · sắp có"
+    },
+    "sections": {
+      "medsTitle": "Quản lý thuốc trong tủ",
+      "medsBody": "Thêm từ đơn mua, toa khám hoặc tìm catalog. Lọc theo hạn dùng và tồn.",
+      "remindersTitle": "Nhắc hạn sử dụng",
+      "remindersBody": "Bật nhắc và xem hộp thư khi thuốc sắp hết hạn hoặc đã hết hạn.",
+      "scheduleTitle": "Lịch uống thuốc",
+      "scheduleBody": "Nhắc theo khung giờ trong ngày — tính năng đang hoàn thiện trong Tủ thuốc thông minh.",
+      "showAllMeds": "Xem tất cả thuốc"
+    },
+    "schedule": {
+      "comingTitle": "Lịch uống sắp ra mắt",
+      "comingBody": "Bạn sẽ đặt giờ uống theo từng thuốc trong tủ, đánh dấu đã uống và nhận nhắc trong app. Hiện tại hãy quản lý thuốc và bật nhắc hạn ở các tab bên cạnh.",
+      "bullet1": "Khung sáng / trưa / tối theo từng loại thuốc",
+      "bullet2": "Đánh dấu đã uống · xem lịch sử",
+      "bullet3": "Gắn với thuốc đã có trong tủ (không nhập lại)",
+      "footnote": "Chưa có thông báo đẩy. Không phải lịch uống thật cho đến khi mở tính năng.",
+      "backToMeds": "Quay lại quản lý thuốc"
+    },
     "addMedicine": "Thêm thuốc",
     "addTitle": "Thêm thuốc vào tủ",
     "searchLabel": "Tìm thuốc",
@@ -234,7 +262,7 @@
       "hint": "Hộp thư trong app. Quét hàng ngày tạo nhắc khi bật nhắc hạn trên tủ.",
       "empty": "Chưa có thông báo hạn dùng.",
       "unreadBadge": "{count} chưa đọc",
-      "markRead": "Đã đọc",
+      "markRead": "Đánh dấu đã đọc",
       "markAllRead": "Đọc hết",
       "markedRead": "Đã đánh dấu đã đọc",
       "markedAllRead": "Đã đọc hết thông báo",

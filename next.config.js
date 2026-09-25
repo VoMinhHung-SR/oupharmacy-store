@@ -69,9 +69,9 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: '/tim-nha-thuoc',
-        destination: '/nhac-uong-thuoc',
-        permanent: false,
+        source: '/nhac-uong-thuoc',
+        destination: '/tai-khoan/tu-thuoc?tab=reminders',
+        permanent: true,
       },
       {
         source: '/tiem-vac-xin',

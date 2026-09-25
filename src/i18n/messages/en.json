@@ -140,8 +140,36 @@
   },
   "cabinet": {
     "title": "Smart medicine cabinet",
+    "productEyebrow": "OUPharmacy Care",
+    "productTagline": "Manage home medicines · expiry alerts · dose schedule (soon)",
     "titleHint": "Track household medicines and expiry dates",
     "subtitle": "{name} · {count} medicines",
+    "tabs": {
+      "meds": "Medicines",
+      "medsHint": "Add & manage",
+      "reminders": "Expiry alerts",
+      "remindersHint": "Expired / soon",
+      "schedule": "Dose schedule",
+      "scheduleHint": "By time · soon"
+    },
+    "sections": {
+      "medsTitle": "Manage cabinet medicines",
+      "medsBody": "Add from orders, prescriptions, or catalog. Filter by expiry and stock.",
+      "remindersTitle": "Expiry reminders",
+      "remindersBody": "Enable scanning and review the inbox when medicines are expiring or expired.",
+      "scheduleTitle": "Dose schedule",
+      "scheduleBody": "Time-of-day reminders — coming soon inside Smart medicine cabinet.",
+      "showAllMeds": "Show all medicines"
+    },
+    "schedule": {
+      "comingTitle": "Dose schedule coming soon",
+      "comingBody": "You’ll set times per medicine, mark doses taken, and get in-app reminders. For now, manage medicines and expiry alerts in the other tabs.",
+      "bullet1": "Morning / noon / evening slots per medicine",
+      "bullet2": "Mark taken · view history",
+      "bullet3": "Tied to medicines already in your cabinet",
+      "footnote": "No push notifications yet. Not a live dose schedule until this feature ships.",
+      "backToMeds": "Back to medicines"
+    },
     "addMedicine": "Add medicine",
     "addTitle": "Add medicine to cabinet",
     "searchLabel": "Search medicine",
