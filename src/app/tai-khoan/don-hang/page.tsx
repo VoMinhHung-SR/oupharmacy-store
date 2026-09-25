@@ -17,6 +17,7 @@ const PAGE_SIZE = 10
 
 const statusMap: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Đang chờ xử lý', color: 'bg-yellow-100 text-yellow-800' },
+  PREORDER_PENDING_STOCK: { label: 'Đặt trước — chờ hàng', color: 'bg-amber-100 text-amber-900' },
   CONFIRMED: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800' },
   SHIPPING: { label: 'Đang giao hàng', color: 'bg-purple-100 text-purple-800' },
   DELIVERED: { label: 'Đã giao', color: 'bg-green-100 text-green-800' },
@@ -167,6 +168,7 @@ export default function OrdersListPage() {
                 >
                   <option value="ALL">Tất cả</option>
                   <option value="PENDING">Đang chờ xử lý</option>
+                  <option value="PREORDER_PENDING_STOCK">Đặt trước — chờ hàng</option>
                   <option value="CONFIRMED">Đã xác nhận</option>
                   <option value="SHIPPING">Đang giao hàng</option>
                   <option value="DELIVERED">Đã giao</option>

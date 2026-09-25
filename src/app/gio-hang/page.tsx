@@ -600,12 +600,19 @@ export default function CartPage() {
                       <p className="mt-2.5 text-center text-[11px] leading-snug text-slate-500">
                         Bằng việc tiếp tục, bạn đồng ý với{" "}
                         <Link
-                          href="/tai-khoan/quyen-rieng-tu"
+                          href="/dieu-khoan"
                           className="font-medium text-primary-600 underline-offset-2 hover:underline"
                         >
-                          Điều khoản dịch vụ
+                          Điều khoản sử dụng
                         </Link>{" "}
-                        của chúng tôi.
+                        và{" "}
+                        <Link
+                          href="/chinh-sach-bao-mat"
+                          className="font-medium text-primary-600 underline-offset-2 hover:underline"
+                        >
+                          chính sách bảo mật
+                        </Link>
+                        .
                       </p>
                     </div>
                   </CartReceiptCard>

@@ -8,9 +8,8 @@ import {
   ProductFilters,
   FilterGroup,
   buildProductCardPayload,
-  getListProductKey,
 } from '@/lib/services/products'
-import { applyBrandCampaignDiscount } from '@/lib/services/brandCampaigns'
+import { scatterBrandCampaignDiscounts } from '@/lib/services/brandCampaigns'
 import { Container } from '@/components/Container'
 import { ProductSortAndView } from '@/components/catalog/_shared/listing/ProductSortAndView'
 import { LoadMoreProductsButton } from '@/components/catalog/_shared/listing/LoadMoreProductsButton'
@@ -25,6 +24,7 @@ import {
   stripFacetFilters,
 } from '@/components/catalog/_shared/filters/ActiveFilters'
 import { BackdropLoading } from '@/components/BackdropLoading'
+import { PAGE_Y } from '@/lib/layout/pageLayout'
 
 type SortOption = 'bestselling' | 'price-low' | 'price-high'
 
@@ -84,9 +84,9 @@ export function SearchResultsContent({
 
   if (!query.trim() && !allowEmptyQuery) {
     return (
-      <Container className="py-8">
+      <Container className={PAGE_Y}>
         <Breadcrumb items={breadcrumbItems} />
-        <div className="py-12 text-center">
+        <div className="py-6 text-center">
           <h1 className="mb-2 text-xl font-semibold text-gray-900">Tìm kiếm sản phẩm</h1>
           <p className="mb-6 text-gray-600">Nhập từ khóa vào ô tìm kiếm ở trên để xem kết quả.</p>
           {popularTerms.length > 0 ? (
@@ -114,7 +114,7 @@ export function SearchResultsContent({
 
   if (error) {
     return (
-      <Container className="py-4">
+      <Container className={PAGE_Y}>
         <Breadcrumb items={breadcrumbItems} />
         <div className="mt-6 text-center text-gray-600">
           Đã xảy ra lỗi khi tải kết quả. Vui lòng thử lại.
@@ -124,7 +124,7 @@ export function SearchResultsContent({
   }
 
   return (
-    <Container className="py-4">
+    <Container className={PAGE_Y}>
       <div className="mb-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
@@ -197,16 +197,17 @@ export function SearchResultsContent({
             </div>
           ) : (
             <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-              {products.map((product) => {
-                const card = buildProductCardPayload(product)
-                const withPromo =
-                  brandCampaignPromo != null
-                    ? applyBrandCampaignDiscount(card, brandCampaignPromo)
-                    : card
-                return (
-                  <ProductCard key={getListProductKey(product)} product={withPromo} />
-                )
-              })}
+              {(brandCampaignPromo != null
+                ? scatterBrandCampaignDiscounts(
+                    products.map((product) => buildProductCardPayload(product)),
+                    brandCampaignPromo,
+                    `search:${brandCampaignPromo}`,
+                    totalCount
+                  )
+                : products.map((product) => buildProductCardPayload(product))
+              ).map((card) => (
+                <ProductCard key={card.id} product={card} />
+              ))}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Container from '@/components/Container'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 
 export interface CampaignEmptyProductsProps {
   message: string
@@ -12,7 +13,7 @@ export function CampaignEmptyProducts({
   browseLabel,
 }: CampaignEmptyProductsProps) {
   return (
-    <section className="py-12" aria-label={message}>
+    <section className={SECTION_Y} aria-label={message}>
       <Container className="text-center">
         <p className="text-base text-gray-600">{message}</p>
         <Link

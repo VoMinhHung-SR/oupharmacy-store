@@ -5,7 +5,7 @@ import { SIDEBAR } from '@/lib/constant'
 interface CategoryListingSidebarProps {
   facetFilters?: FilterGroup[]
   filtersLoading: boolean
-  categoryFilters: Omit<ProductFilters, 'category'>
+  categoryFilters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
 }
 

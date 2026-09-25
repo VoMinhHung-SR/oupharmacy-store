@@ -38,6 +38,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Giỏ hàng | `src/app/gio-hang/`, `CartContext` |
 | Tài khoản / đơn hàng user | `src/app/tai-khoan/` |
 | Smart Medicine Cabinet | `src/app/tai-khoan/tu-thuoc/`, `src/components/cabinet/`, `docs/smart-medicine-cabinet.md` |
+| Consultation hub (FAB chat) | `src/components/consultation/`, `docs/consultation-hub.md` |
 | Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
 | Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
 | Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |

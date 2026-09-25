@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,15 +13,15 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 }
 
-// Initialize Firebase
+/** Must match Clinic FE `VITE_APP_ENV` so conversations/messages share collections. */
+export const FIRESTORE_APP_ENV = process.env.NEXT_PUBLIC_APP_ENV || 'dev'
+
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 const auth = getAuth(app)
+const db = getFirestore(app)
 
-// Configure Google Auth Provider
 const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope('email')
 googleProvider.addScope('profile')
 
-export { app, auth, googleProvider }
-
-
+export { app, auth, db, googleProvider }

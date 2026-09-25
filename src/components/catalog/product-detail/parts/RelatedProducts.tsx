@@ -10,8 +10,8 @@ import {
   getListProductKey,
 } from '@/lib/services/products'
 import { ProductCard } from '@/components/cards/ProductCard'
-import { Container } from '@/components/Container'
 import { ProductGridSkeleton } from '@/components/skeletons'
+import { PAGE_Y_SECTION } from '@/lib/layout/pageLayout'
 
 interface RelatedProductsProps {
   currentProduct: Product
@@ -54,10 +54,10 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
 
   if (isLoading) {
     return (
-      <Container className="py-8">
+      <section className={PAGE_Y_SECTION} aria-label="Sản phẩm liên quan">
         <h2 className="mb-6 text-2xl font-semibold text-gray-900">Sản phẩm liên quan</h2>
         <ProductGridSkeleton count={6} columns="related" />
-      </Container>
+      </section>
     )
   }
 
@@ -66,18 +66,16 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = ({
   }
 
   return (
-    <Container className="py-8">
+    <section className={PAGE_Y_SECTION} aria-label="Sản phẩm liên quan">
       <h2 className="mb-6 text-2xl font-semibold text-gray-900">Sản phẩm liên quan</h2>
       <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {relatedProducts.map((product) => {
-          return (
-            <ProductCard
-              key={getListProductKey(product)}
-              product={buildProductCardPayload(product)}
-            />
-          )
-        })}
+        {relatedProducts.map((product) => (
+          <ProductCard
+            key={getListProductKey(product)}
+            product={buildProductCardPayload(product)}
+          />
+        ))}
       </div>
-    </Container>
+    </section>
   )
 }

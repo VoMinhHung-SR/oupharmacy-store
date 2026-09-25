@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import React from 'react'
-import { Container } from '@/components/Container'
+import { PageShell } from '@/components/layout/PageShell'
 import { Breadcrumb, CrumbItem } from '@/components/Breadcrumb'
 
 const DEFAULT_DESCRIPTION =
@@ -23,10 +23,10 @@ export function ComingSoonPage({
   icon = '✨',
 }: ComingSoonPageProps) {
   return (
-    <Container className="py-8 pb-16">
-      <Breadcrumb items={breadcrumbItems} className="mb-6" />
+    <PageShell>
+      <Breadcrumb items={breadcrumbItems} />
 
-      <div className="mx-auto max-w-xl rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
+      <div className="mx-auto max-w-xl rounded-xl border border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:px-8">
         <div className="text-5xl" aria-hidden>
           {icon}
         </div>
@@ -49,6 +49,6 @@ export function ComingSoonPage({
           </Link>
         </div>
       </div>
-    </Container>
+    </PageShell>
   )
 }

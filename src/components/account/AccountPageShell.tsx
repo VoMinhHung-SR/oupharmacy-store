@@ -1,14 +1,10 @@
 import React from 'react'
-import { Container } from '@/components/Container'
+import { PageShell } from '@/components/layout/PageShell'
 
 interface AccountPageShellProps {
   children: React.ReactNode
 }
 
 export function AccountPageShell({ children }: AccountPageShellProps) {
-  return (
-    <Container className="py-6">
-      <div className="mx-auto w-full max-w-5xl space-y-6">{children}</div>
-    </Container>
-  )
+  return <PageShell innerClassName="sm:space-y-5">{children}</PageShell>
 }

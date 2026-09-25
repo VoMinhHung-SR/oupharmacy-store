@@ -35,7 +35,7 @@ export const HeroBanner: React.FC = () => {
               <div className="mb-3 text-xl font-bold text-yellow-300 sm:mb-4 sm:text-2xl md:text-3xl">
                 Giảm đến 35%
               </div>
-              <Link href="/categories/duoc-my-pham">
+              <Link href="/duoc-my-pham">
                 <Button
                   variant="secondary"
                   size="sm"
@@ -52,7 +52,7 @@ export const HeroBanner: React.FC = () => {
               <div className="mb-3 text-xl font-bold text-yellow-300 sm:mb-4 sm:text-2xl md:text-3xl">
                 Giảm đến 30%
               </div>
-              <Link href="/categories/thuc-pham-chuc-nang">
+              <Link href="/thuc-pham-chuc-nang">
                 <Button
                   variant="secondary"
                   size="sm"

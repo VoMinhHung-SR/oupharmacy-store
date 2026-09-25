@@ -58,8 +58,8 @@ export default async function CampaignLandingPage({
   const products = await loadCampaignScopedProducts(campaign)
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <Container className="space-y-5 py-4 sm:space-y-6 sm:py-6">
+    <main className="bg-gray-50">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         {campaign.is_preview ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
             {t('previewBanner')}

@@ -1,14 +1,22 @@
 'use client'
 
-import { ClockIcon, LocationIcon, MailIcon, PhoneIcon } from '@/components/icons'
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/Button'
+import { ClockIcon, MailIcon, PhoneIcon } from '@/components/icons'
+import {
+  SupportDoc,
+  SupportPanel,
+  supportBodyClass,
+  supportMutedClass,
+  supportSectionClass,
+  supportTitleClass,
+} from '@/components/support/SupportDoc'
+import { STORE_SUPPORT } from '@/lib/constant'
 import { submitContactMessage } from '@/lib/services/contact'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 type ContactFormData = {
   firstName: string
-  companyName: string
   email: string
   phone: string
   subject: string
@@ -17,12 +25,14 @@ type ContactFormData = {
 
 const initialFormData: ContactFormData = {
   firstName: '',
-  companyName: '',
   email: '',
   phone: '',
   subject: '',
   message: '',
 }
+
+const fieldClass =
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20'
 
 export default function ContactPage() {
   const [form, setForm] = useState<ContactFormData>(initialFormData)
@@ -32,27 +42,23 @@ export default function ContactPage() {
 
   const subjectLabel = useMemo(() => {
     switch (form.subject) {
-      case 'pricing':
-        return 'Thông tin giá'
-      case 'support':
-        return 'Hỗ trợ kỹ thuật'
-      case 'partnership':
-        return 'Hợp tác'
+      case 'order':
+        return 'Đơn hàng / giao nhận'
+      case 'medicine':
+        return 'Tư vấn thuốc / sản phẩm'
+      case 'complaint':
+        return 'Khiếu nại'
       case 'policy':
         return 'Chính sách'
-      case 'demo':
-        return 'Yêu cầu demo'
+      case 'other':
+        return 'Khác'
       default:
         return ''
     }
   }, [form.subject])
 
   const requestType: 'support' | 'policy' | 'other' =
-    form.subject === 'policy'
-      ? 'policy'
-      : form.subject === 'other'
-      ? 'other'
-      : 'support'
+    form.subject === 'policy' ? 'policy' : form.subject === 'other' ? 'other' : 'support'
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -67,16 +73,12 @@ export default function ContactPage() {
     setSubmitSuccess(null)
     setIsSubmitting(true)
 
-    const fullMessage = form.companyName.trim()
-      ? `Công ty: ${form.companyName.trim()}\n\n${form.message.trim()}`
-      : form.message.trim()
-
     const result = await submitContactMessage({
       name: form.firstName.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
       subject: subjectLabel || undefined,
-      message: fullMessage,
+      message: form.message.trim(),
       request_type: requestType,
     })
 
@@ -87,77 +89,45 @@ export default function ContactPage() {
       return
     }
 
-    const successMessage =
-      'Cảm ơn bạn đã tin tưởng lựa chọn chúng tôi. Chúng tôi sẽ phản hồi yêu cầu của bạn trong thời gian sớm nhất.'
-    setSubmitSuccess(successMessage)
-    toastSuccess('Gửi yêu cầu thành công. Chúng tôi sẽ phản hồi sớm nhất.')
+    setSubmitSuccess('Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể.')
+    toastSuccess('Gửi yêu cầu thành công.')
     setForm(initialFormData)
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <h1 className="mb-3 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Liên hệ với chúng tôi</h1>
-          <p className="mx-auto max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
-              Chúng tôi luôn sẵn sàng hỗ trợ và tư vấn cho bạn về giải pháp OUPharmacy System
+    <SupportDoc activeHref="/lien-he">
+      <div className="space-y-4 sm:space-y-5">
+        <SupportPanel>
+          <h1 className={supportTitleClass}>Liên hệ với chúng tôi</h1>
+          <p className={`mt-2 max-w-2xl ${supportBodyClass}`}>
+            Hỗ trợ đơn hàng, sản phẩm và chính sách tại Nhà thuốc OUPharmacy. Chọn chủ đề phù hợp để
+            đội ngũ xử lý nhanh hơn.
           </p>
-        </div>
+        </SupportPanel>
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 lg:col-span-7">
-            <h2 className="mb-5 text-xl font-semibold text-gray-900">Gửi tin nhắn</h2>
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Họ và tên *
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      value={form.firstName}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nhập họ và tên"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Tên công ty
-                    </label>
-                    <input
-                      type="text"
-                      id="companyName"
-                      name="companyName"
-                      value={form.companyName}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nhập tên công ty"
-                    />
-                  </div>
-                </div>
-
+        <div className="grid gap-4 lg:grid-cols-5 lg:gap-5">
+          <SupportPanel className="lg:col-span-3">
+            <h2 className={`mb-4 ${supportSectionClass}`}>Gửi tin nhắn</h2>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
+                  <label htmlFor="firstName" className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Họ và tên <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={form.email}
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={form.firstName}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Nhập địa chỉ email"
+                    className={fieldClass}
+                    placeholder="Nhập họ và tên"
+                    autoComplete="name"
                   />
                 </div>
-
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-slate-700">
                     Số điện thoại
                   </label>
                   <input
@@ -166,101 +136,133 @@ export default function ContactPage() {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={fieldClass}
                     placeholder="Nhập số điện thoại"
+                    autoComplete="tel"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Chủ đề *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={form.subject}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  >
-                    <option value="" className="text-gray-500">Chọn chủ đề</option>
-                    <option value="demo">Yêu cầu demo</option>
-                    <option value="pricing">Thông tin giá</option>
-                    <option value="support">Hỗ trợ kỹ thuật</option>
-                    <option value="policy">Chính sách</option>
-                    <option value="partnership">Hợp tác</option>
-                    <option value="other">Khác</option>
-                  </select>
-                </div>
+              <div>
+                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className={fieldClass}
+                  placeholder="Nhập địa chỉ email"
+                  autoComplete="email"
+                />
+              </div>
 
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nội dung tin nhắn *
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    value={form.message}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Nhập nội dung tin nhắn của bạn"
-                  />
-                </div>
+              <div>
+                <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Chủ đề <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="subject"
+                  name="subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  required
+                  className={fieldClass}
+                >
+                  <option value="">Chọn chủ đề</option>
+                  <option value="order">Đơn hàng / giao nhận</option>
+                  <option value="medicine">Tư vấn thuốc / sản phẩm</option>
+                  <option value="complaint">Khiếu nại</option>
+                  <option value="policy">Chính sách</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
 
-                {submitError ? (
-                  <p className="text-sm text-red-600">{submitError}</p>
-                ) : null}
-                {submitSuccess ? (
-                  <p className="text-sm text-green-600">{submitSuccess}</p>
-                ) : null}
+              <div>
+                <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Nội dung tin nhắn <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={5}
+                  value={form.message}
+                  onChange={handleChange}
+                  required
+                  className={fieldClass}
+                  placeholder="Mô tả ngắn gọn vấn đề (kèm mã đơn nếu có)"
+                />
+              </div>
 
-                <Button size="lg" type="submit" disabled={isSubmitting} className="w-full">
+              {submitError ? <p className="text-sm text-red-600">{submitError}</p> : null}
+              {submitSuccess ? <p className="text-sm text-green-700">{submitSuccess}</p> : null}
+
+              <div className="flex justify-end pt-1">
+                <Button type="submit" disabled={isSubmitting} className="min-w-[10rem]">
                   {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
                 </Button>
-              </form>
-          </div>
+              </div>
+            </form>
+          </SupportPanel>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8 lg:col-span-5">
-            <h3 className="mb-4 text-xl font-semibold text-gray-900">Thông tin liên hệ</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <LocationIcon className="w-6 h-6 text-primary-600 mt-1 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">Địa chỉ</p>
-                      <p className="text-gray-600">123 Đường ABC, Quận 1, TP.HCM</p>
-                    </div>
+          <div className="space-y-4 lg:col-span-2">
+            <SupportPanel>
+              <h2 className={`mb-4 ${supportSectionClass}`}>Thông tin liên hệ</h2>
+              <ul className="space-y-4">
+                <li className="flex gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                    <PhoneIcon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Hotline</p>
+                    <a
+                      href={`tel:${STORE_SUPPORT.HOTLINE_TEL}`}
+                      className="text-sm font-semibold text-primary-700 hover:underline"
+                    >
+                      {STORE_SUPPORT.HOTLINE_DISPLAY}
+                    </a>
                   </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                    <MailIcon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Email</p>
+                    <p className="text-sm text-slate-600">contact@oupharmacy.com</p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                    <ClockIcon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Giờ hỗ trợ</p>
+                    <p className="text-sm text-slate-600">Thứ 2 – Thứ 6: 8:00 – 17:00</p>
+                    <p className="text-sm text-slate-600">Thứ 7: 8:00 – 12:00</p>
+                  </div>
+                </li>
+              </ul>
+            </SupportPanel>
 
-                  <div className="flex items-start">
-                    <PhoneIcon className="w-6 h-6 text-primary-600 mt-1 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">Điện thoại</p>
-                      <p className="text-gray-600">+84 123 456 789</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <MailIcon className="w-6 h-6 text-primary-600 mt-1 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">Email</p>
-                      <p className="text-gray-600">contact@oupharmacy.com</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <ClockIcon className="w-6 h-6 text-primary-600 mt-1 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">Giờ làm việc</p>
-                      <p className="text-gray-600">Thứ 2 - Thứ 6: 8:00 - 17:00</p>
-                      <p className="text-gray-600">Thứ 7: 8:00 - 12:00</p>
-                    </div>
-                  </div>
-                </div>
+            <SupportPanel>
+              <p className="text-sm font-semibold text-slate-900">Cần đổi trả?</p>
+              <p className={`mt-1 ${supportMutedClass}`}>
+                Xem điều kiện và quy trình trước khi gửi yêu cầu để được xử lý nhanh hơn.
+              </p>
+              <a
+                href="/chinh-sach-doi-tra"
+                className="mt-3 inline-flex text-sm font-semibold text-primary-800 hover:underline"
+              >
+                Chính sách đổi trả →
+              </a>
+            </SupportPanel>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </SupportDoc>
   )
 }

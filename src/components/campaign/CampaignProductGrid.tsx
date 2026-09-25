@@ -7,6 +7,7 @@ import {
   getListProductKey,
   type Product,
 } from '@/lib/services/products'
+import { PAGE_Y_SECTION } from '@/lib/layout/pageLayout'
 
 export interface CampaignProductGridProps {
   products: Product[]
@@ -17,7 +18,7 @@ export function CampaignProductGrid({ products, heading }: CampaignProductGridPr
   if (!products.length) return null
 
   return (
-    <section id="campaign-products" className="bg-white py-8 sm:py-10" aria-label={heading}>
+    <section id="campaign-products" className={`bg-white ${PAGE_Y_SECTION}`} aria-label={heading}>
       <Container>
         <h2 className="mb-5 text-lg font-bold text-gray-900 sm:text-xl">{heading}</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">

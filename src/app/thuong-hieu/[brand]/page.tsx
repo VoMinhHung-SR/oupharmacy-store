@@ -48,7 +48,7 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#ededed] py-10 text-center text-sm text-gray-500">
+        <div className="bg-[#ededed] py-6 text-center text-sm text-gray-500 sm:py-8">
           Đang tải thương hiệu…
         </div>
       }

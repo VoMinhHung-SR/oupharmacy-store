@@ -31,7 +31,7 @@ export default function OrderConfirmationPage() {
 
   if (!orderIdentifier) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
@@ -57,7 +57,7 @@ export default function OrderConfirmationPage() {
 
   if (isLoading) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <OrderDetailSkeleton />
       </Container>
@@ -66,7 +66,7 @@ export default function OrderConfirmationPage() {
 
   if (error || !order) {
     return (
-      <Container className="space-y-6 py-6 sm:py-8">
+      <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Xác nhận đơn hàng' }]} />
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center sm:p-8">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
@@ -104,6 +104,7 @@ export default function OrderConfirmationPage() {
     : null
   const statusText: Record<string, string> = {
     PENDING: 'Đang chờ xử lý',
+    PREORDER_PENDING_STOCK: 'Đặt trước — chờ hàng',
     CONFIRMED: 'Đã xác nhận',
     SHIPPING: 'Đang giao hàng',
     DELIVERED: 'Đã giao',
@@ -111,6 +112,7 @@ export default function OrderConfirmationPage() {
   }
   const statusColor: Record<string, string> = {
     PENDING: 'bg-yellow-100 text-yellow-800',
+    PREORDER_PENDING_STOCK: 'bg-amber-100 text-amber-900',
     CONFIRMED: 'bg-blue-100 text-blue-800',
     SHIPPING: 'bg-purple-100 text-purple-800',
     DELIVERED: 'bg-green-100 text-green-800',
@@ -128,7 +130,7 @@ export default function OrderConfirmationPage() {
   const formatVnd = (value?: number) => `${Math.round(Number(value ?? 0)).toLocaleString('vi-VN')}đ`
 
   return (
-    <Container className="space-y-6 py-6 sm:py-8">
+    <Container className="space-y-4 py-3 sm:space-y-5 sm:py-4">
       <Breadcrumb
         items={[
           { label: 'Trang chủ', href: '/' },
@@ -150,6 +152,11 @@ export default function OrderConfirmationPage() {
                 Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn:{' '}
                 <span className="font-semibold text-gray-900">{order.order_number ?? `#${order.id}`}</span>
               </p>
+              {order.status === 'PREORDER_PENDING_STOCK' ? (
+                <p className="mt-2 text-sm text-amber-900">
+                  Đơn đặt trước — cửa hàng sẽ liên hệ / giao khi có hàng.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>

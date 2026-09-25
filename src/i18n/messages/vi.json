@@ -140,8 +140,36 @@
   },
   "cabinet": {
     "title": "Tủ thuốc thông minh",
+    "productEyebrow": "OUPharmacy Care",
+    "productTagline": "Quản lý thuốc tại nhà · nhắc hạn dùng · lịch uống (sắp có)",
     "titleHint": "Quản lý thuốc tại nhà và hạn sử dụng",
     "subtitle": "{name} · {count} loại thuốc",
+    "tabs": {
+      "meds": "Thuốc",
+      "medsHint": "Thêm & quản lý",
+      "reminders": "Nhắc hạn",
+      "remindersHint": "Hết hạn / sắp hết",
+      "schedule": "Lịch uống",
+      "scheduleHint": "Theo giờ · sắp có"
+    },
+    "sections": {
+      "medsTitle": "Quản lý thuốc trong tủ",
+      "medsBody": "Thêm từ đơn mua, toa khám hoặc tìm catalog. Lọc theo hạn dùng và tồn.",
+      "remindersTitle": "Nhắc hạn sử dụng",
+      "remindersBody": "Bật nhắc và xem hộp thư khi thuốc sắp hết hạn hoặc đã hết hạn.",
+      "scheduleTitle": "Lịch uống thuốc",
+      "scheduleBody": "Nhắc theo khung giờ trong ngày — tính năng đang hoàn thiện trong Tủ thuốc thông minh.",
+      "showAllMeds": "Xem tất cả thuốc"
+    },
+    "schedule": {
+      "comingTitle": "Lịch uống sắp ra mắt",
+      "comingBody": "Bạn sẽ đặt giờ uống theo từng thuốc trong tủ, đánh dấu đã uống và nhận nhắc trong app. Hiện tại hãy quản lý thuốc và bật nhắc hạn ở các tab bên cạnh.",
+      "bullet1": "Khung sáng / trưa / tối theo từng loại thuốc",
+      "bullet2": "Đánh dấu đã uống · xem lịch sử",
+      "bullet3": "Gắn với thuốc đã có trong tủ (không nhập lại)",
+      "footnote": "Chưa có thông báo đẩy. Không phải lịch uống thật cho đến khi mở tính năng.",
+      "backToMeds": "Quay lại quản lý thuốc"
+    },
     "addMedicine": "Thêm thuốc",
     "addTitle": "Thêm thuốc vào tủ",
     "searchLabel": "Tìm thuốc",
@@ -234,7 +262,7 @@
       "hint": "Hộp thư trong app. Quét hàng ngày tạo nhắc khi bật nhắc hạn trên tủ.",
       "empty": "Chưa có thông báo hạn dùng.",
       "unreadBadge": "{count} chưa đọc",
-      "markRead": "Đã đọc",
+      "markRead": "Đánh dấu đã đọc",
       "markAllRead": "Đọc hết",
       "markedRead": "Đã đánh dấu đã đọc",
       "markedAllRead": "Đã đọc hết thông báo",
@@ -286,6 +314,7 @@
       "missingUnit": "Không xác định được đơn vị bán của sản phẩm này. Hãy thử Thêm thuốc.",
       "status": {
         "PENDING": "Chờ xử lý",
+        "PREORDER_PENDING_STOCK": "Đặt trước — chờ hàng",
         "CONFIRMED": "Đã xác nhận",
         "SHIPPING": "Đang giao",
         "DELIVERED": "Đã nhận",
@@ -328,6 +357,99 @@
       "addedToCart": "Đã thêm 1 đơn vị bán vào giỏ. Số lượng trong tủ không đổi.",
       "warehouseOutOfStock": "Kho đang hết hàng. Số lượng trong tủ không đổi.",
       "cartNotReady": "Đang tải giỏ hàng, vui lòng thử lại."
+    }
+  },
+  "consultation": {
+    "fabOpenAria": "Mở hộp thoại tư vấn",
+    "fabCloseAria": "Đóng hộp thoại tư vấn",
+    "panelTitle": "Tư vấn OUPharmacy",
+    "panelSubtitle": "Chọn nhu cầu của bạn",
+    "welcome": "Xin chào! Bạn cần hỗ trợ về điều gì?",
+    "disclaimer": "Hộp thoại này không thay thế khám chữa bệnh. Không tự ý dùng thuốc theo gợi ý nếu chưa được chuyên môn hướng dẫn.",
+    "backToMenu": "Quay lại menu",
+    "backTooltip": "Quay lại",
+    "roleUser": "Bạn",
+    "roleAssistant": "OUPharmacy",
+    "rolePharmacist": "Dược sĩ",
+    "roleSystem": "Lưu ý",
+    "typing": "Đang xử lý…",
+    "connectingWithPharmacist": "Đang kết nối với Dược sĩ…",
+    "connectingWithDoctor": "Đang kết nối với Bác sĩ…",
+    "menu": {
+      "aria": "Chọn loại tư vấn",
+      "prompt": "Chọn một trong các lựa chọn sau:",
+      "pharmacist": {
+        "title": "Tư vấn dược sĩ",
+        "desc": "Chat trực tiếp với dược sĩ"
+      },
+      "doctor": {
+        "title": "Đặt lịch bác sĩ",
+        "desc": "Hướng dẫn đặt khám tại phòng khám"
+      },
+      "medicine": {
+        "title": "Tìm thuốc",
+        "desc": "Gợi ý sản phẩm và thêm vào giỏ"
+      }
+    },
+    "branch": {
+      "pharmacist": {
+        "title": "Tư vấn dược sĩ",
+        "empty": "Hãy mô tả nhu cầu của bạn. Dược sĩ sẽ phản hồi sớm.",
+        "inputPlaceholder": "Nhập tin nhắn…",
+        "send": "Gửi",
+        "error": "Không kết nối được tư vấn. Vui lòng thử lại."
+      },
+      "doctor": {
+        "title": "Đặt lịch bác sĩ",
+        "loading": "Đang kết nối với Bác sĩ…",
+        "loadingSlots": "Đang tải khung giờ của bác sĩ…",
+        "loginRequired": "Đăng nhập để đặt lịch khám.",
+        "loginCta": "Đăng nhập",
+        "descriptionLabel": "Lý do khám (tuỳ chọn)",
+        "descriptionPlaceholder": "Mô tả ngắn triệu chứng hoặc nhu cầu…",
+        "doctorLabel": "Bác sĩ",
+        "doctorPlaceholder": "Chọn bác sĩ",
+        "dateLabel": "Ngày khám",
+        "slotLabel": "Khung giờ",
+        "pickDoctorFirst": "Chọn bác sĩ trước để xem lịch trống.",
+        "noSlots": "Không còn khung giờ trống ngày này.",
+        "patientLabel": "Bệnh nhân",
+        "patientPlaceholder": "Chọn hồ sơ bệnh nhân",
+        "patientNew": "Thêm hồ sơ mới",
+        "patientRequired": "Vui lòng chọn hoặc tạo hồ sơ bệnh nhân.",
+        "slotRequired": "Vui lòng chọn bác sĩ, ngày và khung giờ.",
+        "firstName": "Họ",
+        "lastName": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "submit": "Đặt lịch",
+        "submitting": "Đang gửi yêu cầu đặt lịch với Bác sĩ…",
+        "success": "Đã tạo phiếu khám thành công.",
+        "successWithId": "Đã tạo phiếu khám #{id}.",
+        "errorGeneric": "Không đặt được lịch. Thử lại hoặc dùng trang phòng khám.",
+        "fallbackLink": "Mở trang đặt lịch phòng khám"
+      },
+      "medicine": {
+        "title": "Tìm thuốc",
+        "queryLabel": "Từ khóa",
+        "queryPlaceholder": "Ví dụ: paracetamol, vitamin C…",
+        "queryRequired": "Nhập từ khóa hoặc chọn danh mục để tìm.",
+        "clearCategory": "Bỏ danh mục",
+        "search": "Tìm",
+        "searching": "Đang tìm…",
+        "empty": "Không tìm thấy sản phẩm phù hợp.",
+        "errorGeneric": "Không tìm được sản phẩm. Vui lòng thử lại.",
+        "consultPrice": "Cần tư vấn",
+        "escalateCta": "Tư vấn dược sĩ",
+        "escalateNeedText": "Tôi cần tư vấn về sản phẩm: {name}",
+        "addToCart": "Thêm giỏ",
+        "adding": "Đang thêm…",
+        "added": "Đã thêm vào giỏ",
+        "addFailed": "Không thêm được vào giỏ",
+        "addUnavailable": "Sản phẩm chưa sẵn sàng thêm giỏ",
+        "outOfStock": "Sản phẩm đã hết hàng",
+        "stockExceeded": "Vượt tồn kho ({stock}). Đã có {inCart} trong giỏ."
+      }
     }
   }
 }

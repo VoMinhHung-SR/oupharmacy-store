@@ -9,7 +9,7 @@ import {
 import { OfferSheet } from '@/components/sheets'
 import { ProductFilters, FilterGroup } from '@/lib/services/products'
 
-function countFacetFilters(filters: Omit<ProductFilters, 'category'>): number {
+function countFacetFilters(filters: ProductFilters): number {
   return Object.entries(filters).filter(([key, value]) => {
     if (NON_FACET_FILTER_KEYS.has(key)) return false
     if (value === undefined || value === null || value === '') return false
@@ -23,7 +23,7 @@ interface CategoryListingMobileFiltersProps {
   onClose: () => void
   facetFilters?: FilterGroup[]
   filtersLoading: boolean
-  categoryFilters: Omit<ProductFilters, 'category'>
+  categoryFilters: ProductFilters
   onFiltersChange: (filters: ProductFilters) => void
 }
 
@@ -102,10 +102,7 @@ export function CategoryListingMobileFilters({
           <SearchFacetsSidebar
             filters={facetFilters}
             activeFilters={draftFilters}
-            onFiltersChange={(next) => {
-              const { category: _category, ...rest } = next
-              setDraftFilters(rest)
-            }}
+            onFiltersChange={setDraftFilters}
             compact
           />
         )}

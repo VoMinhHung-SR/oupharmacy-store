@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react'
 import { ImagePlaceholderIcon } from '@/components/icons'
 import { PRICE_CONSULT, STORE_SUPPORT } from '@/lib/constant'
 import { useCart } from '@/contexts/CartContext'
+import { useConsultUi } from '@/contexts/ConsultUiContext'
 import { toastWarning } from '@/lib/utils/toast'
 import { CardBadge } from '@/components/badges/CardBadge'
 import {
@@ -38,6 +39,8 @@ interface ProductCardProps {
     product_slug?: string
     href?: string
     in_stock?: number
+    allow_preorder?: boolean
+    preorder_eta_days?: number | null
     variant_count?: number
     brand_name?: string
     brand_country?: string | null
@@ -66,6 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const productLink = useMemo(() => getProductLink(product), [product])
   const { add, items } = useCart()
+  const { open: openConsult } = useConsultUi()
   const unitOptions = useMemo(() => product.unit_options || [], [product.unit_options])
   const defaultUnitId = useMemo(() => {
     if (!unitOptions.length) return product.product_variant_unit_id
@@ -134,6 +138,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (!product.variant_unit_id) return
 
     const inStock = product.in_stock ?? 0
+    const canPreorder = Boolean(product.allow_preorder)
     const selectedUnitIdForCart = selectedUnit?.unit_id ?? product.product_variant_unit_id ?? null
     const existingItem = items.find(
       (i) =>
@@ -143,12 +148,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     const currentQtyInCart = existingItem?.qty ?? 0
     const totalQty = currentQtyInCart + 1
 
-    if (inStock === 0) {
+    if (inStock === 0 && !canPreorder) {
       toastWarning('Sản phẩm đã hết hàng')
       return
     }
 
-    if (totalQty > inStock) {
+    if (totalQty > inStock && !canPreorder) {
       toastWarning(
         `Số lượng vượt quá tồn kho. Hiện có ${inStock} sản phẩm trong kho. Bạn đã có ${currentQtyInCart} sản phẩm trong giỏ hàng.`
       )
@@ -173,13 +178,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleConsult = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.location.href = STORE_SUPPORT.CONSULT_HREF
+    openConsult()
   }
 
-  const handleFindPharmacy = (e: React.MouseEvent) => {
+  const handleContactSupport = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.location.href = STORE_SUPPORT.PHARMACY_FINDER_HREF
+    window.location.href = STORE_SUPPORT.CONTACT_HREF
   }
 
   // Nếu không có link, hiển thị thông báo thay vì crash
@@ -334,9 +339,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <button
                     type="button"
                     className="w-full rounded-lg bg-gray-100 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 sm:text-sm"
-                    onClick={handleFindPharmacy}
+                    onClick={handleContactSupport}
                   >
-                    Tìm nhà thuốc
+                    Liên hệ hỗ trợ
                   </button>
                 </>
               ) : ctaVariant === 'viewDetail' ? (
@@ -347,7 +352,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   className="w-full rounded-lg bg-primary-600 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:text-sm"
                   onClick={handleAddToCart}
                 >
-                  Thêm vào giỏ
+                  {(product.in_stock ?? 0) <= 0 && product.allow_preorder
+                    ? 'Đặt trước'
+                    : 'Thêm vào giỏ'}
                 </button>
               )}
             </div>

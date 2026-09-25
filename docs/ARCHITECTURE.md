@@ -23,15 +23,15 @@ flowchart LR
 
 - **Middleware** (`src/middleware.ts`): redirect, matcher cho `/don-hang`, `/tai-khoan`; không còn ép redirect login server-side toàn phần — modal login phía client.
 - **Trang** (`src/app/...`): compose sections/components; data qua hooks hoặc gọi service trực tiếp / React Query (tuỳ chỗ).
-- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI.
+- **Contexts** (`src/contexts/`): trạng thái session giỏ, checkout, wishlist, auth UI, **ConsultUi** (FAB chat hub).
 - **Services** (`src/lib/services/`): biến đổi request/response, URL từ `NEXT_PUBLIC_*`.
-
+- **Consultation hub (MVP Done):** FAB chat — pharmacist (session + Firestore), doctor (MAIN_API book), medicine (search ≤5 + cart; `CONSULT` escalate). Doc: [`docs/consultation-hub.md`](consultation-hub.md). Deep-link `/?consult=open`. Firestore env: `NEXT_PUBLIC_APP_ENV` ≡ Clinic `VITE_APP_ENV`.
 ## Hai “cổng” HTTP chính
 
 | Cổng | File / pattern | Env |
 |------|----------------|-----|
 | Store API (catalog, cart-shaped store endpoints, …) | `src/lib/api.ts`, nhiều service dùng `fetch` hoặc instance | `NEXT_PUBLIC_API_URL` |
-| Main API (user, OAuth, địa chỉ, …) | `src/lib/services/auth.ts`, `location.ts`, … | `NEXT_PUBLIC_MAIN_API_URL` |
+| Main API (user, OAuth, địa chỉ, …) | `src/lib/services/auth.ts`, `location.ts`, `userAddresses.ts` (`/users/me/addresses/`) | `NEXT_PUBLIC_MAIN_API_URL` |
 
 Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL không có chủ đích.
 
@@ -60,6 +60,12 @@ Giữ nguyên phân tách này khi thêm endpoint — tránh gộp base URL khô
 - BE API SoT: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 - Plans: `PersonalProject/plans/[Done] smart-medicine-cabinet.plan.md`, `[Done] smart-cabinet-adjacent-domains.plan.md`.
 
+### Consultation hub
+
+- **Doc:** [`docs/consultation-hub.md`](consultation-hub.md) — FSM, branches, files, env.
+- Mount: `ConsultChatbox` in layout; open via `useConsultUi` / `/?consult=open`.
+- Plan: `PersonalProject/plans/[Done] consultation-hub-mvp.plan.md`.
+
 ### Faceted search / advanced filters
 
 - Sidebar facets từ `GET /api/store/search/` (`facets.brand`, `origin_country`, `attributes`, …).
@@ -72,10 +78,10 @@ Fixed section frame. Taxonomy (fixtures under `src/api/mocks/`):
 | Section | Source | Notes |
 |---------|--------|--------|
 | Hero cluster | Jazzmin placements | `HOME_HERO` / `HOME_SECONDARY` = `Subject[]` (D-21/D-22); `HOME_NOTICE_TOP` / `HOME_NOTICE_BOTTOM` = single |
-| Quick cate | `HOME_QUICK_LINKS` | FE constant |
+| Quick cate | `HOME_QUICK_LINKS` | Live: mua thuốc / tư vấn / đơn / nhắc (`/tai-khoan/tu-thuoc?tab=reminders`) / tủ thuốc; **Sắp có:** tra cứu. Hotline demo `STORE_SUPPORT` `1800 6868`. |
 | Flash sale | Fixture chrome + `getFlashSaleProductsSSG` | D-23: `window_templates` (VN day_offset); pool daily seed; rail ≤12; **upcoming** badge `-xx%` (no revealed %); **live** shows flash −10…35%; exclude Hot IDs; not checkout (D-01) |
 | Hot sale | `GET /api/store/search/?sort=popular` (SSG) | Top 12 priced; −% chỉ khi BE có `compare_at_price` / `discount_percent` **thật** (D-PRC-03); sort giảm dần theo % |
-| Featured categories | `home/featured-categories.response.json` | Fixed section → later category API |
+| Featured categories | `home/featured-categories.response.json` | Href `/{slug}` (không `/categories/…`); later category API |
 | Favorite brands | `getFavoriteBrandsSSG` (search facets) | Top 10 brands by product count; campaign display 10–35%; `bg-white`; fixture = offline reference |
 
 Empty/error on placements → static `HeroBanner` / `PromotionalBanners` (D-08). No mock fill on CMS slots. Do not stuff flash/hot/cate into `placements.home.response.json`.

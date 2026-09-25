@@ -6,8 +6,9 @@ import Container from '@/components/Container'
 import Button from '@/components/Button'
 import PromotionalBanners from '@/sections/PromotionalBanners'
 import type { PlacementWinner } from '@/lib/services/campaign'
-import { setCampaignAttributionId } from '@/lib/utils/campaignAttribution'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 import { safeCampaignHref } from './campaignPlacementUtils'
+import { useCampaignCtaClick } from './useCampaignCtaClick'
 
 export interface CampaignPromoSlotsProps {
   left: PlacementWinner | null
@@ -15,6 +16,7 @@ export interface CampaignPromoSlotsProps {
 }
 
 function PromoCard({ placement }: { placement: PlacementWinner }) {
+  const onCtaClick = useCampaignCtaClick()
   const href = safeCampaignHref(placement.cta_url)
   const ctaLabel = placement.cta_label?.trim() || 'Mua ngay'
   const imageSrc =
@@ -38,7 +40,7 @@ function PromoCard({ placement }: { placement: PlacementWinner }) {
         )}
       </div>
       {href ? (
-        <Link href={href} onClick={() => setCampaignAttributionId(placement.campaign_id)}>
+        <Link href={href} onClick={(e) => onCtaClick(e, placement.campaign_id, href)}>
           <Button variant="primary" size="md" className="w-full bg-red-600 hover:bg-red-700">
             {ctaLabel}
           </Button>
@@ -59,7 +61,7 @@ export const CampaignPromoSlots: React.FC<CampaignPromoSlotsProps> = ({ left, ri
   }
 
   return (
-    <section className="bg-gray-50 py-12">
+    <section className={`bg-gray-50 ${SECTION_Y}`}>
       <Container>
         <div className="grid gap-6 md:grid-cols-2">
           {left ? (

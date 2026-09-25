@@ -140,8 +140,36 @@
   },
   "cabinet": {
     "title": "Smart medicine cabinet",
+    "productEyebrow": "OUPharmacy Care",
+    "productTagline": "Manage home medicines · expiry alerts · dose schedule (soon)",
     "titleHint": "Track household medicines and expiry dates",
     "subtitle": "{name} · {count} medicines",
+    "tabs": {
+      "meds": "Medicines",
+      "medsHint": "Add & manage",
+      "reminders": "Expiry alerts",
+      "remindersHint": "Expired / soon",
+      "schedule": "Dose schedule",
+      "scheduleHint": "By time · soon"
+    },
+    "sections": {
+      "medsTitle": "Manage cabinet medicines",
+      "medsBody": "Add from orders, prescriptions, or catalog. Filter by expiry and stock.",
+      "remindersTitle": "Expiry reminders",
+      "remindersBody": "Enable scanning and review the inbox when medicines are expiring or expired.",
+      "scheduleTitle": "Dose schedule",
+      "scheduleBody": "Time-of-day reminders — coming soon inside Smart medicine cabinet.",
+      "showAllMeds": "Show all medicines"
+    },
+    "schedule": {
+      "comingTitle": "Dose schedule coming soon",
+      "comingBody": "You’ll set times per medicine, mark doses taken, and get in-app reminders. For now, manage medicines and expiry alerts in the other tabs.",
+      "bullet1": "Morning / noon / evening slots per medicine",
+      "bullet2": "Mark taken · view history",
+      "bullet3": "Tied to medicines already in your cabinet",
+      "footnote": "No push notifications yet. Not a live dose schedule until this feature ships.",
+      "backToMeds": "Back to medicines"
+    },
     "addMedicine": "Add medicine",
     "addTitle": "Add medicine to cabinet",
     "searchLabel": "Search medicine",
@@ -286,6 +314,7 @@
       "missingUnit": "Could not resolve a sell unit for this product. Try Add medicine instead.",
       "status": {
         "PENDING": "Pending",
+        "PREORDER_PENDING_STOCK": "Preorder — awaiting stock",
         "CONFIRMED": "Confirmed",
         "SHIPPING": "Shipping",
         "DELIVERED": "Delivered",
@@ -328,6 +357,99 @@
       "addedToCart": "Added 1 sell unit to the cart. Cabinet quantity is unchanged.",
       "warehouseOutOfStock": "This item is out of stock in the warehouse. Cabinet quantity is unchanged.",
       "cartNotReady": "Cart is still loading. Please try again."
+    }
+  },
+  "consultation": {
+    "fabOpenAria": "Open consultation chat",
+    "fabCloseAria": "Close consultation chat",
+    "panelTitle": "OUPharmacy Consult",
+    "panelSubtitle": "Choose what you need",
+    "welcome": "Hi! How can we help?",
+    "disclaimer": "This chat does not replace medical care. Do not take medicines based on suggestions alone without professional guidance.",
+    "backToMenu": "Back to menu",
+    "backTooltip": "Back",
+    "roleUser": "You",
+    "roleAssistant": "OUPharmacy",
+    "rolePharmacist": "Pharmacist",
+    "roleSystem": "Notice",
+    "typing": "Working on it…",
+    "connectingWithPharmacist": "Connecting you with a Pharmacist…",
+    "connectingWithDoctor": "Connecting you with a Doctor…",
+    "menu": {
+      "aria": "Choose consultation type",
+      "prompt": "Pick one of the options below:",
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "desc": "Live chat with a pharmacist"
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "desc": "Guided clinic appointment booking"
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "desc": "Product suggestions and add to cart"
+      }
+    },
+    "branch": {
+      "pharmacist": {
+        "title": "Pharmacist consult",
+        "empty": "Describe what you need. A pharmacist will reply soon.",
+        "inputPlaceholder": "Type a message…",
+        "send": "Send",
+        "error": "Could not start consultation. Please try again."
+      },
+      "doctor": {
+        "title": "Book a doctor",
+        "loading": "Connecting you with a Doctor…",
+        "loadingSlots": "Loading the doctor’s time slots…",
+        "loginRequired": "Sign in to book an appointment.",
+        "loginCta": "Sign in",
+        "descriptionLabel": "Reason (optional)",
+        "descriptionPlaceholder": "Brief symptoms or request…",
+        "doctorLabel": "Doctor",
+        "doctorPlaceholder": "Select a doctor",
+        "dateLabel": "Date",
+        "slotLabel": "Time slot",
+        "pickDoctorFirst": "Select a doctor first to see open slots.",
+        "noSlots": "No open slots on this date.",
+        "patientLabel": "Patient",
+        "patientPlaceholder": "Select a patient profile",
+        "patientNew": "Add new profile",
+        "patientRequired": "Please select or create a patient profile.",
+        "slotRequired": "Please choose a doctor, date, and time slot.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "submit": "Book",
+        "submitting": "Sending your booking request to the Doctor…",
+        "success": "Appointment created successfully.",
+        "successWithId": "Appointment #{id} created.",
+        "errorGeneric": "Could not book. Try again or use the clinic booking page.",
+        "fallbackLink": "Open clinic booking page"
+      },
+      "medicine": {
+        "title": "Find medicine",
+        "queryLabel": "Keyword",
+        "queryPlaceholder": "e.g. paracetamol, vitamin C…",
+        "queryRequired": "Enter a keyword or pick a category to search.",
+        "clearCategory": "Clear category",
+        "search": "Search",
+        "searching": "Searching…",
+        "empty": "No matching products.",
+        "errorGeneric": "Could not search products. Please try again.",
+        "consultPrice": "Needs consult",
+        "escalateCta": "Ask pharmacist",
+        "escalateNeedText": "I need advice about: {name}",
+        "addToCart": "Add to cart",
+        "adding": "Adding…",
+        "added": "Added to cart",
+        "addFailed": "Could not add to cart",
+        "addUnavailable": "Product is not ready to add",
+        "outOfStock": "Out of stock",
+        "stockExceeded": "Over stock ({stock}). Already {inCart} in cart."
+      }
     }
   }
 }

@@ -144,6 +144,17 @@ export function CheckoutOrderSummary({
       </button>
       <p className="text-center text-[11px] leading-relaxed text-slate-500">
         Nhấn Hoàn tất đồng nghĩa bạn đồng ý với{' '}
+        <Link href="/dieu-khoan" className="font-medium text-primary-600 underline-offset-2 hover:underline">
+          điều khoản sử dụng
+        </Link>
+        ,{' '}
+        <Link
+          href="/chinh-sach-bao-mat"
+          className="font-medium text-primary-600 underline-offset-2 hover:underline"
+        >
+          chính sách bảo mật
+        </Link>{' '}
+        và{' '}
         <Link href="/chinh-sach-doi-tra" className="font-medium text-primary-600 underline-offset-2 hover:underline">
           chính sách đổi trả
         </Link>

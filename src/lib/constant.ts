@@ -117,14 +117,16 @@ export const CHECKOUT_LEGACY_STEP_PATHS = [
 
 export const FREE_SHIPPING_THRESHOLD = 300000 as const
 
-/** Hotline / liên hệ — đồng bộ header top bar. */
+/** Hotline / liên hệ — đồng bộ header top bar (demo `1800`, override sau qua env nếu cần). */
 export const STORE_SUPPORT = {
-  HOTLINE_DISPLAY: '+84 123 456 789',
-  HOTLINE_TEL: '+84123456789',
-  CONSULT_HREF: '/tu-van-duoc-si',
-  /** Tạm thời tới liên hệ cho đến khi /tim-nha-thuoc có bản đồ. */
-  PHARMACY_FINDER_HREF: '/lien-he',
+  HOTLINE_DISPLAY: '1800 6868',
+  HOTLINE_TEL: '+8418006868',
+  /** Prefer `useConsultUi().open()` in client CTAs. */
+  CONSULT_HREF: '/?consult=open',
   CONTACT_HREF: '/lien-he',
+  CABINET_HREF: '/tai-khoan/tu-thuoc',
+  /** Home “Nhắc uống” → tủ thuốc, tab nhắc hạn. */
+  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=reminders',
 } as const
 
 export type PlaceholderPageAction = {
@@ -133,7 +135,6 @@ export type PlaceholderPageAction = {
   variant?: 'primary' | 'outline'
 }
 
-/** CTA mặc định cho trang tính năng chưa ship. */
 export const PLACEHOLDER_PAGE_ACTIONS: PlaceholderPageAction[] = [
   { label: 'Liên hệ hỗ trợ', href: STORE_SUPPORT.CONTACT_HREF, variant: 'primary' },
   { label: 'Tiếp tục mua sắm', href: '/tim-kiem', variant: 'outline' },
@@ -148,14 +149,25 @@ export type HomeQuickLink = {
   title: string
   href: string
   comingSoon?: boolean
+  /** Open ConsultChatbox popup instead of navigating. */
+  openConsult?: boolean
 }
 
 /** Trang chủ — lối tắt dịch vụ. */
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { iconId: 'pill-plus', title: 'Cần mua thuốc', href: '/dat-thuoc' },
-  { iconId: 'user', title: 'Tư vấn với Dược Sỹ', href: '/tu-van-duoc-si', comingSoon: true },
-  { iconId: 'file-text', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
-  { iconId: 'map-pin', title: 'Tìm nhà thuốc', href: '/tim-nha-thuoc', comingSoon: true },
-  { iconId: 'vaccine', title: 'Tiêm Vắc xin', href: '/tiem-vac-xin', comingSoon: true },
-  { iconId: 'shield-search', title: 'Tra thuốc chính hãng', href: '/tra-cuu-thuoc-chinh-hang', comingSoon: true },
+  { iconId: 'user', title: 'Tư vấn với Dược Sĩ', href: STORE_SUPPORT.CONSULT_HREF, openConsult: true },
+  { iconId: 'package', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
+  {
+    iconId: 'clock',
+    title: 'Nhắc uống thuốc',
+    href: STORE_SUPPORT.MED_REMINDER_HREF,
+  },
+  { iconId: 'jar-of-pills', title: 'Tủ thuốc', href: STORE_SUPPORT.CABINET_HREF },
+  {
+    iconId: 'shield-search',
+    title: 'Tra cứu',
+    href: '/tra-cuu-thuoc-chinh-hang',
+    comingSoon: true,
+  },
 ]

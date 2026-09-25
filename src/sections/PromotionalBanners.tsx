@@ -5,11 +5,12 @@ import Link from 'next/link'
 import React from 'react'
 import Container from '@/components/Container'
 import Button from '@/components/Button'
+import { SECTION_Y } from '@/lib/layout/pageLayout'
 
 export const PromotionalBanners: React.FC = () => {
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className={`bg-gray-50 ${SECTION_Y}`}>
       <Container>
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left banner */}
@@ -30,7 +31,7 @@ export const PromotionalBanners: React.FC = () => {
             <div className="bg-gray-100 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
               <div className="text-gray-400 text-sm">Hình ảnh sản phẩm</div>
             </div>
-            <Link href="/articles/thuoc">
+            <Link href="/?consult=open">
               <Button variant="primary" size="md" className="w-full bg-red-600 hover:bg-red-700">
                 ĐỌC NGAY
               </Button>
@@ -45,7 +46,7 @@ export const PromotionalBanners: React.FC = () => {
             <div className="bg-gray-100 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
               <div className="text-gray-400 text-sm">Hình ảnh sản phẩm</div>
             </div>
-            <Link href="/categories/thuoc-nho-mat">
+            <Link href="/tim-kiem?q=nhỏ+mắt">
               <Button variant="primary" size="md" className="w-full bg-pink-500 hover:bg-pink-600">
                 MUA NGAY
               </Button>

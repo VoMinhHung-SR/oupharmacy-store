@@ -122,6 +122,73 @@ export const SprayIcon = createOutlineIcon(
   { className: 'w-6 h-6', strokeWidth: 2 },
 )
 
+/** Tabler: face-mask — https://icon-sets.iconify.design/tabler/face-mask/ */
+export const FaceMaskIcon = createOutlineIcon(
+  'face-mask',
+  [
+    'M5 14.5h-.222C3.243 14.5 2 13.38 2 12s1.243-2.5 2.778-2.5H5m14 5h.222C20.756 14.5 22 13.38 22 12s-1.244-2.5-2.778-2.5H19M9 10h6m-6 4h6',
+    'm12.55 18.843l5-1.429A2 2 0 0 0 19 15.491V8.51a2 2 0 0 0-1.45-1.923l-5-1.429a2 2 0 0 0-1.1 0l-5 1.429A2 2 0 0 0 5 8.509v6.982a2 2 0 0 0 1.45 1.923l5 1.429a2 2 0 0 0 1.1 0',
+  ],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: hand-sanitizer — https://icon-sets.iconify.design/tabler/hand-sanitizer/ */
+export const HandSanitizerIcon = createOutlineIcon(
+  'hand-sanitizer',
+  ['M7 21h10V11a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3zm8-18H9a2 2 0 0 0-2 2m5-2v5m0 3v4m-2-2h4'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: dental — https://icon-sets.iconify.design/tabler/dental/ */
+export const DentalIcon = createOutlineIcon(
+  'dental',
+  [
+    'M12 5.5C10.926 4.914 9.417 4 8 4C5.9 4 4 5.247 4 9c0 4.899 1.056 8.41 2.671 10.537c.573.756 1.97.521 2.567-.236q.597-.758 1.262-2.801c.292-.771.892-1.504 1.5-1.5c.602 0 1.21.737 1.5 1.5q.665 2.043 1.262 2.8c.597.759 2 .993 2.567.237C18.944 17.41 20 13.9 20 9c0-3.74-1.908-5-4-5c-1.423 0-2.92.911-4 1.5m0 0L15 7',
+  ],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: razor-electric — https://icon-sets.iconify.design/tabler/razor-electric/ */
+export const RazorElectricIcon = createOutlineIcon(
+  'razor-electric',
+  ['M8 3v2m4-2v2m4-2v2m-7 7v6a3 3 0 0 0 6 0v-6zM8 5h8l-1 4H9zm4 12v1'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: pills — https://icon-sets.iconify.design/tabler/pills/ */
+export const PillsIcon = createOutlineIcon(
+  'pills',
+  ['M3 8a5 5 0 1 0 10 0A5 5 0 1 0 3 8m10 9a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4.5 4.5l7 7m8 3l-5 5'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: tools — https://icon-sets.iconify.design/tabler/tools/ */
+export const ToolsIcon = createOutlineIcon(
+  'tools',
+  [
+    'M3 21h4L20 8a1.5 1.5 0 0 0-4-4L3 17zM14.5 5.5l4 4',
+    'M12 8L7 3L3 7l5 5M7 8L5.5 9.5M16 12l5 5l-4 4l-5-5m4 1l-1.5 1.5',
+  ],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: wash-hand — https://icon-sets.iconify.design/tabler/wash-hand/ */
+export const WashHandIcon = createOutlineIcon(
+  'wash-hand',
+  [
+    'M3.486 8.965Q3.738 8.996 4 9c.79.009 1.539-.178 2-.5c.426-.296.777-.5 1.5-.5h1M16 8l.615.034c.552.067 1.046.23 1.385.466c.461.322 1.21.509 2 .5q.256-.002.503-.034M14 10.5l.586.578a1.516 1.516 0 0 0 2 0c.476-.433.55-1.112.176-1.622L15 7c-.37-.506-1.331-1-2-1H9.883a1 1 0 0 0-.992.876l-.499 3.986A3.86 3.86 0 0 0 11 15a2.28 2.28 0 0 0 3-2.162z',
+    'm3 6l1.721 10.329A2 2 0 0 0 6.694 18h10.612a2 2 0 0 0 1.973-1.671L21 6',
+  ],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
+/** Tabler: shirt — https://icon-sets.iconify.design/tabler/shirt/ */
+export const ShirtIcon = createOutlineIcon(
+  'shirt',
+  ['m15 4l6 2v5h-3v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8H3V6l6-2a3 3 0 0 0 6 0'],
+  { className: 'w-6 h-6', strokeWidth: 2 },
+)
+
 /** Medicine jar — “Tủ thuốc thông minh”. */
 export const JarOfPillsIcon = createOutlineIcon(
   'jar-of-pills',
