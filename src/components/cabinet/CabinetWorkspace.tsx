@@ -9,6 +9,7 @@ import { TextField } from '@/components/TextField'
 import { SearchableSelect } from '@/components/common/SearchableSelect'
 import { AddMedicineSheet } from '@/components/cabinet/AddMedicineSheet'
 import { CabinetAlertsPanel } from '@/components/cabinet/CabinetAlertsPanel'
+import { CabinetDosePanel } from '@/components/cabinet/CabinetDosePanel'
 import { ItemActionsSheet } from '@/components/cabinet/ItemActionsSheet'
 import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
 import { SeedFromPrescriptionSheet } from '@/components/cabinet/SeedFromPrescriptionSheet'
@@ -18,7 +19,6 @@ import { CartLineThumb } from '@/components/cart/CartLineThumb'
 import {
   ArrowLeftIcon,
   BellIcon,
-  CheckCircleIcon,
   ClockIcon,
   JarOfPillsIcon,
   PillIcon,
@@ -31,17 +31,23 @@ import type { CabinetItem } from '@/lib/services/cabinet'
 import { CabinetMedsListSkeleton } from '@/components/skeletons'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
-type CabinetTab = 'meds' | 'reminders' | 'schedule'
+type CabinetTab = 'meds' | 'doses'
 type StageFilter = 'all' | 'expired' | 'expiring_soon' | 'expiring' | 'low_stock' | 'refill'
 type StageTone = 'neutral' | 'danger' | 'warn'
 
 const MANAGE_DELETE_BTN = 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
 const MANAGE_CREATE_BTN = 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500'
 
-function parseTab(raw: string | null, focusAlerts: boolean): CabinetTab {
-  if (focusAlerts || raw === 'reminders' || raw === 'alerts') return 'reminders'
-  if (raw === 'schedule' || raw === 'doses') return 'schedule'
+const LEGACY_ALERT_TABS = new Set(['reminders', 'alerts'])
+
+function parseTab(raw: string | null): CabinetTab {
+  if (raw === 'doses' || raw === 'schedule') return 'doses'
   return 'meds'
+}
+
+function wantsAlerts(params: URLSearchParams | { get: (k: string) => string | null }) {
+  const raw = params.get('tab')
+  return params.get('focus') === 'alerts' || (raw != null && LEGACY_ALERT_TABS.has(raw))
 }
 
 function stageChipClass(tone: StageTone, active: boolean) {
@@ -65,10 +71,7 @@ export function CabinetWorkspace() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const focusAlerts = searchParams.get('focus') === 'alerts'
-  const [tab, setTab] = useState<CabinetTab>(() =>
-    parseTab(searchParams.get('tab'), focusAlerts)
-  )
+  const [tab, setTab] = useState<CabinetTab>(() => parseTab(searchParams.get('tab')))
 
   const cabinet = useCabinet(true)
   const alerts = useCabinetAlerts(true, false)
@@ -92,10 +95,21 @@ export function CabinetWorkspace() {
   const counts = cabinet.overview?.counts
   const total = counts?.total ?? 0
   const unreadCount = alerts.unreadCount
+  const activeDoseCount = cabinet.items.filter((row) => row.dose_enabled).length
 
   useEffect(() => {
-    setTab(parseTab(searchParams.get('tab'), searchParams.get('focus') === 'alerts'))
-  }, [searchParams])
+    setTab(parseTab(searchParams.get('tab')))
+    if (!wantsAlerts(searchParams)) return
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('focus')
+    params.delete('tab')
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    // Not cleared on re-run: the replace above re-fires this effect before the scroll lands.
+    window.setTimeout(() => {
+      document.getElementById('cabinet-alerts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 250)
+  }, [searchParams, pathname, router])
 
   const selectTab = (next: CabinetTab) => {
     setTab(next)
@@ -232,6 +246,7 @@ export function CabinetWorkspace() {
     hint: string
     icon: typeof PillIcon
     badge?: number
+    alerts?: number
   }[] = [
     {
       id: 'meds',
@@ -239,19 +254,14 @@ export function CabinetWorkspace() {
       hint: t('tabs.medsHint'),
       icon: PillIcon,
       badge: total > 0 ? total : undefined,
+      alerts: unreadCount > 0 ? unreadCount : undefined,
     },
     {
-      id: 'reminders',
-      label: t('tabs.reminders'),
-      hint: t('tabs.remindersHint'),
-      icon: BellIcon,
-      badge: unreadCount > 0 ? unreadCount : undefined,
-    },
-    {
-      id: 'schedule',
-      label: t('tabs.schedule'),
-      hint: t('tabs.scheduleHint'),
+      id: 'doses',
+      label: t('tabs.doses'),
+      hint: t('tabs.dosesHint'),
       icon: ClockIcon,
+      badge: activeDoseCount > 0 ? activeDoseCount : undefined,
     },
   ]
 
@@ -295,7 +305,7 @@ export function CabinetWorkspace() {
           </div>
 
           {/* Feature map */}
-          <div className="relative mt-4 grid grid-cols-3 gap-2">
+          <div className="relative mt-4 grid grid-cols-2 gap-2" role="tablist" aria-label={t('title')}>
             {featureTabs.map((item) => {
               const Icon = item.icon
               const active = tab === item.id
@@ -303,15 +313,28 @@ export function CabinetWorkspace() {
                 <button
                   key={item.id}
                   type="button"
+                  role="tab"
+                  aria-selected={active}
                   onClick={() => selectTab(item.id)}
-                  className={`rounded-xl border px-2 py-2.5 text-left transition-colors sm:px-3 ${
+                  className={`rounded-xl border px-3 py-2.5 text-left transition-colors sm:px-4 sm:py-3 ${
                     active
                       ? 'border-white bg-white text-primary-800 shadow-sm'
                       : 'border-white/25 bg-white/10 text-white hover:bg-white/15'
                   }`}
                 >
                   <span className="flex items-center justify-between gap-1">
-                    <Icon className={`h-4 w-4 ${active ? 'text-primary-600' : 'text-white'}`} />
+                    <span className="flex items-center gap-1.5">
+                      <Icon className={`h-4 w-4 ${active ? 'text-primary-600' : 'text-white'}`} />
+                      {item.alerts ? (
+                        <span
+                          className="inline-flex items-center gap-0.5 rounded-full bg-accent-500 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-white"
+                          aria-label={t('tabs.unreadAlerts', { count: item.alerts })}
+                        >
+                          <BellIcon className="h-3 w-3" />
+                          {item.alerts}
+                        </span>
+                      ) : null}
+                    </span>
                     {item.badge != null ? (
                       <span
                         className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
@@ -570,35 +593,43 @@ export function CabinetWorkspace() {
         </section>
       ) : null}
 
-      {/* ===== TAB: REMINDERS (expiry) ===== */}
-      {tab === 'reminders' ? (
-        <div className="space-y-3.5">
-          <section className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('sections.remindersTitle')}</h2>
-            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.remindersBody')}</p>
+      {/* Expiry notifications — the notification layer of the meds tab */}
+      {tab === 'meds' ? (
+        <section
+          id="cabinet-alerts"
+          className="scroll-mt-24 space-y-4 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
+              <BellIcon className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-semibold text-slate-900 sm:text-lg">
+                {t('sections.expiryNotifyTitle')}
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.expiryNotifyBody')}</p>
+            </div>
+          </div>
 
-            <div className="mt-4 space-y-4">
-              <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 ${
-                  reminderEnabled
-                    ? 'border-secondary-200 bg-secondary-50/50'
-                    : 'border-slate-200 bg-slate-50'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600"
-                  checked={reminderEnabled}
-                  onChange={(e) => setReminderEnabled(e.target.checked)}
-                />
-                <span>
-                  <span className="block text-sm font-medium text-slate-800">
-                    {t('settings.reminderEnabled')}
-                  </span>
-                  <span className="block text-xs text-gray-500">{t('settings.reminderHint')}</span>
-                </span>
-              </label>
-              <div className="max-w-sm">
+          <div
+            className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:flex-row sm:items-end ${
+              reminderEnabled ? 'border-secondary-200 bg-secondary-50/50' : 'border-slate-200 bg-slate-50'
+            }`}
+          >
+            <label className="flex flex-1 cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600"
+                checked={reminderEnabled}
+                onChange={(e) => setReminderEnabled(e.target.checked)}
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">{t('settings.reminderEnabled')}</span>
+                <span className="block text-xs text-gray-500">{t('settings.reminderHint')}</span>
+              </span>
+            </label>
+            <div className="flex items-end gap-2">
+              <div className="w-28">
                 <TextField
                   type="number"
                   min={1}
@@ -606,62 +637,32 @@ export function CabinetWorkspace() {
                   label={t('settings.soonDays')}
                   value={soonDays}
                   onChange={(e) => setSoonDays(e.target.value)}
-                  helperText={t('settings.soonDaysHint')}
                   fullWidth
                 />
               </div>
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => void handleSaveSettings()}
-                  disabled={cabinet.updateCabinet.isPending || selected?.id == null}
-                >
-                  {cabinet.updateCabinet.isPending ? t('loading') : t('settings.save')}
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                onClick={() => void handleSaveSettings()}
+                disabled={cabinet.updateCabinet.isPending || selected?.id == null}
+              >
+                {cabinet.updateCabinet.isPending ? t('loading') : t('settings.save')}
+              </Button>
             </div>
-          </section>
-
-          <div id="cabinet-alerts" className="scroll-mt-24">
-            <CabinetAlertsPanel enabled showUnreadFilter variant="elevated" />
           </div>
-        </div>
+
+          <CabinetAlertsPanel enabled showUnreadFilter variant="embedded" />
+        </section>
       ) : null}
 
-      {/* ===== TAB: SCHEDULE (dose) — roadmap, honest empty ===== */}
-      {tab === 'schedule' ? (
-        <section className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
-          <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('sections.scheduleTitle')}</h2>
-          <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.scheduleBody')}</p>
-
-          <div className="mt-5 flex flex-col items-center rounded-xl border border-dashed border-primary-200 bg-gradient-to-b from-primary-50/80 to-white px-4 py-10 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
-              <ClockIcon className="h-7 w-7" />
-            </span>
-            <p className="mt-4 text-sm font-semibold text-slate-900">{t('schedule.comingTitle')}</p>
-            <p className="mt-1.5 max-w-md text-xs leading-relaxed text-slate-600 sm:text-sm">
-              {t('schedule.comingBody')}
-            </p>
-            <ul className="mt-5 w-full max-w-sm space-y-2 text-left text-xs text-slate-600 sm:text-sm">
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet1')}
-              </li>
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet2')}
-              </li>
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet3')}
-              </li>
-            </ul>
-            <p className="mt-5 text-[11px] text-slate-400">{t('schedule.footnote')}</p>
-            <Button size="sm" variant="outline" className="mt-4" onClick={() => selectTab('meds')}>
-              {t('schedule.backToMeds')}
-            </Button>
-          </div>
-        </section>
+      {/* ===== TAB: DOSES ===== */}
+      {tab === 'doses' ? (
+        <CabinetDosePanel
+          items={cabinet.items}
+          isLoading={cabinet.isLoading}
+          cabinetReady={cabinet.selectedId != null}
+          onUpdate={(id, payload) => cabinet.updateItem.mutateAsync({ id, payload })}
+          onGoToMeds={() => selectTab('meds')}
+        />
       ) : null}
 
       {cabinet.selectedId ? (

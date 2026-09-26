@@ -46,11 +46,11 @@ export function CabinetWorkspaceSkeleton() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className={`rounded-xl border px-2 py-2.5 sm:px-3 ${
+                className={`rounded-xl border px-3 py-2.5 sm:px-4 sm:py-3 ${
                   i === 0 ? 'border-white bg-white' : 'border-white/25 bg-white/10'
                 }`}
               >

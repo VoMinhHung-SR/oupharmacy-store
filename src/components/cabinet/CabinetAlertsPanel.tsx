@@ -13,7 +13,8 @@ type CabinetAlertsPanelProps = {
   /** When true, show a chip to toggle unread-only list (`?unread=1`). */
   showUnreadFilter?: boolean
   /** Visual density for reminder hub vs embedded cabinet. */
-  variant?: 'default' | 'elevated'
+  /** `embedded`: no card shell / title — parent card owns the heading. */
+  variant?: 'default' | 'elevated' | 'embedded'
 }
 
 export function CabinetAlertsPanel({
@@ -45,8 +46,10 @@ export function CabinetAlertsPanel({
 
   const unread = alerts.unreadCount
   const isEmpty = !alerts.isLoading && alerts.alerts.length === 0
-  const shellClass =
-    variant === 'elevated'
+  const embedded = variant === 'embedded'
+  const shellClass = embedded
+    ? ''
+    : variant === 'elevated'
       ? 'rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5'
       : 'rounded-lg border border-gray-200 bg-white p-5'
 
@@ -68,16 +71,20 @@ export function CabinetAlertsPanel({
 
   return (
     <section className={shellClass}>
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-              <BellIcon className="h-4 w-4" />
-            </span>
-            <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('alerts.title')}</h2>
+      <div
+        className={`mb-3 flex flex-wrap items-start gap-3 ${embedded ? 'justify-end' : 'justify-between'}`}
+      >
+        {embedded ? null : (
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
+                <BellIcon className="h-4 w-4" />
+              </span>
+              <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('alerts.title')}</h2>
+            </div>
+            <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">{t('alerts.hint')}</p>
           </div>
-          <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">{t('alerts.hint')}</p>
-        </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           {showUnreadFilter ? (
             <button

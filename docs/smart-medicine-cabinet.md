@@ -16,12 +16,14 @@
 | Low stock / OOS | Threshold per item or default; mark used up → OOS |
 | Refill list | Flag items; overview section |
 | Buy again | Adds to store cart via `/carts/items/` — **does not** decrement cabinet qty |
-| HSD inbox | Panel on cabinet page; mark read / mark all read |
-| Settings | Per-cabinet reminder toggle, custom “expiring soon” window |
+| Expiry notifications | Card inside the **Thuốc** tab (`#cabinet-alerts`): reminder toggle + “expiring soon” window + inbox (mark read / mark all read) |
+| Dose reminders | **Nhắc uống thuốc** tab: per-item daily times (1–4 × `HH:MM`, VN time) + optional note; pause/resume keeps times. Stored on `CabinetItem.dose_*`; no push yet |
+
+**Tabs (2):** `meds` (default) and `doses`. Legacy `?tab=reminders|alerts` and `?focus=alerts` land on `meds` and scroll to the expiry card; `?tab=schedule` maps to `doses`.
 
 **Guest:** client login gate (modal); no cabinet API calls without auth.
 
-**Legacy redirect:** `/tu-thuoc-thong-minh` → `/tai-khoan/tu-thuoc`.
+**Legacy redirects:** `/tu-thuoc-thong-minh` → `/tai-khoan/tu-thuoc`; `/nhac-uong-thuoc` → `/tai-khoan/tu-thuoc?tab=doses`.
 
 ---
 
@@ -38,8 +40,10 @@
 
 | Component | Role |
 |-----------|------|
-| `CabinetWorkspace.tsx` | Main workspace: cabinet tabs, filters, item list, manage panel |
-| `CabinetAlertsPanel.tsx` | HSD inbox (compact when empty) |
+| `CabinetWorkspace.tsx` | Main workspace: 2 feature tabs, cabinet switcher, filters, item list, expiry card |
+| `CabinetAlertsPanel.tsx` | HSD inbox (`variant="embedded"` inside the expiry card) |
+| `CabinetDosePanel.tsx` | Dose tab: active / paused schedules, empty states |
+| `DoseScheduleSheet.tsx` | Create / edit dose times + note → `PATCH /cabinet-items/{id}/` |
 | `AddMedicineSheet.tsx` | Search catalog + add with HSD/qty |
 | `SkuScanControl.tsx` | Barcode / SKU lookup → add flow |
 | `SeedFromOrderSheet.tsx` | Pick lines from delivered orders |
@@ -83,6 +87,7 @@ See BE doc: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 | Cabinet overview | `GET /cabinets/{id}/overview/` |
 | List / filter items | `GET /cabinet-items/?cabinet=&expiration_status=` |
 | Add / edit / delete item | POST / PATCH / DELETE `/cabinet-items/` |
+| Dose schedule / pause | `PATCH /cabinet-items/{id}/` with `dose_enabled`, `dose_times`, `dose_label` |
 | Inbox | `GET /cabinet-alerts/?unread=1` |
 | Seed from Rx | `GET /cabinet-prescription-lines/` → POST `/cabinet-items/` |
 | Buy again | `POST /carts/items/` (existing cart service) |
@@ -98,9 +103,11 @@ See BE doc: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 5. Inbox: run BE scan (staging) → alerts appear; mark read.
 6. Buy again → item in cart; cabinet qty unchanged.
 7. Guest visit → login modal, no data leak.
+8. Nhắc uống thuốc tab → add schedule (pick item, 2 times, note) → listed with chips; pause → moves to “paused”; resume.
+9. `?tab=reminders` / `?focus=alerts` → Thuốc tab, scrolled to the expiry card; `/nhac-uong-thuoc` → dose tab.
 
 ---
 
 ## Out of scope (by design)
 
-Medication adherence schedule, family sharing, push/Zalo notifications, AI suggestions, auto-seed at checkout.
+Dose logs (“mark taken”), timed push/Zalo notifications, family sharing, AI suggestions, auto-seed at checkout.

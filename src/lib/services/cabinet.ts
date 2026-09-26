@@ -22,6 +22,10 @@ export type CabinetItem = {
   lot_number: string | null
   low_stock_threshold: number | null
   on_refill_list: boolean
+  dose_enabled: boolean
+  /** Daily wall-clock times "HH:MM" (VN), sorted, max 4. */
+  dose_times: string[]
+  dose_label: string
   expiration_status: ExpirationStatus
   days_until_expiry: number
   inventory_status: InventoryStatus
@@ -68,8 +72,20 @@ export type UpdateCabinetPayload = {
   expiring_soon_days?: number
 }
 
+export const DOSE_TIMES_MAX = 4
+
 export type UpdateCabinetItemPayload = Partial<
-  Pick<CabinetItem, 'quantity' | 'expiration_date' | 'lot_number' | 'low_stock_threshold' | 'on_refill_list'>
+  Pick<
+    CabinetItem,
+    | 'quantity'
+    | 'expiration_date'
+    | 'lot_number'
+    | 'low_stock_threshold'
+    | 'on_refill_list'
+    | 'dose_enabled'
+    | 'dose_times'
+    | 'dose_label'
+  >
 >
 
 export function listCabinets() {

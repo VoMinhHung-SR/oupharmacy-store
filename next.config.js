@@ -70,7 +70,7 @@ const nextConfig = {
       },
       {
         source: '/nhac-uong-thuoc',
-        destination: '/tai-khoan/tu-thuoc?tab=reminders',
+        destination: '/tai-khoan/tu-thuoc?tab=doses',
         permanent: true,
       },
       {
