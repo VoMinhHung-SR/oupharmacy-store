@@ -36,24 +36,24 @@ export function ProductListingSkeleton({
       )}
 
       {isCategory ? (
-        <div className="mb-4 flex items-stretch sm:mb-5">
-          <div className="hidden w-12 shrink-0 items-center justify-center sm:flex">
-            <div className="h-10 w-10 animate-pulse rounded-full border border-gray-200 bg-white shadow-md" aria-hidden />
+        <div className="mb-6 flex items-stretch">
+          <div className="flex w-10 shrink-0 items-center justify-center sm:w-12">
+            <div className="h-9 w-9 animate-pulse rounded-full border border-gray-200 bg-white shadow-md sm:h-10 sm:w-10" aria-hidden />
           </div>
           <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex h-11 w-28 shrink-0 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 sm:w-36"
+                className="flex h-10 w-24 shrink-0 items-center gap-2 rounded-lg border border-gray-200 bg-white px-2.5 sm:h-11 sm:w-36 sm:px-3"
                 aria-hidden
               >
-                <SkeletonPulse className="h-5 w-5 shrink-0 rounded" />
+                <SkeletonPulse className="h-4 w-4 shrink-0 rounded sm:h-5 sm:w-5" />
                 <SkeletonPulse className="h-3 flex-1 rounded" />
               </div>
             ))}
           </div>
-          <div className="hidden w-12 shrink-0 items-center justify-center sm:flex">
-            <div className="h-10 w-10 animate-pulse rounded-full border border-gray-200 bg-white shadow-md" aria-hidden />
+          <div className="flex w-10 shrink-0 items-center justify-center sm:w-12">
+            <div className="h-9 w-9 animate-pulse rounded-full border border-gray-200 bg-white shadow-md sm:h-10 sm:w-10" aria-hidden />
           </div>
         </div>
       ) : null}

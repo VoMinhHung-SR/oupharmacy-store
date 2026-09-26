@@ -14,6 +14,7 @@ import {
   placeInfo,
   type UserAddress,
 } from '@/lib/services/userAddresses'
+import { AddressBookSkeleton } from '@/components/skeletons'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 export function AddressBook() {
@@ -54,26 +55,24 @@ export function AddressBook() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <Button
-          variant="primary"
-          disabled={busy || atLimit}
-          onClick={() => {
-            setEditing(null)
-            setShowForm(true)
-          }}
-        >
-          Thêm địa chỉ
-        </Button>
-      </div>
-      {atLimit ? (
-        <p className="text-sm text-gray-600">Tối đa {USER_ADDRESS_LIMIT} địa chỉ. Xóa bớt để thêm mới.</p>
-      ) : null}
+      {isLoading ? <AddressBookSkeleton /> : null}
 
-      {isLoading ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600">
-          Đang tải sổ địa chỉ…
+      {!isLoading ? (
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <Button
+            variant="primary"
+            disabled={busy || atLimit}
+            onClick={() => {
+              setEditing(null)
+              setShowForm(true)
+            }}
+          >
+            Thêm địa chỉ
+          </Button>
         </div>
+      ) : null}
+      {!isLoading && atLimit ? (
+        <p className="text-sm text-gray-600">Tối đa {USER_ADDRESS_LIMIT} địa chỉ. Xóa bớt để thêm mới.</p>
       ) : null}
 
       {error ? (

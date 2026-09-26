@@ -28,6 +28,7 @@ import { useCabinet } from '@/lib/hooks/useCabinet'
 import { useCabinetAlerts } from '@/lib/hooks/useCabinetAlerts'
 import { mapBuyAgainError, useCabinetBuyAgain } from '@/lib/hooks/useCabinetBuyAgain'
 import type { CabinetItem } from '@/lib/services/cabinet'
+import { CabinetMedsListSkeleton } from '@/components/skeletons'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 type CabinetTab = 'meds' | 'reminders' | 'schedule'
@@ -501,7 +502,7 @@ export function CabinetWorkspace() {
             })}
           </div>
 
-          {cabinet.isLoading ? <p className="text-sm text-gray-500">{t('loading')}</p> : null}
+          {cabinet.isLoading ? <CabinetMedsListSkeleton /> : null}
 
           {!cabinet.isLoading && filteredItems.length === 0 ? (
             <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">

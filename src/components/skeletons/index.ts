@@ -11,6 +11,11 @@ export {
 export { ProductDetailPageSkeleton } from '@/components/skeletons/ProductDetailPageSkeleton'
 export {
   AccountHubSkeleton,
+  CabinetWorkspaceSkeleton,
+  CabinetMedsListSkeleton,
+  AddressBookSkeleton,
+  MedicineRequestsListSkeleton,
+  MedicineRequestDetailSkeleton,
   OrdersListSkeleton,
   OrderDetailSkeleton,
   FormPageSkeleton,

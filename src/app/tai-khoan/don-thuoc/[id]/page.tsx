@@ -12,6 +12,7 @@ import {
   formatMedicineRequestDate,
   MEDICINE_REQUEST_STATUS_MAP,
 } from '@/lib/utils/medicineRequestStatus'
+import { MedicineRequestDetailSkeleton } from '@/components/skeletons'
 
 export default function MedicineRequestDetailPage() {
   const params = useParams<{ id: string }>()
@@ -44,11 +45,7 @@ export default function MedicineRequestDetailPage() {
           backHref="/tai-khoan/don-thuoc"
         />
 
-        {isLoading ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500">
-            Đang tải...
-          </div>
-        ) : null}
+        {isLoading ? <MedicineRequestDetailSkeleton /> : null}
 
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">

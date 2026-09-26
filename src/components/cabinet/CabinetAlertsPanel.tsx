@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/Button'
 import { BellIcon } from '@/components/icons'
+import { SkeletonPulse } from '@/components/skeletons'
 import { useCabinetAlerts } from '@/lib/hooks/useCabinetAlerts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
@@ -107,7 +108,28 @@ export function CabinetAlertsPanel({
         </div>
       </div>
 
-      {alerts.isLoading ? <p className="text-sm text-gray-500">{t('loading')}</p> : null}
+      {alerts.isLoading ? (
+        <ul className="space-y-2" aria-busy="true" aria-label={t('loading')}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <li
+              key={i}
+              className="rounded-xl border border-slate-100 bg-slate-50/50 px-3 py-3 sm:px-3.5"
+            >
+              <div className="flex items-start gap-3">
+                <SkeletonPulse className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <SkeletonPulse className="h-5 w-16 rounded-full" />
+                    <SkeletonPulse className="h-3 w-20" />
+                  </div>
+                  <SkeletonPulse className="h-4 w-4/5" />
+                  <SkeletonPulse className="h-3 w-1/2" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {isEmpty ? (
         <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
