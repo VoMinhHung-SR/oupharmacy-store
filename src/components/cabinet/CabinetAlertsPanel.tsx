@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/Button'
 import { BellIcon } from '@/components/icons'
@@ -8,11 +8,12 @@ import { SkeletonPulse } from '@/components/skeletons'
 import { useCabinetAlerts } from '@/lib/hooks/useCabinetAlerts'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
+const PREVIEW_LIMIT = 5
+
 type CabinetAlertsPanelProps = {
   enabled: boolean
-  /** When true, show a chip to toggle unread-only list (`?unread=1`). */
+  /** When true, show a chip to toggle unread-only list. */
   showUnreadFilter?: boolean
-  /** Visual density for reminder hub vs embedded cabinet. */
   /** `embedded`: no card shell / title — parent card owns the heading. */
   variant?: 'default' | 'elevated' | 'embedded'
 }
@@ -24,7 +25,19 @@ export function CabinetAlertsPanel({
 }: CabinetAlertsPanelProps) {
   const t = useTranslations('cabinet')
   const [unreadOnly, setUnreadOnly] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const alerts = useCabinetAlerts(enabled, showUnreadFilter ? unreadOnly : false)
+
+  const sorted = useMemo(
+    () =>
+      [...alerts.alerts].sort((a, b) => {
+        if (a.is_read === b.is_read) return 0
+        return a.is_read ? 1 : -1
+      }),
+    [alerts.alerts]
+  )
+  const visible = expanded ? sorted : sorted.slice(0, PREVIEW_LIMIT)
+  const hiddenCount = Math.max(0, sorted.length - PREVIEW_LIMIT)
 
   const handleMarkRead = async (id: number) => {
     try {
@@ -44,7 +57,26 @@ export function CabinetAlertsPanel({
     }
   }
 
+  const handleDismiss = async (id: number) => {
+    try {
+      await alerts.dismiss.mutateAsync(id)
+      toastSuccess(t('alerts.dismissed'))
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
+    }
+  }
+
+  const handleClearRead = async () => {
+    try {
+      await alerts.clearRead.mutateAsync()
+      toastSuccess(t('alerts.clearedRead'))
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
+    }
+  }
+
   const unread = alerts.unreadCount
+  const readCount = alerts.readCount
   const isEmpty = !alerts.isLoading && alerts.alerts.length === 0
   const embedded = variant === 'embedded'
   const shellClass = embedded
@@ -96,7 +128,7 @@ export function CabinetAlertsPanel({
                   : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-primary-300 hover:bg-primary-50'
               }`}
             >
-              {unreadOnly ? 'Chưa đọc ✓' : 'Chỉ chưa đọc'}
+              {unreadOnly ? t('alerts.unreadFilterOn') : t('alerts.unreadFilter')}
             </button>
           ) : null}
           {unread > 0 ? (
@@ -108,9 +140,17 @@ export function CabinetAlertsPanel({
             size="sm"
             variant="outline"
             disabled={unread === 0 || alerts.markAllRead.isPending}
-            onClick={handleMarkAll}
+            onClick={() => void handleMarkAll()}
           >
             {t('alerts.markAllRead')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={readCount === 0 || alerts.clearRead.isPending}
+            onClick={() => void handleClearRead()}
+          >
+            {t('alerts.clearRead')}
           </Button>
         </div>
       </div>
@@ -141,14 +181,14 @@ export function CabinetAlertsPanel({
       {isEmpty ? (
         <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
           <p className="text-sm text-gray-500">
-            {unreadOnly ? 'Không có thông báo chưa đọc.' : t('alerts.empty')}
+            {unreadOnly ? t('alerts.emptyUnread') : t('alerts.empty')}
           </p>
         </div>
       ) : null}
 
-      {alerts.alerts.length > 0 ? (
+      {visible.length > 0 ? (
         <ul className="space-y-2">
-          {alerts.alerts.map((row) => {
+          {visible.map((row) => {
             const isUnread = !row.is_read
             const kindTone =
               row.kind === 'EXPIRED'
@@ -168,7 +208,7 @@ export function CabinetAlertsPanel({
                     className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white ${
                       isUnread ? 'bg-primary-500' : 'bg-slate-300'
                     }`}
-                    aria-label={isUnread ? 'Chưa đọc' : 'Đã đọc'}
+                    aria-label={isUnread ? t('alerts.unreadStatus') : t('alerts.read')}
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -179,33 +219,52 @@ export function CabinetAlertsPanel({
                       </span>
                       {isUnread ? (
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-primary-600">
-                          Mới
+                          {t('alerts.newBadge')}
                         </span>
                       ) : null}
                     </div>
                     <p className="mt-1.5 text-sm font-semibold leading-snug text-slate-900">{row.title}</p>
                     <p className="mt-1 text-xs leading-relaxed text-slate-600 sm:text-sm">{row.body}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {isUnread ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={alerts.markRead.isPending}
+                          onClick={() => void handleMarkRead(row.id)}
+                        >
+                          {t('alerts.markRead')}
+                        </Button>
+                      ) : (
+                        <span className="inline-flex items-center text-[11px] font-medium text-slate-400">
+                          {t('alerts.read')}
+                        </span>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={alerts.dismiss.isPending}
+                        onClick={() => void handleDismiss(row.id)}
+                      >
+                        {t('alerts.dismiss')}
+                      </Button>
+                    </div>
                   </div>
-                  {isUnread ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="shrink-0"
-                      disabled={alerts.markRead.isPending}
-                      onClick={() => handleMarkRead(row.id)}
-                    >
-                      {t('alerts.markRead')}
-                    </Button>
-                  ) : (
-                    <span className="shrink-0 pt-1 text-[11px] font-medium text-slate-400">
-                      {t('alerts.read')}
-                    </span>
-                  )}
                 </div>
               </li>
             )
           })}
         </ul>
+      ) : null}
+
+      {!expanded && hiddenCount > 0 ? (
+        <button
+          type="button"
+          className="mt-3 w-full rounded-lg border border-slate-200 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50"
+          onClick={() => setExpanded(true)}
+        >
+          {t('alerts.showMore', { count: hiddenCount })}
+        </button>
       ) : null}
     </section>
   )

@@ -11,6 +11,7 @@ import { AddMedicineSheet } from '@/components/cabinet/AddMedicineSheet'
 import { CabinetAlertsPanel } from '@/components/cabinet/CabinetAlertsPanel'
 import { CabinetDosePanel } from '@/components/cabinet/CabinetDosePanel'
 import { ItemActionsSheet } from '@/components/cabinet/ItemActionsSheet'
+import { NotifySettingsSheet } from '@/components/cabinet/NotifySettingsSheet'
 import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
 import { SeedFromPrescriptionSheet } from '@/components/cabinet/SeedFromPrescriptionSheet'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
@@ -31,17 +32,18 @@ import type { CabinetItem } from '@/lib/services/cabinet'
 import { CabinetMedsListSkeleton } from '@/components/skeletons'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
-type CabinetTab = 'meds' | 'doses'
+type CabinetView = 'meds' | 'doses'
 type StageFilter = 'all' | 'expired' | 'expiring_soon' | 'expiring' | 'low_stock' | 'refill'
 type StageTone = 'neutral' | 'danger' | 'warn'
 
 const MANAGE_DELETE_BTN = 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
 const MANAGE_CREATE_BTN = 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500'
+const DOSE_TAB_SLUG = 'lich-uong-thuoc'
 
 const LEGACY_ALERT_TABS = new Set(['reminders', 'alerts'])
 
-function parseTab(raw: string | null): CabinetTab {
-  if (raw === 'doses' || raw === 'schedule') return 'doses'
+function parseView(raw: string | null): CabinetView {
+  if (raw === DOSE_TAB_SLUG || raw === 'doses' || raw === 'schedule') return 'doses'
   return 'meds'
 }
 
@@ -71,7 +73,7 @@ export function CabinetWorkspace() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [tab, setTab] = useState<CabinetTab>(() => parseTab(searchParams.get('tab')))
+  const [view, setView] = useState<CabinetView>(() => parseView(searchParams.get('tab')))
 
   const cabinet = useCabinet(true)
   const alerts = useCabinetAlerts(true, false)
@@ -82,14 +84,13 @@ export function CabinetWorkspace() {
   const [seedOpen, setSeedOpen] = useState(false)
   const [seedRxOpen, setSeedRxOpen] = useState(false)
   const [activeItem, setActiveItem] = useState<CabinetItem | null>(null)
+  const [notifyOpen, setNotifyOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [renameValue, setRenameValue] = useState('')
   const [showManage, setShowManage] = useState(false)
   const [showRename, setShowRename] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [stage, setStage] = useState<StageFilter>('all')
-  const [reminderEnabled, setReminderEnabled] = useState(true)
-  const [soonDays, setSoonDays] = useState('30')
 
   const selected = cabinet.cabinets.find((row) => row.id === cabinet.selectedId)
   const counts = cabinet.overview?.counts
@@ -98,7 +99,7 @@ export function CabinetWorkspace() {
   const activeDoseCount = cabinet.items.filter((row) => row.dose_enabled).length
 
   useEffect(() => {
-    setTab(parseTab(searchParams.get('tab')))
+    setView(parseView(searchParams.get('tab')))
     if (!wantsAlerts(searchParams)) return
     const params = new URLSearchParams(searchParams.toString())
     params.delete('focus')
@@ -111,12 +112,12 @@ export function CabinetWorkspace() {
     }, 250)
   }, [searchParams, pathname, router])
 
-  const selectTab = (next: CabinetTab) => {
-    setTab(next)
+  const selectView = (next: CabinetView) => {
+    setView(next)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('focus')
     if (next === 'meds') params.delete('tab')
-    else params.set('tab', next)
+    else params.set('tab', DOSE_TAB_SLUG)
     const qs = params.toString()
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
@@ -144,12 +145,6 @@ export function CabinetWorkspace() {
         return items
     }
   }, [cabinet.items, cabinet.overview, stage])
-
-  useEffect(() => {
-    if (!selected) return
-    setReminderEnabled(selected.reminder_enabled ?? true)
-    setSoonDays(String(selected.expiring_soon_days ?? 30))
-  }, [selected])
 
   useEffect(() => {
     setStage('all')
@@ -203,24 +198,6 @@ export function CabinetWorkspace() {
     }
   }
 
-  const handleSaveSettings = async () => {
-    if (!cabinet.selectedId) return
-    const days = Number(soonDays)
-    if (!Number.isFinite(days) || days < 1 || days > 365) {
-      toastError(t('settings.daysInvalid'))
-      return
-    }
-    try {
-      await cabinet.updateCabinet.mutateAsync({
-        id: cabinet.selectedId,
-        payload: { reminder_enabled: reminderEnabled, expiring_soon_days: days },
-      })
-      toastSuccess(t('toast.settingsSaved'))
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
-    }
-  }
-
   const stageTabs: { id: StageFilter; label: string; count: number; tone: StageTone }[] = [
     { id: 'all', label: t('filters.all'), count: total, tone: 'neutral' },
     { id: 'expired', label: t('filters.expired'), count: counts?.expired ?? 0, tone: 'danger' },
@@ -241,12 +218,11 @@ export function CabinetWorkspace() {
   ]
 
   const featureTabs: {
-    id: CabinetTab
+    id: CabinetView
     label: string
     hint: string
     icon: typeof PillIcon
     badge?: number
-    alerts?: number
   }[] = [
     {
       id: 'meds',
@@ -254,7 +230,6 @@ export function CabinetWorkspace() {
       hint: t('tabs.medsHint'),
       icon: PillIcon,
       badge: total > 0 ? total : undefined,
-      alerts: unreadCount > 0 ? unreadCount : undefined,
     },
     {
       id: 'doses',
@@ -284,13 +259,32 @@ export function CabinetWorkspace() {
             className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-secondary-400/20 blur-2xl"
             aria-hidden
           />
-          <Link
-            href="/tai-khoan"
-            className="relative mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary-100 hover:text-white"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Quay lại
-          </Link>
+          <div className="relative mb-3 flex items-center justify-between gap-3">
+            <Link
+              href="/tai-khoan"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-100 hover:text-white"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Quay lại
+            </Link>
+            <button
+              type="button"
+              onClick={() => setNotifyOpen(true)}
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white hover:bg-white/25"
+              aria-label={
+                unreadCount > 0
+                  ? t('notify.bellAriaUnread', { count: unreadCount })
+                  : t('notify.bellAria')
+              }
+            >
+              <BellIcon className="h-5 w-5" />
+              {unreadCount > 0 ? (
+                <span className="absolute -right-1 -top-1 min-w-[1.15rem] rounded-full bg-accent-500 px-1 py-0.5 text-center text-[10px] font-bold tabular-nums leading-none text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
           <div className="relative flex items-start gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
               <JarOfPillsIcon className="h-6 w-6" />
@@ -304,18 +298,17 @@ export function CabinetWorkspace() {
             </div>
           </div>
 
-          {/* Feature map */}
           <div className="relative mt-4 grid grid-cols-2 gap-2" role="tablist" aria-label={t('title')}>
             {featureTabs.map((item) => {
               const Icon = item.icon
-              const active = tab === item.id
+              const active = view === item.id
               return (
                 <button
                   key={item.id}
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => selectTab(item.id)}
+                  onClick={() => selectView(item.id)}
                   className={`rounded-xl border px-3 py-2.5 text-left transition-colors sm:px-4 sm:py-3 ${
                     active
                       ? 'border-white bg-white text-primary-800 shadow-sm'
@@ -323,18 +316,7 @@ export function CabinetWorkspace() {
                   }`}
                 >
                   <span className="flex items-center justify-between gap-1">
-                    <span className="flex items-center gap-1.5">
-                      <Icon className={`h-4 w-4 ${active ? 'text-primary-600' : 'text-white'}`} />
-                      {item.alerts ? (
-                        <span
-                          className="inline-flex items-center gap-0.5 rounded-full bg-accent-500 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-white"
-                          aria-label={t('tabs.unreadAlerts', { count: item.alerts })}
-                        >
-                          <BellIcon className="h-3 w-3" />
-                          {item.alerts}
-                        </span>
-                      ) : null}
-                    </span>
+                    <Icon className={`h-4 w-4 ${active ? 'text-primary-600' : 'text-white'}`} />
                     {item.badge != null ? (
                       <span
                         className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
@@ -345,7 +327,9 @@ export function CabinetWorkspace() {
                       </span>
                     ) : null}
                   </span>
-                  <span className={`mt-1.5 block text-xs font-semibold sm:text-sm ${active ? 'text-primary-900' : ''}`}>
+                  <span
+                    className={`mt-1.5 block text-xs font-semibold sm:text-sm ${active ? 'text-primary-900' : ''}`}
+                  >
                     {item.label}
                   </span>
                   <span
@@ -462,8 +446,8 @@ export function CabinetWorkspace() {
 
       {cabinet.error ? <p className="text-sm text-accent-600">{cabinet.error.message}</p> : null}
 
-      {/* ===== TAB: MEDS ===== */}
-      {tab === 'meds' ? (
+      {/* ===== VIEW: MEDS ===== */}
+      {view === 'meds' ? (
         <section className="space-y-3.5 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -593,8 +577,8 @@ export function CabinetWorkspace() {
         </section>
       ) : null}
 
-      {/* Expiry notifications — the notification layer of the meds tab */}
-      {tab === 'meds' ? (
+      {/* Inbox — receive notifications only (settings live in bell modal) */}
+      {view === 'meds' ? (
         <section
           id="cabinet-alerts"
           className="scroll-mt-24 space-y-4 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5"
@@ -609,59 +593,23 @@ export function CabinetWorkspace() {
               </h2>
               <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.expiryNotifyBody')}</p>
             </div>
-          </div>
-
-          <div
-            className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:flex-row sm:items-end ${
-              reminderEnabled ? 'border-secondary-200 bg-secondary-50/50' : 'border-slate-200 bg-slate-50'
-            }`}
-          >
-            <label className="flex flex-1 cursor-pointer items-start gap-3">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600"
-                checked={reminderEnabled}
-                onChange={(e) => setReminderEnabled(e.target.checked)}
-              />
-              <span>
-                <span className="block text-sm font-medium text-slate-800">{t('settings.reminderEnabled')}</span>
-                <span className="block text-xs text-gray-500">{t('settings.reminderHint')}</span>
-              </span>
-            </label>
-            <div className="flex items-end gap-2">
-              <div className="w-28">
-                <TextField
-                  type="number"
-                  min={1}
-                  max={365}
-                  label={t('settings.soonDays')}
-                  value={soonDays}
-                  onChange={(e) => setSoonDays(e.target.value)}
-                  fullWidth
-                />
-              </div>
-              <Button
-                size="sm"
-                onClick={() => void handleSaveSettings()}
-                disabled={cabinet.updateCabinet.isPending || selected?.id == null}
-              >
-                {cabinet.updateCabinet.isPending ? t('loading') : t('settings.save')}
-              </Button>
-            </div>
+            <Button size="sm" variant="outline" className="shrink-0" onClick={() => setNotifyOpen(true)}>
+              {t('notify.openSettings')}
+            </Button>
           </div>
 
           <CabinetAlertsPanel enabled showUnreadFilter variant="embedded" />
         </section>
       ) : null}
 
-      {/* ===== TAB: DOSES ===== */}
-      {tab === 'doses' ? (
+      {/* ===== VIEW: DOSES ===== */}
+      {view === 'doses' ? (
         <CabinetDosePanel
           items={cabinet.items}
           isLoading={cabinet.isLoading}
           cabinetReady={cabinet.selectedId != null}
           onUpdate={(id, payload) => cabinet.updateItem.mutateAsync({ id, payload })}
-          onGoToMeds={() => selectTab('meds')}
+          onGoToMeds={() => selectView('meds')}
         />
       ) : null}
 
@@ -693,6 +641,25 @@ export function CabinetWorkspace() {
         onClose={() => setActiveItem(null)}
         onUpdate={(id, payload) => cabinet.updateItem.mutateAsync({ id, payload })}
         onDelete={(id) => cabinet.deleteItem.mutateAsync(id)}
+        onOpenDoseSchedule={() => {
+          setActiveItem(null)
+          selectView('doses')
+        }}
+      />
+      <NotifySettingsSheet
+        open={notifyOpen}
+        onClose={() => setNotifyOpen(false)}
+        reminderEnabled={selected?.reminder_enabled ?? false}
+        doseReminderEnabled={selected?.dose_reminder_enabled ?? false}
+        soonDays={selected?.expiring_soon_days ?? 30}
+        canSave={cabinet.selectedId != null}
+        onSave={(payload) =>
+          cabinet.updateCabinet.mutateAsync({ id: cabinet.selectedId!, payload })
+        }
+        onConfigureDoses={() => {
+          setNotifyOpen(false)
+          selectView('doses')
+        }}
       />
     </div>
   )

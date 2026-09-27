@@ -125,8 +125,8 @@ export const STORE_SUPPORT = {
   CONSULT_HREF: '/?consult=open',
   CONTACT_HREF: '/lien-he',
   CABINET_HREF: '/tai-khoan/tu-thuoc',
-  /** Home “Nhắc uống” → tủ thuốc, tab nhắc uống thuốc. */
-  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=doses',
+  /** Home “Lịch uống” → tủ thuốc, tab lịch uống. */
+  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=lich-uong-thuoc',
 } as const
 
 export type PlaceholderPageAction = {
@@ -160,7 +160,7 @@ export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { iconId: 'package', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
   {
     iconId: 'clock',
-    title: 'Nhắc uống thuốc',
+    title: 'Lịch uống',
     href: STORE_SUPPORT.MED_REMINDER_HREF,
   },
   { iconId: 'jar-of-pills', title: 'Tủ thuốc', href: STORE_SUPPORT.CABINET_HREF },

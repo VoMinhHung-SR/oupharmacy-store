@@ -7,6 +7,7 @@ export type Cabinet = {
   id: number
   name: string
   reminder_enabled: boolean
+  dose_reminder_enabled: boolean
   expiring_soon_days: number
   created_date: string
   updated_date: string
@@ -69,6 +70,7 @@ export type CreateCabinetItemPayload = {
 export type UpdateCabinetPayload = {
   name?: string
   reminder_enabled?: boolean
+  dose_reminder_enabled?: boolean
   expiring_soon_days?: number
 }
 
