@@ -9,7 +9,9 @@ import { TextField } from '@/components/TextField'
 import { SearchableSelect } from '@/components/common/SearchableSelect'
 import { AddMedicineSheet } from '@/components/cabinet/AddMedicineSheet'
 import { CabinetAlertsPanel } from '@/components/cabinet/CabinetAlertsPanel'
+import { CabinetDosePanel } from '@/components/cabinet/CabinetDosePanel'
 import { ItemActionsSheet } from '@/components/cabinet/ItemActionsSheet'
+import { NotifySettingsSheet } from '@/components/cabinet/NotifySettingsSheet'
 import { SeedFromOrderSheet } from '@/components/cabinet/SeedFromOrderSheet'
 import { SeedFromPrescriptionSheet } from '@/components/cabinet/SeedFromPrescriptionSheet'
 import { ExpiryBadge } from '@/components/cabinet/ExpiryBadge'
@@ -18,7 +20,6 @@ import { CartLineThumb } from '@/components/cart/CartLineThumb'
 import {
   ArrowLeftIcon,
   BellIcon,
-  CheckCircleIcon,
   ClockIcon,
   JarOfPillsIcon,
   PillIcon,
@@ -31,17 +32,24 @@ import type { CabinetItem } from '@/lib/services/cabinet'
 import { CabinetMedsListSkeleton } from '@/components/skeletons'
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
-type CabinetTab = 'meds' | 'reminders' | 'schedule'
+type CabinetView = 'meds' | 'doses'
 type StageFilter = 'all' | 'expired' | 'expiring_soon' | 'expiring' | 'low_stock' | 'refill'
 type StageTone = 'neutral' | 'danger' | 'warn'
 
 const MANAGE_DELETE_BTN = 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
 const MANAGE_CREATE_BTN = 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500'
+const DOSE_TAB_SLUG = 'lich-uong-thuoc'
 
-function parseTab(raw: string | null, focusAlerts: boolean): CabinetTab {
-  if (focusAlerts || raw === 'reminders' || raw === 'alerts') return 'reminders'
-  if (raw === 'schedule' || raw === 'doses') return 'schedule'
+const LEGACY_ALERT_TABS = new Set(['reminders', 'alerts'])
+
+function parseView(raw: string | null): CabinetView {
+  if (raw === DOSE_TAB_SLUG || raw === 'doses' || raw === 'schedule') return 'doses'
   return 'meds'
+}
+
+function wantsAlerts(params: URLSearchParams | { get: (k: string) => string | null }) {
+  const raw = params.get('tab')
+  return params.get('focus') === 'alerts' || (raw != null && LEGACY_ALERT_TABS.has(raw))
 }
 
 function stageChipClass(tone: StageTone, active: boolean) {
@@ -65,10 +73,7 @@ export function CabinetWorkspace() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const focusAlerts = searchParams.get('focus') === 'alerts'
-  const [tab, setTab] = useState<CabinetTab>(() =>
-    parseTab(searchParams.get('tab'), focusAlerts)
-  )
+  const [view, setView] = useState<CabinetView>(() => parseView(searchParams.get('tab')))
 
   const cabinet = useCabinet(true)
   const alerts = useCabinetAlerts(true, false)
@@ -79,30 +84,40 @@ export function CabinetWorkspace() {
   const [seedOpen, setSeedOpen] = useState(false)
   const [seedRxOpen, setSeedRxOpen] = useState(false)
   const [activeItem, setActiveItem] = useState<CabinetItem | null>(null)
+  const [notifyOpen, setNotifyOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [renameValue, setRenameValue] = useState('')
   const [showManage, setShowManage] = useState(false)
   const [showRename, setShowRename] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [stage, setStage] = useState<StageFilter>('all')
-  const [reminderEnabled, setReminderEnabled] = useState(true)
-  const [soonDays, setSoonDays] = useState('30')
 
   const selected = cabinet.cabinets.find((row) => row.id === cabinet.selectedId)
   const counts = cabinet.overview?.counts
   const total = counts?.total ?? 0
   const unreadCount = alerts.unreadCount
+  const activeDoseCount = cabinet.items.filter((row) => row.dose_enabled).length
 
   useEffect(() => {
-    setTab(parseTab(searchParams.get('tab'), searchParams.get('focus') === 'alerts'))
-  }, [searchParams])
+    setView(parseView(searchParams.get('tab')))
+    if (!wantsAlerts(searchParams)) return
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('focus')
+    params.delete('tab')
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    // Not cleared on re-run: the replace above re-fires this effect before the scroll lands.
+    window.setTimeout(() => {
+      document.getElementById('cabinet-alerts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 250)
+  }, [searchParams, pathname, router])
 
-  const selectTab = (next: CabinetTab) => {
-    setTab(next)
+  const selectView = (next: CabinetView) => {
+    setView(next)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('focus')
     if (next === 'meds') params.delete('tab')
-    else params.set('tab', next)
+    else params.set('tab', DOSE_TAB_SLUG)
     const qs = params.toString()
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
@@ -130,12 +145,6 @@ export function CabinetWorkspace() {
         return items
     }
   }, [cabinet.items, cabinet.overview, stage])
-
-  useEffect(() => {
-    if (!selected) return
-    setReminderEnabled(selected.reminder_enabled ?? true)
-    setSoonDays(String(selected.expiring_soon_days ?? 30))
-  }, [selected])
 
   useEffect(() => {
     setStage('all')
@@ -189,24 +198,6 @@ export function CabinetWorkspace() {
     }
   }
 
-  const handleSaveSettings = async () => {
-    if (!cabinet.selectedId) return
-    const days = Number(soonDays)
-    if (!Number.isFinite(days) || days < 1 || days > 365) {
-      toastError(t('settings.daysInvalid'))
-      return
-    }
-    try {
-      await cabinet.updateCabinet.mutateAsync({
-        id: cabinet.selectedId,
-        payload: { reminder_enabled: reminderEnabled, expiring_soon_days: days },
-      })
-      toastSuccess(t('toast.settingsSaved'))
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : t('toast.actionFailed'))
-    }
-  }
-
   const stageTabs: { id: StageFilter; label: string; count: number; tone: StageTone }[] = [
     { id: 'all', label: t('filters.all'), count: total, tone: 'neutral' },
     { id: 'expired', label: t('filters.expired'), count: counts?.expired ?? 0, tone: 'danger' },
@@ -227,7 +218,7 @@ export function CabinetWorkspace() {
   ]
 
   const featureTabs: {
-    id: CabinetTab
+    id: CabinetView
     label: string
     hint: string
     icon: typeof PillIcon
@@ -241,17 +232,11 @@ export function CabinetWorkspace() {
       badge: total > 0 ? total : undefined,
     },
     {
-      id: 'reminders',
-      label: t('tabs.reminders'),
-      hint: t('tabs.remindersHint'),
-      icon: BellIcon,
-      badge: unreadCount > 0 ? unreadCount : undefined,
-    },
-    {
-      id: 'schedule',
-      label: t('tabs.schedule'),
-      hint: t('tabs.scheduleHint'),
+      id: 'doses',
+      label: t('tabs.doses'),
+      hint: t('tabs.dosesHint'),
       icon: ClockIcon,
+      badge: activeDoseCount > 0 ? activeDoseCount : undefined,
     },
   ]
 
@@ -274,13 +259,32 @@ export function CabinetWorkspace() {
             className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-secondary-400/20 blur-2xl"
             aria-hidden
           />
-          <Link
-            href="/tai-khoan"
-            className="relative mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary-100 hover:text-white"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Quay lại
-          </Link>
+          <div className="relative mb-3 flex items-center justify-between gap-3">
+            <Link
+              href="/tai-khoan"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-100 hover:text-white"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Quay lại
+            </Link>
+            <button
+              type="button"
+              onClick={() => setNotifyOpen(true)}
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white hover:bg-white/25"
+              aria-label={
+                unreadCount > 0
+                  ? t('notify.bellAriaUnread', { count: unreadCount })
+                  : t('notify.bellAria')
+              }
+            >
+              <BellIcon className="h-5 w-5" />
+              {unreadCount > 0 ? (
+                <span className="absolute -right-1 -top-1 min-w-[1.15rem] rounded-full bg-accent-500 px-1 py-0.5 text-center text-[10px] font-bold tabular-nums leading-none text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
           <div className="relative flex items-start gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
               <JarOfPillsIcon className="h-6 w-6" />
@@ -294,17 +298,18 @@ export function CabinetWorkspace() {
             </div>
           </div>
 
-          {/* Feature map */}
-          <div className="relative mt-4 grid grid-cols-3 gap-2">
+          <div className="relative mt-4 grid grid-cols-2 gap-2" role="tablist" aria-label={t('title')}>
             {featureTabs.map((item) => {
               const Icon = item.icon
-              const active = tab === item.id
+              const active = view === item.id
               return (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => selectTab(item.id)}
-                  className={`rounded-xl border px-2 py-2.5 text-left transition-colors sm:px-3 ${
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => selectView(item.id)}
+                  className={`rounded-xl border px-3 py-2.5 text-left transition-colors sm:px-4 sm:py-3 ${
                     active
                       ? 'border-white bg-white text-primary-800 shadow-sm'
                       : 'border-white/25 bg-white/10 text-white hover:bg-white/15'
@@ -322,7 +327,9 @@ export function CabinetWorkspace() {
                       </span>
                     ) : null}
                   </span>
-                  <span className={`mt-1.5 block text-xs font-semibold sm:text-sm ${active ? 'text-primary-900' : ''}`}>
+                  <span
+                    className={`mt-1.5 block text-xs font-semibold sm:text-sm ${active ? 'text-primary-900' : ''}`}
+                  >
                     {item.label}
                   </span>
                   <span
@@ -439,8 +446,8 @@ export function CabinetWorkspace() {
 
       {cabinet.error ? <p className="text-sm text-accent-600">{cabinet.error.message}</p> : null}
 
-      {/* ===== TAB: MEDS ===== */}
-      {tab === 'meds' ? (
+      {/* ===== VIEW: MEDS ===== */}
+      {view === 'meds' ? (
         <section className="space-y-3.5 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -570,98 +577,40 @@ export function CabinetWorkspace() {
         </section>
       ) : null}
 
-      {/* ===== TAB: REMINDERS (expiry) ===== */}
-      {tab === 'reminders' ? (
-        <div className="space-y-3.5">
-          <section className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('sections.remindersTitle')}</h2>
-            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.remindersBody')}</p>
-
-            <div className="mt-4 space-y-4">
-              <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 ${
-                  reminderEnabled
-                    ? 'border-secondary-200 bg-secondary-50/50'
-                    : 'border-slate-200 bg-slate-50'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600"
-                  checked={reminderEnabled}
-                  onChange={(e) => setReminderEnabled(e.target.checked)}
-                />
-                <span>
-                  <span className="block text-sm font-medium text-slate-800">
-                    {t('settings.reminderEnabled')}
-                  </span>
-                  <span className="block text-xs text-gray-500">{t('settings.reminderHint')}</span>
-                </span>
-              </label>
-              <div className="max-w-sm">
-                <TextField
-                  type="number"
-                  min={1}
-                  max={365}
-                  label={t('settings.soonDays')}
-                  value={soonDays}
-                  onChange={(e) => setSoonDays(e.target.value)}
-                  helperText={t('settings.soonDaysHint')}
-                  fullWidth
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => void handleSaveSettings()}
-                  disabled={cabinet.updateCabinet.isPending || selected?.id == null}
-                >
-                  {cabinet.updateCabinet.isPending ? t('loading') : t('settings.save')}
-                </Button>
-              </div>
-            </div>
-          </section>
-
-          <div id="cabinet-alerts" className="scroll-mt-24">
-            <CabinetAlertsPanel enabled showUnreadFilter variant="elevated" />
-          </div>
-        </div>
-      ) : null}
-
-      {/* ===== TAB: SCHEDULE (dose) — roadmap, honest empty ===== */}
-      {tab === 'schedule' ? (
-        <section className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
-          <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{t('sections.scheduleTitle')}</h2>
-          <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.scheduleBody')}</p>
-
-          <div className="mt-5 flex flex-col items-center rounded-xl border border-dashed border-primary-200 bg-gradient-to-b from-primary-50/80 to-white px-4 py-10 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
-              <ClockIcon className="h-7 w-7" />
+      {/* Inbox — receive notifications only (settings live in bell modal) */}
+      {view === 'meds' ? (
+        <section
+          id="cabinet-alerts"
+          className="scroll-mt-24 space-y-4 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
+              <BellIcon className="h-5 w-5" />
             </span>
-            <p className="mt-4 text-sm font-semibold text-slate-900">{t('schedule.comingTitle')}</p>
-            <p className="mt-1.5 max-w-md text-xs leading-relaxed text-slate-600 sm:text-sm">
-              {t('schedule.comingBody')}
-            </p>
-            <ul className="mt-5 w-full max-w-sm space-y-2 text-left text-xs text-slate-600 sm:text-sm">
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet1')}
-              </li>
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet2')}
-              </li>
-              <li className="flex items-start gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-                <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-secondary-600" />
-                {t('schedule.bullet3')}
-              </li>
-            </ul>
-            <p className="mt-5 text-[11px] text-slate-400">{t('schedule.footnote')}</p>
-            <Button size="sm" variant="outline" className="mt-4" onClick={() => selectTab('meds')}>
-              {t('schedule.backToMeds')}
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-semibold text-slate-900 sm:text-lg">
+                {t('sections.expiryNotifyTitle')}
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{t('sections.expiryNotifyBody')}</p>
+            </div>
+            <Button size="sm" variant="outline" className="shrink-0" onClick={() => setNotifyOpen(true)}>
+              {t('notify.openSettings')}
             </Button>
           </div>
+
+          <CabinetAlertsPanel enabled showUnreadFilter variant="embedded" />
         </section>
+      ) : null}
+
+      {/* ===== VIEW: DOSES ===== */}
+      {view === 'doses' ? (
+        <CabinetDosePanel
+          items={cabinet.items}
+          isLoading={cabinet.isLoading}
+          cabinetReady={cabinet.selectedId != null}
+          onUpdate={(id, payload) => cabinet.updateItem.mutateAsync({ id, payload })}
+          onGoToMeds={() => selectView('meds')}
+        />
       ) : null}
 
       {cabinet.selectedId ? (
@@ -692,6 +641,25 @@ export function CabinetWorkspace() {
         onClose={() => setActiveItem(null)}
         onUpdate={(id, payload) => cabinet.updateItem.mutateAsync({ id, payload })}
         onDelete={(id) => cabinet.deleteItem.mutateAsync(id)}
+        onOpenDoseSchedule={() => {
+          setActiveItem(null)
+          selectView('doses')
+        }}
+      />
+      <NotifySettingsSheet
+        open={notifyOpen}
+        onClose={() => setNotifyOpen(false)}
+        reminderEnabled={selected?.reminder_enabled ?? false}
+        doseReminderEnabled={selected?.dose_reminder_enabled ?? false}
+        soonDays={selected?.expiring_soon_days ?? 30}
+        canSave={cabinet.selectedId != null}
+        onSave={(payload) =>
+          cabinet.updateCabinet.mutateAsync({ id: cabinet.selectedId!, payload })
+        }
+        onConfigureDoses={() => {
+          setNotifyOpen(false)
+          selectView('doses')
+        }}
       />
     </div>
   )

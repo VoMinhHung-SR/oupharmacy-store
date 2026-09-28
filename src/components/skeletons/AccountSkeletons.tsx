@@ -30,13 +30,16 @@ export function AccountHubSkeleton() {
   )
 }
 
-/** Smart cabinet page while auth / Suspense — mirrors hero tabs + switcher + meds panel. */
+/** Smart cabinet page while auth / Suspense — mirrors hero tabs + bell + switcher + meds panel. */
 export function CabinetWorkspaceSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-5" aria-busy="true" aria-label="Đang tải tủ thuốc">
       <section className="overflow-hidden rounded-xl border border-primary-200/70 bg-gradient-to-br from-primary-600 to-primary-800 shadow-md shadow-primary-900/10">
         <div className="relative p-4 sm:p-5">
-          <SkeletonPulse className="mb-3 h-4 w-24 bg-white/25" />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <SkeletonPulse className="h-4 w-24 bg-white/25" />
+            <SkeletonPulse className="h-10 w-10 shrink-0 rounded-full bg-white/20" />
+          </div>
           <div className="flex items-start gap-3">
             <SkeletonPulse className="h-12 w-12 shrink-0 rounded-2xl bg-white/20" />
             <div className="min-w-0 flex-1 space-y-2">
@@ -46,11 +49,11 @@ export function CabinetWorkspaceSkeleton() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className={`rounded-xl border px-2 py-2.5 sm:px-3 ${
+                className={`rounded-xl border px-3 py-2.5 sm:px-4 sm:py-3 ${
                   i === 0 ? 'border-white bg-white' : 'border-white/25 bg-white/10'
                 }`}
               >
