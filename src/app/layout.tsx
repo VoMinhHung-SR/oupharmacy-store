@@ -19,18 +19,35 @@ import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegis
 import { ChunkLoadRecovery } from '@/components/pwa/ChunkLoadRecovery'
 import { Providers } from './providers'
 import { fetchCommonCitiesServer } from '@/lib/services/location.server'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { getSiteOrigin } from '@/lib/siteUrls'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const APP_NAME = 'OUPharmacy'
 const APP_TITLE = 'OUPharmacy Store'
 const APP_DESCRIPTION = 'Nhà thuốc OUPharmacy — mua thuốc, tư vấn và đặt hàng trực tuyến'
+const SITE_ORIGIN = getSiteOrigin()
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   applicationName: APP_NAME,
   title: APP_TITLE,
   description: APP_DESCRIPTION,
   manifest: '/manifest.webmanifest',
+  openGraph: {
+    type: 'website',
+    locale: 'vi_VN',
+    siteName: APP_NAME,
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    url: SITE_ORIGIN,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -63,9 +80,19 @@ export default async function RootLayout({
   const messages = await getMessages()
   const { cities: initialCities, error: initialCitiesError } = await fetchCommonCitiesServer()
 
+  const organizationLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: APP_NAME,
+    url: SITE_ORIGIN,
+    logo: `${SITE_ORIGIN}/icons/icon-512.png`,
+    description: APP_DESCRIPTION,
+  }
+
   return (
     <html lang="vi" className="h-full">
       <body className={`${inter.className} flex min-h-full flex-col overflow-x-hidden bg-[#ededed]`}>
+        <JsonLd data={organizationLd} />
         <NextIntlClientProvider messages={messages}>
           <Providers initialCities={initialCities} initialCitiesError={initialCitiesError}>
             <AuthProvider>

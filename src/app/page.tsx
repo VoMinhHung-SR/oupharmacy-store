@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import FeaturedCategories from '@/sections/FeaturedCategories'
 import FavoriteBrands from '@/sections/FavoriteBrands'
 import BestsellingProducts from '@/sections/BestsellingProducts'
@@ -9,6 +10,20 @@ import { getFavoriteBrandsSSG } from '@/lib/services/brandCampaigns'
 import { getFlashSaleProductsSSG } from '@/lib/services/flashSale'
 import { getHotSaleProductsSSG } from '@/lib/services/search'
 import { HomeQuickLinks } from '@/components/consultation/HomeQuickLinks'
+
+export const metadata: Metadata = {
+  title: 'Nhà thuốc OUPharmacy — mua thuốc, tư vấn và đặt hàng trực tuyến',
+  description:
+    'Nhà thuốc OUPharmacy: mua thuốc chính hãng, tủ thuốc thông minh, tư vấn dược sĩ và giao hàng nhanh.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Nhà thuốc OUPharmacy',
+    description:
+      'Mua thuốc chính hãng, tư vấn dược sĩ và đặt hàng trực tuyến tại OUPharmacy.',
+    url: '/',
+    type: 'website',
+  },
+}
 
 /** BE does not expose theme_image_url yet — fall back to first-party demo themes by sort_order. */
 function withHeroThemeFallback(slides: PlacementWinner[]): PlacementWinner[] {

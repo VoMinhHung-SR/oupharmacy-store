@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
+  title: 'Giỏ hàng',
 }
 
-export default function AccountLayout({ children }: { children: ReactNode }) {
+export default function CartLayout({ children }: { children: React.ReactNode }) {
   return children
 }

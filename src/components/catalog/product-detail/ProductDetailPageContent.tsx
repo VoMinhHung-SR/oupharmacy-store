@@ -1,6 +1,13 @@
 'use client'
 
-import { Product } from '@/lib/services/products'
+import { useMemo } from 'react'
+import {
+  Product,
+  buildCategoryBreadcrumbFromPath,
+  buildProductCanonicalHref,
+  getProductImageUrl,
+  getProductName,
+} from '@/lib/services/products'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/common/ProductImageGallery'
@@ -12,6 +19,7 @@ import { ProductDetailInfoColumn } from '@/components/catalog/product-detail/par
 import { ProductDetailPoliciesBox } from '@/components/catalog/product-detail/parts/ProductDetailPoliciesBox'
 import { ProductStickyAddToCartBar } from '@/components/catalog/product-detail/parts/ProductStickyAddToCartBar'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -19,6 +27,58 @@ interface ProductDetailPageContentProps {
   productSlug: string
   loading?: boolean
   error?: Error | null
+}
+
+function buildProductJsonLd(product: Product, categorySlug: string) {
+  const name = getProductName(product)
+  const image = getProductImageUrl(product)
+  const canonical = buildProductCanonicalHref(product)
+  const path = canonical || `/${categorySlug}/${product.product?.slug || ''}`.replace(/\/+/g, '/')
+  const crumbs = [
+    { name: 'Trang chủ', item: '/' },
+    ...buildCategoryBreadcrumbFromPath(categorySlug, product).map((s) => ({
+      name: s.name,
+      item: s.href,
+    })),
+    { name, item: path },
+  ]
+
+  const productLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description:
+      product.product?.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() ||
+      undefined,
+    image: image || undefined,
+    sku: product.product?.mid || String(product.product_entity_id ?? product.id),
+    brand: product.brand?.name
+      ? { '@type': 'Brand', name: product.brand.name }
+      : undefined,
+    offers: {
+      '@type': 'Offer',
+      url: path,
+      priceCurrency: 'VND',
+      price: product.price_value ?? undefined,
+      availability:
+        product.in_stock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+    },
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  }
+
+  return [productLd, breadcrumbLd]
 }
 
 export function ProductDetailPageContent({
@@ -29,6 +89,10 @@ export function ProductDetailPageContent({
   error = null,
 }: ProductDetailPageContentProps) {
   const state = useProductDetailPage({ product, categorySlug, productSlug, loading })
+  const jsonLd = useMemo(
+    () => (product ? buildProductJsonLd(product, categorySlug) : null),
+    [product, categorySlug]
+  )
 
   if (loading) {
     return <ProductDetailPageSkeleton />
@@ -77,6 +141,7 @@ export function ProductDetailPageContent({
 
   return (
     <Container className="pb-28 md:pb-32">
+      {jsonLd ? <JsonLd data={jsonLd} /> : null}
       <Breadcrumb
         items={state.breadcrumbItems}
         className="py-4 max-md:[&_ol>li:last-child]:hidden max-md:[&_ol>li:nth-last-child(2)>span:last-child]:hidden"
