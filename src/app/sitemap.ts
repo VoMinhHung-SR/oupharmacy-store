@@ -8,7 +8,7 @@ const STATIC_PATHS = [
   '/dat-thuoc',
   '/khuyen-mai',
   '/lien-he',
-  '/about',
+  '/gioi-thieu',
   '/tro-giup',
   '/dieu-khoan',
   '/chinh-sach-bao-mat',

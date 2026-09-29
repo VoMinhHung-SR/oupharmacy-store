@@ -202,14 +202,14 @@ export const LoginModal: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4 text-sm">
               <Link 
-                href="/register" 
+                href="/dang-ky" 
                 onClick={closeModal}
                 className="text-primary-700 hover:text-primary-800 hover:underline"
               >
                 Tạo tài khoản
               </Link>
               <Link 
-                href="/forgot-password" 
+                href="/quen-mat-khau" 
                 onClick={closeModal}
                 className="text-primary-700 hover:text-primary-800 hover:underline"
               >

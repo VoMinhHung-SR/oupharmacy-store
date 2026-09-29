@@ -74,9 +74,29 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/about',
+        destination: '/gioi-thieu',
+        permanent: true,
+      },
+      {
+        source: '/register',
+        destination: '/dang-ky',
+        permanent: true,
+      },
+      {
+        source: '/forgot-password',
+        destination: '/quen-mat-khau',
+        permanent: true,
+      },
+      {
+        source: '/products',
+        destination: '/tim-kiem',
+        permanent: true,
+      },
+      {
         source: '/tiem-vac-xin',
-        destination: '/tai-khoan/tu-thuoc',
-        permanent: false,
+        destination: '/tro-giup',
+        permanent: true,
       },
     ]
   },
