@@ -26,7 +26,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | `src/middleware.ts` | Redirect legacy checkout, strip `/vi` `/en`, matcher bảo vệ route. |
 | `config/theme/` | Theme tokens (nếu có). |
 
-`src/app/api/` và `src/api/` hiện **trống** — API nghiệp vụ nằm trên server ngoài; client gọi qua `src/lib/`.
+`src/app/api/` — BFF auth routes (`/api/auth/login|refresh|logout|session|firebase`); nghiệp vụ khác vẫn gọi backend ngoài qua `src/lib/`.
 
 ## Đi vào đâu theo tính năng
 
@@ -41,7 +41,7 @@ Next.js **14** (App Router), TypeScript, Tailwind, **next-intl**, React Query, F
 | Consultation hub (FAB chat) | `src/components/consultation/`, `docs/consultation-hub.md` |
 | Sản phẩm / danh mục | `src/app/[category-slug]/`, `src/components/catalog/` (xem bảng components bên dưới) |
 | Search / facets sidebar | `useStorePage`, `useStoreSearch`, `SearchFacetsSidebar` — **chỉ** `GET /search/` (không `dynamic-filters`) |
-| Auth / token | `src/lib/services/auth.ts`, `AuthContext`, cookie `token` |
+| Auth / token | `src/lib/services/auth.ts`, `AuthContext`, BFF `/api/auth/*` + HttpOnly cookies (`ouph_at`/`ouph_rt`), access in-memory |
 | HTTP client & env | `src/lib/api.ts`, `src/lib/services/*.ts` |
 | Icons (UI SVG) | `src/components/icons/` — barrel `@/components/icons`; outline paths tự host theo module (`ui` / `commerce` / `account` / `pharmacy` / `medical`); **không** thêm npm icon pack |
 
@@ -72,9 +72,12 @@ npm run start    # chạy build
 ## Biến môi trường (gợi ý; không commit secret)
 
 - `NEXT_PUBLIC_API_URL` — API store (prefix `/api/store`).
-- `NEXT_PUBLIC_MAIN_API_URL` — API chính (user, OAuth, common-config, …).
+- `NEXT_PUBLIC_MAIN_API_URL` — API chính (user, OAuth, common-config, …) — client-safe URL only.
+- `MAIN_API_URL` — optional server-only override for BFF (`/api/auth/*`).
+- `OAUTH2_CLIENT_ID` / `OAUTH2_CLIENT_SECRET` — **server-only**; password/refresh grant trên BFF. Không dùng `NEXT_PUBLIC_` cho secret.
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase (xem `src/lib/config/firebase.ts`).
 - `NEXT_PUBLIC_ENABLE_PWA` — `true` để bật PWA (SW + install banner). Local/dev để trống hoặc `false`; set trên container / staging / production.
+- `NEXT_PUBLIC_SITE_URL` — origin tuyệt đối cho sitemap/metadata (Phase 1 SEO).
 
 Dùng `.env.local`; không đưa giá trị thật vào chat hoặc commit.
 

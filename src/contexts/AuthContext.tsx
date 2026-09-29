@@ -2,8 +2,14 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import { login as loginApi, register as registerApi, getCurrentUser, firebaseSocialLogin, type User } from '@/lib/services/auth'
 import { STORAGE_KEY } from '@/lib/constant'
-import { clearAuthStorage, persistAuthTokens, refreshSessionWithStoredRefresh } from '@/lib/auth'
-import { setEncodedItem, getEncodedItem } from '@/lib/utils/storage'
+import {
+  clearAuthStorage,
+  persistAuthTokens,
+  refreshSessionWithStoredRefresh,
+  fetchSessionAccessToken,
+  logoutViaBff,
+} from '@/lib/auth'
+import { setEncodedItem } from '@/lib/utils/storage'
 import { toastSuccess } from '@/lib/utils/toast'
 
 interface AuthContextValue {
@@ -20,7 +26,6 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -29,24 +34,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const loadAuth = async () => {
       try {
-        let storedToken = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY.TOKEN) : null
-        const storedRefresh = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY.REFRESH_TOKEN) : null
-
-        if (!storedToken && storedRefresh) {
-          storedToken = await refreshSessionWithStoredRefresh()
-        }
-
-        if (!storedToken) {
+        let access = await fetchSessionAccessToken()
+        if (!access) {
+          // Drop legacy localStorage tokens from pre-BFF sessions.
+          clearAuthStorage()
           return
         }
 
-        setToken(storedToken)
+        setToken(access)
 
-        let userResult = await getCurrentUser(storedToken)
-        if (!userResult.data && userResult.status === 401 && storedRefresh) {
+        let userResult = await getCurrentUser(access)
+        if (!userResult.data && userResult.status === 401) {
           const newAccess = await refreshSessionWithStoredRefresh()
           if (newAccess) {
-            storedToken = newAccess
+            access = newAccess
             setToken(newAccess)
             userResult = await getCurrentUser(newAccess)
           }
@@ -56,12 +57,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(userResult.data)
           setEncodedItem(STORAGE_KEY.USER, userResult.data)
         } else {
+          await logoutViaBff()
           clearAuthStorage()
           setToken(null)
           setUser(null)
         }
       } catch (error) {
         console.error('Error loading auth:', error)
+        await logoutViaBff()
         clearAuthStorage()
         setToken(null)
         setUser(null)
@@ -75,15 +78,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await loginApi(email, password)
-    
+
     if (result.error || !result.data) {
       throw new Error(result.error || 'Đăng nhập thất bại')
     }
 
-    const { access_token, refresh_token } = result.data
+    const { access_token } = result.data
 
     setToken(access_token)
-    persistAuthTokens(access_token, refresh_token)
+    persistAuthTokens(access_token)
 
     const userResult = await getCurrentUser(access_token)
     if (userResult.data) {
@@ -97,7 +100,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const loginWithGoogle = useCallback(async () => {
-    // Dynamic import để tránh lỗi SSR
     const { signInWithPopup } = await import('firebase/auth')
     const { auth, googleProvider } = await import('@/lib/config/firebase')
 
@@ -110,20 +112,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error(response.error || 'Đăng nhập với Google thất bại')
     }
 
-    const { access_token, refresh_token, user } = response.data
+    const { access_token, user: socialUser } = response.data
 
     setToken(access_token)
-    persistAuthTokens(access_token, refresh_token)
+    persistAuthTokens(access_token)
 
-    setUser(user)
-    setEncodedItem(STORAGE_KEY.USER, user)
+    if (socialUser) {
+      setUser(socialUser)
+      setEncodedItem(STORAGE_KEY.USER, socialUser)
+    } else {
+      const userResult = await getCurrentUser(access_token)
+      if (!userResult.data) {
+        throw new Error(userResult.error || 'Không thể lấy thông tin user')
+      }
+      setUser(userResult.data)
+      setEncodedItem(STORAGE_KEY.USER, userResult.data)
+    }
 
     toastSuccess('Đăng nhập với Google thành công')
   }, [])
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     const result = await registerApi({ name, email, password })
-    
+
     if (result.error || !result.data) {
       throw new Error(result.error || 'Đăng ký thất bại')
     }
@@ -132,9 +143,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [login])
 
   const logout = useCallback(() => {
-    setToken(null)
-    setUser(null)
-    clearAuthStorage()
+    void logoutViaBff().finally(() => {
+      setToken(null)
+      setUser(null)
+      clearAuthStorage()
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/tai-khoan')) {
+        window.location.assign('/')
+      }
+    })
   }, [])
 
   const refreshUser = useCallback(async () => {

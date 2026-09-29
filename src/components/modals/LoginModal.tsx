@@ -13,7 +13,7 @@ import { GoogleIcon, SpinnerIcon, XIcon } from '@/components/icons'
 
 export const LoginModal: React.FC = () => {
   const router = useRouter()
-  const { isOpen, returnUrl, closeModal } = useLoginModal()
+  const { isOpen, returnUrl, openModal, closeModal } = useLoginModal()
   const { login, loginWithGoogle, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -27,6 +27,19 @@ export const LoginModal: React.FC = () => {
     resolver: yupResolver(loginSchema),
     mode: 'onBlur',
   })
+
+  // Middleware redirects unauthenticated /tai-khoan → /?login=1&next=…
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('login') !== '1') return
+    const next = params.get('next') || undefined
+    openModal(next)
+    params.delete('login')
+    params.delete('next')
+    const qs = params.toString()
+    router.replace(`${window.location.pathname}${qs ? `?${qs}` : ''}`)
+  }, [openModal, router])
 
   // Reset form when modal closes
   useEffect(() => {
