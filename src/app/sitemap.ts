@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getCategoriesSSG } from '@/lib/services/categories'
+import { getProductSitemapEntriesSSG } from '@/lib/services/sitemapProducts.server'
 import { getSiteOrigin } from '@/lib/siteUrls'
 
 const STATIC_PATHS = [
@@ -59,6 +60,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     categoryEntries = []
   }
 
-  // Product URLs: Phase 4 BE feed. Static + category paths only for now.
-  return [...staticEntries, ...categoryEntries]
+  let productEntries: MetadataRoute.Sitemap = []
+  try {
+    const products = await getProductSitemapEntriesSSG()
+    productEntries = products.map((item) => ({
+      url: `${origin}/${item.path}`,
+      lastModified: item.lastModified || now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
+  } catch {
+    productEntries = []
+  }
+
+  return [...staticEntries, ...categoryEntries, ...productEntries]
 }

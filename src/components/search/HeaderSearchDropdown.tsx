@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { SearchIcon, XCircleIcon, MicIcon, QrScanIcon } from '@/components/icons'
+import { SearchIcon, XCircleIcon } from '@/components/icons'
 import { HeaderSearchBrowsePanel, HeaderSearchSuggestionsPanel } from './HeaderSearchDropdownPanels'
 import { useHeaderSearchDropdown } from './useHeaderSearchDropdown'
 
@@ -66,28 +66,6 @@ export const HeaderSearchDropdown: React.FC<HeaderSearchDropdownProps> = ({
           </button>
         ) : null}
         <div className={`flex shrink-0 items-center gap-0.5 pr-1 ${stickyBar ? '' : 'sm:pr-1.5'}`}>
-          <button
-            type="button"
-            disabled
-            className={`hidden cursor-not-allowed rounded-full text-gray-400 opacity-50 sm:inline-flex ${
-              stickyBar ? 'p-1.5' : 'p-2'
-            }`}
-            aria-disabled="true"
-            title={s.t('headerSearch.voiceDisabled')}
-          >
-            <MicIcon className={stickyBar ? 'h-4 w-4' : 'h-5 w-5'} />
-          </button>
-          <button
-            type="button"
-            disabled
-            className={`hidden cursor-not-allowed rounded-full text-gray-400 opacity-50 sm:inline-flex ${
-              stickyBar ? 'p-1.5' : 'p-2'
-            }`}
-            aria-disabled="true"
-            title={s.t('headerSearch.scanDisabled')}
-          >
-            <QrScanIcon className={stickyBar ? 'h-4 w-4' : 'h-5 w-5'} />
-          </button>
           <button
             type="submit"
             className={`rounded-full p-1.5 text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-600 ${

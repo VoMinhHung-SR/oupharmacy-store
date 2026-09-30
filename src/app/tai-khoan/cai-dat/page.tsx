@@ -50,7 +50,7 @@ export default function SettingsPage() {
     setLoading(true)
     try {
       localStorage.setItem('account_settings', JSON.stringify(settings))
-      toastSuccess('Đã lưu cài đặt')
+      toastSuccess('Đã lưu cài đặt (trên thiết bị này)')
     } catch (error) {
       // Handle error
     } finally {
@@ -70,6 +70,9 @@ export default function SettingsPage() {
     <AccountPageShell>
       <div className="space-y-6">
         <AccountPageHeader title="Cài đặt tài khoản" />
+        <p className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Tùy chọn trên trang này chỉ lưu trên thiết bị này, chưa đồng bộ tài khoản.
+        </p>
 
         <div className="space-y-6">
           {/* Language */}
