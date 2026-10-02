@@ -22,7 +22,7 @@ import { fetchCommonCitiesServer } from '@/lib/services/location.server'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { getSiteOrigin } from '@/lib/siteUrls'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin', 'vietnamese'] })
 
 const APP_NAME = 'OUPharmacy'
 const APP_TITLE = 'OUPharmacy Store'
