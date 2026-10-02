@@ -9,12 +9,10 @@ import { StoreNavFallback } from '@/layouts/StoreNavFallback'
 import Footer from '@/layouts/Footer'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { CheckoutProvider } from '@/contexts/CheckoutContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
+import dynamic from 'next/dynamic'
 import { LoginModalProvider } from '@/contexts/LoginModalContext'
 import { ConsultUiProvider } from '@/contexts/ConsultUiContext'
-import { LoginModal } from '@/components/modals/LoginModal'
-import { ConsultChatbox } from '@/components/consultation/ConsultChatbox'
 import { PwaServiceWorkerRegister } from '@/components/pwa/PwaServiceWorkerRegister'
 import { ChunkLoadRecovery } from '@/components/pwa/ChunkLoadRecovery'
 import { Providers } from './providers'
@@ -23,6 +21,20 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { getSiteOrigin } from '@/lib/siteUrls'
 
 const inter = Inter({ subsets: ['latin', 'vietnamese'] })
+
+/** Login/consult off critical path. */
+const LoginModal = dynamic(
+  () =>
+    import('@/components/modals/LoginModal').then((m) => ({ default: m.LoginModal })),
+  { ssr: false }
+)
+const ConsultChatbox = dynamic(
+  () =>
+    import('@/components/consultation/ConsultChatbox').then((m) => ({
+      default: m.ConsultChatbox,
+    })),
+  { ssr: false }
+)
 
 const APP_NAME = 'OUPharmacy'
 const APP_TITLE = 'OUPharmacy Store'
@@ -100,21 +112,19 @@ export default async function RootLayout({
                 <ConsultUiProvider>
                   <CartProvider>
                     <WishlistProvider>
-                      <CheckoutProvider>
-                        <ChunkLoadRecovery />
-                        <Suspense fallback={<StoreNavFallback />}>
-                          <StoreNavShell />
-                        </Suspense>
-                        <main className="relative z-0 flex min-h-0 w-full flex-1 flex-col border-0 bg-[#ededed]">
-                          {children}
-                        </main>
-                        <Footer />
-                        <LoginModal />
-                        <Suspense fallback={null}>
-                          <ConsultChatbox />
-                        </Suspense>
-                        <PwaServiceWorkerRegister />
-                      </CheckoutProvider>
+                      <ChunkLoadRecovery />
+                      <Suspense fallback={<StoreNavFallback />}>
+                        <StoreNavShell />
+                      </Suspense>
+                      <main className="relative z-0 flex min-h-0 w-full flex-1 flex-col border-0 bg-[#ededed]">
+                        {children}
+                      </main>
+                      <Footer />
+                      <LoginModal />
+                      <Suspense fallback={null}>
+                        <ConsultChatbox />
+                      </Suspense>
+                      <PwaServiceWorkerRegister />
                     </WishlistProvider>
                   </CartProvider>
                 </ConsultUiProvider>

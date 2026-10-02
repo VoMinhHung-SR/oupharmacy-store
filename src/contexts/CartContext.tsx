@@ -69,6 +69,8 @@ interface CartContextValue {
   setItemSelected: (id: string, selected: boolean) => void
   setAllItemsSelected: (selected: boolean) => void
   selectionTotals: CartSelectionTotals
+  /** Enable guest server-cart fetch (idle or user interaction). */
+  ensureServerCart: () => void
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
@@ -141,8 +143,8 @@ function writeServerLineSelection(map: Record<string, boolean>) {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
   const queryClient = useQueryClient()
-  const [guestSessionReady, setGuestSessionReady] = useState(false)
-  const serverCartEnabled = isAuthenticated || guestSessionReady
+  const [guestCartFetchEnabled, setGuestCartFetchEnabled] = useState(false)
+  const serverCartEnabled = isAuthenticated || guestCartFetchEnabled
   const { data: serverCart, isLoading: serverCartLoading } = useCurrentCart(serverCartEnabled)
   const addMutation = useAddCartItem()
   const removeMutation = useRemoveCartItem()
@@ -153,17 +155,41 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hasAttemptedGuestSyncRef = useRef(false)
   const hasAttemptedGuestMergeRef = useRef(false)
 
+  const ensureServerCart = useCallback(() => {
+    ensureGuestSessionId()
+    setGuestCartFetchEnabled(true)
+  }, [])
+
   useEffect(() => {
     if (isAuthenticated) {
       ensureGuestSessionId()
-      setGuestSessionReady(true)
+      setGuestCartFetchEnabled(true)
       return
     }
-    setGuestSessionReady(false)
+
+    setGuestCartFetchEnabled(false)
     hasAttemptedGuestSyncRef.current = false
     hasAttemptedGuestMergeRef.current = false
     ensureGuestSessionId()
-    setGuestSessionReady(true)
+
+    if (typeof window === "undefined") return
+
+    let idleId: number | undefined
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    const enable = () => setGuestCartFetchEnabled(true)
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(enable, { timeout: 2000 })
+    } else {
+      timeoutId = setTimeout(enable, 1500)
+    }
+
+    return () => {
+      if (idleId != null && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId != null) clearTimeout(timeoutId)
+    }
   }, [isAuthenticated])
 
   useEffect(() => {
@@ -294,7 +320,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [addMutation, isAuthenticated, queryClient])
 
   useEffect(() => {
-    if (isAuthenticated || !guestSessionReady || typeof window === "undefined") return
+    if (isAuthenticated || !guestCartFetchEnabled || typeof window === "undefined") return
     if (hasAttemptedGuestSyncRef.current) return
     hasAttemptedGuestSyncRef.current = true
     let cancelled = false
@@ -354,7 +380,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       cancelled = true
     }
-  }, [addMutation, guestSessionReady, isAuthenticated, queryClient])
+  }, [addMutation, guestCartFetchEnabled, isAuthenticated, queryClient])
 
   useEffect(() => {
     if (!isAuthenticated || typeof window === "undefined") return
@@ -413,11 +439,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const add = useCallback(
     async (item: Omit<CartItem, "qty" | "selected">, qty: number = 1) => {
+      ensureGuestSessionId()
       if (!serverCartEnabled) {
-        toastError("Đang tải giỏ hàng, vui lòng thử lại.")
-        throw new Error("Cart not ready")
+        setGuestCartFetchEnabled(true)
       }
-      const version = serverCart?.version
+
+      let version = serverCart?.version
+      if (version == null) {
+        try {
+          const cart = await queryClient.fetchQuery({
+            queryKey: CART_QUERY_KEY,
+            queryFn: async () => {
+              const response = await getCurrentCart()
+              if (response.error) throw new Error(response.error)
+              return response.data
+            },
+          })
+          version = cart?.version
+        } catch {
+          toastError("Đang tải giỏ hàng, vui lòng thử lại.")
+          throw new Error("Cart not ready")
+        }
+      }
       if (version == null) {
         toastError("Đang tải giỏ hàng, vui lòng thử lại.")
         throw new Error("Cart not ready")
@@ -436,7 +479,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw e instanceof Error ? e : new Error(msg)
       }
     },
-    [addMutation, serverCartEnabled, serverCart?.version]
+    [addMutation, queryClient, serverCart?.version, serverCartEnabled]
   )
 
   const remove = useCallback(
@@ -572,15 +615,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ? Number(serverCart?.catalog_direct_savings_total ?? 0)
         : 0,
       version: serverCartEnabled ? serverCart?.version : undefined,
-      isLoading: serverCartEnabled ? serverCartLoading || !guestSessionReady : false,
+      isLoading: serverCartEnabled ? serverCartLoading || !guestCartFetchEnabled : false,
       setItemSelected,
       setAllItemsSelected,
       selectionTotals,
+      ensureServerCart,
     }),
     [
       add,
       clear,
-      guestSessionReady,
+      ensureServerCart,
+      guestCartFetchEnabled,
       remove,
       resolvedItems,
       selectionTotals,

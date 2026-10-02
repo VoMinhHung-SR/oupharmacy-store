@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CheckoutProviders } from '@/contexts/CheckoutProviders'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function CartLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return <CheckoutProviders>{children}</CheckoutProviders>
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 import Container from '@/components/Container'
@@ -12,6 +13,8 @@ import CampaignHeroSlot from './CampaignHeroSlot'
 import { useCampaignCtaClick } from './useCampaignCtaClick'
 
 const THEME_FADE_MS = 500
+const CAMPAIGN_IMG_QUALITY = 75
+const THEME_IMG_QUALITY = 60
 
 export interface CampaignHomeClusterProps {
   heroSlides: PlacementWinner[]
@@ -42,11 +45,13 @@ function SecondarySlide({ placement }: { placement: PlacementWinner }) {
   const body = (
     <div className="relative h-full w-full overflow-hidden rounded-2xl bg-primary-700 text-white">
       {imageSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element -- campaign CDN
-        <img
+        <Image
           src={imageSrc}
           alt={alt}
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          fill
+          sizes="(max-width: 768px) 100vw, 66vw"
+          quality={CAMPAIGN_IMG_QUALITY}
+          className="object-cover object-center"
         />
       ) : (
         <div className="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
@@ -117,7 +122,9 @@ function SecondaryCarousel({ slides }: { slides: PlacementWinner[] }) {
                 pointerEvents: active ? 'auto' : 'none',
               }}
             >
-              <SecondarySlide placement={slide} />
+              {active || Math.abs(i - index) === 1 || (index === 0 && i === count - 1) || (index === count - 1 && i === 0) ? (
+                <SecondarySlide placement={slide} />
+              ) : null}
             </div>
           )
         })}
@@ -195,11 +202,13 @@ function NoticeBanner({
       className={`relative flex w-full flex-col justify-between overflow-hidden rounded-2xl p-4 ${NOTICE_ASPECT} ${className}`}
     >
       {imageSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element -- campaign CDN
-        <img
+        <Image
           src={imageSrc}
           alt=""
-          className={`absolute inset-0 h-full w-full object-cover object-center ${
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          quality={CAMPAIGN_IMG_QUALITY}
+          className={`object-cover object-center ${
             tone === 'primary' ? 'opacity-35' : 'opacity-20'
           }`}
         />
@@ -262,12 +271,14 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
           if (!src) return null
           const active = i === heroIndex
           return (
-            // eslint-disable-next-line @next/next/no-img-element -- theme CDN / mocks
-            <img
+            <Image
               key={`theme-${slide.campaign_id}-${i}`}
               src={src}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover object-top transition-opacity ease-in-out"
+              fill
+              sizes="100vw"
+              quality={THEME_IMG_QUALITY}
+              className="object-cover object-top transition-opacity ease-in-out"
               style={{
                 opacity: active ? 1 : 0,
                 transitionDuration: `${THEME_FADE_MS}ms`,
@@ -280,21 +291,28 @@ export const CampaignHomeCluster: React.FC<CampaignHomeClusterProps> = ({
         ) : null}
 
         {slides.map((slide, i) => {
+          if (i === 0) return null
           const src = slide.image_desktop_url?.trim() || slide.image_mobile_url?.trim()
           if (!src) return null
           const active = i === heroIndex
           return (
-            // eslint-disable-next-line @next/next/no-img-element -- campaign CDN / mocks
-            <img
+            <div
               key={`ambient-${slide.campaign_id}-${i}`}
-              src={src}
-              alt=""
-              className="absolute inset-x-0 top-0 h-[58%] w-full object-cover object-top blur-2xl transition-opacity ease-in-out"
+              className="absolute inset-x-0 top-0 h-[58%] w-full transition-opacity ease-in-out"
               style={{
                 opacity: active ? 0.35 : 0,
                 transitionDuration: `${THEME_FADE_MS}ms`,
               }}
-            />
+            >
+              <Image
+                src={src}
+                alt=""
+                fill
+                sizes="100vw"
+                quality={THEME_IMG_QUALITY}
+                className="object-cover object-top blur-2xl"
+              />
+            </div>
           )
         })}
       </div>

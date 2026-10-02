@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CheckoutProviders } from '@/contexts/CheckoutProviders'
 
 /**
  * Checkout allows guest (cart-first) and authenticated users.
@@ -14,5 +15,5 @@ export default function CheckoutLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return <CheckoutProviders>{children}</CheckoutProviders>
 }
