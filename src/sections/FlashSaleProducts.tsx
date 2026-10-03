@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
+import { ProgressiveRailItem } from '@/components/carousel/ProgressiveRailItem'
 import flashSaleMeta from '@/api/mocks/home/flash-sale.response.json'
 import type { FlashSaleResponse, FlashSaleWindow } from '@/api/mocks/home/types'
 import { HOME_MERCH_ORANGE } from '@/lib/constant'
@@ -308,10 +309,15 @@ export const FlashSaleProducts: React.FC<FlashSaleProductsProps> = ({
               ) : null}
 
               <div ref={scrollerRef} className="hot-sale-track scrollbar-hide scroll-smooth">
-                {railProducts.map((product) => (
-                  <div key={`${activeWindowId}-${product.id}`} className="min-w-0">
+                {railProducts.map((product, index) => (
+                  <ProgressiveRailItem
+                    key={`${activeWindowId}-${product.id}`}
+                    index={index}
+                    eagerCount={3}
+                    className="min-w-0"
+                  >
                     <ProductCard product={product} ctaVariant="viewDetail" merchShockOffer="compact" />
-                  </div>
+                  </ProgressiveRailItem>
                 ))}
               </div>
             </div>
