@@ -439,10 +439,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const add = useCallback(
     async (item: Omit<CartItem, "qty" | "selected">, qty: number = 1) => {
-      ensureGuestSessionId()
-      if (!serverCartEnabled) {
-        setGuestCartFetchEnabled(true)
-      }
+      ensureServerCart()
 
       let version = serverCart?.version
       if (version == null) {
@@ -479,7 +476,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw e instanceof Error ? e : new Error(msg)
       }
     },
-    [addMutation, queryClient, serverCart?.version, serverCartEnabled]
+    [addMutation, ensureServerCart, queryClient, serverCart?.version]
   )
 
   const remove = useCallback(

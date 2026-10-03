@@ -32,11 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+    let idleId: number | undefined
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+
     const loadAuth = async () => {
       try {
         let access = await fetchSessionAccessToken()
+        if (cancelled) return
         if (!access) {
-          // Drop legacy localStorage tokens from pre-BFF sessions.
           clearAuthStorage()
           return
         }
@@ -44,12 +48,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(access)
 
         let userResult = await getCurrentUser(access)
+        if (cancelled) return
         if (!userResult.data && userResult.status === 401) {
           const newAccess = await refreshSessionWithStoredRefresh()
+          if (cancelled) return
           if (newAccess) {
             access = newAccess
             setToken(newAccess)
             userResult = await getCurrentUser(newAccess)
+            if (cancelled) return
           }
         }
 
@@ -58,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setEncodedItem(STORAGE_KEY.USER, userResult.data)
         } else {
           await logoutViaBff()
+          if (cancelled) return
           clearAuthStorage()
           setToken(null)
           setUser(null)
@@ -65,15 +73,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Error loading auth:', error)
         await logoutViaBff()
+        if (cancelled) return
         clearAuthStorage()
         setToken(null)
         setUser(null)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
-    loadAuth()
+    const schedule = () => {
+      if (!cancelled) void loadAuth()
+    }
+
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(schedule, { timeout: 600 })
+    } else {
+      timeoutId = setTimeout(schedule, 0)
+    }
+
+    return () => {
+      cancelled = true
+      if (idleId != null && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId != null) clearTimeout(timeoutId)
+    }
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {

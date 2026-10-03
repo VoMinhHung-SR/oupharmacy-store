@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import {
   Product,
@@ -11,15 +12,44 @@ import {
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/common/ProductImageGallery'
-import { ProductDescriptionSection } from '@/components/catalog/product-detail/parts/ProductDescriptionSection'
-import { RelatedProducts } from '@/components/catalog/product-detail/parts/RelatedProducts'
-import { RecentlyViewed } from '@/components/catalog/product-detail/parts/RecentlyViewed'
 import { useProductDetailPage } from '@/components/catalog/product-detail/useProductDetailPage'
 import { ProductDetailInfoColumn } from '@/components/catalog/product-detail/parts/ProductDetailInfoColumn'
-import { ProductDetailPoliciesBox } from '@/components/catalog/product-detail/parts/ProductDetailPoliciesBox'
 import { ProductStickyAddToCartBar } from '@/components/catalog/product-detail/parts/ProductStickyAddToCartBar'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
+import { DeferredRailMount } from '@/components/carousel/ProgressiveRailItem'
 import { JsonLd } from '@/components/seo/JsonLd'
+
+const ProductDetailPoliciesBox = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductDetailPoliciesBox').then((m) => ({
+      default: m.ProductDetailPoliciesBox,
+    })),
+  { loading: () => <div className="min-h-[5rem]" aria-hidden /> }
+)
+
+const ProductDescriptionSection = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductDescriptionSection').then((m) => ({
+      default: m.ProductDescriptionSection,
+    })),
+  { loading: () => <div className="mt-6 min-h-[8rem] rounded-lg bg-white" aria-hidden /> }
+)
+
+const RelatedProducts = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/RelatedProducts').then((m) => ({
+      default: m.RelatedProducts,
+    })),
+  { ssr: false, loading: () => <div className="min-h-[16rem]" aria-hidden /> }
+)
+
+const RecentlyViewed = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/RecentlyViewed').then((m) => ({
+      default: m.RecentlyViewed,
+    })),
+  { ssr: false, loading: () => null }
+)
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -162,12 +192,16 @@ export function ProductDetailPageContent({
         </div>
       </div>
 
-      <div className="mt-6">
+      <DeferredRailMount minHeightClassName="mt-6 min-h-[8rem]" rootMargin="120px 0px">
         <ProductDescriptionSection product={product} />
-      </div>
+      </DeferredRailMount>
 
-      <RelatedProducts currentProduct={product} />
-      <RecentlyViewed />
+      <DeferredRailMount minHeightClassName="min-h-[16rem]" rootMargin="200px 0px">
+        <RelatedProducts currentProduct={product} />
+      </DeferredRailMount>
+      <DeferredRailMount minHeightClassName="min-h-0" rootMargin="200px 0px">
+        <RecentlyViewed />
+      </DeferredRailMount>
 
       <ProductStickyAddToCartBar
         visible={state.showStickyPurchaseBar}
