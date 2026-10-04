@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import type { ResolvedStorePath } from './types'
 
 function storeApiBaseUrl(): string {
@@ -14,10 +15,7 @@ const NOT_FOUND: ResolvedStorePath = {
   default_variant_id: null,
 }
 
-/**
- * Server-only resolve-path (ISR). Mirrors client `resolveStorePath` without axios.
- */
-export async function resolveStorePathServer(path: string): Promise<ResolvedStorePath> {
+async function resolveStorePathServerUncached(path: string): Promise<ResolvedStorePath> {
   const normalized = path.replace(/^\/+|\/+$/g, '')
   if (!normalized) return NOT_FOUND
 
@@ -51,3 +49,9 @@ export async function resolveStorePathServer(path: string): Promise<ResolvedStor
     return NOT_FOUND
   }
 }
+
+/**
+ * Server-only resolve-path (ISR). Mirrors client `resolveStorePath` without axios.
+ * `cache()` dedupes layout `generateMetadata` + page RSC in the same request.
+ */
+export const resolveStorePathServer = cache(resolveStorePathServerUncached)

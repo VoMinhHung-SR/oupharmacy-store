@@ -25,6 +25,10 @@
 
 **Route shell:** `app/[category-slug]/[[...slug]]/page.tsx` (optional catch-all) — parent và nested dùng cùng `StorePage` (không remount khi 1→2 segment).
 
+**Cold load vs soft-nav (S1 catalog SSR shell):**
+- Cold load: RSC `page.tsx` gọi `resolveStorePathServer` (React `cache` dedupe với `layout` `generateMetadata`) → `StorePage` nhận `initialStorePath` + `initialResolved` → `useStorePage` seed React Query (bỏ skeleton resolve khi path khớp).
+- Soft-nav trong catalog: client `resolveStorePath` như trước; chỉ seed khi `storePath === initialStorePath` (tránh props RSC cũ).
+
 **Loading UX:** không dùng full-screen `BackdropLoading` cho browse catalog.
 - Click: `markStoreNavIntent` (product card / subcategory) → skeleton **đúng loại** trong lúc resolve
 - Sau resolve: page đúng type; listing/detail dùng in-page skeleton hoặc `isRefreshing` (overlay nhẹ trên grid)

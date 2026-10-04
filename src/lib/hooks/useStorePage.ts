@@ -32,19 +32,38 @@ function resolvedPathKey(resolved: ResolvedStorePath): string {
   return ''
 }
 
+type UseStorePageOptions = {
+  /** RSC path + resolve — applied only while `storePath === initialStorePath`. */
+  initialStorePath?: string
+  initialResolved?: ResolvedStorePath
+}
+
 /**
  * Store path page: resolve routing, then category browse via search-first
  * (GET /search/?category=) with facets from the same response.
  *
  * UI: resolve decides page type; listing/detail use in-page skeletons / grid
  * refresh — no full-screen route backdrop.
+ * Cold load may seed resolve from RSC; soft-nav still uses client resolve-path.
  */
-export function useStorePage() {
+export function useStorePage(options: UseStorePageOptions = {}) {
+  const { initialStorePath, initialResolved } = options
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const storePath = useMemo(() => pathnameToStorePath(pathname), [pathname])
   const variantId = parseVariantIdFromSearch(searchParams)
   const navIntent = peekStoreNavIntent(storePath)
+
+  const seededResolved = useMemo(() => {
+    if (!initialResolved || !initialStorePath) return undefined
+    if (initialStorePath !== storePath) return undefined
+    return initialResolved
+  }, [initialResolved, initialStorePath, storePath])
+
+  const seedUpdatedAt = useMemo(() => {
+    if (!seededResolved) return undefined
+    return Date.now()
+  }, [seededResolved, storePath])
 
   const {
     data: resolved,
@@ -54,13 +73,20 @@ export function useStorePage() {
     queryKey: ['resolve-store-path', storePath],
     queryFn: () => resolveStorePath(storePath),
     staleTime: 60_000,
+    initialData: seededResolved,
+    initialDataUpdatedAt: seedUpdatedAt,
   })
 
+  // Query key is storePath-scoped; not_found has an empty path key.
   const resolveAligned =
-    Boolean(resolved) && resolvedPathKey(resolved as ResolvedStorePath) === storePath
+    Boolean(resolved) &&
+    ((resolved as ResolvedStorePath).page === 'not_found' ||
+      resolvedPathKey(resolved as ResolvedStorePath) === storePath)
 
   const liveResolved =
-    resolveAligned && !isPlaceholderData ? (resolved as ResolvedStorePath) : undefined
+    resolveAligned && (!isPlaceholderData || Boolean(seededResolved))
+      ? (resolved as ResolvedStorePath)
+      : undefined
 
   const resolvingPath = !liveResolved && !resolveError
 
