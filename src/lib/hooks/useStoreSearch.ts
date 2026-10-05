@@ -14,7 +14,11 @@ import { HEADER_SEARCH } from '@/lib/constant'
  */
 export function useStoreSearch(
   params: StoreSearchParams | undefined,
-  options?: { enabled?: boolean }
+  options?: {
+    enabled?: boolean
+    initialData?: StoreSearchResponse
+    initialDataUpdatedAt?: number
+  }
 ) {
   const hasQuery = !!params?.q?.trim()
   const hasCategory = params?.category != null && params.category !== ''
@@ -43,5 +47,7 @@ export function useStoreSearch(
     enabled,
     staleTime: HEADER_SEARCH.SUGGEST_STALE_MS,
     placeholderData: keepPreviousData,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   })
 }

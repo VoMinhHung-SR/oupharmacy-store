@@ -141,7 +141,7 @@ const PRICE_RANGE_LABELS: Record<string, string> = {
   over_500k: 'Trên 500.000đ',
 }
 
-function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
+export function buildSearchQueryParams(params: StoreSearchParams): URLSearchParams {
   const qs = new URLSearchParams()
   qs.set('q', params.q ?? '')
   if (params.page != null) qs.set('page', String(params.page))

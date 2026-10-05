@@ -7,17 +7,24 @@ function storeApiBaseUrl(): string {
 }
 
 /**
- * Server-only product detail for SEO metadata (ISR). Same path as client PDP fetch.
+ * Server-only product detail for SEO metadata + SSR PDP hydrate (ISR).
+ * Same path as client PDP fetch; optional `v` mirrors `?v=` deep link.
  */
 export async function getProductByPathSSG(
   categoryPath: string,
-  productSlug: string
+  productSlug: string,
+  variantId?: number
 ): Promise<Product | null> {
   const cat = categoryPath.replace(/^\/+|\/+$/g, '')
   const slug = productSlug.replace(/^\/+|\/+$/g, '')
   if (!cat || !slug) return null
 
-  const url = `${storeApiBaseUrl()}/${cat}/${slug}`
+  const params = new URLSearchParams()
+  if (variantId != null && variantId > 0) {
+    params.set('v', String(variantId))
+  }
+  const qs = params.toString()
+  const url = `${storeApiBaseUrl()}/${cat}/${slug}${qs ? `?${qs}` : ''}`
   try {
     const res = await fetch(url, {
       method: 'GET',
