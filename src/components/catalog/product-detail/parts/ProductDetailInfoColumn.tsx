@@ -1,10 +1,18 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { Product } from '@/lib/services/products'
 import { useProductDetailPage } from '@/components/catalog/product-detail/useProductDetailPage'
 import { ProductDetailInfoHeader } from '@/components/catalog/product-detail/parts/ProductDetailInfoHeader'
 import { ProductDetailPurchaseBlock } from '@/components/catalog/product-detail/parts/ProductDetailPurchaseBlock'
-import { ProductDetailSpecsPanel } from '@/components/catalog/product-detail/parts/ProductDetailSpecsPanel'
+
+const ProductDetailSpecsPanel = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductDetailSpecsPanel').then((m) => ({
+      default: m.ProductDetailSpecsPanel,
+    })),
+  { loading: () => <div className="min-h-[6rem] rounded-lg bg-gray-50/80" aria-hidden /> }
+)
 
 type ProductDetailPageState = ReturnType<typeof useProductDetailPage>
 

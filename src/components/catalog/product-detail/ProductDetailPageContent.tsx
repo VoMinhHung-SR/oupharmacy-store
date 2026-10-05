@@ -14,7 +14,6 @@ import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/common/ProductImageGallery'
 import { useProductDetailPage } from '@/components/catalog/product-detail/useProductDetailPage'
 import { ProductDetailInfoColumn } from '@/components/catalog/product-detail/parts/ProductDetailInfoColumn'
-import { ProductStickyAddToCartBar } from '@/components/catalog/product-detail/parts/ProductStickyAddToCartBar'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
 import { DeferredRailMount } from '@/components/carousel/ProgressiveRailItem'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -24,7 +23,15 @@ const ProductDetailPoliciesBox = dynamic(
     import('@/components/catalog/product-detail/parts/ProductDetailPoliciesBox').then((m) => ({
       default: m.ProductDetailPoliciesBox,
     })),
-  { loading: () => <div className="min-h-[5rem]" aria-hidden /> }
+  { ssr: false, loading: () => <div className="min-h-[5rem]" aria-hidden /> }
+)
+
+const ProductStickyAddToCartBar = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductStickyAddToCartBar').then((m) => ({
+      default: m.ProductStickyAddToCartBar,
+    })),
+  { ssr: false, loading: () => null }
 )
 
 const ProductDescriptionSection = dynamic(
@@ -203,24 +210,26 @@ export function ProductDetailPageContent({
         <RecentlyViewed />
       </DeferredRailMount>
 
-      <ProductStickyAddToCartBar
-        visible={state.showStickyPurchaseBar}
-        productName={state.productName}
-        imageUrl={state.productImageUrl}
-        priceValue={state.effectivePriceValue}
-        compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
-        discountPercent={state.catalogPriceDisplay.discountPercent}
-        unitOptions={state.unitOptionsForSticky}
-        selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
-        onSelectUnit={state.setSelectedUnitId}
-        quantity={state.quantity}
-        maxQuantity={state.maxSelectableQuantity}
-        onQuantityChange={state.handleQuantityChange}
-        onAddToCart={state.handleAddToCart}
-        addToCartLabel={
-          product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'
-        }
-      />
+      {state.showStickyPurchaseBar ? (
+        <ProductStickyAddToCartBar
+          visible
+          productName={state.productName}
+          imageUrl={state.productImageUrl}
+          priceValue={state.effectivePriceValue}
+          compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
+          discountPercent={state.catalogPriceDisplay.discountPercent}
+          unitOptions={state.unitOptionsForSticky}
+          selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
+          onSelectUnit={state.setSelectedUnitId}
+          quantity={state.quantity}
+          maxQuantity={state.maxSelectableQuantity}
+          onQuantityChange={state.handleQuantityChange}
+          onAddToCart={state.handleAddToCart}
+          addToCartLabel={
+            product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'
+          }
+        />
+      ) : null}
     </Container>
   )
 }
