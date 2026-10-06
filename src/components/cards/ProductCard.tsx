@@ -237,6 +237,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     alt={product.name}
                     width={300}
                     height={300}
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
+                    quality={75}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (

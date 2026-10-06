@@ -201,7 +201,7 @@ export function MobileNavDrawer() {
                   Đăng nhập
                 </button>
                 <Link
-                  href="/register"
+                  href="/dang-ky"
                   onClick={closeNav}
                   className="flex-1 rounded-lg border border-white/70 bg-primary-700/40 px-3 py-2 text-center text-xs font-semibold text-white"
                 >

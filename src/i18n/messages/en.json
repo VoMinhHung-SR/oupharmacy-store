@@ -32,8 +32,6 @@
       "ariaLabel": "Search products",
       "panelAria": "Search suggestions and recommendations",
       "submitAria": "Submit search",
-      "voiceDisabled": "Voice search — coming soon",
-      "scanDisabled": "Scan code — coming soon",
       "history": "Recent",
       "clearHistory": "Clear all",
       "removeItem": "Remove from history",

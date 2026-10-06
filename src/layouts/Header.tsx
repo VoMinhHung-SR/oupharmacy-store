@@ -2,20 +2,43 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import dynamic from 'next/dynamic'
 import React from 'react'
 import Container from '@/components/Container'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import AvatarBadge from '@/components/AvatarBadge'
 import { HeaderSearchDropdown } from '@/components/search/HeaderSearchDropdown'
-import { MenuIcon, UserIcon } from '@/components/icons'
+import { CartIcon, MenuIcon, UserIcon } from '@/components/icons'
 import { HeaderTopBar } from '@/components/header/HeaderTopBar'
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt'
-import { HeaderCartDropdown } from '@/layouts/HeaderCartDropdown'
-import { MobileNavDrawer } from '@/layouts/MobileNavDrawer'
 import { useMobileNavUi } from '@/layouts/nav/NavProviders'
 import { useCompactOnScroll } from '@/lib/hooks/useCompactOnScroll'
-import { usePopularSearchTerms } from '@/lib/hooks/usePopularSearchTerms'
+import { useDeferredPopularSearchTerms } from '@/lib/hooks/useDeferredPopularSearchTerms'
+
+const HeaderCartDropdown = dynamic(
+  () =>
+    import('@/layouts/HeaderCartDropdown').then((m) => ({ default: m.HeaderCartDropdown })),
+  {
+    ssr: false,
+    loading: () => (
+      <Link
+        href="/gio-hang"
+        className="flex items-center gap-2 rounded-full bg-primary-700 px-2.5 py-2 text-sm font-medium text-white shadow-sm whitespace-nowrap sm:px-3"
+        aria-label="Giỏ hàng"
+      >
+        <CartIcon className="h-5 w-5" strokeWidth={2} />
+        <span className="hidden lg:inline">Giỏ hàng</span>
+      </Link>
+    ),
+  }
+)
+
+const MobileNavDrawer = dynamic(
+  () =>
+    import('@/layouts/MobileNavDrawer').then((m) => ({ default: m.MobileNavDrawer })),
+  { ssr: false, loading: () => null }
+)
 
 const FALLBACK_POPULAR_TERMS = [
   'Omega 3',
@@ -48,7 +71,7 @@ export const Header: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const { openModal } = useLoginModal()
   const { openNav } = useMobileNavUi()
-  const { data: popularTerms = [] } = usePopularSearchTerms(20)
+  const { data: popularTerms = [] } = useDeferredPopularSearchTerms(20)
   const compact = useCompactOnScroll()
 
   const displayTerms =

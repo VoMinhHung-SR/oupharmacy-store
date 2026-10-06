@@ -153,13 +153,6 @@ export const AvatarBadge: React.FC = () => {
               Yêu cầu mua thuốc
             </Link>
             <Link
-              href="/tai-khoan/cai-dat"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-              onClick={() => setIsDropdownOpen(false)}
-            >
-              Cài đặt tài khoản
-            </Link>
-            <Link
               href="/tai-khoan/doi-mat-khau"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setIsDropdownOpen(false)}

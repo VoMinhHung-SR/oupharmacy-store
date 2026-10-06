@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <SupportDoc activeHref="/about">
+    <SupportDoc activeHref="/gioi-thieu">
       <SupportPanel>
         <h1 className={`mb-2 ${supportTitleClass}`}>Về Nhà thuốc OUPharmacy</h1>
         <p className={`mb-6 ${supportBodyClass}`}>

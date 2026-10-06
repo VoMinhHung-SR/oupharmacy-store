@@ -1,7 +1,5 @@
-import FeaturedCategories from '@/sections/FeaturedCategories'
-import FavoriteBrands from '@/sections/FavoriteBrands'
-import BestsellingProducts from '@/sections/BestsellingProducts'
-import FlashSaleProducts from '@/sections/FlashSaleProducts'
+import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { CampaignHomeCluster, pickHomePlacement, pickHomeSlides } from '@/components/campaign'
 import type { PlacementWinner } from '@/lib/services/campaign'
 import { getCampaignPlacementsSSG } from '@/lib/services/campaign'
@@ -9,6 +7,33 @@ import { getFavoriteBrandsSSG } from '@/lib/services/brandCampaigns'
 import { getFlashSaleProductsSSG } from '@/lib/services/flashSale'
 import { getHotSaleProductsSSG } from '@/lib/services/search'
 import { HomeQuickLinks } from '@/components/consultation/HomeQuickLinks'
+
+const FlashSaleProducts = dynamic(() => import('@/sections/FlashSaleProducts'), {
+  loading: () => <div className="min-h-[22rem] bg-white" aria-hidden />,
+})
+const BestsellingProducts = dynamic(() => import('@/sections/BestsellingProducts'), {
+  loading: () => <div className="min-h-[22rem] bg-white" aria-hidden />,
+})
+const FeaturedCategories = dynamic(() => import('@/sections/FeaturedCategories'), {
+  loading: () => <div className="min-h-[16rem] bg-white" aria-hidden />,
+})
+const FavoriteBrands = dynamic(() => import('@/sections/FavoriteBrands'), {
+  loading: () => <div className="min-h-[18rem] bg-gray-50" aria-hidden />,
+})
+
+export const metadata: Metadata = {
+  title: 'Nhà thuốc OUPharmacy — mua thuốc, tư vấn và đặt hàng trực tuyến',
+  description:
+    'Nhà thuốc OUPharmacy: mua thuốc chính hãng, tủ thuốc thông minh, tư vấn dược sĩ và giao hàng nhanh.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Nhà thuốc OUPharmacy',
+    description:
+      'Mua thuốc chính hãng, tư vấn dược sĩ và đặt hàng trực tuyến tại OUPharmacy.',
+    url: '/',
+    type: 'website',
+  },
+}
 
 /** BE does not expose theme_image_url yet — fall back to first-party demo themes by sort_order. */
 function withHeroThemeFallback(slides: PlacementWinner[]): PlacementWinner[] {
@@ -35,7 +60,7 @@ export default async function Home() {
     getFavoriteBrandsSSG(10),
   ])
   // After hot-sale IDs known — flash pool skips those to avoid duplicate rails on /
-  const flashSale = await getFlashSaleProductsSSG(48, {
+  const flashSale = await getFlashSaleProductsSSG(16, {
     excludeIds: hotSaleProducts.map((product) => product.id),
   })
   const placements = placementsPayload?.placements ?? null

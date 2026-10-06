@@ -11,7 +11,6 @@ import { toastWarning } from '@/lib/utils/toast'
 import {
   Product,
   buildCategoryBreadcrumbFromPath,
-  buildProductCanonicalHref,
   buildProductHref,
   getProductName,
   getProductPackaging,
@@ -169,21 +168,6 @@ export function useProductDetailPage({
       saveToRecentlyViewed(product, categorySlug)
     }
   }, [product, categorySlug])
-
-  useEffect(() => {
-    if (!product || loading || typeof document === 'undefined') return
-    const canonical = buildProductCanonicalHref(product)
-    if (!canonical) return
-
-    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null
-    if (!link) {
-      link = document.createElement('link')
-      link.setAttribute('rel', 'canonical')
-      document.head.appendChild(link)
-    }
-    const origin = typeof window !== 'undefined' ? window.location.origin : ''
-    link.href = `${origin}${canonical}`
-  }, [product, loading])
 
   useEffect(() => {
     if (!unitOptions.length) {

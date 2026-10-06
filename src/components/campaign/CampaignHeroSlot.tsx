@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 import Container from '@/components/Container'
@@ -21,7 +22,15 @@ const TRANSITION_MS = 500
 /** Hero 3.7:1 — matches 1920×516 creatives. */
 const HERO_MAIN_ASPECT = 'aspect-[1920/516]'
 
-function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
+const HERO_QUALITY = 75
+
+function HeroSlideMedia({
+  placement,
+  priority = false,
+}: {
+  placement: PlacementWinner
+  priority?: boolean
+}) {
   const desktopSrc = placement.image_desktop_url?.trim() || null
   const mobileSrc = placement.image_mobile_url?.trim() || desktopSrc
   const alt = placement.image_alt?.trim() || placement.title || 'Campaign banner'
@@ -30,18 +39,24 @@ function HeroSlideMedia({ placement }: { placement: PlacementWinner }) {
     <div className="absolute inset-0 bg-transparent">
       {desktopSrc || mobileSrc ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element -- campaign CDN hosts vary */}
-          <img
+          <Image
             src={mobileSrc || desktopSrc || ''}
             alt={alt}
-            className="absolute inset-0 h-full w-full object-cover object-center md:hidden"
+            fill
+            sizes="100vw"
+            quality={HERO_QUALITY}
+            priority={priority}
+            className="object-cover object-center md:hidden"
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={desktopSrc || mobileSrc || ''}
             alt=""
             aria-hidden
-            className="absolute inset-0 hidden h-full w-full object-cover object-center md:block"
+            fill
+            sizes="(max-width: 768px) 0px, 100vw"
+            quality={HERO_QUALITY}
+            priority={priority}
+            className="hidden object-cover object-center md:block"
           />
         </>
       ) : (
@@ -56,16 +71,18 @@ function HeroSlideLink({
   className,
   style,
   inert,
+  priority = false,
 }: {
   placement: PlacementWinner
   className?: string
   style?: React.CSSProperties
   inert?: boolean
+  priority?: boolean
 }) {
   const onCtaClick = useCampaignCtaClick()
   const href = safeCampaignHref(placement.cta_url)
   const alt = placement.image_alt?.trim() || placement.title || 'Campaign banner'
-  const inner = <HeroSlideMedia placement={placement} />
+  const inner = <HeroSlideMedia placement={placement} priority={priority} />
 
   if (!href) {
     return (
@@ -125,7 +142,7 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
     <div className={`relative w-full ${HERO_MAIN_ASPECT}`}>
       <div className="hero-slot-blend absolute inset-0">
         {count === 1 ? (
-          <HeroSlideLink placement={list[0]} className="absolute inset-0" />
+          <HeroSlideLink placement={list[0]} className="absolute inset-0" priority />
         ) : (
           list.map((slide, i) => {
             const active = i === index
@@ -134,6 +151,7 @@ export const CampaignHeroSlot: React.FC<CampaignHeroSlotProps> = ({
                 key={`${slide.campaign_id}-${slide.sort_order ?? i}-${i}`}
                 placement={slide}
                 inert={!active}
+                priority={i === 0}
                 className="absolute inset-0 transition-opacity ease-in-out"
                 style={{
                   opacity: active ? 1 : 0,

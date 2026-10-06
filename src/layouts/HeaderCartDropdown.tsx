@@ -12,7 +12,7 @@ const CLOSE_DELAY_MS = 120
 
 export function HeaderCartDropdown() {
   const t = useTranslations('common')
-  const { items, remove, isLoading: cartLoading } = useCart()
+  const { items, remove, isLoading: cartLoading, ensureServerCart } = useCart()
   const [open, setOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const panelId = useId()
@@ -31,8 +31,9 @@ export function HeaderCartDropdown() {
 
   const openPanel = useCallback(() => {
     clearCloseTimer()
+    ensureServerCart()
     setOpen(true)
-  }, [clearCloseTimer])
+  }, [clearCloseTimer, ensureServerCart])
 
   useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
 
@@ -59,6 +60,7 @@ export function HeaderCartDropdown() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={panelId}
+        onClick={() => ensureServerCart()}
       >
         <span className="relative inline-flex shrink-0">
           <CartIcon className="h-5 w-5" strokeWidth={2} />

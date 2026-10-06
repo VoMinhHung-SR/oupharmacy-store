@@ -2,6 +2,9 @@
 
 import React from 'react'
 import { useStorePage } from '@/lib/hooks/useStorePage'
+import type { ResolvedStorePath } from '@/lib/store-path'
+import type { Product } from '@/lib/services/products'
+import type { StoreSearchResponse } from '@/lib/services/search'
 import { CategoryListingPageContent } from '@/components/catalog/category-listing/CategoryListingPageContent'
 import { ProductDetailPageContent } from '@/components/catalog/product-detail/ProductDetailPageContent'
 import { OverLimitMessage } from '@/components/catalog/_shared/category/OverLimitMessage'
@@ -12,14 +15,28 @@ import { pendingShellWhileResolving } from '@/lib/store-path/loading-hint'
 
 type StorePageProps = {
   minSegments?: number
+  /** Path the RSC resolved for — seed only while client pathname still matches. */
+  initialStorePath?: string
+  initialResolved?: ResolvedStorePath
+  initialListing?: StoreSearchResponse
+  initialProduct?: Product
+  initialVariantId?: number
 }
 
 /**
  * Catalog route shell.
- * - While resolve is in flight: in-page skeleton from nav intent (not full-screen backdrop).
+ * - Cold load: optional server resolve + listing/product payload seeds React Query.
+ * - Soft-nav / resolve in flight: in-page skeleton from nav intent (not full-screen backdrop).
  * - After resolve: correct page; listing/detail use their own loading / isRefreshing.
  */
-export function StorePage({ minSegments = 1 }: StorePageProps) {
+export function StorePage({
+  minSegments = 1,
+  initialStorePath,
+  initialResolved,
+  initialListing,
+  initialProduct,
+  initialVariantId,
+}: StorePageProps) {
   const {
     storePath,
     navIntent,
@@ -36,7 +53,13 @@ export function StorePage({ minSegments = 1 }: StorePageProps) {
     detail,
     categoryFacets,
     meta,
-  } = useStorePage()
+  } = useStorePage({
+    initialStorePath,
+    initialResolved,
+    initialListing,
+    initialProduct,
+    initialVariantId,
+  })
 
   const segmentCount = storePath ? storePath.split('/').filter(Boolean).length : 0
   if (segmentCount < minSegments) {

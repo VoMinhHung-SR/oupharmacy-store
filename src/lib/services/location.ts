@@ -1,11 +1,11 @@
 import axios from 'axios'
-import { STORAGE_KEY } from '../constant'
+import { getAccessToken } from '@/lib/auth'
 
 const MAIN_API_URL = process.env.NEXT_PUBLIC_MAIN_API_URL || 'http://localhost:8000'
 
 function mainApiAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {}
-  const token = localStorage.getItem(STORAGE_KEY.TOKEN)
+  const token = getAccessToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 

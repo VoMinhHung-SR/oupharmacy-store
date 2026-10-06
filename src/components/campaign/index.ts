@@ -1,5 +1,6 @@
 export { default as CampaignHeroSlot } from './CampaignHeroSlot'
 export { default as CampaignHomeCluster } from './CampaignHomeCluster'
+export type { CampaignHomeClusterProps } from './CampaignHomeCluster'
 export { default as CampaignPromoSlots } from './CampaignPromoSlots'
 export { CampaignCard } from './CampaignCard'
 export { CampaignLandingHeader } from './CampaignLandingHeader'

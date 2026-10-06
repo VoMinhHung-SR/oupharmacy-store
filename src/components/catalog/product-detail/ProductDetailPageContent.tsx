@@ -1,17 +1,62 @@
 'use client'
 
-import { Product } from '@/lib/services/products'
+import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
+import {
+  Product,
+  buildCategoryBreadcrumbFromPath,
+  buildProductCanonicalHref,
+  getProductImageUrl,
+  getProductName,
+} from '@/lib/services/products'
 import Breadcrumb from '@/components/Breadcrumb'
 import { Container } from '@/components/Container'
 import { ProductImageGallery } from '@/components/common/ProductImageGallery'
-import { ProductDescriptionSection } from '@/components/catalog/product-detail/parts/ProductDescriptionSection'
-import { RelatedProducts } from '@/components/catalog/product-detail/parts/RelatedProducts'
-import { RecentlyViewed } from '@/components/catalog/product-detail/parts/RecentlyViewed'
 import { useProductDetailPage } from '@/components/catalog/product-detail/useProductDetailPage'
 import { ProductDetailInfoColumn } from '@/components/catalog/product-detail/parts/ProductDetailInfoColumn'
-import { ProductDetailPoliciesBox } from '@/components/catalog/product-detail/parts/ProductDetailPoliciesBox'
-import { ProductStickyAddToCartBar } from '@/components/catalog/product-detail/parts/ProductStickyAddToCartBar'
 import { ProductDetailPageSkeleton } from '@/components/catalog/product-detail/ProductDetailPageSkeleton'
+import { DeferredRailMount } from '@/components/carousel/ProgressiveRailItem'
+import { JsonLd } from '@/components/seo/JsonLd'
+
+const ProductDetailPoliciesBox = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductDetailPoliciesBox').then((m) => ({
+      default: m.ProductDetailPoliciesBox,
+    })),
+  { ssr: false, loading: () => <div className="min-h-[5rem]" aria-hidden /> }
+)
+
+const ProductStickyAddToCartBar = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductStickyAddToCartBar').then((m) => ({
+      default: m.ProductStickyAddToCartBar,
+    })),
+  { ssr: false, loading: () => null }
+)
+
+const ProductDescriptionSection = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/ProductDescriptionSection').then((m) => ({
+      default: m.ProductDescriptionSection,
+    })),
+  { loading: () => <div className="mt-6 min-h-[8rem] rounded-lg bg-white" aria-hidden /> }
+)
+
+const RelatedProducts = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/RelatedProducts').then((m) => ({
+      default: m.RelatedProducts,
+    })),
+  { ssr: false, loading: () => <div className="min-h-[16rem]" aria-hidden /> }
+)
+
+const RecentlyViewed = dynamic(
+  () =>
+    import('@/components/catalog/product-detail/parts/RecentlyViewed').then((m) => ({
+      default: m.RecentlyViewed,
+    })),
+  { ssr: false, loading: () => null }
+)
 
 interface ProductDetailPageContentProps {
   product: Product | undefined
@@ -19,6 +64,58 @@ interface ProductDetailPageContentProps {
   productSlug: string
   loading?: boolean
   error?: Error | null
+}
+
+function buildProductJsonLd(product: Product, categorySlug: string) {
+  const name = getProductName(product)
+  const image = getProductImageUrl(product)
+  const canonical = buildProductCanonicalHref(product)
+  const path = canonical || `/${categorySlug}/${product.product?.slug || ''}`.replace(/\/+/g, '/')
+  const crumbs = [
+    { name: 'Trang chủ', item: '/' },
+    ...buildCategoryBreadcrumbFromPath(categorySlug, product).map((s) => ({
+      name: s.name,
+      item: s.href,
+    })),
+    { name, item: path },
+  ]
+
+  const productLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description:
+      product.product?.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() ||
+      undefined,
+    image: image || undefined,
+    sku: product.product?.mid || String(product.product_entity_id ?? product.id),
+    brand: product.brand?.name
+      ? { '@type': 'Brand', name: product.brand.name }
+      : undefined,
+    offers: {
+      '@type': 'Offer',
+      url: path,
+      priceCurrency: 'VND',
+      price: product.price_value ?? undefined,
+      availability:
+        product.in_stock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+    },
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  }
+
+  return [productLd, breadcrumbLd]
 }
 
 export function ProductDetailPageContent({
@@ -29,6 +126,10 @@ export function ProductDetailPageContent({
   error = null,
 }: ProductDetailPageContentProps) {
   const state = useProductDetailPage({ product, categorySlug, productSlug, loading })
+  const jsonLd = useMemo(
+    () => (product ? buildProductJsonLd(product, categorySlug) : null),
+    [product, categorySlug]
+  )
 
   if (loading) {
     return <ProductDetailPageSkeleton />
@@ -77,6 +178,7 @@ export function ProductDetailPageContent({
 
   return (
     <Container className="pb-28 md:pb-32">
+      {jsonLd ? <JsonLd data={jsonLd} /> : null}
       <Breadcrumb
         items={state.breadcrumbItems}
         className="py-4 max-md:[&_ol>li:last-child]:hidden max-md:[&_ol>li:nth-last-child(2)>span:last-child]:hidden"
@@ -97,31 +199,37 @@ export function ProductDetailPageContent({
         </div>
       </div>
 
-      <div className="mt-6">
+      <DeferredRailMount minHeightClassName="mt-6 min-h-[8rem]" rootMargin="120px 0px">
         <ProductDescriptionSection product={product} />
-      </div>
+      </DeferredRailMount>
 
-      <RelatedProducts currentProduct={product} />
-      <RecentlyViewed />
+      <DeferredRailMount minHeightClassName="min-h-[16rem]" rootMargin="200px 0px">
+        <RelatedProducts currentProduct={product} />
+      </DeferredRailMount>
+      <DeferredRailMount minHeightClassName="min-h-0" rootMargin="200px 0px">
+        <RecentlyViewed />
+      </DeferredRailMount>
 
-      <ProductStickyAddToCartBar
-        visible={state.showStickyPurchaseBar}
-        productName={state.productName}
-        imageUrl={state.productImageUrl}
-        priceValue={state.effectivePriceValue}
-        compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
-        discountPercent={state.catalogPriceDisplay.discountPercent}
-        unitOptions={state.unitOptionsForSticky}
-        selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
-        onSelectUnit={state.setSelectedUnitId}
-        quantity={state.quantity}
-        maxQuantity={state.maxSelectableQuantity}
-        onQuantityChange={state.handleQuantityChange}
-        onAddToCart={state.handleAddToCart}
-        addToCartLabel={
-          product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'
-        }
-      />
+      {state.showStickyPurchaseBar ? (
+        <ProductStickyAddToCartBar
+          visible
+          productName={state.productName}
+          imageUrl={state.productImageUrl}
+          priceValue={state.effectivePriceValue}
+          compareAtPrice={state.catalogPriceDisplay.compareAtPrice}
+          discountPercent={state.catalogPriceDisplay.discountPercent}
+          unitOptions={state.unitOptionsForSticky}
+          selectedUnitId={state.selectedUnit?.unit_id ?? product.default_unit_id ?? null}
+          onSelectUnit={state.setSelectedUnitId}
+          quantity={state.quantity}
+          maxQuantity={state.maxSelectableQuantity}
+          onQuantityChange={state.handleQuantityChange}
+          onAddToCart={state.handleAddToCart}
+          addToCartLabel={
+            product.in_stock <= 0 && product.allow_preorder ? 'Đặt trước' : 'Thêm vào giỏ'
+          }
+        />
+      ) : null}
     </Container>
   )
 }

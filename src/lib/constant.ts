@@ -148,7 +148,6 @@ export type HomeQuickLink = {
   iconId: HomeQuickLinkIconId
   title: string
   href: string
-  comingSoon?: boolean
   /** Open ConsultChatbox popup instead of navigating. */
   openConsult?: boolean
 }
@@ -164,10 +163,5 @@ export const HOME_QUICK_LINKS: HomeQuickLink[] = [
     href: STORE_SUPPORT.MED_REMINDER_HREF,
   },
   { iconId: 'jar-of-pills', title: 'Tủ thuốc', href: STORE_SUPPORT.CABINET_HREF },
-  {
-    iconId: 'shield-search',
-    title: 'Tra cứu',
-    href: '/tra-cuu-thuoc-chinh-hang',
-    comingSoon: true,
-  },
+  { iconId: 'shield-search', title: 'Khuyến mãi', href: '/khuyen-mai' },
 ]

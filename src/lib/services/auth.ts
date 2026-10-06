@@ -65,77 +65,72 @@ export async function register(
   }
 }
 
-export async function getOAuth2Info(): Promise<{ data?: OAuth2Info; error?: string }> {
-  try {
-    const response = await axios.get<OAuth2Info>(`${MAIN_API_URL}/oauth2-info/`)
-    return { data: response.data }
-  } catch (error: any) {
-    return {
-      error: error.response?.data?.detail || error.message || 'Không thể lấy thông tin OAuth2',
-    }
-  }
-}
-
-export async function refreshAccessToken(
-  refreshToken: string
-): Promise<{ data?: LoginResponse; error?: string; status?: number }> {
-  try {
-    const oauthInfo = await getOAuth2Info()
-    if (oauthInfo.error || !oauthInfo.data) {
-      return {
-        error: oauthInfo.error || 'Không thể lấy thông tin OAuth2',
-        status: 0,
-      }
-    }
-
-    const response = await axios.post<LoginResponse>(`${MAIN_API_URL}/o/token/`, {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: oauthInfo.data.client_id,
-      client_secret: oauthInfo.data.client_secret,
-    })
-    return { data: response.data }
-  } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.error_description ||
-      error.response?.data?.error ||
-      error.message ||
-      'Làm mới phiên đăng nhập thất bại'
-    return {
-      error: errorMessage,
-      status: error.response?.status,
-    }
-  }
-}
-
+/** Password login via Next BFF — sets HttpOnly cookies; returns access only. */
 export async function login(
   email: string,
   password: string
 ): Promise<{ data?: LoginResponse; error?: string }> {
   try {
-    const oauthInfo = await getOAuth2Info()
-    if (oauthInfo.error || !oauthInfo.data) {
-      return { error: oauthInfo.error || 'Không thể lấy thông tin OAuth2' }
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: email, password }),
+    })
+    const data = (await response.json().catch(() => ({}))) as LoginResponse & {
+      error?: string
     }
-
-    const response = await axios.post<LoginResponse>(
-      `${MAIN_API_URL}/o/token/`,
-      {
-        username: email,
-        password: password,
-        client_id: oauthInfo.data.client_id,
-        client_secret: oauthInfo.data.client_secret,
-        grant_type: 'password',
-      }
-    )
-    return { data: response.data }
+    if (!response.ok || !data.access_token) {
+      return { error: data.error || 'Đăng nhập thất bại' }
+    }
+    return {
+      data: {
+        access_token: data.access_token,
+        token_type: data.token_type || 'Bearer',
+        expires_in: data.expires_in ?? 0,
+      },
+    }
   } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.error_description ||
-      error.response?.data?.error ||
-      error.message ||
-      'Đăng nhập thất bại'
-    return { error: errorMessage }
+    return { error: error?.message || 'Đăng nhập thất bại' }
+  }
+}
+
+/** Refresh via BFF cookie (no refresh_token in browser). */
+export async function refreshAccessToken(): Promise<{
+  data?: LoginResponse
+  error?: string
+  status?: number
+}> {
+  try {
+    const response = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    })
+    const data = (await response.json().catch(() => ({}))) as LoginResponse & {
+      error?: string
+    }
+    if (!response.ok || !data.access_token) {
+      return {
+        error: data.error || 'Làm mới phiên đăng nhập thất bại',
+        status: response.status,
+      }
+    }
+    return {
+      data: {
+        access_token: data.access_token,
+        token_type: data.token_type || 'Bearer',
+        expires_in: data.expires_in ?? 0,
+      },
+    }
+  } catch (error: any) {
+    return {
+      error: error?.message || 'Làm mới phiên đăng nhập thất bại',
+      status: 0,
+    }
   }
 }
 
@@ -173,22 +168,31 @@ export async function firebaseSocialLogin(
   provider: 'google' | 'facebook' = 'google'
 ): Promise<{ data?: FirebaseSocialLoginResponse; error?: string }> {
   try {
-    const response = await axios.post<FirebaseSocialLoginResponse>(
-      `${MAIN_API_URL}/auth/firebase/`,
-      {
-        id_token: idToken,
-        provider: provider,
-      }
-    )
-
-    return { data: response.data }
+    const response = await fetch('/api/auth/firebase', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id_token: idToken, provider }),
+    })
+    const data = (await response.json().catch(() => ({}))) as FirebaseSocialLoginResponse & {
+      error?: string
+    }
+    if (!response.ok || !data.access_token) {
+      return { error: data.error || 'Đăng nhập với tài khoản mạng xã hội thất bại' }
+    }
+    return {
+      data: {
+        access_token: data.access_token,
+        user: data.user,
+      },
+    }
   } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error.message ||
-      'Đăng nhập với tài khoản mạng xã hội thất bại'
-    return { error: errorMessage }
+    return {
+      error: error?.message || 'Đăng nhập với tài khoản mạng xã hội thất bại',
+    }
   }
 }
 
