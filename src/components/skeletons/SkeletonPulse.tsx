@@ -4,5 +4,11 @@ interface SkeletonPulseProps {
 
 /** Shared pulse block for page/route skeletons. */
 export function SkeletonPulse({ className = '' }: SkeletonPulseProps) {
-  return <div className={`animate-pulse rounded bg-gray-200 ${className}`.trim()} aria-hidden />
+  const hasBg = /\bbg-/.test(className)
+  return (
+    <div
+      className={`animate-pulse rounded ${hasBg ? '' : 'bg-gray-200'} ${className}`.trim()}
+      aria-hidden
+    />
+  )
 }

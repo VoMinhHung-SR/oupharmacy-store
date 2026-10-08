@@ -4,6 +4,7 @@ import React, { useRef } from 'react'
 import Container from '@/components/Container'
 import ProductCard from '@/components/cards/ProductCard'
 import { CarouselArrowButton } from '@/components/carousel/CarouselArrowButton'
+import { DeferredRailMount, ProgressiveRailItem } from '@/components/carousel/ProgressiveRailItem'
 import { HOME_MERCH_ORANGE } from '@/lib/constant'
 import { useHorizontalScrollEdges } from '@/lib/hooks/useHorizontalScrollEdges'
 import type { ProductCardPayload } from '@/lib/services/products'
@@ -15,14 +16,18 @@ type BestsellingProductsProps = {
   title?: string
 }
 
-/** Hot-sale / bestsellers rail (home SSG). */
-export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
+function BestsellingRail({
   products,
-  title = DEFAULT_TITLE,
-}) => {
+  title,
+}: {
+  products: ProductCardPayload[]
+  title: string
+}) {
   const rail = (products || []).slice(0, 12)
   const scrollerRef = useRef<HTMLDivElement>(null)
-  const { canScrollLeft, canScrollRight, scrollPage } = useHorizontalScrollEdges(scrollerRef, [rail.length])
+  const { canScrollLeft, canScrollRight, scrollPage } = useHorizontalScrollEdges(scrollerRef, [
+    rail.length,
+  ])
 
   if (rail.length === 0) return null
 
@@ -60,14 +65,11 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
                 />
               ) : null}
 
-              <div
-                ref={scrollerRef}
-                className="hot-sale-track scrollbar-hide scroll-smooth"
-              >
-                {rail.map((product) => (
-                  <div key={product.id}>
+              <div ref={scrollerRef} className="hot-sale-track scrollbar-hide scroll-smooth">
+                {rail.map((product, index) => (
+                  <ProgressiveRailItem key={product.id} index={index} eagerCount={3}>
                     <ProductCard product={product} />
-                  </div>
+                  </ProgressiveRailItem>
                 ))}
               </div>
             </div>
@@ -75,6 +77,21 @@ export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
         </div>
       </Container>
     </section>
+  )
+}
+
+/** Hot-sale / bestsellers rail (home SSG). */
+export const BestsellingProducts: React.FC<BestsellingProductsProps> = ({
+  products,
+  title = DEFAULT_TITLE,
+}) => {
+  const rail = (products || []).slice(0, 12)
+  if (rail.length === 0) return null
+
+  return (
+    <DeferredRailMount minHeightClassName="min-h-[22rem] bg-white">
+      <BestsellingRail products={rail} title={title} />
+    </DeferredRailMount>
   )
 }
 

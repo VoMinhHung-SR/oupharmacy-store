@@ -53,7 +53,11 @@ export default function CartPage() {
     selectionTotals,
     orderVoucherCode,
     isLoading: cartLoading,
+    ensureServerCart,
   } = useCart()
+  useEffect(() => {
+    ensureServerCart()
+  }, [ensureServerCart])
   useAutoApplyBestCartVoucher(!cartLoading && items.length > 0)
   const {
     data: eligibleVouchers,

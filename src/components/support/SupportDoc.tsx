@@ -11,7 +11,7 @@ export const supportBodyClass = 'text-sm leading-6 text-slate-600 sm:text-[0.937
 export const supportMutedClass = 'text-sm leading-6 text-slate-500'
 
 export const SUPPORT_NAV_ITEMS = [
-  { href: '/about', label: 'Giới thiệu' },
+  { href: '/gioi-thieu', label: 'Giới thiệu' },
   { href: '/tro-giup', label: 'Trung tâm trợ giúp' },
   { href: '/chinh-sach-doi-tra', label: 'Chính sách đổi trả' },
   { href: '/chinh-sach-bao-mat', label: 'Chính sách bảo mật' },

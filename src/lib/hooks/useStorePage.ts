@@ -14,6 +14,7 @@ import { useCategoryPageMeta } from './useCategoryPageMeta'
 import {
   sortOptionToStoreSearchSort,
   type StoreSearchParams,
+  type StoreSearchResponse,
 } from '@/lib/services/search'
 import { usePreservedSearchFacets } from './usePreservedSearchFacets'
 import { pickFacetSearchParams } from '@/lib/listing/facetSearchParams'
@@ -32,19 +33,49 @@ function resolvedPathKey(resolved: ResolvedStorePath): string {
   return ''
 }
 
+type UseStorePageOptions = {
+  /** RSC path + resolve — applied only while `storePath === initialStorePath`. */
+  initialStorePath?: string
+  initialResolved?: ResolvedStorePath
+  /** Default PLP page-1 search payload (no facet/sort overrides). */
+  initialListing?: StoreSearchResponse
+  initialProduct?: Product
+  initialVariantId?: number
+}
+
 /**
  * Store path page: resolve routing, then category browse via search-first
  * (GET /search/?category=) with facets from the same response.
  *
  * UI: resolve decides page type; listing/detail use in-page skeletons / grid
  * refresh — no full-screen route backdrop.
+ * Cold load may seed resolve + listing/product from RSC; soft-nav still uses client fetch.
  */
-export function useStorePage() {
+export function useStorePage(options: UseStorePageOptions = {}) {
+  const {
+    initialStorePath,
+    initialResolved,
+    initialListing,
+    initialProduct,
+    initialVariantId,
+  } = options
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const storePath = useMemo(() => pathnameToStorePath(pathname), [pathname])
   const variantId = parseVariantIdFromSearch(searchParams)
   const navIntent = peekStoreNavIntent(storePath)
+
+  const pathSeedActive = Boolean(initialStorePath && initialStorePath === storePath)
+
+  const seededResolved = useMemo(() => {
+    if (!initialResolved || !pathSeedActive) return undefined
+    return initialResolved
+  }, [initialResolved, pathSeedActive])
+
+  const seedUpdatedAt = useMemo(() => {
+    if (!pathSeedActive) return undefined
+    return Date.now()
+  }, [pathSeedActive, storePath])
 
   const {
     data: resolved,
@@ -54,13 +85,20 @@ export function useStorePage() {
     queryKey: ['resolve-store-path', storePath],
     queryFn: () => resolveStorePath(storePath),
     staleTime: 60_000,
+    initialData: seededResolved,
+    initialDataUpdatedAt: seedUpdatedAt,
   })
 
+  // Query key is storePath-scoped; not_found has an empty path key.
   const resolveAligned =
-    Boolean(resolved) && resolvedPathKey(resolved as ResolvedStorePath) === storePath
+    Boolean(resolved) &&
+    ((resolved as ResolvedStorePath).page === 'not_found' ||
+      resolvedPathKey(resolved as ResolvedStorePath) === storePath)
 
   const liveResolved =
-    resolveAligned && !isPlaceholderData ? (resolved as ResolvedStorePath) : undefined
+    resolveAligned && (!isPlaceholderData || Boolean(seededResolved))
+      ? (resolved as ResolvedStorePath)
+      : undefined
 
   const resolvingPath = !liveResolved && !resolveError
 
@@ -108,6 +146,37 @@ export function useStorePage() {
   const facetParams = useMemo(() => pickFacetSearchParams(filters), [filters])
   const currentPage = filters.page ?? PAGINATION.DEFAULT_PAGE
 
+  const hasActiveFacetFilters =
+    facetParams.brand != null ||
+    facetParams.origin_country != null ||
+    facetParams.price_range != null ||
+    facetParams.in_stock != null ||
+    facetParams.attrs.length > 0
+
+  const defaultListingSort = sortOptionToStoreSearchSort('bestselling')
+  const seededListing = useMemo(() => {
+    if (!pathSeedActive || !initialListing || !isCategory) return undefined
+    if (liveResolved?.over_limit === true) return undefined
+    if (currentPage > 1 || hasActiveFacetFilters) return undefined
+    if (searchSort !== defaultListingSort) return undefined
+    return initialListing
+  }, [
+    pathSeedActive,
+    initialListing,
+    isCategory,
+    liveResolved?.over_limit,
+    currentPage,
+    hasActiveFacetFilters,
+    searchSort,
+    defaultListingSort,
+  ])
+
+  const seededProduct = useMemo(() => {
+    if (!pathSeedActive || !initialProduct || !isProduct) return undefined
+    if ((effectiveVariantId ?? null) !== (initialVariantId ?? null)) return undefined
+    return initialProduct
+  }, [pathSeedActive, initialProduct, isProduct, effectiveVariantId, initialVariantId])
+
   const categorySearchParams = useMemo((): StoreSearchParams | undefined => {
     if (!isCategory || categoryId == null) return undefined
     return {
@@ -134,6 +203,8 @@ export function useStorePage() {
 
   const listingSearch = useStoreSearch(categorySearchParams, {
     enabled: isCategory && categoryId != null && liveResolved?.over_limit !== true,
+    initialData: seededListing,
+    initialDataUpdatedAt: seededListing ? seedUpdatedAt : undefined,
   })
 
   useEffect(() => {
@@ -160,9 +231,16 @@ export function useStorePage() {
   const productsMatchCategory =
     categoryId != null && productsForCategoryId === categoryId
 
+  const listingResults =
+    productsMatchCategory
+      ? accumulatedProducts
+      : seededListing && currentPage <= 1 && !hasActiveFacetFilters
+        ? seededListing.items
+        : []
+
   const listingData = useMemo(() => {
     if (!isCategory || !liveResolved) return undefined
-    const search = listingSearch.data
+    const search = listingSearch.data ?? seededListing
     const total = search?.meta.total ?? liveResolved.product_count ?? 0
     return {
       categorySlug: categoryPath,
@@ -173,30 +251,26 @@ export function useStorePage() {
       subcategories: liveResolved.subcategories ?? [],
       overLimit: liveResolved.over_limit ?? false,
       count: total,
-      results: productsMatchCategory ? accumulatedProducts : [],
+      results: listingResults,
     }
   }, [
     isCategory,
     liveResolved,
     listingSearch.data,
+    seededListing,
     categoryPath,
-    accumulatedProducts,
-    productsMatchCategory,
+    listingResults,
   ])
 
-  const hasActiveFacetFilters =
-    facetParams.brand != null ||
-    facetParams.origin_country != null ||
-    facetParams.price_range != null ||
-    facetParams.in_stock != null ||
-    facetParams.attrs.length > 0
-
-  const preservedFacetFilters = usePreservedSearchFacets(listingSearch.data?.facets, {
-    scopeKey: categoryId,
-    hasActiveFacetFilters,
-    isPlaceholderData: listingSearch.isPlaceholderData,
-    dataUpdatedAt: listingSearch.dataUpdatedAt,
-  })
+  const preservedFacetFilters = usePreservedSearchFacets(
+    (listingSearch.data ?? seededListing)?.facets,
+    {
+      scopeKey: categoryId,
+      hasActiveFacetFilters,
+      isPlaceholderData: listingSearch.isPlaceholderData && !seededListing,
+      dataUpdatedAt: listingSearch.dataUpdatedAt,
+    }
+  )
 
   const categoryFacetsData = useMemo(() => {
     if (!listingData) return undefined
@@ -213,15 +287,18 @@ export function useStorePage() {
 
   const listingEnabled = isCategory && categoryId != null && liveResolved?.over_limit !== true
   const listingAwaitingMatchedProducts =
-    listingEnabled && !productsMatchCategory && !listingSearch.error
+    listingEnabled &&
+    !productsMatchCategory &&
+    !seededListing &&
+    !listingSearch.error
 
   const { isInitialLoad, isRefreshing, isFetchingMore } = getListingRequestUiFlags({
     page: currentPage,
-    productCount: productsMatchCategory ? accumulatedProducts.length : 0,
-    hasData: !!listingSearch.data && productsMatchCategory,
-    isLoading: listingSearch.isLoading || listingAwaitingMatchedProducts,
+    productCount: listingResults.length,
+    hasData: !!(listingSearch.data || seededListing) && (productsMatchCategory || !!seededListing),
+    isLoading: (listingSearch.isLoading && !seededListing) || listingAwaitingMatchedProducts,
     isFetching: listingSearch.isFetching || listingAwaitingMatchedProducts,
-    isPlaceholderData: listingSearch.isPlaceholderData,
+    isPlaceholderData: listingSearch.isPlaceholderData && !seededListing,
     enabled: isCategory,
   })
 
@@ -235,13 +312,19 @@ export function useStorePage() {
 
   const categoryFacets = {
     data: categoryFacetsData,
-    isLoading: (listingSearch.isLoading && !listingSearch.data) || listingAwaitingMatchedProducts,
+    isLoading:
+      ((listingSearch.isLoading && !listingSearch.data && !seededListing) ||
+        listingAwaitingMatchedProducts),
   }
 
   const detail = useProductByCategoryAndProductSlug(
     isProduct ? categoryPath : undefined,
     isProduct ? productSlug : undefined,
-    isProduct ? effectiveVariantId : undefined
+    isProduct ? effectiveVariantId : undefined,
+    {
+      initialData: seededProduct,
+      initialDataUpdatedAt: seededProduct ? seedUpdatedAt : undefined,
+    }
   )
 
   const meta = useCategoryPageMeta({

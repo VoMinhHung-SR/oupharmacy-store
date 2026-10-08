@@ -4,8 +4,7 @@ import axios, {
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from 'axios'
-import { STORAGE_KEY } from './constant'
-import { refreshSessionWithStoredRefresh } from '@/lib/auth'
+import { getAccessToken, refreshSessionWithStoredRefresh } from '@/lib/auth'
 import { getGuestSessionId } from '@/lib/utils/guestSession'
 
 type InternalRequestConfigRetry = InternalAxiosRequestConfig & { _retry?: boolean }
@@ -28,9 +27,8 @@ const axiosInstance: AxiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Add Authorization header từ localStorage
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem(STORAGE_KEY.TOKEN)
+      const token = getAccessToken()
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
@@ -39,18 +37,9 @@ axiosInstance.interceptors.request.use(
         config.headers['X-Guest-Session'] = guestSessionId
       }
     }
-    
-    // I18N DISABLED - Tạm thời tắt Accept-Language header
-    // Để bật lại: uncomment code bên dưới
-    // Add Accept-Language header from URL
-    // if (typeof window !== 'undefined') {
-    //   const locale = window.location.pathname.split('/')[1] || 'vi'
-    //   config.headers['Accept-Language'] = locale
-    // }
-    
-    // Tạm thời: luôn set locale là 'vi'
+
     config.headers['Accept-Language'] = 'vi'
-    
+
     return config
   },
   (error) => {
@@ -70,7 +59,7 @@ axiosInstance.interceptors.response.use(
     }
 
     const reqUrl = `${originalRequest.baseURL || ''}${originalRequest.url || ''}`
-    if (reqUrl.includes('/o/token/')) {
+    if (reqUrl.includes('/o/token/') || reqUrl.includes('/api/auth/')) {
       return Promise.reject(error)
     }
 

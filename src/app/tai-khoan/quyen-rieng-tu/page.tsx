@@ -51,7 +51,7 @@ export default function PrivacyPage() {
     setLoading(true)
     try {
       localStorage.setItem('privacy_settings', JSON.stringify(settings))
-      toastSuccess('Đã lưu cài đặt quyền riêng tư')
+      toastSuccess('Đã lưu cài đặt quyền riêng tư (trên thiết bị này)')
     } catch (error) {
       // Handle error
     } finally {
@@ -71,6 +71,9 @@ export default function PrivacyPage() {
     <AccountPageShell>
       <div className="space-y-6">
         <AccountPageHeader title="Quyền riêng tư" />
+        <p className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Tùy chọn trên trang này chỉ lưu trên thiết bị này, chưa đồng bộ tài khoản.
+        </p>
 
         <div className="space-y-6">
           {/* Profile Visibility */}

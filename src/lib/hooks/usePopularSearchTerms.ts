@@ -6,7 +6,7 @@ import {
   type SearchKeywordItem,
 } from '@/lib/services/searchTerms'
 
-export function usePopularSearchTerms(limit = 20) {
+export function usePopularSearchTerms(limit = 20, enabled = true) {
   return useQuery<SearchKeywordItem[]>({
     queryKey: ['popular-search-terms', limit],
     queryFn: async () => {
@@ -14,5 +14,6 @@ export function usePopularSearchTerms(limit = 20) {
       return Array.isArray(res.data) ? res.data : []
     },
     staleTime: 5 * 60_000,
+    enabled,
   })
 }

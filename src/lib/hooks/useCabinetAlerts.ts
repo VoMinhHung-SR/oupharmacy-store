@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  clearReadCabinetAlerts,
+  dismissCabinetAlert,
   listCabinetAlerts,
   markAllCabinetAlertsRead,
   markCabinetAlertRead,
@@ -35,16 +37,30 @@ export function useCabinetAlerts(enabled: boolean, unreadOnly = false) {
     onSuccess: invalidate,
   })
 
+  const dismiss = useMutation({
+    mutationFn: dismissCabinetAlert,
+    onSuccess: invalidate,
+  })
+
+  const clearRead = useMutation({
+    mutationFn: clearReadCabinetAlerts,
+    onSuccess: invalidate,
+  })
+
   const alerts = listQuery.data ?? []
   const unreadCount = unreadOnly ? alerts.length : alerts.filter((row) => !row.is_read).length
+  const readCount = unreadOnly ? 0 : alerts.filter((row) => row.is_read).length
 
   return {
     alerts,
     unreadCount,
+    readCount,
     isLoading: listQuery.isLoading,
     error: listQuery.error,
     markRead,
     markAllRead,
+    dismiss,
+    clearRead,
     refetch: listQuery.refetch,
   }
 }

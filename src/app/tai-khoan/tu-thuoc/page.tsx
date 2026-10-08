@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLoginModal } from '@/contexts/LoginModalContext'
 import { AccountPageShell } from '@/components/account/AccountPageShell'
-import { AccountHubSkeleton } from '@/components/skeletons'
+import { CabinetWorkspaceSkeleton } from '@/components/skeletons'
 import { CabinetWorkspace } from '@/components/cabinet/CabinetWorkspace'
 
 function CabinetPageBody() {
@@ -28,7 +28,7 @@ function CabinetPageBody() {
   if (loading) {
     return (
       <AccountPageShell>
-        <AccountHubSkeleton />
+        <CabinetWorkspaceSkeleton />
       </AccountPageShell>
     )
   }
@@ -49,7 +49,7 @@ export default function SmartMedicineCabinetPage() {
     <Suspense
       fallback={
         <AccountPageShell>
-          <AccountHubSkeleton />
+          <CabinetWorkspaceSkeleton />
         </AccountPageShell>
       }
     >

@@ -125,8 +125,8 @@ export const STORE_SUPPORT = {
   CONSULT_HREF: '/?consult=open',
   CONTACT_HREF: '/lien-he',
   CABINET_HREF: '/tai-khoan/tu-thuoc',
-  /** Home “Nhắc uống” → tủ thuốc, tab nhắc hạn. */
-  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=reminders',
+  /** Home “Lịch uống” → tủ thuốc, tab lịch uống. */
+  MED_REMINDER_HREF: '/tai-khoan/tu-thuoc?tab=lich-uong-thuoc',
 } as const
 
 export type PlaceholderPageAction = {
@@ -148,7 +148,6 @@ export type HomeQuickLink = {
   iconId: HomeQuickLinkIconId
   title: string
   href: string
-  comingSoon?: boolean
   /** Open ConsultChatbox popup instead of navigating. */
   openConsult?: boolean
 }
@@ -160,14 +159,9 @@ export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   { iconId: 'package', title: 'Đơn của tôi', href: '/tai-khoan/don-hang' },
   {
     iconId: 'clock',
-    title: 'Nhắc uống thuốc',
+    title: 'Lịch uống',
     href: STORE_SUPPORT.MED_REMINDER_HREF,
   },
   { iconId: 'jar-of-pills', title: 'Tủ thuốc', href: STORE_SUPPORT.CABINET_HREF },
-  {
-    iconId: 'shield-search',
-    title: 'Tra cứu',
-    href: '/tra-cuu-thuoc-chinh-hang',
-    comingSoon: true,
-  },
+  { iconId: 'shield-search', title: 'Khuyến mãi', href: '/khuyen-mai' },
 ]

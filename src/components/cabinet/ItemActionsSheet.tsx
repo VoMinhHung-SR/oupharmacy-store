@@ -18,9 +18,17 @@ type ItemActionsSheetProps = {
   onClose: () => void
   onUpdate: (id: number, payload: UpdateCabinetItemPayload) => Promise<unknown>
   onDelete: (id: number) => Promise<unknown>
+  onOpenDoseSchedule?: () => void
 }
 
-export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: ItemActionsSheetProps) {
+export function ItemActionsSheet({
+  item,
+  open,
+  onClose,
+  onUpdate,
+  onDelete,
+  onOpenDoseSchedule,
+}: ItemActionsSheetProps) {
   const t = useTranslations('cabinet')
   const titleId = useId()
   const [quantity, setQuantity] = useState(1)
@@ -101,6 +109,16 @@ export function ItemActionsSheet({ item, open, onClose, onUpdate, onDelete }: It
           >
             {t('saveChanges')}
           </Button>
+          {onOpenDoseSchedule ? (
+            <Button
+              className="w-full"
+              variant="outline"
+              disabled={busy}
+              onClick={() => onOpenDoseSchedule()}
+            >
+              {t('notify.setDoseFromItem')}
+            </Button>
+          ) : null}
           <Button
             variant="outline"
             className="w-full"

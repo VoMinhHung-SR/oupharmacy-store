@@ -67,9 +67,8 @@ export default function NotificationsPage() {
   const handleSave = async () => {
     setLoading(true)
     try {
-      // TODO: Call API to save preferences
       localStorage.setItem('notification_preferences', JSON.stringify(preferences))
-      toastSuccess('Đã lưu tùy chọn thông báo')
+      toastSuccess('Đã lưu tùy chọn thông báo (trên thiết bị này)')
     } catch (error) {
       // Handle error
     } finally {
@@ -95,6 +94,9 @@ export default function NotificationsPage() {
     <AccountPageShell>
       <div className="space-y-6">
         <AccountPageHeader title="Tùy chọn thông báo" />
+        <p className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Tùy chọn trên trang này chỉ lưu trên thiết bị này, chưa đồng bộ tài khoản.
+        </p>
 
         <div className="space-y-6">
           {/* Email Notifications */}

@@ -1,15 +1,45 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { Product, ProductFilters, Subcategory, FilterGroup } from '@/lib/services/products'
 import { Container } from '@/components/Container'
 import { Breadcrumb } from '@/components/Breadcrumb'
 import { CategoryListingSkeleton } from '@/components/catalog/_shared/listing/CategoryListingSkeleton'
 import { SubcategoriesHorizontalList } from '@/components/catalog/_shared/category/SubcategoriesHorizontalList'
 import { useCategoryListingPage } from '@/components/catalog/category-listing/useCategoryListingPage'
-import { CategoryListingSidebar } from '@/components/catalog/category-listing/parts/CategoryListingSidebar'
-import { CategoryListingMobileFilters } from '@/components/catalog/category-listing/parts/CategoryListingMobileFilters'
 import { CategoryProductGrid } from '@/components/catalog/category-listing/parts/CategoryProductGrid'
 import { PAGE_Y } from '@/lib/layout/pageLayout'
+import { SIDEBAR } from '@/lib/constant'
+
+const CategoryListingSidebar = dynamic(
+  () =>
+    import('@/components/catalog/category-listing/parts/CategoryListingSidebar').then((m) => ({
+      default: m.CategoryListingSidebar,
+    })),
+  {
+    loading: () => (
+      <aside className="hidden flex-shrink-0 lg:flex" style={{ width: `${SIDEBAR.WIDTH}px` }}>
+        <div
+          className="w-full space-y-4 overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+          style={{ width: `${SIDEBAR.WIDTH}px` }}
+          aria-hidden
+        >
+          <div className="h-5 w-40 animate-pulse rounded bg-gray-100" />
+          <div className="h-24 animate-pulse rounded bg-gray-50" />
+          <div className="h-24 animate-pulse rounded bg-gray-50" />
+        </div>
+      </aside>
+    ),
+  }
+)
+
+const CategoryListingMobileFilters = dynamic(
+  () =>
+    import('@/components/catalog/category-listing/parts/CategoryListingMobileFilters').then(
+      (m) => ({ default: m.CategoryListingMobileFilters })
+    ),
+  { ssr: false, loading: () => null }
+)
 
 interface CategoryListingPageContentProps {
   categorySlug: string
@@ -95,14 +125,16 @@ export function CategoryListingPageContent({
           onFiltersChange={listing.handleFiltersChange}
         />
 
-        <CategoryListingMobileFilters
-          open={listing.showMobileFilters}
-          onClose={() => listing.setShowMobileFilters(false)}
-          facetFilters={facetFilters}
-          filtersLoading={filtersLoading}
-          categoryFilters={listing.categoryFilters}
-          onFiltersChange={listing.handleFiltersChange}
-        />
+        {listing.showMobileFilters ? (
+          <CategoryListingMobileFilters
+            open={listing.showMobileFilters}
+            onClose={() => listing.setShowMobileFilters(false)}
+            facetFilters={facetFilters}
+            filtersLoading={filtersLoading}
+            categoryFilters={listing.categoryFilters}
+            onFiltersChange={listing.handleFiltersChange}
+          />
+        ) : null}
 
         <CategoryProductGrid
           categorySlug={categorySlug}

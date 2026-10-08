@@ -17,11 +17,6 @@ export function HomeQuickLinks() {
         const Icon = resolveHomeQuickLinkIcon(link.iconId)
         const body = (
           <>
-            {link.comingSoon ? (
-              <span className="absolute right-1 top-1 z-10 rounded bg-amber-100 px-1 py-px text-[9px] font-semibold leading-none text-amber-800">
-                Sắp có
-              </span>
-            ) : null}
             <span aria-hidden />
             <span className="flex flex-col items-center">
               <span className="flex h-8 w-8 items-center justify-center text-primary-600 sm:h-9 sm:w-9" aria-hidden>

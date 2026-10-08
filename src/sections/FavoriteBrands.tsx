@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckCircleIcon } from '@/components/icons'
+import Image from 'next/image'
 import Link from 'next/link'
 import React, { useRef } from 'react'
 import Container from '@/components/Container'
@@ -72,11 +73,13 @@ export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
               >
                 <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-white">
                   {brand.productImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- catalog CDN hosts vary
-                    <img
+                    <Image
                       src={brand.productImage}
                       alt=""
-                      className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                      fill
+                      sizes="(max-width: 640px) 40vw, 180px"
+                      quality={75}
+                      className="object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gray-50 text-4xl font-bold text-gray-300">
@@ -85,12 +88,15 @@ export const FavoriteBrands: React.FC<FavoriteBrandsProps> = ({
                   )}
                 </div>
 
-                <div className="mb-2.5 flex h-12 w-full items-center justify-center rounded-md border border-gray-200 bg-white px-2 sm:h-14">
+                <div className="relative mb-2.5 flex h-12 w-full items-center justify-center rounded-md border border-gray-200 bg-white px-2 sm:h-14">
                   {brand.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- brand CDN hosts vary
-                    <img
+                    <Image
                       src={brand.logoUrl}
                       alt={brand.name}
+                      width={120}
+                      height={40}
+                      sizes="120px"
+                      quality={75}
                       className="max-h-9 w-auto max-w-full object-contain sm:max-h-10"
                     />
                   ) : (

@@ -83,7 +83,11 @@ export function useProductsByCategorySlug(
 export function useProductByCategoryAndProductSlug(
   categorySlug: string | undefined,
   productSlug: string | undefined,
-  variantId?: number
+  variantId?: number,
+  options?: {
+    initialData?: Product
+    initialDataUpdatedAt?: number
+  }
 ) {
   return useQuery<Product | undefined, Error>({
     queryKey: ['product-by-category-product-slug', categorySlug, productSlug, variantId],
@@ -102,5 +106,8 @@ export function useProductByCategoryAndProductSlug(
       return response.data
     },
     enabled: !!categorySlug && !!productSlug,
+    staleTime: 60_000,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   })
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { ProductCard } from '@/components/cards/ProductCard'
+import { ProgressiveRailItem } from '@/components/carousel/ProgressiveRailItem'
 import {
   Product,
   ProductFilters,
@@ -100,11 +101,11 @@ export function CategoryProductGrid({
         </div>
       ) : (
         <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard
-              key={getListProductKey(product)}
-              product={buildProductCardPayload(product, categorySlug)}
-            />
+          {products.map((product, index) => (
+            // Viewport IO (default rail rootSelector does not match PLP grid).
+            <ProgressiveRailItem key={getListProductKey(product)} index={index} eagerCount={8}>
+              <ProductCard product={buildProductCardPayload(product, categorySlug)} />
+            </ProgressiveRailItem>
           ))}
         </div>
       )}

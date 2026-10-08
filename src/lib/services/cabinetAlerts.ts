@@ -27,3 +27,11 @@ export async function markCabinetAlertRead(id: number) {
 export async function markAllCabinetAlertsRead() {
   return unwrap(await apiPost<{ updated: number }>('/cabinet-alerts/mark-all-read/', {}))
 }
+
+export async function dismissCabinetAlert(id: number) {
+  return unwrap(await apiPost<{ dismissed: number }>(`/cabinet-alerts/${id}/dismiss/`, {}))
+}
+
+export async function clearReadCabinetAlerts() {
+  return unwrap(await apiPost<{ cleared: number }>('/cabinet-alerts/clear-read/', {}))
+}

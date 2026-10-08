@@ -16,12 +16,14 @@
 | Low stock / OOS | Threshold per item or default; mark used up → OOS |
 | Refill list | Flag items; overview section |
 | Buy again | Adds to store cart via `/carts/items/` — **does not** decrement cabinet qty |
-| HSD inbox | Panel on cabinet page; mark read / mark all read |
-| Settings | Per-cabinet reminder toggle, custom “expiring soon” window |
+| Expiry notifications | Bell on banner opens settings modal (`reminder_enabled`, soon days). Inbox card on the medicines view lists alerts (mark read / dismiss / clear read). |
+| Dose schedule | Tab **Lịch uống** (`?tab=lich-uong-thuoc`, aliases `doses` / `schedule`): per-item daily times (1–4 × `HH:MM`, VN time) + optional note; pause/resume keeps times. Entry via banner tab, notify modal, or item actions. Stored on `CabinetItem.dose_*`; no push yet |
+
+**Views:** default medicines page + optional dose schedule view (not a banner tile). Legacy `?tab=reminders|alerts` and `?focus=alerts` land on medicines and scroll to `#cabinet-alerts`.
 
 **Guest:** client login gate (modal); no cabinet API calls without auth.
 
-**Legacy redirect:** `/tu-thuoc-thong-minh` → `/tai-khoan/tu-thuoc`.
+**Legacy redirects:** `/tu-thuoc-thong-minh` → `/tai-khoan/tu-thuoc`; `/nhac-uong-thuoc` → `/tai-khoan/tu-thuoc?tab=lich-uong-thuoc`.
 
 ---
 
@@ -38,8 +40,11 @@
 
 | Component | Role |
 |-----------|------|
-| `CabinetWorkspace.tsx` | Main workspace: cabinet tabs, filters, item list, manage panel |
-| `CabinetAlertsPanel.tsx` | HSD inbox (compact when empty) |
+| `CabinetWorkspace.tsx` | Main workspace: hero + notify bell, cabinet switcher, filters, item list, inbox card |
+| `CabinetAlertsPanel.tsx` | HSD inbox (`variant="embedded"`); dismiss / clear-read / show-more |
+| `NotifySettingsSheet.tsx` | Bell modal: expiry + dose prefs |
+| `CabinetDosePanel.tsx` | Dose view: active / paused schedules, empty states |
+| `DoseScheduleSheet.tsx` | Create / edit dose times + note → `PATCH /cabinet-items/{id}/` |
 | `AddMedicineSheet.tsx` | Search catalog + add with HSD/qty |
 | `SkuScanControl.tsx` | Barcode / SKU lookup → add flow |
 | `SeedFromOrderSheet.tsx` | Pick lines from delivered orders |
@@ -83,6 +88,7 @@ See BE doc: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 | Cabinet overview | `GET /cabinets/{id}/overview/` |
 | List / filter items | `GET /cabinet-items/?cabinet=&expiration_status=` |
 | Add / edit / delete item | POST / PATCH / DELETE `/cabinet-items/` |
+| Dose schedule / pause | `PATCH /cabinet-items/{id}/` with `dose_enabled`, `dose_times`, `dose_label` |
 | Inbox | `GET /cabinet-alerts/?unread=1` |
 | Seed from Rx | `GET /cabinet-prescription-lines/` → POST `/cabinet-items/` |
 | Buy again | `POST /carts/items/` (existing cart service) |
@@ -98,9 +104,12 @@ See BE doc: `Clinic-Oupharmacy-BE/docs/smart-medicine-cabinet-api.md`.
 5. Inbox: run BE scan (staging) → alerts appear; mark read.
 6. Buy again → item in cart; cabinet qty unchanged.
 7. Guest visit → login modal, no data leak.
+8. Lịch uống (`?tab=lich-uong-thuoc`) → add schedule (pick item, 2 times, note) → listed with chips; pause → moves to “paused”; resume.
+9. `?tab=reminders` / `?focus=alerts` → medicines view, scrolled to inbox; `/nhac-uong-thuoc` → dose view.
+10. Bell → settings modal (expiry + dose prefs); dismiss / clear-read remove alerts from inbox without recreate on next scan.
 
 ---
 
 ## Out of scope (by design)
 
-Medication adherence schedule, family sharing, push/Zalo notifications, AI suggestions, auto-seed at checkout.
+Dose logs (“mark taken”), timed push/Zalo notifications, family sharing, AI suggestions, auto-seed at checkout.

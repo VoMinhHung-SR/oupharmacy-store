@@ -70,26 +70,81 @@ const nextConfig = {
       },
       {
         source: '/nhac-uong-thuoc',
-        destination: '/tai-khoan/tu-thuoc?tab=reminders',
+        destination: '/tai-khoan/tu-thuoc?tab=lich-uong-thuoc',
+        permanent: true,
+      },
+      {
+        source: '/about',
+        destination: '/gioi-thieu',
+        permanent: true,
+      },
+      {
+        source: '/register',
+        destination: '/dang-ky',
+        permanent: true,
+      },
+      {
+        source: '/forgot-password',
+        destination: '/quen-mat-khau',
+        permanent: true,
+      },
+      {
+        source: '/products',
+        destination: '/tim-kiem',
         permanent: true,
       },
       {
         source: '/tiem-vac-xin',
-        destination: '/tai-khoan/tu-thuoc',
-        permanent: false,
+        destination: '/tro-giup',
+        permanent: true,
+      },
+      {
+        source: '/tra-cuu-thuoc-chinh-hang',
+        destination: '/tro-giup',
+        permanent: true,
+      },
+      {
+        source: '/tim-nha-thuoc',
+        destination: '/tro-giup',
+        permanent: true,
       },
     ]
   },
-  // LAN / phone preview: scripts ship with crossorigin="anonymous" and need ACAO
-  // when the page is opened via http://<lan-ip>:3000 (not only localhost).
   async headers() {
+    const security = [
+      {
+        key: 'Content-Security-Policy-Report-Only',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://apis.google.com",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "img-src 'self' data: blob: https: http:",
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "connect-src 'self' http://localhost:* http://127.0.0.1:* https: wss: ws:",
+          "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://www.google.com",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+        ].join('; '),
+      },
+      { key: 'X-Frame-Options', value: 'DENY' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+    ]
+
+    // LAN / phone preview only — scripts need ACAO when opened via http://<lan-ip>:3000.
+    const lanCors =
+      process.env.NODE_ENV !== 'production'
+        ? [
+            { key: 'Access-Control-Allow-Origin', value: '*' },
+            { key: 'Access-Control-Allow-Methods', value: 'GET,HEAD,OPTIONS' },
+          ]
+        : []
+
     return [
       {
         source: '/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,HEAD,OPTIONS' },
-        ],
+        headers: [...security, ...lanCors],
       },
     ]
   },
